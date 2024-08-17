@@ -6,7 +6,7 @@ local F = require("llm.common.func")
 
 function M.GetStreamingOutput(bufnr, winid, messages)
   local ACCOUNT = os.getenv("ACCOUNT")
-  local KEY = os.getenv("KEY")
+  local LLM_KEY = os.getenv("LLM_KEY")
   local MODEL = conf.configs.model
 
   local body = {
@@ -44,7 +44,7 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       "-H",
       "Content-Type: application/json",
       "-H",
-      "Authorization: Bearer " .. KEY,
+      "Authorization: Bearer " .. LLM_KEY,
       "-d",
       vim.fn.json_encode(body),
     },
