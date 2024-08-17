@@ -1,6 +1,9 @@
 # llm.nvim
 
-Free large language model (LLM) support for Neovim based on [cloudflare](https://developers.cloudflare.com/workers-ai/models/).
+Free large language model (LLM) support for Neovim based on [cloudflare](https://dash.cloudflare.com/).
+
+You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your account and API key. Then you will find all [models](https://developers.cloudflare.com/workers-ai/models/) on cloudflare, where the models labeled as beta are free.
+
 
 ## Screenshots
 ### Chat
@@ -16,6 +19,12 @@ Free large language model (LLM) support for Neovim based on [cloudflare](https:/
 ![llm-explain-code](https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-explain-code-compress.png)
 
 ## Installation
+
+Set `ACCOUNT` and `LLM_KEY` in your zshrc or bashrc
+```sh
+export ACCOUNT=xxxxxxxx
+export LLM_KEY=********
+```
 
 - lazy.nvim
 
