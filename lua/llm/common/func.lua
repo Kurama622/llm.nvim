@@ -22,7 +22,9 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
     vim.api.nvim_buf_set_lines(bufnr, line_count - 1, line_count, false, { last_line .. lines[1] })
     vim.api.nvim_buf_set_lines(bufnr, line_count, line_count, false, vim.list_slice(lines, 2))
   end
-  M.UpdateCursorPosition(bufnr, winid)
+  if vim.api.nvim_win_is_valid(winid) then
+    M.UpdateCursorPosition(bufnr, winid)
+  end
 end
 
 function M.SetRole(bufnr, winid, role)
@@ -69,6 +71,8 @@ function M.ToggleLLM()
     if layout.llm.popup then
       layout.llm.popup:show()
       layout.llm.winid = layout.llm.popup.winid
+      vim.api.nvim_set_option_value("spell", false, { win = layout.llm.winid })
+      vim.api.nvim_set_option_value("wrap", true, { win = layout.llm.winid })
       conf.session.status = 1
     end
     layout.input.popup:show()
