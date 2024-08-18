@@ -64,7 +64,7 @@ export LLM_KEY=********
         popwin_opts = {
           relative = "cursor",
           position = {
-            row = 0,
+            row = -5,
             col = 10,
           },
           size = {
