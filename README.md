@@ -32,7 +32,7 @@ export LLM_KEY=********
   {
     "StubbornVegeta/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMUserDefineOp" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
     config = function()
       require("llm").setup({
         prompt = "请用中文回答问题",
@@ -99,8 +99,8 @@ export LLM_KEY=********
     end,
     keys = {
       { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMUserDefineOp 请解释下面这段代码<cr>" },
-      { "<leader>t", mode = "x", "<cmd>LLMUserDefineOp 英译汉<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
     },
   },
 ```

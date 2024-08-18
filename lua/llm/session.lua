@@ -27,7 +27,7 @@ local function GetVisualSelection()
   return seletion
 end
 
-function M.LLMUserDefineOp(description)
+function M.LLMSelectedTextHandler(description)
   local content = description .. ":\n" .. GetVisualSelection()
   table.insert(conf.session.messages, { role = "user", content = content })
 
