@@ -1,9 +1,20 @@
 local M = {}
 
+-- support icons
+M.prefix = {
+  user = "## User \n",
+  llm = "## LLM \n",
+}
+
 M.configs = {
   prompt = "",
   max_tokens = 512,
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
+
+  icons = {
+    user = "",
+    llm = "",
+  },
 
   input_box_opts = {
     relative = "editor",
@@ -104,6 +115,12 @@ function M.setup(opts)
   M.configs = vim.tbl_deep_extend("force", M.configs, opts or {})
   table.insert(M.session.messages, { role = "system", content = M.configs.prompt })
 
+  if M.configs.icons.user ~= "" then
+    M.prefix.user = M.configs.icons.user
+  end
+  if M.configs.icons.llm ~= "" then
+    M.prefix.llm = M.configs.icons.llm
+  end
   -- for _, mapping in ipairs(conf.keys) do
   --   vim.keymap.set(mapping.mode, mapping.key, mapping.func)
   -- end

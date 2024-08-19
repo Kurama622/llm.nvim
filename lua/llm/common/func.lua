@@ -28,7 +28,7 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
 end
 
 function M.SetRole(bufnr, winid, role)
-  M.AppendChunkToBuffer(bufnr, winid, "## " .. role .. "\n")
+  M.AppendChunkToBuffer(bufnr, winid, conf.prefix[role])
 end
 
 function M.NewLine(bufnr, winid)

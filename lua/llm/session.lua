@@ -8,7 +8,7 @@ local _popup = require("nui.popup")
 local F = require("llm.common.func")
 
 local function OpenLLM()
-  F.SetRole(layout.llm.bufnr, layout.llm.winid, "LLM")
+  F.SetRole(layout.llm.bufnr, layout.llm.winid, "llm")
   layout.llm.job = streaming.GetStreamingOutput(layout.llm.bufnr, layout.llm.winid, conf.session.messages)
 end
 local function GetVisualSelectionRange()
@@ -54,7 +54,7 @@ end
 
 function M.AddMessageToSession()
   local content = GetVisualSelection()
-  F.SetRole(layout.llm.bufnr, layout.llm.winid, "User")
+  F.SetRole(layout.llm.bufnr, layout.llm.winid, "user")
   table.insert(conf.session.messages, { role = "user", content = content })
   F.WriteContent(layout.llm.bufnr, layout.llm.winid, content)
 end

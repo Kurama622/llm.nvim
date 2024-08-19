@@ -22,7 +22,7 @@ function M.SetInput(bufnr, winid, messages)
         end
         if input ~= "" then
           table.insert(messages, { role = "user", content = input })
-          F.SetRole(bufnr, winid, "User")
+          F.SetRole(bufnr, winid, "user")
           F.AppendChunkToBuffer(bufnr, winid, input)
           F.NewLine(bufnr, winid)
           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
