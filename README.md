@@ -38,62 +38,9 @@ export LLM_KEY=********
         prompt = "请用中文回答问题",
         max_tokens = 512,
         model = "@cf/qwen/qwen1.5-14b-chat-awq",
-        input_box_opts = {
-          relative = "editor",
-          position = {
-            row = "85%",
-            col = "50%",
-          },
-          size = {
-            width = "70%",
-            height = "5%",
-          },
-        },
-        output_box_opts = {
-          style = "float", -- float (default) | right | left | above | below
-          relative = "win",
-          position = {
-            row = "35%",
-            col = "50%",
-          },
-          size = {
-            width = "70%",
-            height = "65%",
-          },
-        },
-        popwin_opts = {
-          relative = "cursor",
-          position = {
-            row = -5,
-            col = 10,
-          },
-          size = {
-            width = "50%",
-            height = 15,
-          },
-          enter = true,
-          border = {
-            style = "rounded",
-            text = {
-              top = " Explain ",
-            },
-          },
-        },
-        -- stylua: ignore
-        keys = {
-          -- The keyboard mapping for the input window.
-          ["Input:Submit"]  = { mode = "n", key = "<cr>" },
-          ["Input:Cancel"]  = { mode = "n", key = "<C-c>" },
-          ["Input:Resend"]  = { mode = "n", key = "<C-r>" },
-
-          -- The keyboard mapping for the output window in "split" style.
-          ["Output:Ask"]  = { mode = "n", key = "i" },
-          ["Output:Cancel"]  = { mode = "n", key = "<C-c>" },
-          ["Output:Resend"]  = { mode = "n", key = "<C-r>" },
-
-          -- The keyboard mapping for the output and input windows in "float" style.
-          ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
-          ["Session:Close"]  = { mode = "n", key = "<esc>" },
+        icons = {
+          user = "😃 ",
+          llm = "⚡ ",
         },
       })
     end,
@@ -103,4 +50,78 @@ export LLM_KEY=********
       { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
     },
   },
+```
+
+## Configuration
+
+`llm.nvim` comes with the following defaults, you can override them by passing config as setup param
+
+https://github.com/StubbornVegeta/llm.nvim/blob/caa08eccfb8d88a8b5cdfbce425c8695f2c04093/lua/llm/config.lua#L9-L107
+
+### Example Configuration
+
+For example, the following simple configuration can do:
+
+- Adjust the position of `popwin`.
+
+- Set icons and prompt.
+
+- Remap keys.
+```lua
+{
+  "StubbornVegeta/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+  config = function()
+    require("llm").setup({
+      prompt = "Please answer in English!",
+      max_tokens = 512,
+      model = "@cf/qwen/qwen1.5-14b-chat-awq",
+
+      icons = {
+        user = "😃 ",
+        llm = "⚡ ",
+      },
+
+      -- The pop-up window of LLMSelectedTextHandler is popwin
+      popwin_opts = {
+        relative = "cursor",
+        position = {
+          row = -7,
+          col = 10,
+        },
+        size = {
+          width = "50%",
+          height = 15,
+        },
+        enter = true,
+        border = {
+          style = "rounded",
+          text = {
+            top = " Explain ",
+          },
+        },
+      },
+      -- stylua: ignore
+      keys = {
+        -- The keyboard mapping for the input window.
+        ["Input:Submit"]  = { mode = "n", key = "<cr>" },
+        ["Input:Cancel"]  = { mode = "n", key = "<C-c>" },
+        ["Input:Resend"]  = { mode = "n", key = "<C-r>" },
+        -- The keyboard mapping for the output window in "split" style.
+        ["Output:Ask"]  = { mode = "n", key = "i" },
+        ["Output:Cancel"]  = { mode = "n", key = "<C-c>" },
+        ["Output:Resend"]  = { mode = "n", key = "<C-r>" },
+        -- The keyboard mapping for the output and input windows in "float" style.
+        ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
+        ["Session:Close"]  = { mode = "n", key = "<esc>" },
+      },
+    })
+  end,
+  keys = {
+    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+    { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+  },
+}
 ```
