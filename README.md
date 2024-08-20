@@ -38,9 +38,9 @@ export LLM_KEY=********
         prompt = "请用中文回答问题",
         max_tokens = 512,
         model = "@cf/qwen/qwen1.5-14b-chat-awq",
-        icons = {
-          user = "😃 ",
-          llm = "⚡ ",
+        prefix = {
+          user = { text = "😃 ", hl = "Title" },
+          llm = { text = "⚡ ", hl = "Added" },
         },
       })
     end,
@@ -56,7 +56,7 @@ export LLM_KEY=********
 
 `llm.nvim` comes with the following defaults, you can override them by passing config as setup param
 
-https://github.com/StubbornVegeta/llm.nvim/blob/caa08eccfb8d88a8b5cdfbce425c8695f2c04093/lua/llm/config.lua#L9-L107
+https://github.com/StubbornVegeta/llm.nvim/blob/6317242e9a3cf7f5ba05c1364fa2ebf8c04ccd48/lua/llm/config.lua#L10-L108
 
 ### Example Configuration
 
@@ -78,9 +78,9 @@ For example, the following simple configuration can do:
       max_tokens = 512,
       model = "@cf/qwen/qwen1.5-14b-chat-awq",
 
-      icons = {
-        user = "😃 ",
-        llm = "⚡ ",
+      prefix = {
+        user = { text = "😃 ", hl = "Title" },
+        llm = { text = "⚡ ", hl = "Added" },
       },
 
       -- The pop-up window of LLMSelectedTextHandler is popwin
