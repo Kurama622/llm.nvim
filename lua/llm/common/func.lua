@@ -15,6 +15,7 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
   local line_count = vim.api.nvim_buf_line_count(bufnr)
   local last_line = vim.api.nvim_buf_get_lines(bufnr, line_count - 1, line_count, false)[1]
 
+  layout.cursor.pos = line_count
   local lines = vim.split(chunk, "\n")
   if #lines == 1 then
     vim.api.nvim_buf_set_lines(bufnr, line_count - 1, line_count, false, { last_line .. lines[1] })
@@ -25,14 +26,29 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
   if vim.api.nvim_win_is_valid(winid) then
     M.UpdateCursorPosition(bufnr, winid)
   end
+  if layout.cursor.has_prefix then
+    vim.api.nvim_buf_add_highlight(
+      bufnr,
+      -1,
+      conf.prefix[layout.cursor.role].hl,
+      line_count - 1,
+      0,
+      #conf.prefix[layout.cursor.role].text
+    )
+  end
+  if layout.cursor.pos ~= vim.api.nvim_buf_line_count(bufnr) then
+    layout.cursor.has_prefix = false
+  end
 end
 
 function M.SetRole(bufnr, winid, role)
-  M.AppendChunkToBuffer(bufnr, winid, conf.prefix[role])
+  layout.cursor.role = role
+  M.AppendChunkToBuffer(bufnr, winid, conf.prefix[role].text)
 end
 
 function M.NewLine(bufnr, winid)
   M.AppendChunkToBuffer(bufnr, winid, "\n\n")
+  layout.cursor.has_prefix = true
 end
 
 function M.WriteContent(bufnr, winid, content)

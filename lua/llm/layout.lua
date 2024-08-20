@@ -1,5 +1,10 @@
 local M = {}
--- local conf = require("llm.config")
+
+M.cursor = {
+  role = nil,
+  has_prefix = true,
+  pos = 1,
+}
 
 M.llm = {
   popup = nil,
