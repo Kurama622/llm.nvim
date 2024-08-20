@@ -6,17 +6,12 @@ You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your acco
 
 
 ## Screenshots
-### Chat
 
-![llm-chat](https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-chat-compress.png)
-
-### Translate
-
-![llm-translate](https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-translate-compress.png)
-
-### Explain code
-
-![llm-explain-code](https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-explain-code-compress.png)
+<p align= "center">
+  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" height="280">
+  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" height="280">
+  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" height="280">
+</p>
 
 ## Installation
 
