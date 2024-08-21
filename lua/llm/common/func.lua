@@ -3,8 +3,12 @@ local M = {}
 local layout = require("llm.layout")
 local conf = require("llm.config")
 
+local function IsNotPopwin(winid)
+  return layout.popwin == nil or winid ~= layout.popwin.winid
+end
+
 function M.UpdateCursorPosition(bufnr, winid)
-  if layout.popwin == nil or winid ~= layout.popwin.winid then
+  if IsNotPopwin(winid) then
     winid = layout.llm.winid
   end
   local buffer_line_count = vim.api.nvim_buf_line_count(bufnr)
@@ -26,7 +30,7 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
   if vim.api.nvim_win_is_valid(winid) then
     M.UpdateCursorPosition(bufnr, winid)
   end
-  if layout.cursor.has_prefix then
+  if layout.cursor.has_prefix and IsNotPopwin(winid) then
     vim.api.nvim_buf_add_highlight(
       bufnr,
       -1,
