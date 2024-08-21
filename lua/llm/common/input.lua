@@ -2,12 +2,12 @@ local M = {}
 
 local _popup = require("nui.popup")
 local conf = require("llm.config")
-local layout = require("llm.layout")
+local state = require("llm.state")
 local F = require("llm.common.func")
 
-function M.SetInput(bufnr, winid, messages)
+function M.SetInput(bufnr, winid)
   local input_popup = _popup(conf.configs.input_box_opts)
-  layout.input.popup = input_popup
+  state.input.popup = input_popup
 
   -- set keymaps
   for k, v in pairs(conf.configs.keys) do
@@ -21,7 +21,7 @@ function M.SetInput(bufnr, winid, messages)
           vim.api.nvim_buf_set_lines(input_popup.bufnr, 0, -1, false, {})
         end
         if input ~= "" then
-          table.insert(messages, { role = "user", content = input })
+          table.insert(state.session[state.session.filename], { role = "user", content = input })
           F.SetRole(bufnr, winid, "user")
           F.AppendChunkToBuffer(bufnr, winid, input)
           F.NewLine(bufnr, winid)
@@ -37,6 +37,7 @@ function M.SetInput(bufnr, winid, messages)
         input_popup:unmount()
         if conf.configs.output_box_opts.style == "float" then
           vim.api.nvim_exec_autocmds("User", { pattern = "CloseLLM" })
+          vim.api.nvim_exec_autocmds("User", { pattern = "CloseHistory" })
         end
         conf.session.status = -1
       end, { noremap = true })
@@ -44,6 +45,18 @@ function M.SetInput(bufnr, winid, messages)
       input_popup:map(v.mode, v.key, F.ToggleLLM, { noremap = true })
     end
   end
+  input_popup:map("i", "<C-j>", function()
+    F.MoveHistoryCursor(1)
+  end, { noremap = true })
+  input_popup:map("i", "<C-k>", function()
+    F.MoveHistoryCursor(-1)
+  end, { noremap = true })
+  input_popup:map("n", "<C-j>", function()
+    F.MoveHistoryCursor(1)
+  end, { noremap = true })
+  input_popup:map("n", "<C-k>", function()
+    F.MoveHistoryCursor(-1)
+  end, { noremap = true })
 
   input_popup:mount()
   vim.api.nvim_command("startinsert")

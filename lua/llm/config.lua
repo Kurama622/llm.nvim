@@ -3,7 +3,7 @@ local M = {}
 -- support icons
 M.prefix = {
   user = { text = "", hl = "" },
-  llm = { text = "", hl = "" },
+  assistant = { text = "", hl = "" },
 }
 
 -- default configs
@@ -14,18 +14,19 @@ M.configs = {
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },
-    llm = { text = "## LLM \n", hl = "Added" },
+    assistant = { text = "## Assistant \n", hl = "Added" },
   },
 
+  history_path = "/tmp/history",
   input_box_opts = {
     relative = "editor",
     position = {
       row = "85%",
-      col = "50%",
+      col = 15,
     },
     size = {
-      width = "70%",
       height = "5%",
+      width = 120,
     },
     enter = true,
     focusable = true,
@@ -44,14 +45,14 @@ M.configs = {
   },
   output_box_opts = {
     style = "float", -- right | left | above | below | float
-    relative = "win",
+    relative = "editor",
     position = {
       row = "35%",
-      col = "50%",
+      col = 15,
     },
     size = {
-      width = "70%",
       height = "65%",
+      width = 90,
     },
     enter = true,
     focusable = true,
@@ -63,30 +64,55 @@ M.configs = {
         top_align = "center",
       },
     },
-    popwin_opts = {
-      relative = "cursor",
-      position = {
-        row = -5,
-        col = 10,
+  },
+
+  history_box_opts = {
+    relative = "editor",
+    position = {
+      row = "35%",
+      col = 108,
+    },
+    size = {
+      height = "65%",
+      width = 27,
+    },
+    zindex = 70,
+    focusable = false,
+    border = {
+      style = "rounded",
+      text = {
+        top = " History ",
+        top_align = "center",
       },
-      size = {
-        width = "60%",
-        height = 10,
+    },
+    win_options = {
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+  },
+
+  popwin_opts = {
+    relative = "cursor",
+    position = {
+      row = -7,
+      col = 10,
+    },
+    size = {
+      height = 10,
+      width = "60%",
+    },
+    enter = true,
+    focusable = true,
+    zindex = 50,
+    border = {
+      style = "rounded",
+      text = {
+        top = " Explain ",
+        top_align = "center",
       },
-      enter = true,
-      focusable = true,
-      zindex = 50,
-      border = {
-        style = "rounded",
-        text = {
-          top = " Explain ",
-          top_align = "center",
-        },
-      },
-      win_options = {
-        winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-      },
+    },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
   },
   -- stylua: ignore
@@ -116,8 +142,15 @@ function M.setup(opts)
   M.configs = vim.tbl_deep_extend("force", M.configs, opts or {})
   table.insert(M.session.messages, { role = "system", content = M.configs.prompt })
 
+  local file = io.open(M.configs.history_path, "rb")
+  if file then
+    file:close()
+  else
+    os.execute("mkdir -p " .. M.configs.history_path)
+  end
+
   M.prefix.user = M.configs.prefix.user
-  M.prefix.llm = M.configs.prefix.llm
+  M.prefix.assistant = M.configs.prefix.assistant
 end
 
 return M

@@ -19,5 +19,16 @@ M.input = {
   winid = nil,
 }
 
+M.history = {
+  popup = nil,
+  list = nil,
+  foucs_item = nil,
+}
+
+M.session = {
+  filename = nil,
+}
+
 M.popwin = nil
+
 return M

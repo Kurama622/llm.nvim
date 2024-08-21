@@ -12,7 +12,7 @@ function M.GetStreamingOutput(bufnr, winid, messages)
   local body = {
     stream = true,
     max_tokens = conf.configs.max_tokens,
-    messages = conf.session.messages,
+    messages = messages,
   }
 
   local line = ""
