@@ -35,7 +35,7 @@ export LLM_KEY=********
         model = "@cf/qwen/qwen1.5-14b-chat-awq",
         prefix = {
           user = { text = "😃 ", hl = "Title" },
-          llm = { text = "⚡ ", hl = "Added" },
+          assistant = { text = "⚡ ", hl = "Added" },
         },
       })
     end,
@@ -51,11 +51,11 @@ export LLM_KEY=********
 
 `llm.nvim` comes with the following defaults, you can override them by passing config as setup param
 
-https://github.com/StubbornVegeta/llm.nvim/blob/6317242e9a3cf7f5ba05c1364fa2ebf8c04ccd48/lua/llm/config.lua#L10-L108
+https://github.com/StubbornVegeta/llm.nvim/blob/f8e4383a5970696802439928c333c634e51066cb/lua/llm/config.lua#L10-L134
 
 ### Example Configuration
 
-For example, the following simple configuration can do:
+For example, the following configuration can do:
 
 - Adjust the position of `popwin`.
 
@@ -66,19 +66,88 @@ For example, the following simple configuration can do:
 {
   "StubbornVegeta/llm.nvim",
   dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  branch = "save-sess",
   cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
   config = function()
     require("llm").setup({
       prompt = "Please answer in English!",
       max_tokens = 512,
       model = "@cf/qwen/qwen1.5-14b-chat-awq",
-
       prefix = {
         user = { text = "😃 ", hl = "Title" },
-        llm = { text = "⚡ ", hl = "Added" },
+        assistant = { text = "⚡ ", hl = "Added" },
+      },
+      input_box_opts = {
+        relative = "editor",
+        position = {
+          row = "85%",
+          col = 15,
+        },
+        size = {
+          height = "5%",
+          width = 120,
+        },
+        enter = true,
+        focusable = true,
+        zindex = 50,
+        border = {
+          style = "rounded",
+          text = {
+            top = " Enter Your Question ",
+            top_align = "center",
+          },
+        },
+        win_options = {
+          winblend = 0,
+          winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        },
+      },
+      output_box_opts = {
+        style = "float", -- right | left | above | below | float
+        relative = "editor",
+        position = {
+          row = "35%",
+          col = 15,
+        },
+        size = {
+          height = "65%",
+          width = 90,
+        },
+        enter = true,
+        focusable = true,
+        zindex = 20,
+        border = {
+          style = "rounded",
+          text = {
+            top = " LLM ",
+            top_align = "center",
+          },
+        },
       },
 
-      -- The pop-up window of LLMSelectedTextHandler is popwin
+      history_box_opts = {
+        relative = "editor",
+        position = {
+          row = "35%",
+          col = 108,
+        },
+        size = {
+          height = "65%",
+          width = 27,
+        },
+        zindex = 70,
+        focusable = false,
+        border = {
+          style = "rounded",
+          text = {
+            top = " History ",
+            top_align = "center",
+          },
+        },
+        win_options = {
+          winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        },
+      },
       popwin_opts = {
         relative = "cursor",
         position = {
@@ -118,5 +187,5 @@ For example, the following simple configuration can do:
     { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
     { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
   },
-}
+},
 ```
