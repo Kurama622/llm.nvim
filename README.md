@@ -53,6 +53,8 @@ export LLM_KEY=********
 
 https://github.com/StubbornVegeta/llm.nvim/blob/f8e4383a5970696802439928c333c634e51066cb/lua/llm/config.lua#L10-L134
 
+> You can switch between session histories by pressing `<C-j>/<C-k>` in the input box ((works in both Insert and Normal modes).
+
 ### Example Configuration
 
 For example, the following configuration can do:
