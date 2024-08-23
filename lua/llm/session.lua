@@ -78,51 +78,53 @@ function M.NewSession()
       bufnr = llm_popup.bufnr
       winid = llm_popup.winid
 
-      local history_popup = Menu(conf.configs.history_box_opts, {
-        lines = (function()
-          local items = F.ListFilesInPath()
-          state.history.list = { Menu.item("current") }
-          for _, item in ipairs(items) do
-            table.insert(state.history.list, Menu.item(item))
-          end
-          return state.history.list
-        end)(),
-        max_width = 20,
-        keymap = {
-          focus_next = { "j", "<Down>", "<Tab>" },
-          focus_prev = { "k", "<Up>", "<S-Tab>" },
-          submit = { "<CR>", "<Space>" },
-        },
-        on_change = function(item)
-          if item.text == "current" then
-            state.session.filename = item.text
-            if not state.session[item.text] then
-              state.session[item.text] = F.DeepCopy(conf.session.messages)
+      if conf.configs.save_session then
+        local history_popup = Menu(conf.configs.history_box_opts, {
+          lines = (function()
+            local items = F.ListFilesInPath()
+            state.history.list = { Menu.item("current") }
+            for _, item in ipairs(items) do
+              table.insert(state.history.list, Menu.item(item))
             end
-            F.RefreshLLMText(state.session[item.text])
-          else
-            local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
-            state.session.filename = item.text
-            if not state.session[item.text] then
-              local file = io.open(sess_file, "r")
-              local messages = vim.fn.json_decode(file:read())
-              state.session[item.text] = messages
-              file:close()
+            return state.history.list
+          end)(),
+          max_width = 20,
+          keymap = {
+            focus_next = { "j", "<Down>", "<Tab>" },
+            focus_prev = { "k", "<Up>", "<S-Tab>" },
+            submit = { "<CR>", "<Space>" },
+          },
+          on_change = function(item)
+            if item.text == "current" then
+              state.session.filename = item.text
+              if not state.session[item.text] then
+                state.session[item.text] = F.DeepCopy(conf.session.messages)
+              end
+              F.RefreshLLMText(state.session[item.text])
+            else
+              local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
+              state.session.filename = item.text
+              if not state.session[item.text] then
+                local file = io.open(sess_file, "r")
+                local messages = vim.fn.json_decode(file:read())
+                state.session[item.text] = messages
+                file:close()
+              end
+              F.RefreshLLMText(state.session[item.text])
             end
-            F.RefreshLLMText(state.session[item.text])
-          end
-        end,
-        on_submit = function(item)
-          print("Menu Submitted: ", item.text)
-        end,
-      })
+          end,
+          on_submit = function(item)
+            print("Menu Submitted: ", item.text)
+          end,
+        })
 
-      history_popup:mount()
-      local unmap_list = { "<Esc>", "<C-c>", "<CR>", "<Space>" }
-      for _, v in ipairs(unmap_list) do
-        history_popup:unmap("n", v)
+        history_popup:mount()
+        local unmap_list = { "<Esc>", "<C-c>", "<CR>", "<Space>" }
+        for _, v in ipairs(unmap_list) do
+          history_popup:unmap("n", v)
+        end
+        state.history.popup = history_popup
       end
-      state.history.popup = history_popup
 
       -- set autocmds
       local user_autocmd_lists = {

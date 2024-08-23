@@ -82,7 +82,7 @@ function M.CloseLLM()
   M.CancelLLM()
   state.llm.popup:unmount()
 
-  if #state.session[state.session.filename] > 2 then
+  if conf.configs.save_session and #state.session[state.session.filename] > 2 then
     local filename = nil
     if state.session.filename ~= "current" then
       filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
@@ -110,8 +110,10 @@ function M.CloseInput()
 end
 
 function M.CloseHistory()
-  state.session = { filename = nil }
-  state.history.popup:unmount()
+  if state.history.popup then
+    state.session = { filename = nil }
+    state.history.popup:unmount()
+  end
 end
 
 function M.ToggleLLM()
@@ -137,9 +139,14 @@ end
 
 function M.ListFilesInPath()
   local files = {}
-  local p = io.popen("ls -At " .. conf.configs.history_path .. "| grep json$")
+
+  local p = io.popen(string.format("ls -At %s | grep json$", conf.configs.history_path))
   for filename in p:lines() do
-    table.insert(files, filename)
+    if #files < conf.configs.max_history_files then
+      table.insert(files, filename)
+    else
+      os.execute("rm " .. string.format("%s/%s", conf.configs.history_path, filename))
+    end
   end
   p:close()
   return files

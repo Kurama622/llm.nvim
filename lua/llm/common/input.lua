@@ -22,6 +22,12 @@ function M.SetInput(bufnr, winid)
           end
           input_popup:unmount()
         else
+          if not conf.configs.save_session then
+            state.session.filename = "current"
+            if not state.session[state.session.filename] then
+              state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+            end
+          end
           vim.api.nvim_buf_set_lines(input_popup.bufnr, 0, -1, false, {})
         end
         if input ~= "" then
@@ -49,18 +55,21 @@ function M.SetInput(bufnr, winid)
       input_popup:map(v.mode, v.key, F.ToggleLLM, { noremap = true })
     end
   end
-  input_popup:map("i", "<C-j>", function()
-    F.MoveHistoryCursor(1)
-  end, { noremap = true })
-  input_popup:map("i", "<C-k>", function()
-    F.MoveHistoryCursor(-1)
-  end, { noremap = true })
-  input_popup:map("n", "<C-j>", function()
-    F.MoveHistoryCursor(1)
-  end, { noremap = true })
-  input_popup:map("n", "<C-k>", function()
-    F.MoveHistoryCursor(-1)
-  end, { noremap = true })
+
+  if conf.configs.save_session then
+    input_popup:map("i", "<C-j>", function()
+      F.MoveHistoryCursor(1)
+    end, { noremap = true })
+    input_popup:map("i", "<C-k>", function()
+      F.MoveHistoryCursor(-1)
+    end, { noremap = true })
+    input_popup:map("n", "<C-j>", function()
+      F.MoveHistoryCursor(1)
+    end, { noremap = true })
+    input_popup:map("n", "<C-k>", function()
+      F.MoveHistoryCursor(-1)
+    end, { noremap = true })
+  end
 
   input_popup:mount()
   vim.api.nvim_command("startinsert")

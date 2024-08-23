@@ -1,5 +1,21 @@
 local M = {}
 
+local function get_win_width()
+  return vim.api.nvim_win_get_width(vim.api.nvim_get_current_win())
+end
+
+-- default box width
+local input_box_width = math.floor(get_win_width() * 0.7)
+local input_box_start = math.floor(get_win_width() * 0.15)
+
+local history_box_width = 27
+local output_box_start = input_box_start
+
+local output_box_width = math.floor(get_win_width() * 0.7 - history_box_width - 2)
+local history_box_start = math.floor(output_box_start + get_win_width() * 0.7 - history_box_width)
+
+local HOME = os.getenv("HOME")
+
 -- support icons
 M.prefix = {
   user = { text = "", hl = "" },
@@ -17,16 +33,19 @@ M.configs = {
     assistant = { text = "## Assistant \n", hl = "Added" },
   },
 
-  history_path = "/tmp/history",
+  history_path = HOME .. "/.local/state/nvim/llm-history",
+  max_history_files = 15,
+  save_session = true,
+
   input_box_opts = {
     relative = "editor",
     position = {
       row = "85%",
-      col = 15,
+      col = input_box_start,
     },
     size = {
       height = "5%",
-      width = 120,
+      width = input_box_width,
     },
     enter = true,
     focusable = true,
@@ -48,11 +67,11 @@ M.configs = {
     relative = "editor",
     position = {
       row = "35%",
-      col = 15,
+      col = output_box_start,
     },
     size = {
       height = "65%",
-      width = 90,
+      width = output_box_width,
     },
     enter = true,
     focusable = true,
@@ -60,7 +79,7 @@ M.configs = {
     border = {
       style = "rounded",
       text = {
-        top = " LLM ",
+        top = " Preview ",
         top_align = "center",
       },
     },
@@ -70,13 +89,14 @@ M.configs = {
     relative = "editor",
     position = {
       row = "35%",
-      col = 108,
+      col = history_box_start,
     },
     size = {
       height = "65%",
-      width = 27,
+      width = history_box_width,
     },
     zindex = 70,
+    enter = false,
     focusable = false,
     border = {
       style = "rounded",
@@ -142,11 +162,15 @@ function M.setup(opts)
   M.configs = vim.tbl_deep_extend("force", M.configs, opts or {})
   table.insert(M.session.messages, { role = "system", content = M.configs.prompt })
 
-  local file = io.open(M.configs.history_path, "rb")
-  if file then
-    file:close()
+  if not M.configs.save_session then
+    M.configs.output_box_opts.size.width = M.configs.input_box_opts.size.width
   else
-    os.execute("mkdir -p " .. M.configs.history_path)
+    local file = io.open(M.configs.history_path, "rb")
+    if file then
+      file:close()
+    else
+      os.execute("mkdir -p " .. M.configs.history_path)
+    end
   end
 
   M.prefix.user = M.configs.prefix.user
