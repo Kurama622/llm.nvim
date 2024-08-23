@@ -16,6 +16,10 @@ function M.SetInput(bufnr, winid)
         local input_table = vim.api.nvim_buf_get_lines(input_popup.bufnr, 0, -1, true)
         local input = table.concat(input_table, "\n")
         if conf.configs.output_box_opts.style ~= "float" then
+          state.session.filename = "current"
+          if not state.session[state.session.filename] then
+            state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+          end
           input_popup:unmount()
         else
           vim.api.nvim_buf_set_lines(input_popup.bufnr, 0, -1, false, {})
