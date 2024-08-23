@@ -137,7 +137,7 @@ end
 
 function M.ListFilesInPath()
   local files = {}
-  local p = io.popen("ls -A " .. conf.configs.history_path)
+  local p = io.popen("ls -At " .. conf.configs.history_path .. "| grep json$")
   for filename in p:lines() do
     table.insert(files, filename)
   end
