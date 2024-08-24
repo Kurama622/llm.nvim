@@ -67,6 +67,8 @@ export LLM_KEY=********
 
 `llm.nvim` comes with the following defaults, you can override them by passing config as setup param.
 
+https://github.com/StubbornVegeta/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f75e/lua/llm/config.lua#L26-L158
+
 ### Example Configuration
 
 ```lua
