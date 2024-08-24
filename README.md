@@ -220,3 +220,6 @@ https://github.com/StubbornVegeta/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b
     },
   },
 ```
+Finally, here is my personal configuration for reference.
+
+https://github.com/StubbornVegeta/.lazyvim/blob/ec6ba2f6610cf0f9645543ea2a43882272870088/lua/plugins/coding.lua#L114-L158
