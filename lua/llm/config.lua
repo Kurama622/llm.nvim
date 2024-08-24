@@ -142,6 +142,10 @@ M.configs = {
     ["Input:Cancel"]  = { mode = "i", key = "<C-c>" },
     ["Input:Resend"]  = { mode = "i", key = "<C-r>" },
 
+    -- only works when "save_session = true"
+    ["Input:HistoryNext"]  = { mode = "i", key = "<C-j>" },
+    ["Input:HistoryPrev"]  = { mode = "i", key = "<C-k>" },
+
     -- The keyboard mapping for the output window in "split" style.
     ["Output:Ask"]  = { mode = "n", key = "i" },
     ["Output:Cancel"]  = { mode = "n", key = "<C-c>" },

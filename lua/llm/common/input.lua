@@ -53,22 +53,15 @@ function M.SetInput(bufnr, winid)
       end, { noremap = true })
     elseif k == "Session:Toggle" and conf.configs.output_box_opts.style == "float" then
       input_popup:map(v.mode, v.key, F.ToggleLLM, { noremap = true })
+    elseif conf.configs.save_session and k == "Input:HistoryNext" and conf.configs.output_box_opts.style == "float" then
+      input_popup:map(v.mode, v.key, function()
+        F.MoveHistoryCursor(1)
+      end, { noremap = true })
+    elseif conf.configs.save_session and k == "Input:HistoryPrev" and conf.configs.output_box_opts.style == "float" then
+      input_popup:map(v.mode, v.key, function()
+        F.MoveHistoryCursor(-1)
+      end, { noremap = true })
     end
-  end
-
-  if conf.configs.save_session then
-    input_popup:map("i", "<C-j>", function()
-      F.MoveHistoryCursor(1)
-    end, { noremap = true })
-    input_popup:map("i", "<C-k>", function()
-      F.MoveHistoryCursor(-1)
-    end, { noremap = true })
-    input_popup:map("n", "<C-j>", function()
-      F.MoveHistoryCursor(1)
-    end, { noremap = true })
-    input_popup:map("n", "<C-k>", function()
-      F.MoveHistoryCursor(-1)
-    end, { noremap = true })
   end
 
   input_popup:mount()
