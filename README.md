@@ -8,9 +8,9 @@ You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your acco
 ## Screenshots
 
 <p align= "center">
-  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" height="280">
-  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" height="280">
-  <img src="https://github.com/StubbornVegeta/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" height="250">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" height="280">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" height="280">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" height="250">
 </p>
 
 ## Installation
@@ -25,7 +25,7 @@ export LLM_KEY=********
 
 ```lua
   {
-    "StubbornVegeta/llm.nvim",
+    "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
     cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
     config = function()
@@ -67,13 +67,13 @@ export LLM_KEY=********
 
 `llm.nvim` comes with the following defaults, you can override them by passing config as setup param.
 
-https://github.com/StubbornVegeta/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f75e/lua/llm/config.lua#L26-L158
+https://github.com/Kurama622/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f75e/lua/llm/config.lua#L26-L158
 
 ### Example Configuration
 
 ```lua
   {
-    "StubbornVegeta/llm.nvim",
+    "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
     cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
     config = function()
@@ -222,4 +222,4 @@ https://github.com/StubbornVegeta/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b
 ```
 Finally, here is my personal configuration for reference.
 
-https://github.com/StubbornVegeta/.lazyvim/blob/ec6ba2f6610cf0f9645543ea2a43882272870088/lua/plugins/coding.lua#L114-L158
+https://github.com/Kurama622/.lazyvim/blob/ec6ba2f6610cf0f9645543ea2a43882272870088/lua/plugins/coding.lua#L114-L158
