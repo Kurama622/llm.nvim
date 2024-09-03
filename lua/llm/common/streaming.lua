@@ -58,8 +58,6 @@ function M.GetStreamingOutput(bufnr, winid, messages)
           local data = vim.fn.json_decode(json_str)
           system_output = system_output .. data.choices[1].delta.content
           F.WriteContent(bufnr, winid, data.choices[1].delta.content)
-          start_idx = line:find("data: ", 1, true)
-          end_idx = line:find("}}]}", 1, true)
 
           if end_idx + 4 > #line then
             line = ""
@@ -67,6 +65,8 @@ function M.GetStreamingOutput(bufnr, winid, messages)
           else
             line = line:sub(end_idx + 4)
           end
+          start_idx = line:find("data: ", 1, true)
+          end_idx = line:find("}}]}", 1, true)
         end
       end
     end
