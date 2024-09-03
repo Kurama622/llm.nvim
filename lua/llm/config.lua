@@ -27,6 +27,7 @@ M.configs = {
   prompt = "",
   max_tokens = 512,
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
+  url = nil,
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },
