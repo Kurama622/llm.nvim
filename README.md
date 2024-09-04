@@ -271,6 +271,64 @@ https://github.com/Kurama622/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f
   },
 ```
 
+### Customized Large Language Model
+
+1. Add the requested URL.
+2. Specify the model you will be using.
+3. Customize the streaming processing function (used for parsing the model output).
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        max_tokens = 4095,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        streaming_handler = function(chunk, line, output, bufnr, winid, F)
+          if not chunk then
+            return output
+          end
+          local tail = chunk:sub(-1, -1)
+          if tail:sub(1, 1) ~= "}" then
+            line = line .. chunk
+          else
+            line = line .. chunk
+
+            local start_idx = line:find("data: ", 1, true)
+            local end_idx = line:find("}}]}", 1, true)
+            local json_str = nil
+
+            while start_idx ~= nil and end_idx ~= nil do
+              if start_idx < end_idx then
+                json_str = line:sub(7, end_idx + 3)
+              end
+              local data = vim.fn.json_decode(json_str)
+              output = output .. data.choices[1].delta.content
+              F.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+              if end_idx + 4 > #line then
+                line = ""
+                break
+              else
+                line = line:sub(end_idx + 4)
+              end
+              start_idx = line:find("data: ", 1, true)
+              end_idx = line:find("}}]}", 1, true)
+            end
+          end
+          return output
+        end
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+```
+
 Finally, here is my personal configuration for reference.
 
 https://github.com/Kurama622/.lazyvim/blob/ec6ba2f6610cf0f9645543ea2a43882272870088/lua/plugins/coding.lua#L114-L158
