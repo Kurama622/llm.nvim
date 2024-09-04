@@ -28,6 +28,7 @@ M.configs = {
   max_tokens = 512,
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
   url = nil,
+  streaming_handler = nil,
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },
@@ -84,6 +85,10 @@ M.configs = {
         top_align = "center",
       },
     },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
   },
 
   history_box_opts = {
@@ -107,6 +112,7 @@ M.configs = {
       },
     },
     win_options = {
+      winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
   },

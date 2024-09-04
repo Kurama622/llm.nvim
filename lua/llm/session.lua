@@ -39,6 +39,7 @@ function M.LLMSelectedTextHandler(description)
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
+  vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
   state.llm.job =
     streaming.GetStreamingOutput(state.popwin.bufnr, state.popwin.winid, state.session[state.popwin.winid])
 
@@ -198,6 +199,7 @@ function M.NewSession()
     vim.api.nvim_buf_set_name(bufnr, filename)
     vim.api.nvim_set_option_value("spell", false, { win = winid })
     vim.api.nvim_set_option_value("wrap", true, { win = winid })
+    vim.api.nvim_set_option_value("linebreak", false, { win = winid })
 
     state.llm.bufnr = bufnr
     state.llm.winid = winid
