@@ -145,7 +145,7 @@ function M.ListFilesInPath()
     if #files < conf.configs.max_history_files then
       table.insert(files, filename)
     else
-      os.execute("rm " .. string.format("%s/%s", conf.configs.history_path, filename))
+      os.execute("rm " .. string.format("%s/'%s'", conf.configs.history_path, filename))
     end
   end
   p:close()
