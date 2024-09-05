@@ -140,7 +140,7 @@ end
 function M.ListFilesInPath()
   local files = {}
 
-  local p = io.popen(string.format("ls -At %s | grep json$", conf.configs.history_path))
+  local p = io.popen(string.format("ls -At %s  2>/dev/null", conf.configs.history_path))
   for filename in p:lines() do
     if #files < conf.configs.max_history_files then
       table.insert(files, filename)
