@@ -1,7 +1,7 @@
 local M = {}
 
 local function get_win_width()
-  return vim.api.nvim_win_get_width(vim.api.nvim_get_current_win())
+  return vim.o.columns
 end
 
 -- default box width
