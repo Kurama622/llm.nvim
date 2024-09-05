@@ -331,4 +331,4 @@ https://github.com/Kurama622/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f
 
 Finally, here is my personal configuration for reference.
 
-https://github.com/Kurama622/.lazyvim/blob/550933eafcc9fee65e2bc412e6f4ff688eda2192/lua/plugins/coding.lua#L114-L223
+https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua
