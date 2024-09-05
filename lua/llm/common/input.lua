@@ -12,7 +12,7 @@ function M.SetInput(bufnr, winid)
   -- set keymaps
   for k, v in pairs(conf.configs.keys) do
     if k == "Input:Submit" then
-      input_popup:map(v.mode, v.key, function()
+      F.WinMapping(input_popup, v.mode, v.key, function()
         local input_table = vim.api.nvim_buf_get_lines(input_popup.bufnr, 0, -1, true)
         local input = table.concat(input_table, "\n")
         if conf.configs.output_box_opts.style ~= "float" then
@@ -39,11 +39,11 @@ function M.SetInput(bufnr, winid)
         end
       end, { noremap = true })
     elseif k == "Input:Cancel" and conf.configs.output_box_opts.style == "float" then
-      input_popup:map(v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+      F.WinMapping(input_popup, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
     elseif k == "Input:Resend" and conf.configs.output_box_opts.style == "float" then
-      input_popup:map(v.mode, v.key, F.ResendLLM, { noremap = true, silent = true })
+      F.WinMapping(input_popup, v.mode, v.key, F.ResendLLM, { noremap = true, silent = true })
     elseif k == "Session:Close" then
-      input_popup:map(v.mode, v.key, function()
+      F.WinMapping(input_popup, v.mode, v.key, function()
         input_popup:unmount()
         if conf.configs.output_box_opts.style == "float" then
           vim.api.nvim_exec_autocmds("User", { pattern = "CloseLLM" })
@@ -52,13 +52,13 @@ function M.SetInput(bufnr, winid)
         conf.session.status = -1
       end, { noremap = true })
     elseif k == "Session:Toggle" and conf.configs.output_box_opts.style == "float" then
-      input_popup:map(v.mode, v.key, F.ToggleLLM, { noremap = true })
+      F.WinMapping(input_popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
     elseif conf.configs.save_session and k == "Input:HistoryNext" and conf.configs.output_box_opts.style == "float" then
-      input_popup:map(v.mode, v.key, function()
+      F.WinMapping(input_popup, v.mode, v.key, function()
         F.MoveHistoryCursor(1)
       end, { noremap = true })
     elseif conf.configs.save_session and k == "Input:HistoryPrev" and conf.configs.output_box_opts.style == "float" then
-      input_popup:map(v.mode, v.key, function()
+      F.WinMapping(input_popup, v.mode, v.key, function()
         F.MoveHistoryCursor(-1)
       end, { noremap = true })
     end

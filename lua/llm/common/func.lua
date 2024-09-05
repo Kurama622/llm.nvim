@@ -177,4 +177,14 @@ function M.RefreshLLMText(messages)
   end
 end
 
+function M.WinMapping(win, modes, keys, func, opts)
+  local _modes = type(modes) == "string" and { modes } or modes
+  local _keys = type(keys) == "string" and { keys } or keys
+  for i = 1, #_modes do
+    for j = 1, #_keys do
+      win:map(_modes[i], _keys[j], func, opts)
+    end
+  end
+end
+
 return M

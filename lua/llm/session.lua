@@ -45,12 +45,12 @@ function M.LLMSelectedTextHandler(description)
 
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
-      state.popwin:map(v.mode, v.key, function()
+      F.WinMapping(state.popwin, v.mode, v.key, function()
         state.popwin:unmount()
         F.CancelLLM()
       end, { noremap = true })
     elseif k == "Output:Cancel" then
-      state.popwin:map(v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+      F.WinMapping(state.popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
     end
   end
 end
@@ -158,14 +158,14 @@ function M.NewSession()
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Session:Close" then
-          llm_popup:map(v.mode, v.key, function()
+          F.WinMapping(llm_popup, v.mode, v.key, function()
             F.CloseLLM()
             vim.api.nvim_exec_autocmds("User", { pattern = "CloseInput" })
             vim.api.nvim_exec_autocmds("User", { pattern = "CloseHistory" })
             conf.session.status = -1
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          llm_popup:map(v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.WinMapping(llm_popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
         end
       end
       uin.SetInput(bufnr, winid)
@@ -186,9 +186,9 @@ function M.NewSession()
             uin.SetInput(bufnr, winid)
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Cancel" then
-          vim.keymap.set("n", "<C-c>", F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
+          vim.keymap.set(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Resend" then
-          vim.keymap.set("n", "<C-r>", F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
+          vim.keymap.set(v.mode, v.key, F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
         end
       end
     end
