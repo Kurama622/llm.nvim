@@ -1,9 +1,11 @@
 # llm.nvim
 
-Free large language model (LLM) support for Neovim based on [cloudflare](https://dash.cloudflare.com/).
-
-You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your account and API key. Then you will find all [models](https://developers.cloudflare.com/workers-ai/models/) on cloudflare, where the models labeled as beta are free.
-
+> [!IMPORTANT]
+> This is a universal plugin for a large language model (LLM), designed to enable users to interact with LLM within neovim.
+>
+> You can customize any LLM you wish to use.
+>
+> Finally, and most importantly, you can use various free models (whether provided by Cloudflare or others).
 
 ## Screenshots
 
@@ -15,10 +17,14 @@ You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your acco
 
 ## Installation
 
-Set `ACCOUNT` and `LLM_KEY` in your zshrc or bashrc
+### cloudflare
+
+1. You need sign up on [cloudflare](https://dash.cloudflare.com/) and get your account and API key. Then you will find all [models](https://developers.cloudflare.com/workers-ai/models/) on cloudflare, where the models labeled as beta are free.
+
+2. Set `ACCOUNT` and `LLM_KEY` in your zshrc or bashrc
 ```sh
-export ACCOUNT=xxxxxxxx
-export LLM_KEY=********
+export ACCOUNT=<Your ACCOUNT>
+export LLM_KEY=<Your API_KEY>
 ```
 
 - lazy.nvim
@@ -37,6 +43,124 @@ export LLM_KEY=********
       { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
     },
   },
+```
+
+### ChatGLM (智谱清言)
+
+1. You need sign up on [https://open.bigmodel.cn/](https://open.bigmodel.cn/), and get your account and API key.
+
+2. `LLM_KEY` in your zshrc or bashrc
+
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
+- lazy.nvim
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        max_tokens = 512,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        prefix = {
+          user = { text = "😃 ", hl = "Title" },
+          assistant = { text = "⚡ ", hl = "Added" },
+        },
+
+        save_session = true,
+        max_history = 15,
+
+        -- stylua: ignore
+        keys = {
+          -- The keyboard mapping for the input window.
+          ["Input:Submit"]      = { mode = "n", key = "<cr>" },
+          ["Input:Cancel"]      = { mode = "n", key = "<C-c>" },
+          ["Input:Resend"]      = { mode = "n", key = "<C-r>" },
+
+          -- only works when "save_session = true"
+          ["Input:HistoryNext"] = { mode = "n", key = "<C-j>" },
+          ["Input:HistoryPrev"] = { mode = "n", key = "<C-k>" },
+
+          -- The keyboard mapping for the output window in "split" style.
+          ["Output:Ask"]        = { mode = "n", key = "i" },
+          ["Output:Cancel"]     = { mode = "n", key = "<C-c>" },
+          ["Output:Resend"]     = { mode = "n", key = "<C-r>" },
+
+          -- The keyboard mapping for the output and input windows in "float" style.
+          ["Session:Toggle"]    = { mode = "n", key = "<leader>ac" },
+          ["Session:Close"]     = { mode = "n", key = "<esc>" },
+        },
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+    },
+  },
+```
+
+### Customized Large Language Model
+
+1. Add the requested URL.
+2. Specify the model you will be using.
+3. Customize the streaming processing function (used for parsing the model output).
+
+- lazy.nvim
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        max_tokens = 4095,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        streaming_handler = function(chunk, line, output, bufnr, winid, F)
+          if not chunk then
+            return output
+          end
+          local tail = chunk:sub(-1, -1)
+          if tail:sub(1, 1) ~= "}" then
+            line = line .. chunk
+          else
+            line = line .. chunk
+
+            local start_idx = line:find("data: ", 1, true)
+            local end_idx = line:find("}}]}", 1, true)
+            local json_str = nil
+
+            while start_idx ~= nil and end_idx ~= nil do
+              if start_idx < end_idx then
+                json_str = line:sub(7, end_idx + 3)
+              end
+              local data = vim.fn.json_decode(json_str)
+              output = output .. data.choices[1].delta.content
+              F.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+              if end_idx + 4 > #line then
+                line = ""
+                break
+              else
+                line = line:sub(end_idx + 4)
+              end
+              start_idx = line:find("data: ", 1, true)
+              end_idx = line:find("}}]}", 1, true)
+            end
+          end
+          return output
+        end
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
 ```
 
 ## Default Configuration
@@ -219,114 +343,6 @@ https://github.com/Kurama622/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f
       { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
     },
   },
-```
-
-### Configuration: ChatGLM (智谱清言)
-
-```lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
-    config = function()
-      require("llm").setup({
-        max_tokens = 512,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
-        prefix = {
-          user = { text = "😃 ", hl = "Title" },
-          assistant = { text = "⚡ ", hl = "Added" },
-        },
-
-        save_session = true,
-        max_history = 15,
-
-        -- stylua: ignore
-        keys = {
-          -- The keyboard mapping for the input window.
-          ["Input:Submit"]      = { mode = "n", key = "<cr>" },
-          ["Input:Cancel"]      = { mode = "n", key = "<C-c>" },
-          ["Input:Resend"]      = { mode = "n", key = "<C-r>" },
-
-          -- only works when "save_session = true"
-          ["Input:HistoryNext"] = { mode = "n", key = "<C-j>" },
-          ["Input:HistoryPrev"] = { mode = "n", key = "<C-k>" },
-
-          -- The keyboard mapping for the output window in "split" style.
-          ["Output:Ask"]        = { mode = "n", key = "i" },
-          ["Output:Cancel"]     = { mode = "n", key = "<C-c>" },
-          ["Output:Resend"]     = { mode = "n", key = "<C-r>" },
-
-          -- The keyboard mapping for the output and input windows in "float" style.
-          ["Session:Toggle"]    = { mode = "n", key = "<leader>ac" },
-          ["Session:Close"]     = { mode = "n", key = "<esc>" },
-        },
-      })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
-      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
-    },
-  },
-```
-
-### Customized Large Language Model
-
-1. Add the requested URL.
-2. Specify the model you will be using.
-3. Customize the streaming processing function (used for parsing the model output).
-
-```lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
-    config = function()
-      require("llm").setup({
-        max_tokens = 4095,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
-        streaming_handler = function(chunk, line, output, bufnr, winid, F)
-          if not chunk then
-            return output
-          end
-          local tail = chunk:sub(-1, -1)
-          if tail:sub(1, 1) ~= "}" then
-            line = line .. chunk
-          else
-            line = line .. chunk
-
-            local start_idx = line:find("data: ", 1, true)
-            local end_idx = line:find("}}]}", 1, true)
-            local json_str = nil
-
-            while start_idx ~= nil and end_idx ~= nil do
-              if start_idx < end_idx then
-                json_str = line:sub(7, end_idx + 3)
-              end
-              local data = vim.fn.json_decode(json_str)
-              output = output .. data.choices[1].delta.content
-              F.WriteContent(bufnr, winid, data.choices[1].delta.content)
-
-              if end_idx + 4 > #line then
-                line = ""
-                break
-              else
-                line = line:sub(end_idx + 4)
-              end
-              start_idx = line:find("data: ", 1, true)
-              end_idx = line:find("}}]}", 1, true)
-            end
-          end
-          return output
-        end
-      })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-    },
-  }
 ```
 
 Finally, here is my personal configuration for reference.
