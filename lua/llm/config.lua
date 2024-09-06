@@ -37,6 +37,7 @@ M.configs = {
 
   history_path = HOME .. "/.local/state/nvim/llm-history",
   max_history_files = 15,
+  max_history_name_length = 10,
   save_session = true,
 
   input_box_opts = {

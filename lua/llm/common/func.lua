@@ -7,6 +7,44 @@ local function IsNotPopwin(winid)
   return state.popwin == nil or winid ~= state.popwin.winid
 end
 
+-- define utf8 char length
+local function utf8_char_length(byte)
+  if byte < 0x80 then
+    return 1
+  elseif byte >= 0xC0 and byte < 0xE0 then
+    return 2
+  elseif byte >= 0xE0 and byte < 0xF0 then
+    return 3
+  elseif byte >= 0xF0 then
+    return 4
+  end
+end
+
+local function utf8_sub(str, start_char, end_char)
+  local start_index = 1
+  local end_index = #str
+  local i = 1
+  local char_count = 0
+  local byte = string.byte
+
+  while i <= #str do
+    local b = byte(str, i)
+    char_count = char_count + 1
+    local char_len = utf8_char_length(b)
+
+    if char_count == start_char then
+      start_index = i
+    end
+    if char_count == end_char + 1 then
+      end_index = i - 1
+      break
+    end
+    i = i + char_len
+  end
+
+  return string.sub(str, start_index, end_index)
+end
+
 function M.DeepCopy(t)
   local new_t = {}
   for k, v in pairs(t) do
@@ -87,12 +125,9 @@ function M.CloseLLM()
     if state.session.filename ~= "current" then
       filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
     else
-      filename = string.format(
-        "%s/%s-%s.json",
-        conf.configs.history_path,
-        state.session[state.session.filename][2].content:sub(1, 7 * #"中"),
-        os.date("%Y%m%d%H%M%S")
-      )
+      local _filename =
+        utf8_sub(state.session[state.session.filename][2].content, 1, conf.configs.max_history_name_length)
+      filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
     end
     local file = io.open(filename, "w")
     file:write(vim.fn.json_encode(state.session[state.session.filename]))
