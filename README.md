@@ -1,6 +1,8 @@
 <p align= "center">
-<img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo.png" alt="llm.nvim" width="345">
+<img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple.png" alt="llm.nvim" width="345">
 </p>
+
+---
 
 > [!IMPORTANT]
 > This is a universal plugin for a large language model (LLM), designed to enable users to interact with LLM within neovim.
