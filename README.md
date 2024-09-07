@@ -195,10 +195,9 @@ export LLM_KEY=<Your API_KEY>
 
 `llm.nvim` comes with the following defaults, you can override them by passing config as setup param.
 
-https://github.com/Kurama622/llm.nvim/blob/c7c546aef0e12bf645843a6fcb83f27b2987f75e/lua/llm/config.lua#L26-L158
+https://github.com/Kurama622/llm.nvim/blob/51350dc2028249b2ac04ec3b0763dcaca18bd059/lua/llm/config.lua#L26-L166
 
 ### Example Configuration
-
 ```lua
   {
     "Kurama622/llm.nvim",
