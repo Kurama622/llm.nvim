@@ -10,26 +10,12 @@ local F = require("llm.common.func")
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.job = streaming.GetStreamingOutput(state.llm.bufnr, state.llm.winid, state.session[state.session.filename])
-end
-local function GetVisualSelectionRange()
-  local line_v = vim.fn.getpos("v")[2]
-  local line_cur = vim.api.nvim_win_get_cursor(0)[1]
-  if line_v > line_cur then
-    return line_cur, line_v
-  end
-  return line_v, line_cur
-end
-
-local function GetVisualSelection()
-  local vstart, vend = GetVisualSelectionRange()
-  local lines = vim.fn.getline(vstart, vend)
-  local seletion = table.concat(lines, "\n")
-  return seletion
+  state.llm.worker =
+    streaming.GetStreamingOutput(state.llm.bufnr, state.llm.winid, state.session[state.session.filename])
 end
 
 function M.LLMSelectedTextHandler(description)
-  local content = description .. ":\n" .. GetVisualSelection()
+  local content = description .. ":\n" .. F.GetVisualSelection()
   state.popwin = _popup(conf.configs.popwin_opts)
   state.popwin:mount()
   state.session[state.popwin.winid] = {}
@@ -40,7 +26,7 @@ function M.LLMSelectedTextHandler(description)
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
-  state.llm.job =
+  state.llm.worker =
     streaming.GetStreamingOutput(state.popwin.bufnr, state.popwin.winid, state.session[state.popwin.winid])
 
   for k, v in pairs(conf.configs.keys) do

@@ -143,6 +143,9 @@ M.configs = {
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
   },
+
+  template_handler = {},
+
   -- stylua: ignore
   keys = {
     -- The keyboard mapping for the input window.

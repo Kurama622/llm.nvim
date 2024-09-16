@@ -10,7 +10,7 @@ M.llm = {
   popup = nil,
   bufnr = nil,
   winid = nil,
-  job = nil,
+  worker = { job = nil },
 }
 
 M.input = {
@@ -30,5 +30,9 @@ M.session = {
 }
 
 M.popwin = nil
+
+M.template = {
+  session = {},
+}
 
 return M
