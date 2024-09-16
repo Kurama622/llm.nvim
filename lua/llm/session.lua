@@ -32,8 +32,13 @@ function M.LLMSelectedTextHandler(description)
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
       F.WinMapping(state.popwin, v.mode, v.key, function()
+        if state.llm.worker.job then
+          state.llm.worker.job:shutdown()
+          print("Suspend output...")
+          vim.wait(200, function() end)
+          state.llm.worker.job = nil
+        end
         state.popwin:unmount()
-        F.CancelLLM()
       end, { noremap = true })
     elseif k == "Output:Cancel" then
       F.WinMapping(state.popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
