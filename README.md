@@ -13,10 +13,29 @@
 
 ## Screenshots
 
+### Chat
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" height="280">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" height="280">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" height="250">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="400">
+</p>
+
+### Quick Translation
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" width="400">
+</p>
+
+### Explain Code
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="400">
+</p>
+
+### Optimize Code
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="400">
+</p>
+
+### Application Translation
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-trans-compress.png" alt="llm-trans" width="400">
 </p>
 
 ## Installation
