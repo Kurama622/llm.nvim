@@ -117,7 +117,8 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       end
     end
   end
-  active_job = job:new({
+  local worker = { job = nil }
+  worker.job = job:new({
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
@@ -131,20 +132,19 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       if err ~= nil and err:sub(1, 4) == "curl" then
         print(err)
       end
-      active_job = nil
     end,
     on_exit = function()
-      active_job = nil
       table.insert(messages, { role = "assistant", content = assistant_output })
       local newline_func = vim.schedule_wrap(function()
         F.NewLine(bufnr, winid)
       end)
       newline_func()
+      worker.job = nil
     end,
   })
-  active_job:start()
-  return active_job
+  worker.job:start()
+
+  return worker
 end
 
 return M
---   

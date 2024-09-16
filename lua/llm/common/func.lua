@@ -109,15 +109,36 @@ function M.WriteContent(bufnr, winid, content)
   M.AppendChunkToBuffer(bufnr, winid, content)
 end
 
+function M.GetVisualSelectionRange()
+  local line_v = vim.fn.getpos("v")[2]
+  local line_cur = vim.api.nvim_win_get_cursor(0)[1]
+  if line_v > line_cur then
+    return line_cur, line_v
+  end
+  return line_v, line_cur
+end
+
+function M.GetVisualSelection()
+  local vstart, vend = M.GetVisualSelectionRange()
+  local lines = vim.fn.getline(vstart, vend)
+  local seletion = table.concat(lines, "\n")
+  return seletion
+end
+
 function M.CancelLLM()
-  if state.llm.job then
-    state.llm.job:shutdown()
-    state.llm.job = nil
+  if state.llm.worker.job then
+    state.llm.worker.job:shutdown()
+    state.llm.worker.job = nil
   end
 end
 
 function M.CloseLLM()
-  M.CancelLLM()
+  if state.llm.worker.job then
+    state.llm.worker.job:shutdown()
+    print("Suspend output...")
+    vim.wait(200, function() end)
+    state.llm.worker.job = nil
+  end
   state.llm.popup:unmount()
 
   if conf.configs.save_session and #state.session[state.session.filename] > 2 then
