@@ -31,7 +31,7 @@ M.session = {
 
 M.popwin = nil
 
-M.template = {
+M.app = {
   session = {},
 }
 

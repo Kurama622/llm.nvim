@@ -144,7 +144,7 @@ M.configs = {
     },
   },
 
-  template_handler = {},
+  app_handler = {},
 
   -- stylua: ignore
   keys = {
