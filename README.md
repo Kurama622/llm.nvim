@@ -14,26 +14,45 @@
 ## Screenshots
 
 ### Chat
+
+You can converse with it just like you would with ChatGPT.
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="450">
 </p>
 
-### Quick Translation
+### Quick Translate
+
+Select the text to translate quickly.
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" width="450">
 </p>
 
 ### Explain Code
+
+Can't understand the code? No worries, AI will explain every code snippet for you.
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="450">
 </p>
 
-### Optimize Code
+### Customizable LLM application tools
+
+You can customize some useful tools to help you complete your tasks more effectively.
+
+#### Optimize Code
+
+Let AI optimize your code for you.
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="450">
 </p>
 
-### Application Translation
+#### Translate
+
+Your next translator is not a translator.
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-trans-compress.png" alt="llm-trans" width="450">
 </p>
