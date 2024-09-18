@@ -39,11 +39,12 @@ Can't understand the code? No worries, AI will explain every code snippet for yo
 
 ### Customizable LLM application tools
 
-You can customize some useful tools to help you complete your tasks more effectively.
+You can customize some useful tools to help you complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/app-tools#how-to-add-an-application-tool-to-llmnvim).
+
 
 #### Optimize Code
 
-Let AI optimize your code for you.
+Let AI optimize your code for you. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/app-tools#create-a-tool-to-help-optimize-your-code)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="450">
@@ -51,7 +52,7 @@ Let AI optimize your code for you.
 
 #### Translate
 
-Your next translator is not a translator.
+Your next translator is not a translator. [wiki: create-a-translator-tool](https://github.com/Kurama622/llm.nvim/wiki/app-tools#create-a-translator-tool)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-trans-compress.png" alt="llm-trans" width="450">
