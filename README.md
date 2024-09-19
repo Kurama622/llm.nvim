@@ -31,7 +31,7 @@ Select the text to translate quickly.
 
 ### Explain Code
 
-Can't understand the code? No worries, AI will explain every code snippet for you.
+Can't understand the code? Don't worry, AI will explain every code snippet for you.
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="450">
@@ -39,12 +39,12 @@ Can't understand the code? No worries, AI will explain every code snippet for yo
 
 ### Customizable LLM application tools
 
-You can customize some useful tools to help you complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/app-tools#how-to-add-an-application-tool-to-llmnvim).
+You can customize some useful tools to complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/app-tools#how-to-add-an-application-tool-to-llmnvim).
 
 
 #### Optimize Code
 
-Let AI optimize your code for you. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/app-tools#create-a-tool-to-help-optimize-your-code)
+Let AI optimize your code. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/app-tools#create-a-tool-to-help-optimize-your-code)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="450">
