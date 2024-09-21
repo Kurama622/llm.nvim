@@ -29,6 +29,7 @@ M.configs = {
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
   url = nil,
   streaming_handler = nil,
+  temperature = 0.7,
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },

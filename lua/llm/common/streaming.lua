@@ -29,6 +29,7 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       model = MODEL,
       max_tokens = conf.configs.max_tokens,
       messages = messages,
+      temperature = conf.configs.temperature,
     }
     _args = {
       conf.configs.url,
