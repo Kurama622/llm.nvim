@@ -41,7 +41,7 @@ Can't understand the code? Don't worry, AI will explain every code snippet for y
 
 ### Customizable LLM application tools
 
-You can customize some useful tools to complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/app-tools#how-to-add-an-application-tool-to-llmnvim).
+You can customize some useful tools to complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#how-to-add-an-application-tool-to-llmnvim).
 
 
 #### Optimize Code
