@@ -155,6 +155,8 @@ export LLM_KEY=<Your API_KEY>
 2. Specify the model you will be using.
 3. Customize the streaming processing function (used for parsing the model output).
 
+[wiki: example](https://github.com/Kurama622/llm.nvim/wiki/Modify-LLM#how-to-use-custom-llm-models)
+
 - lazy.nvim
 ```lua
   {
