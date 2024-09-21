@@ -7,7 +7,9 @@
 > [!IMPORTANT]
 > This is a universal plugin for a large language model (LLM), designed to enable users to interact with LLM within neovim.
 >
-> You can customize any LLM you wish to use.
+> You can customize any LLM (such as glm, kimi) you wish to use.
+>
+> You can customize some useful tools to complete your tasks more effectively.
 >
 > Finally, and most importantly, you can use various free models (whether provided by Cloudflare or others).
 
@@ -162,8 +164,9 @@ export LLM_KEY=<Your API_KEY>
     config = function()
       require("llm").setup({
         max_tokens = 4095,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
+        url = "https://api.moonshot.cn/v1/chat/completions",
+        model = "moonshot-v1-128k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
+
         streaming_handler = function(chunk, line, output, bufnr, winid, F)
           if not chunk then
             return output
@@ -175,25 +178,29 @@ export LLM_KEY=<Your API_KEY>
             line = line .. chunk
 
             local start_idx = line:find("data: ", 1, true)
-            local end_idx = line:find("}}]}", 1, true)
+            local end_idx = line:find("}]", 1, true)
             local json_str = nil
 
             while start_idx ~= nil and end_idx ~= nil do
               if start_idx < end_idx then
-                json_str = line:sub(7, end_idx + 3)
+                json_str = line:sub(7, end_idx + 1) .. "}"
               end
               local data = vim.fn.json_decode(json_str)
+              if not data.choices[1].delta.content then
+                break
+              end
+
               output = output .. data.choices[1].delta.content
               F.WriteContent(bufnr, winid, data.choices[1].delta.content)
 
-              if end_idx + 4 > #line then
+              if end_idx + 2 > #line then
                 line = ""
                 break
               else
-                line = line:sub(end_idx + 4)
+                line = line:sub(end_idx + 2)
               end
               start_idx = line:find("data: ", 1, true)
-              end_idx = line:find("}}]}", 1, true)
+              end_idx = line:find("}]", 1, true)
             end
           end
           return output
