@@ -165,9 +165,9 @@ export LLM_KEY=<Your API_KEY>
     cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
     config = function()
       require("llm").setup({
-        max_tokens = 4095,
+        max_tokens = 8000,
         url = "https://api.moonshot.cn/v1/chat/completions",
-        model = "moonshot-v1-128k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
+        model = "moonshot-v1-8k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
 
         streaming_handler = function(chunk, line, output, bufnr, winid, F)
           if not chunk then
