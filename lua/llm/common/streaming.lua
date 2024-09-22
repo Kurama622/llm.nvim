@@ -4,7 +4,7 @@ local conf = require("llm.config")
 local job = require("plenary.job")
 local F = require("llm.common.func")
 
-function M.GetStreamingOutput(bufnr, winid, messages)
+function M.GetStreamingOutput(bufnr, winid, messages, args, stream_output)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
   local MODEL = conf.configs.model
@@ -13,9 +13,6 @@ function M.GetStreamingOutput(bufnr, winid, messages)
 
   local line = ""
   local assistant_output = ""
-
-  local stream_output = nil
-
   if conf.configs.streaming_handler ~= nil then
     stream_output = function(chunk)
       return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
@@ -39,18 +36,22 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       body.top_p = conf.configs.top_p
     end
 
-    _args = {
-      conf.configs.url,
-      "-N",
-      "-X",
-      "POST",
-      "-H",
-      "Content-Type: application/json",
-      "-H",
-      "Authorization: Bearer " .. LLM_KEY,
-      "-d",
-      vim.fn.json_encode(body),
-    }
+    if args == nil then
+      _args = {
+        conf.configs.url,
+        "-N",
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        "Authorization: Bearer " .. LLM_KEY,
+        "-d",
+        vim.fn.json_encode(body),
+      }
+    else
+      _args = args
+    end
 
     -- TODO: Allow users to customize stream processing functions
     if stream_output == nil then
@@ -102,18 +103,22 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       body.top_p = conf.configs.top_p
     end
 
-    _args = {
-      string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
-      "-N",
-      "-X",
-      "POST",
-      "-H",
-      "Content-Type: application/json",
-      "-H",
-      "Authorization: Bearer " .. LLM_KEY,
-      "-d",
-      vim.fn.json_encode(body),
-    }
+    if args == nil then
+      _args = {
+        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
+        "-N",
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        "Authorization: Bearer " .. LLM_KEY,
+        "-d",
+        vim.fn.json_encode(body),
+      }
+    else
+      _args = args
+    end
 
     if stream_output == nil then
       stream_output = function(chunk)
