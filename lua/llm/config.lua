@@ -25,11 +25,12 @@ M.prefix = {
 -- default configs
 M.configs = {
   prompt = "",
-  max_tokens = 512,
+  max_tokens = 1024,
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
   url = nil,
   streaming_handler = nil,
-  temperature = 0.7,
+  temperature = nil,
+  top_p = nil,
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },

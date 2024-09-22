@@ -29,8 +29,16 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       model = MODEL,
       max_tokens = conf.configs.max_tokens,
       messages = messages,
-      temperature = conf.configs.temperature,
     }
+
+    if conf.configs.temperature ~= nil then
+      body.temperature = conf.configs.temperature
+    end
+
+    if conf.configs.top_p ~= nil then
+      body.top_p = conf.configs.top_p
+    end
+
     _args = {
       conf.configs.url,
       "-N",
@@ -86,6 +94,14 @@ function M.GetStreamingOutput(bufnr, winid, messages)
       max_tokens = conf.configs.max_tokens,
       messages = messages,
     }
+    if conf.configs.temperature ~= nil then
+      body.temperature = conf.configs.temperature
+    end
+
+    if conf.configs.top_p ~= nil then
+      body.top_p = conf.configs.top_p
+    end
+
     _args = {
       string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
       "-N",
