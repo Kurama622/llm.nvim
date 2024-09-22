@@ -4,7 +4,7 @@ local conf = require("llm.config")
 local job = require("plenary.job")
 local F = require("llm.common.func")
 
-function M.GetStreamingOutput(bufnr, winid, messages, args, stream_output)
+function M.GetStreamingOutput(bufnr, winid, messages, args, streaming_handler)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
   local MODEL = conf.configs.model
@@ -13,9 +13,20 @@ function M.GetStreamingOutput(bufnr, winid, messages, args, stream_output)
 
   local line = ""
   local assistant_output = ""
+
+  local stream_output = nil
+
+  -- use `streaming_handler` in config
   if conf.configs.streaming_handler ~= nil then
     stream_output = function(chunk)
       return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
+    end
+  end
+
+  -- use `streaming_handler` in parameter
+  if streaming_handler ~= nil then
+    stream_output = function(chunk)
+      return streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
     end
   end
 
