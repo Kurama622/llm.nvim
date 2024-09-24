@@ -11,7 +11,7 @@
 >
 > You can customize some useful tools to complete your tasks more effectively.
 >
-> Finally, and most importantly, you can use various free models (whether provided by Cloudflare or others).
+> Finally, and most importantly, you can use various free models (whether provided by `Cloudflare`, `Github models` or others).
 
 ## Screenshots
 
