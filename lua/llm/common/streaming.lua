@@ -4,7 +4,16 @@ local conf = require("llm.config")
 local job = require("plenary.job")
 local F = require("llm.common.func")
 
-function M.GetStreamingOutput(bufnr, winid, messages, args, streaming_handler)
+function M.GetStreamingOutput(
+  bufnr,
+  winid,
+  messages,
+  args,
+  streaming_handler,
+  stdout_handler,
+  stderr_handler,
+  exit_handler
+)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
   local MODEL = conf.configs.model
@@ -160,11 +169,13 @@ function M.GetStreamingOutput(bufnr, winid, messages, args, streaming_handler)
       else
         stream_output(chunk)
       end
+      -- TODO: Add stdout handling
     end),
     on_stderr = function(_, err)
       if err ~= nil and err:sub(1, 4) == "curl" then
         print(err)
       end
+      -- TODO: Add error handling
     end,
     on_exit = function()
       table.insert(messages, { role = "assistant", content = assistant_output })
@@ -173,6 +184,12 @@ function M.GetStreamingOutput(bufnr, winid, messages, args, streaming_handler)
       end)
       newline_func()
       worker.job = nil
+      if exit_handler ~= nil then
+        local callback_func = vim.schedule_wrap(function()
+          exit_handler(assistant_output)
+        end)
+        callback_func()
+      end
     end,
   })
   worker.job:start()
