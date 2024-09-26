@@ -46,10 +46,19 @@ You can customize some useful tools to complete your tasks more effectively. Det
 
 #### Optimize Code
 
-Let AI optimize your code. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code)
+Let AI optimize your code. Press `y` to copy the optimized code, and `n` to ignore. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="450">
+</p>
+
+
+#### Optimize Code and Show Diff
+
+Show the diff between your code and the optimized code in source file. Press `y` to accept the suggestion, and `n` to reject. [wiki: create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file)
+
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-optim-gpt-compress.jpg" alt="llm-optimize-code-with-diff" width="450">
 </p>
 
 #### Translate
