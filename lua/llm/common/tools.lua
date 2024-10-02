@@ -1,5 +1,6 @@
 local M = {}
 
+local F = require("llm.common.func")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local NuiText = require("nui.text")
