@@ -28,6 +28,7 @@ M.configs = {
   max_tokens = 1024,
   model = "@cf/qwen/qwen1.5-14b-chat-awq",
   url = nil,
+  api_type = nil,
   streaming_handler = nil,
   temperature = nil,
   top_p = nil,

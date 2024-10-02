@@ -2,6 +2,8 @@ local M = {}
 
 local state = require("llm.state")
 local conf = require("llm.config")
+local Popup = require("nui.popup")
+local Layout = require("nui.layout")
 
 local function IsNotPopwin(winid)
   return state.popwin == nil or winid ~= state.popwin.winid
@@ -240,6 +242,144 @@ function M.WinMapping(win, modes, keys, func, opts)
     for j = 1, #_keys do
       win:map(_modes[i], _keys[j], func, opts)
     end
+  end
+end
+
+function M.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  if not chunk then
+    return assistant_output
+  end
+  local tail = chunk:sub(-1, -1)
+  if tail:sub(1, 1) ~= "}" then
+    line = line .. chunk
+  else
+    line = line .. chunk
+    local json_str = line:sub(7, -1)
+    local data = vim.fn.json_decode(json_str)
+    assistant_output = assistant_output .. data.response
+    M.WriteContent(bufnr, winid, data.response)
+    line = ""
+  end
+  return assistant_output
+end
+
+function M.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  if not chunk then
+    return assistant_output
+  end
+  local tail = chunk:sub(-1, -1)
+  if tail:sub(1, 1) ~= "}" then
+    line = line .. chunk
+  else
+    line = line .. chunk
+
+    local start_idx = line:find("data: ", 1, true)
+    local end_idx = line:find("}}]}", 1, true)
+    local json_str = nil
+
+    while start_idx ~= nil and end_idx ~= nil do
+      if start_idx < end_idx then
+        json_str = line:sub(7, end_idx + 3)
+      end
+      local data = vim.fn.json_decode(json_str)
+      assistant_output = assistant_output .. data.choices[1].delta.content
+      M.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+      if end_idx + 4 > #line then
+        line = ""
+        break
+      else
+        line = line:sub(end_idx + 4)
+      end
+      start_idx = line:find("data: ", 1, true)
+      end_idx = line:find("}}]}", 1, true)
+    end
+  end
+  return assistant_output
+end
+
+function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  if not chunk then
+    return assistant_output
+  end
+  local tail = chunk:sub(-1, -1)
+  if tail:sub(1, 1) ~= "}" then
+    line = line .. chunk
+  else
+    line = line .. chunk
+
+    local start_idx = line:find("data: ", 1, true)
+    local end_idx = line:find("}]", 1, true)
+    local json_str = nil
+
+    while start_idx ~= nil and end_idx ~= nil do
+      if start_idx < end_idx then
+        json_str = line:sub(7, end_idx + 1) .. "}"
+      end
+      local data = vim.fn.json_decode(json_str)
+      if not data.choices[1].delta.content then
+        break
+      end
+
+      assistant_output = assistant_output .. data.choices[1].delta.content
+      M.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+      if end_idx + 2 > #line then
+        line = ""
+        break
+      else
+        line = line:sub(end_idx + 2)
+      end
+      start_idx = line:find("data: ", 1, true)
+      end_idx = line:find("}]", 1, true)
+    end
+  end
+  return assistant_output
+end
+
+function M.InsertTextLine(bufnr, linenr, text)
+  vim.api.nvim_buf_set_lines(bufnr, linenr, linenr, false, { text })
+end
+
+function M.ReplaceTextLine(bufnr, linenr, text)
+  vim.api.nvim_buf_set_lines(bufnr, linenr, linenr + 1, false, { text })
+end
+
+function M.RemoveTextLines(bufnr, start_linenr, end_linenr)
+  vim.api.nvim_buf_set_lines(bufnr, start_linenr, end_linenr, false, {})
+end
+
+function M.CreatePopup(text, focusable, opts)
+  local options = {
+    focusable = focusable,
+    border = { style = "rounded", text = { top = text, top_align = "center" } },
+  }
+  options = vim.tbl_deep_extend("force", options, opts or {})
+
+  return Popup(options)
+end
+
+function M.CreateLayout(_width, _height, boxes, opts)
+  local options = {
+    relative = "editor",
+    position = "50%",
+    size = {
+      width = _width,
+      height = _height,
+    },
+  }
+  options = vim.tbl_deep_extend("force", options, opts or {})
+  return Layout(options, boxes)
+end
+
+function M.SetBoxOpts(box_list, opts)
+  for i, v in ipairs(box_list) do
+    vim.api.nvim_set_option_value("filetype", opts.filetype[i], { buf = v.bufnr })
+    vim.api.nvim_set_option_value("buftype", opts.buftype, { buf = v.bufnr })
+    vim.api.nvim_set_option_value("spell", opts.spell, { win = v.winid })
+    vim.api.nvim_set_option_value("wrap", opts.wrap, { win = v.winid })
+    vim.api.nvim_set_option_value("linebreak", opts.linebreak, { win = v.winid })
+    vim.api.nvim_set_option_value("number", opts.number, { win = v.winid })
   end
 end
 

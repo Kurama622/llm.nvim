@@ -25,14 +25,30 @@ function M.GetStreamingOutput(
 
   local stream_output = nil
 
-  -- use `streaming_handler` in config
+  -- api_type: workers-ai, zhipu, openai
+  if conf.configs.api_type == "workers-ai" then
+    stream_output = function(chunk)
+      return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+    end
+  elseif conf.configs.api_type == "zhipu" then
+    stream_output = function(chunk)
+      return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+    end
+  elseif conf.configs.api_type == "openai" then
+    stream_output = function(chunk)
+      return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+    end
+  end
+
+  -- The priority of "streaming_handler" is higher than that of "api_type"
   if conf.configs.streaming_handler ~= nil then
+    -- use "streaming_handler" in config
     stream_output = function(chunk)
       return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
     end
   end
 
-  -- use `streaming_handler` in parameter
+  -- use "streaming_handler" in parameters. Generally, app tools will use it.
   if streaming_handler ~= nil then
     stream_output = function(chunk)
       return streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
@@ -73,8 +89,8 @@ function M.GetStreamingOutput(
       _args = args
     end
 
-    -- TODO: Allow users to customize stream processing functions
     if stream_output == nil then
+      -- if url is set, but not set streaming_handler, stream_output will be `zhipu` by default
       stream_output = function(chunk)
         if not chunk then
           return
@@ -141,6 +157,7 @@ function M.GetStreamingOutput(
     end
 
     if stream_output == nil then
+      -- if url is not set, stream_output will be `workers-ai` by default
       stream_output = function(chunk)
         if not chunk then
           return
@@ -165,6 +182,8 @@ function M.GetStreamingOutput(
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
       if conf.configs.streaming_handler ~= nil then
+        assistant_output = stream_output(chunk)
+      elseif conf.configs.api_type ~= nil then
         assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
