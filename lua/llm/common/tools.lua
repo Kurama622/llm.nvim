@@ -107,6 +107,7 @@ Please optimize this code according to the format, and respond in Chinese.]]
     func = M.CompareAction,
     code_hl = { fg = "#6aa84f", bg = "NONE" },
     separator_hl = { fg = "#6aa84f", bg = "#333333" },
+    border = "solid",
     win_options = { winblend = 0, winhighlight = "Normal:Normal" },
     buftype = "nofile",
     spell = false,
@@ -121,7 +122,7 @@ Please optimize this code according to the format, and respond in Chinese.]]
   local bufnr = vim.api.nvim_get_current_buf()
   local source_content = F.GetVisualSelection()
 
-  local preview_box = Popup({ enter = true, border = "solid", win_options = options.win_options })
+  local preview_box = Popup({ enter = true, border = options.border, win_options = options.win_options })
 
   local layout = F.CreateLayout(
     "30%",
