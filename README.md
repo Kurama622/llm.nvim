@@ -162,11 +162,36 @@ export LLM_KEY=<Your API_KEY>
 
 1. Add the requested URL.
 2. Specify the model you will be using.
-3. Customize the streaming processing function (used for parsing the model output).
+3. Set api_type (if your api type is one of "openai", "workers-ai", "zhipu", you can set it) or Customize the streaming processing function (used for parsing the model output).
 
 [wiki: How To Use Custom LLM Models](https://github.com/Kurama622/llm.nvim/wiki/Modify-LLM#how-to-use-custom-llm-models)
 
 #### [kimi](https://github.com/Kurama622/llm.nvim/wiki/Modify-LLM#kimi)
+
+1. Set "api_type" (api_type: "workers-ai", "openai", "zhipu")
+
+- lazy.nvim
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        max_tokens = 8000,
+        url = "https://api.moonshot.cn/v1/chat/completions",
+        model = "moonshot-v1-8k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
+        api_type = "openai",
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+```
+
+2. Use customized "streaming_handler"
+
 - lazy.nvim
 ```lua
   {
@@ -237,45 +262,7 @@ export LLM_KEY=<Your API_KEY>
         url = "https://models.inference.ai.azure.com/chat/completions",
         model = "gpt-4o",
         max_tokens = 4096,
-
-        streaming_handler = function(chunk, line, output, bufnr, winid, F)
-          if not chunk then
-            return output
-          end
-          local tail = chunk:sub(-1, -1)
-          if tail:sub(1, 1) ~= "}" then
-            line = line .. chunk
-          else
-            line = line .. chunk
-
-            local start_idx = line:find("data: ", 1, true)
-            local end_idx = line:find("}]", 1, true)
-            local json_str = nil
-
-            while start_idx ~= nil and end_idx ~= nil do
-              if start_idx < end_idx then
-                json_str = line:sub(7, end_idx + 1) .. "}"
-              end
-              local data = vim.fn.json_decode(json_str)
-              if not data.choices[1].delta.content then
-                break
-              end
-
-              output = output .. data.choices[1].delta.content
-              F.WriteContent(bufnr, winid, data.choices[1].delta.content)
-
-              if end_idx + 2 > #line then
-                line = ""
-                break
-              else
-                line = line:sub(end_idx + 2)
-              end
-              start_idx = line:find("data: ", 1, true)
-              end_idx = line:find("}]", 1, true)
-            end
-          end
-          return output
-        end
+        api_type = "openai"
       })
     end,
     keys = {
