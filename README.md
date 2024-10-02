@@ -46,29 +46,105 @@ You can customize some useful tools to complete your tasks more effectively. Det
 
 #### Optimize Code
 
-Let AI optimize your code. Press `y` to copy the optimized code, and `n` to ignore. [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code)
+Let AI optimize your code. Press `y` to copy the optimized code, and `n` to ignore.
+
+> [!TIP]
+> The code implementation can be roughly referred to: [wiki: create-a-tool-to-help-optimize-your-code](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code)
+> 
+> Currently these functions have been integrated into https://github.com/Kurama622/llm.nvim/blob/main/lua/llm/common/tools.lua and no longer need to be defined.
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="450">
 </p>
 
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+  config = function()
+    local tools = require("llm.common.tools")
+    require("llm").setup({
+        app_handler = {
+          OptimizeCode = {
+            handler = tools.side_by_side_handler,
+          }
+        }
+    })
+  end,
+  keys = {
+    { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
+  },
+}
+```
 
 #### Optimize Code and Compare with Original Code in Source File
 
-Show the diff between your code and the optimized code in source file. Press `y` to accept the suggestion, and `n` to reject. [wiki: create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file)
+Show the diff between your code and the optimized code in source file. Press `y` to accept the suggestion, and `n` to reject.
+
+> [!TIP]
+> The code implementation can be roughly referred to: [wiki: create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-tool-to-help-optimize-your-code-and-show-the-result-in-source-file)
+> 
+> Currently these functions have been integrated into https://github.com/Kurama622/llm.nvim/blob/main/lua/llm/common/tools.lua and no longer need to be defined.
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-optim-gpt-compress.png" alt="llm-optimize-compare-action" width="450">
 </p>
 
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+  config = function()
+    local tools = require("llm.common.tools")
+    require("llm").setup({
+        app_handler = {
+          OptimCompare = {
+            handler = tools.action_handler,
+          },
+        }
+    })
+  end,
+  keys = {
+    { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimCompare<cr>" },
+  },
+}
+```
+
 #### Translate
 
-Your next translator is not a translator. [wiki: create-a-translator-tool](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-translator-tool)
+Your next translator is not a translator.
+
+> [!TIP]
+> The code implementation can be roughly referred to: [wiki: create-a-translator-tool](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#create-a-translator-tool)
+> 
+> Currently these functions have been integrated into https://github.com/Kurama622/llm.nvim/blob/main/lua/llm/common/tools.lua and no longer need to be defined.
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-trans-compress.png" alt="llm-trans" width="450">
 </p>
 
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+  config = function()
+    local tools = require("llm.common.tools")
+    require("llm").setup({
+        app_handler = {
+          Translate = {
+            handler = tools.qa_handler,
+          },
+        }
+    })
+  end,
+  keys = {
+    { "<leader>at", mode = "x", "<cmd>LLMAppHandler Translate<cr>" },
+  },
+}
+```
 ## Installation
 
 ### cloudflare
