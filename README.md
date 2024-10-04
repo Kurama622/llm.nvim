@@ -15,6 +15,8 @@
 
 ## Screenshots
 
+https://github.com/user-attachments/assets/1cac9b3c-e03e-478a-9eda-8b1a1856fd89
+
 ### Chat
 
 You can converse with it just like you would with ChatGPT.
