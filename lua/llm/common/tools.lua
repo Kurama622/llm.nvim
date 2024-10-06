@@ -444,4 +444,18 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
   end
 end
 
+function M.curl_request_handler(url, args)
+  for _, v in ipairs(args) do
+    url = url .. " " .. v
+  end
+  local cmd = string.format("curl -s %s ", url)
+  local pipe = io.popen(cmd)
+  local res = nil
+  if pipe ~= nil then
+    res = vim.json.decode(pipe:read())
+    pipe:close()
+  end
+  return res
+end
+
 return M
