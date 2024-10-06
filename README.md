@@ -11,7 +11,7 @@
 >
 > You can customize some useful tools to complete your tasks more effectively.
 >
-> Finally, and most importantly, you can use various free models (whether provided by `Cloudflare`, `Github models` or others).
+> Finally, and most importantly, you can use various free models (whether provided by `Cloudflare`, `Github models`, `siliconflow` or others).
 
 ## Screenshots
 
@@ -533,3 +533,23 @@ https://github.com/Kurama622/llm.nvim/blob/51350dc2028249b2ac04ec3b0763dcaca18bd
 Finally, here is my personal configuration for reference.
 
 https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua
+
+## others
+### Check Your Account Balance
+
+- For siliconflow: https://api.siliconflow.cn/v1/user/info
+```lua
+  app_handler = {
+    -- check siliconflow's balance
+    UserInfo = {
+      handler = function()
+        local key = os.getenv("LLM_KEY")
+        local res = tools.curl_request_handler(
+          "https://api.siliconflow.cn/v1/user/info",
+          { "GET", "-H", string.format("'Authorization: Bearer %s'", key) }
+        )
+        print("balance: " .. res.data.balance)
+      end,
+    },
+  }
+```
