@@ -121,8 +121,30 @@ function M.GetVisualSelectionRange()
 end
 
 function M.GetVisualSelection()
-  local vstart, vend = M.GetVisualSelectionRange()
-  local lines = vim.fn.getline(vstart, vend)
+  local mode = vim.api.nvim_get_mode().mode
+  local lines = ""
+  if mode == "v" then
+    local s_start, s_end
+    local line_cur = vim.fn.getpos(".")
+    local line_v = vim.fn.getpos("v")
+    local n_lines = math.abs(line_v[2] - line_cur[2]) + 1
+    if (n_lines == 1 and line_cur[3] > line_v[3]) or line_cur[2] > line_v[2] then
+      s_start, s_end = line_v, line_cur
+    else
+      s_start, s_end = line_cur, line_v
+    end
+
+    lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_end[2], false)
+    lines[1] = string.sub(lines[1], s_start[3], -1)
+    if n_lines == 1 then
+      lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3] - s_start[3] + 1)
+    else
+      lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3])
+    end
+  elseif mode == "V" then
+    local vstart, vend = M.GetVisualSelectionRange()
+    lines = vim.fn.getline(vstart, vend)
+  end
   local seletion = table.concat(lines, "\n")
   return seletion
 end
