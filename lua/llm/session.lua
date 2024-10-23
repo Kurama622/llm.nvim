@@ -10,8 +10,12 @@ local F = require("llm.common.func")
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker =
-    streaming.GetStreamingOutput(state.llm.bufnr, state.llm.winid, state.session[state.session.filename])
+  state.llm.worker = streaming.GetStreamingOutput(
+    state.llm.bufnr,
+    state.llm.winid,
+    state.session[state.session.filename],
+    conf.configs.fetch_key
+  )
 end
 
 function M.LLMSelectedTextHandler(description)
@@ -26,8 +30,12 @@ function M.LLMSelectedTextHandler(description)
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
-  state.llm.worker =
-    streaming.GetStreamingOutput(state.popwin.bufnr, state.popwin.winid, state.session[state.popwin.winid])
+  state.llm.worker = streaming.GetStreamingOutput(
+    state.popwin.bufnr,
+    state.popwin.winid,
+    state.session[state.popwin.winid],
+    conf.configs.fetch_key
+  )
 
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then

@@ -8,6 +8,10 @@ function M.GetStreamingOutput(
   bufnr,
   winid,
   messages,
+  fetch_key,
+  url,
+  model,
+  api_type,
   args,
   streaming_handler,
   stdout_handler,
@@ -16,7 +20,19 @@ function M.GetStreamingOutput(
 )
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
+
+  if fetch_key ~= nil then
+    LLM_KEY = fetch_key()
+  end
+
+  if url == nil then
+    url = conf.configs.url
+  end
+
   local MODEL = conf.configs.model
+  if model ~= nil then
+    MODEL = model
+  end
 
   local body = nil
 
@@ -25,16 +41,19 @@ function M.GetStreamingOutput(
 
   local stream_output = nil
 
+  if api_type == nil then
+    api_type = conf.configs.api_type
+  end
   -- api_type: workers-ai, zhipu, openai
-  if conf.configs.api_type == "workers-ai" then
+  if api_type == "workers-ai" then
     stream_output = function(chunk)
       return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
     end
-  elseif conf.configs.api_type == "zhipu" then
+  elseif api_type == "zhipu" then
     stream_output = function(chunk)
       return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
     end
-  elseif conf.configs.api_type == "openai" then
+  elseif api_type == "openai" then
     stream_output = function(chunk)
       return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
     end
@@ -56,7 +75,7 @@ function M.GetStreamingOutput(
   end
 
   local _args = nil
-  if conf.configs.url ~= nil then
+  if url ~= nil then
     body = {
       stream = true,
       model = MODEL,
@@ -74,7 +93,7 @@ function M.GetStreamingOutput(
 
     if args == nil then
       _args = {
-        conf.configs.url,
+        url,
         "-N",
         "-X",
         "POST",
@@ -183,7 +202,7 @@ function M.GetStreamingOutput(
     on_stdout = vim.schedule_wrap(function(_, chunk)
       if conf.configs.streaming_handler ~= nil then
         assistant_output = stream_output(chunk)
-      elseif conf.configs.api_type ~= nil then
+      elseif api_type ~= nil then
         assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
