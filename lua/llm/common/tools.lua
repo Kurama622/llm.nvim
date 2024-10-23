@@ -4,6 +4,7 @@ local F = require("llm.common.func")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local NuiText = require("nui.text")
+local conf = require("llm.config")
 
 function M.CompareAction(
   bufnr,
@@ -118,6 +119,7 @@ Please optimize this code according to the format, and respond in Chinese.]]
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
   local start_line, end_line = F.GetVisualSelectionRange()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -160,6 +162,10 @@ Please optimize this code according to the format, and respond in Chinese.]]
     preview_box.bufnr,
     preview_box.winid,
     state.app.session[name],
+    fetch_key,
+    options.url,
+    options.model,
+    options.api_type,
     nil, -- curl args
     nil, -- streaming handler
     nil, -- stdout handler
@@ -276,6 +282,7 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
   local source_box = F.CreatePopup(options.left.title, false)
   local preview_box = F.CreatePopup(options.right.title, true, { enter = true })
@@ -307,7 +314,15 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. source_content })
 
   state.popwin = preview_box
-  local worker = streaming(preview_box.bufnr, preview_box.winid, state.app.session[name])
+  local worker = streaming(
+    preview_box.bufnr,
+    preview_box.winid,
+    state.app.session[name],
+    fetch_key,
+    options.url,
+    options.model,
+    options.api_type
+  )
 
   preview_box:map("n", "<C-c>", function()
     if worker.job then
@@ -350,6 +365,7 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
   vim.api.nvim_set_hl(0, "LLMQuery", options.query.hl)
 
   -- print(options.query.hl.fg)
@@ -414,7 +430,15 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
     if input ~= "" then
       table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. input })
       state.popwin = preview_box
-      worker = streaming(preview_box.bufnr, preview_box.winid, state.app.session[name])
+      worker = streaming(
+        preview_box.bufnr,
+        preview_box.winid,
+        state.app.session[name],
+        fetch_key,
+        options.url,
+        options.model,
+        options.api_type
+      )
     end
   end)
 
