@@ -9,6 +9,18 @@ local function IsNotPopwin(winid)
   return state.popwin == nil or winid ~= state.popwin.winid
 end
 
+local function escape_string(str)
+  local replacements = {
+    ["\\"] = "\\\\",
+    ["\n"] = "\\n",
+    ["\t"] = "\\t",
+    ['"'] = '\\"',
+    ["'"] = "\\'",
+    [" "] = "\\ ",
+  }
+  return (str:gsub(".", replacements))
+end
+
 -- define utf8 char length
 local function utf8_char_length(byte)
   if byte < 0x80 then
@@ -225,7 +237,7 @@ function M.ListFilesInPath()
     if #files < conf.configs.max_history_files then
       table.insert(files, filename)
     else
-      os.execute("rm " .. string.format("%s/'%s'", conf.configs.history_path, filename))
+      os.execute(string.format("rm %s/%s", conf.configs.history_path, escape_string(filename)))
     end
   end
   p:close()
