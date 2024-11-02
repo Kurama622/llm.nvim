@@ -45,6 +45,7 @@ function M.LLMSelectedTextHandler(description)
           print("Suspend output...")
           vim.wait(200, function() end)
           state.llm.worker.job = nil
+          vim.api.nvim_command("doautocmd BufEnter")
         end
         state.popwin:unmount()
       end, { noremap = true })
@@ -162,6 +163,7 @@ function M.NewSession()
             vim.api.nvim_exec_autocmds("User", { pattern = "CloseInput" })
             vim.api.nvim_exec_autocmds("User", { pattern = "CloseHistory" })
             conf.session.status = -1
+            vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.WinMapping(llm_popup, v.mode, v.key, F.ToggleLLM, { noremap = true })

@@ -50,6 +50,7 @@ function M.SetInput(bufnr, winid)
           vim.api.nvim_exec_autocmds("User", { pattern = "CloseHistory" })
         end
         conf.session.status = -1
+        vim.api.nvim_command("doautocmd BufEnter")
       end, { noremap = true })
     elseif k == "Session:Toggle" and conf.configs.output_box_opts.style == "float" then
       F.WinMapping(input_popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
