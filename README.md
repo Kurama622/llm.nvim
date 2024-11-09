@@ -27,7 +27,7 @@ You can converse with it just like you would with ChatGPT.
 
 ### Quick Translate
 
-Select the text to translate quickly. (Support show the translation result in a flexible window)
+Select the text to translate quickly. (Support displaying the translation result in a flexible window)
 
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/9b822bce-8384-4d45-9d9a-7007a004084c" alt="llm-translate" width="450">
@@ -35,7 +35,7 @@ Select the text to translate quickly. (Support show the translation result in a 
 
 ### Explain Code
 
-Can't understand the code? Don't worry, AI will explain every code snippet for you. (Support show the explanation result in a flexible window)
+Can't understand the code? Don't worry, AI will explain every code snippet for you. (Support displaying the explanation result in a flexible window)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="450">
@@ -550,6 +550,40 @@ https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua
         )
         print("balance: " .. res.data.balance)
       end,
+    },
+  }
+```
+
+### Flexible Window
+
+```lua
+  app_handler = {
+    WordTranslate = {
+      handler = tools.flexi_handler,
+      prompt = "Translate the following text to Chinese, please only return the translation",
+      opts = {
+        fetch_key = function()
+          return switch("enable_glm")
+        end,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        api_type = "zhipu",
+        exit_on_move = true,
+        enter_flexible_window = false,
+      },
+    },
+    CodeExplain = {
+      handler = tools.flexi_handler,
+      prompt = "Explain the following code, please only return the explanation",
+      opts = {
+        fetch_key = function()
+          return switch("enable_glm")
+        end,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        api_type = "zhipu",
+        enter_flexible_window = true,
+      },
     },
   }
 ```
