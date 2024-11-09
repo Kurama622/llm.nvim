@@ -17,6 +17,8 @@ local function escape_string(str)
     ['"'] = '\\"',
     ["'"] = "\\'",
     [" "] = "\\ ",
+    ["("] = "\\(",
+    [")"] = "\\)",
   }
   return (str:gsub(".", replacements))
 end
