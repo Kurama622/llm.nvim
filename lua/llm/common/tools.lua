@@ -484,6 +484,9 @@ end
 
 function M.flexi_handler(name, F, state, _, prompt, opts)
   local content = prompt .. ":\n" .. F.GetVisualSelection()
+  content = (content:gsub(".", {
+    ["'"] = "''",
+  }))
   local options = {
     buftype = "nofile",
     spell = false,
