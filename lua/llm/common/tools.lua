@@ -1,6 +1,6 @@
 local M = {}
 
-local F = require("llm.common.func")
+local event = require("nui.utils.autocmd").event
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local NuiText = require("nui.text")
@@ -480,6 +480,64 @@ function M.curl_request_handler(url, args)
     pipe:close()
   end
   return res
+end
+
+function M.flexi_handler(name, F, state, _, prompt, opts)
+  local content = prompt .. ":\n" .. F.GetVisualSelection()
+  local options = {
+    buftype = "nofile",
+    spell = false,
+    number = false,
+    wrap = true,
+    linebreak = false,
+    exit_on_move = false,
+    enter_flexible_window = true,
+  }
+
+  options = vim.tbl_deep_extend("force", options, opts or {})
+  state.app.session[name] = {}
+  table.insert(state.app.session[name], { role = "user", content = content })
+  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+
+  local flexible_box = nil
+  F.GetUrlOutput(
+    state.app.session[name],
+    fetch_key,
+    opts.url,
+    opts.model,
+    opts.api_type,
+    nil,
+    nil,
+    nil,
+    nil,
+    function(output)
+      flexible_box = F.FlexibleWindow(output, options.enter_flexible_window)
+      flexible_box:mount()
+      flexible_box:map("n", { "<esc>", "N", "n" }, function()
+        flexible_box:unmount()
+      end)
+
+      F.SetBoxOpts({ flexible_box }, {
+        filetype = { "markdown", "markdown" },
+        buftype = options.buftype,
+        spell = options.spell,
+        number = options.number,
+        wrap = options.wrap,
+        linebreak = options.linebreak,
+      })
+    end
+  )
+  local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+  vim.api.nvim_feedkeys(esc, "x", false)
+  if options.exit_on_move then
+    vim.api.nvim_create_autocmd("CursorMoved", {
+      callback = function()
+        if flexible_box ~= nil then
+          flexible_box:unmount()
+        end
+      end,
+    })
+  end
 end
 
 return M

@@ -33,6 +33,7 @@ M.configs = {
   streaming_handler = nil,
   temperature = nil,
   top_p = nil,
+  spinner = { text = { "-", "\\", "|", "/" }, hl = "Title" },
 
   prefix = {
     user = { text = "## User \n", hl = "Title" },

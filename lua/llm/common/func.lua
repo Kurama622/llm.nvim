@@ -59,6 +59,62 @@ local function utf8_sub(str, start_char, end_char)
   return string.sub(str, start_index, end_index)
 end
 
+local function wait_ui_opts()
+  return {
+    relative = "cursor",
+    position = {
+      row = -1,
+      col = 1,
+    },
+    size = {
+      height = 1,
+      width = 3,
+    },
+    enter = false,
+    focusable = true,
+    zindex = 50,
+    border = {
+      style = "none",
+    },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+  }
+end
+
+local function show_spinner(waiting_state)
+  local spinner_frames = conf.configs.spinner.text
+  local spinner_hl = conf.configs.spinner.hl
+  local frame = 1
+
+  local timer = vim.loop.new_timer()
+  timer:start(
+    0,
+    100,
+    vim.schedule_wrap(function()
+      if waiting_state.box then
+        waiting_state.box:unmount()
+        if not waiting_state.finish then
+          waiting_state.box = Popup(waiting_state.box_opts)
+          waiting_state.box:mount()
+          waiting_state.bufnr = waiting_state.box.bufnr
+          waiting_state.winid = waiting_state.box.winid
+        end
+      end
+      if not vim.api.nvim_win_is_valid(waiting_state.winid) then
+        timer:stop()
+        return
+      end
+
+      vim.api.nvim_buf_set_lines(waiting_state.bufnr, 0, -1, false, { spinner_frames[frame] })
+      vim.api.nvim_buf_add_highlight(waiting_state.bufnr, -1, spinner_hl, 0, 0, -1)
+
+      frame = frame % #spinner_frames + 1
+    end)
+  )
+end
+
 function M.DeepCopy(t)
   local new_t = {}
   for k, v in pairs(t) do
@@ -415,6 +471,240 @@ function M.SetBoxOpts(box_list, opts)
     vim.api.nvim_set_option_value("linebreak", opts.linebreak, { win = v.winid })
     vim.api.nvim_set_option_value("number", opts.number, { win = v.winid })
   end
+end
+
+function M.FlexibleWindow(str, enter_flexible_win)
+  local text = vim.split(str, "\n")
+  local width = 0
+  local height = #text
+  local max_win_width = math.floor(vim.o.columns * 0.7)
+  local max_win_height = math.floor(vim.o.lines * 0.7)
+  for i, line in ipairs(text) do
+    if vim.api.nvim_strwidth(line) > width then
+      width = vim.api.nvim_strwidth(line)
+      if width > max_win_width then
+        height = height + 1
+      end
+    end
+    text[i] = " " .. line
+  end
+
+  local win_width = math.min(width + 2, max_win_width)
+  local win_height = math.min(height, max_win_height)
+
+  local opts = {
+    relative = "cursor",
+    position = {
+      row = -2,
+      col = 0,
+    },
+    size = {
+      height = win_height,
+      width = win_width,
+    },
+    enter = enter_flexible_win,
+    focusable = true,
+    zindex = 50,
+    border = {
+      style = "rounded",
+    },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+  }
+
+  local flexible_box = Popup(opts)
+
+  vim.api.nvim_buf_set_lines(flexible_box.bufnr, 0, -1, false, text)
+  return flexible_box
+end
+
+function M.GetUrlOutput(
+  messages,
+  fetch_key,
+  url,
+  model,
+  api_type,
+  args,
+  parse_handler,
+  stdout_handler,
+  stderr_handler,
+  exit_handler
+)
+  local wait_box_opts = wait_ui_opts()
+  local wait_box = Popup(wait_box_opts)
+
+  local waiting_state = {
+    box = wait_box,
+    box_opts = wait_box_opts,
+    bufnr = wait_box.bufnr,
+    winid = wait_box.winid,
+    finish = false,
+  }
+
+  waiting_state.box:mount()
+  show_spinner(waiting_state)
+  local ACCOUNT = os.getenv("ACCOUNT")
+  local LLM_KEY = os.getenv("LLM_KEY")
+
+  if fetch_key ~= nil then
+    LLM_KEY = fetch_key()
+  end
+
+  if url == nil then
+    url = conf.configs.url
+  end
+
+  local MODEL = conf.configs.model
+  if model ~= nil then
+    MODEL = model
+  end
+
+  local body = nil
+
+  local assistant_output = ""
+
+  local parse = nil
+
+  if api_type == nil then
+    api_type = conf.configs.api_type
+  end
+  -- api_type: workers-ai, zhipu, openai
+  if api_type == "workers-ai" then
+    parse = function(chunk)
+      assistant_output = chunk.response
+      return assistant_output
+    end
+  elseif api_type == "zhipu" then
+    parse = function(chunk)
+      assistant_output = chunk.choices[1].message.content
+      return assistant_output
+    end
+  elseif api_type == "openai" then
+    parse = function(chunk)
+      assistant_output = chunk.choices[1].delta.content
+      return assistant_output
+    end
+  end
+
+  -- The priority of "parse_handler" is higher than that of "api_type"
+  if conf.configs.parse_handler ~= nil then
+    -- use "parse_handler" in config
+    parse = function(chunk)
+      assistant_output = conf.configs.parse_handler(chunk)
+      return assistant_output
+    end
+  end
+
+  -- use "parse_handler" in parameters. Generally, app tools will use it.
+  if parse_handler ~= nil then
+    parse = function(chunk)
+      assistant_output = parse_handler(chunk)
+      return assistant_output
+    end
+  end
+
+  local _args = nil
+  if url ~= nil then
+    body = {
+      model = MODEL,
+      max_tokens = conf.configs.max_tokens,
+      messages = messages,
+    }
+
+    if conf.configs.temperature ~= nil then
+      body.temperature = conf.configs.temperature
+    end
+
+    if conf.configs.top_p ~= nil then
+      body.top_p = conf.configs.top_p
+    end
+
+    if args == nil then
+      _args = string.format(
+        [[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']],
+        url,
+        LLM_KEY,
+        vim.fn.json_encode(body)
+      )
+    else
+      _args = args
+    end
+
+    if parse == nil then
+      -- if url is set, but not set parse_handler, parse will be `zhipu` by default
+      parse = function(chunk)
+        assistant_output = chunk.choices[1].message.content
+        return assistant_output
+      end
+    end
+  else
+    body = {
+      max_tokens = conf.configs.max_tokens,
+      messages = messages,
+    }
+    if conf.configs.temperature ~= nil then
+      body.temperature = conf.configs.temperature
+    end
+
+    if conf.configs.top_p ~= nil then
+      body.top_p = conf.configs.top_p
+    end
+
+    if args == nil then
+      _args = string.format(
+        [[curl https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']],
+        ACCOUNT,
+        MODEL,
+        LLM_KEY,
+        vim.fn.json_encode(body)
+      )
+    else
+      _args = args
+    end
+
+    if parse == nil then
+      -- if url is not set, parse will be `workers-ai` by default
+      parse = function(chunk)
+        assistant_output = chunk.response
+        return assistant_output
+      end
+    end
+  end
+
+  vim.fn.jobstart(_args, {
+    on_stdout = function(job_id, data, event_type)
+      vim.schedule(function()
+        local str = ""
+        for _, line in ipairs(data) do
+          str = str .. line
+        end
+        if str:sub(1, 1) ~= "{" then
+          return
+        end
+        local json = vim.json.decode(str)
+        if conf.configs.parse_handler ~= nil then
+          assistant_output = parse(json)
+        elseif api_type ~= nil then
+          assistant_output = parse(json)
+        else
+          parse(json)
+        end
+      end)
+    end,
+    on_exit = function()
+      table.insert(messages, { role = "assistant", content = assistant_output })
+      waiting_state.box:unmount()
+      waiting_state.finish = true
+      if exit_handler ~= nil then
+        local callback_func = vim.schedule_wrap(function()
+          exit_handler(assistant_output)
+        end)
+        callback_func()
+      end
+    end,
+  })
 end
 
 return M
