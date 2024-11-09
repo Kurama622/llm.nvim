@@ -27,15 +27,15 @@ You can converse with it just like you would with ChatGPT.
 
 ### Quick Translate
 
-Select the text to translate quickly.
+Select the text to translate quickly. (Support show the translation result in a flexible window)
 
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-translate-compress.png" alt="llm-translate" width="450">
+  <img src="https://github.com/user-attachments/assets/9b822bce-8384-4d45-9d9a-7007a004084c" alt="llm-translate" width="450">
 </p>
 
 ### Explain Code
 
-Can't understand the code? Don't worry, AI will explain every code snippet for you.
+Can't understand the code? Don't worry, AI will explain every code snippet for you. (Support show the explanation result in a flexible window)
 
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="450">
