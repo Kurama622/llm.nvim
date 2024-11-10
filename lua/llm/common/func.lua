@@ -70,7 +70,7 @@ local function wait_ui_opts()
     },
     size = {
       height = 1,
-      width = 3,
+      width = 1,
     },
     enter = false,
     focusable = true,
@@ -80,7 +80,7 @@ local function wait_ui_opts()
     },
     win_options = {
       winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      winhighlight = "Normal:NONE,FloatBorder:FloatBorder",
     },
   }
 end
