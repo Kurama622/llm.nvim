@@ -242,7 +242,15 @@ function M.CloseLLM()
     else
       local _filename =
         utf8_sub(state.session[state.session.filename][2].content, 1, conf.configs.max_history_name_length)
-      filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
+      filename = (
+        string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S")):gsub(".", {
+          [" "] = "\\ ",
+          ["["] = "\\[",
+          ["]"] = "\\]",
+          ["\n"] = "\\ ",
+          ["\r"] = "\\ ",
+        })
+      )
     end
     local file = io.open(filename, "w")
     file:write(vim.fn.json_encode(state.session[state.session.filename]))
@@ -408,8 +416,10 @@ function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
       if start_idx < end_idx then
         json_str = line:sub(7, end_idx + 1) .. "}"
       end
-      local data = vim.fn.json_decode(json_str)
-      if not data.choices[1].delta.content then
+
+      local status, data = pcall(vim.fn.json_decode, json_str)
+
+      if not (data.choices[1].delta.content and status) then
         break
       end
 
