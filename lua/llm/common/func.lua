@@ -246,8 +246,8 @@ function M.CloseLLM()
         string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S")):gsub(".", {
           ["["] = "\\[",
           ["]"] = "\\]",
-          ["\n"] = "\\ ",
-          ["\r"] = "\\ ",
+          ["\n"] = " ",
+          ["\r"] = " ",
         })
       )
     end
