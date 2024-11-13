@@ -418,7 +418,7 @@ function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
 
       local status, data = pcall(vim.fn.json_decode, json_str)
 
-      if not (data.choices[1].delta.content and status) then
+      if not status or not data.choices[1].delta.content then
         break
       end
 
