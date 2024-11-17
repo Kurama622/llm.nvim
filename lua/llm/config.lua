@@ -16,6 +16,113 @@ local history_box_start = math.floor(output_box_start + get_win_width() * 0.7 - 
 
 local HOME = os.getenv("HOME")
 
+M._ = {}
+
+M._.input_box_opts = {
+  relative = "editor",
+  position = {
+    row = "85%",
+    col = input_box_start,
+  },
+  size = {
+    height = "5%",
+    width = input_box_width,
+  },
+  enter = true,
+  focusable = true,
+  zindex = 50,
+  border = {
+    style = "rounded",
+    text = {
+      top = " Enter Your Question ",
+      top_align = "center",
+    },
+  },
+  win_options = {
+    winblend = 0,
+    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  },
+}
+
+M._.output_box_opts = {
+  style = "float", -- right | left | above | below | float
+  relative = "editor",
+  position = {
+    row = "35%",
+    col = output_box_start,
+  },
+  size = {
+    height = "65%",
+    width = output_box_width,
+  },
+  enter = true,
+  focusable = true,
+  zindex = 20,
+  border = {
+    style = "rounded",
+    text = {
+      top = " Preview ",
+      top_align = "center",
+    },
+  },
+  win_options = {
+    winblend = 0,
+    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  },
+}
+
+M._.history_box_opts = {
+  relative = "editor",
+  position = {
+    row = "35%",
+    col = history_box_start,
+  },
+  size = {
+    height = "65%",
+    width = history_box_width,
+  },
+  zindex = 70,
+  enter = false,
+  focusable = false,
+  border = {
+    style = "rounded",
+    text = {
+      top = " History ",
+      top_align = "center",
+    },
+  },
+  win_options = {
+    winblend = 0,
+    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  },
+}
+
+M._.popwin_opts = {
+  relative = "cursor",
+  position = {
+    row = -7,
+    col = 10,
+  },
+  size = {
+    height = 10,
+    width = "60%",
+  },
+  enter = true,
+  focusable = true,
+  zindex = 50,
+  border = {
+    style = "rounded",
+    text = {
+      top = " Explain ",
+      top_align = "center",
+    },
+  },
+  win_options = {
+    winblend = 0,
+    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  },
+}
+
 -- support icons
 M.prefix = {
   user = { text = "", hl = "" },
@@ -45,109 +152,11 @@ M.configs = {
   max_history_name_length = 10,
   save_session = true,
 
-  input_box_opts = {
-    relative = "editor",
-    position = {
-      row = "85%",
-      col = input_box_start,
-    },
-    size = {
-      height = "5%",
-      width = input_box_width,
-    },
-    enter = true,
-    focusable = true,
-    zindex = 50,
-    border = {
-      style = "rounded",
-      text = {
-        top = " Enter Your Question ",
-        top_align = "center",
-      },
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
-  },
-  output_box_opts = {
-    style = "float", -- right | left | above | below | float
-    relative = "editor",
-    position = {
-      row = "35%",
-      col = output_box_start,
-    },
-    size = {
-      height = "65%",
-      width = output_box_width,
-    },
-    enter = true,
-    focusable = true,
-    zindex = 20,
-    border = {
-      style = "rounded",
-      text = {
-        top = " Preview ",
-        top_align = "center",
-      },
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
-  },
+  input_box_opts = M._.input_box_opts,
+  output_box_opts = M._.output_box_opts,
+  history_box_opts = M._.history_box_opts,
 
-  history_box_opts = {
-    relative = "editor",
-    position = {
-      row = "35%",
-      col = history_box_start,
-    },
-    size = {
-      height = "65%",
-      width = history_box_width,
-    },
-    zindex = 70,
-    enter = false,
-    focusable = false,
-    border = {
-      style = "rounded",
-      text = {
-        top = " History ",
-        top_align = "center",
-      },
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
-  },
-
-  popwin_opts = {
-    relative = "cursor",
-    position = {
-      row = -7,
-      col = 10,
-    },
-    size = {
-      height = 10,
-      width = "60%",
-    },
-    enter = true,
-    focusable = true,
-    zindex = 50,
-    border = {
-      style = "rounded",
-      text = {
-        top = " Explain ",
-        top_align = "center",
-      },
-    },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
-  },
+  popwin_opts = M._.popwin_opts,
 
   app_handler = {},
 
@@ -192,6 +201,10 @@ function M.setup(opts)
       os.execute("mkdir -p " .. M.configs.history_path)
     end
   end
+
+  M._.input_box_opts = M.configs.input_box_opts
+  M._.output_box_opts = M.configs.output_box_opts
+  M._.history_box_opts = M.configs.history_box_opts
 
   M.prefix.user = M.configs.prefix.user
   M.prefix.assistant = M.configs.prefix.assistant
