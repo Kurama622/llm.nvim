@@ -25,6 +25,11 @@ function M.GetStreamingOutput(
     LLM_KEY = fetch_key()
   end
 
+  local authorization = "Authorization: Bearer " .. LLM_KEY
+  if LLM_KEY == "NONE" then
+    authorization = ""
+  end
+
   if url == nil then
     url = conf.configs.url
   end
@@ -100,7 +105,7 @@ function M.GetStreamingOutput(
         "-H",
         "Content-Type: application/json",
         "-H",
-        "Authorization: Bearer " .. LLM_KEY,
+        authorization,
         "-d",
         vim.fn.json_encode(body),
       }
@@ -167,7 +172,7 @@ function M.GetStreamingOutput(
         "-H",
         "Content-Type: application/json",
         "-H",
-        "Authorization: Bearer " .. LLM_KEY,
+        authorization,
         "-d",
         vim.fn.json_encode(body),
       }
