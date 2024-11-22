@@ -62,6 +62,7 @@ local function utf8_sub(str, start_char, end_char)
 end
 
 local function wait_ui_opts()
+  local ui_width = vim.api.nvim_strwidth(conf.configs.spinner.text[1])
   return {
     relative = "cursor",
     position = {
@@ -70,7 +71,7 @@ local function wait_ui_opts()
     },
     size = {
       height = 1,
-      width = 1,
+      width = ui_width,
     },
     enter = false,
     focusable = true,
