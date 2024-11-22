@@ -7,7 +7,7 @@
 > [!IMPORTANT]
 > This is a universal plugin for a large language model (LLM), designed to enable users to interact with LLM within neovim.
 >
-> You can customize any LLM (such as gpt, glm, kimi) you wish to use.
+> You can customize any LLM (such as gpt, glm, kimi and local LLM) you wish to use.
 >
 > You can customize some useful tools to complete your tasks more effectively.
 >
@@ -341,6 +341,49 @@ export LLM_KEY=<Your API_KEY>
         model = "gpt-4o",
         max_tokens = 4096,
         api_type = "openai"
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+```
+
+#### Local LLM
+
+Set `LLM_KEY` is `NONE`
+
+- ollama
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        url = "http://localhost:11434/api/chat", -- your url
+        model = "llama3.2:1b",
+
+        streaming_handler = function(chunk, line, assistant_output, bufnr, winid, F)
+          if not chunk then
+            return assistant_output
+          end
+          local tail = chunk:sub(-1, -1)
+          if tail:sub(1, 1) ~= "}" then
+            line = line .. chunk
+          else
+            line = line .. chunk
+            local status, data = pcall(vim.fn.json_decode, line)
+            if not status or not data.message.content then
+              return assistant_output
+            end
+            assistant_output = assistant_output .. data.message.content
+            F.WriteContent(bufnr, winid, data.message.content)
+            line = ""
+          end
+          return assistant_output
+        end,
       })
     end,
     keys = {
