@@ -14,7 +14,12 @@ local function OpenLLM()
     state.llm.bufnr,
     state.llm.winid,
     state.session[state.session.filename],
-    conf.configs.fetch_key
+    conf.configs.fetch_key,
+    nil,
+    nil,
+    nil,
+    nil,
+    conf.configs.streaming_handler
   )
 end
 
@@ -34,7 +39,12 @@ function M.LLMSelectedTextHandler(description)
     state.popwin.bufnr,
     state.popwin.winid,
     state.session[state.popwin.winid],
-    conf.configs.fetch_key
+    conf.configs.fetch_key,
+    nil,
+    nil,
+    nil,
+    nil,
+    conf.configs.streaming_handler
   )
 
   for k, v in pairs(conf.configs.keys) do

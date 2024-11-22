@@ -26,6 +26,7 @@ function M.GetStreamingOutput(
   end
 
   local authorization = "Authorization: Bearer " .. LLM_KEY
+
   if LLM_KEY == "NONE" then
     authorization = ""
   end
@@ -65,13 +66,6 @@ function M.GetStreamingOutput(
   end
 
   -- The priority of "streaming_handler" is higher than that of "api_type"
-  if conf.configs.streaming_handler ~= nil then
-    -- use "streaming_handler" in config
-    stream_output = function(chunk)
-      return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
-    end
-  end
-
   -- use "streaming_handler" in parameters. Generally, app tools will use it.
   if streaming_handler ~= nil then
     stream_output = function(chunk)

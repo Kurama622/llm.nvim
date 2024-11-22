@@ -351,7 +351,7 @@ export LLM_KEY=<Your API_KEY>
 
 #### Local LLM
 
-Set `LLM_KEY` is `NONE`
+Set `LLM_KEY` to `NONE`
 
 - ollama
 
