@@ -13,6 +13,32 @@
 >
 > Finally, and most importantly, you can use various free models (whether provided by `Cloudflare`, `Github models`, `siliconflow` or others).
 
+<!-- mtoc-start -->
+
+* [Screenshots](#screenshots)
+  * [Chat](#chat)
+  * [Quick Translate](#quick-translate)
+  * [Explain Code](#explain-code)
+  * [Customizable LLM application tools](#customizable-llm-application-tools)
+    * [Optimize Code](#optimize-code)
+    * [Optimize Code and Compare with Original Code in Source File](#optimize-code-and-compare-with-original-code-in-source-file)
+    * [Translate](#translate)
+* [Installation](#installation)
+  * [cloudflare](#cloudflare)
+  * [ChatGLM (智谱清言)](#chatglm-智谱清言)
+  * [Customized Large Language Model](#customized-large-language-model)
+    * [kimi](#kimi)
+    * [Github Models](#github-models)
+    * [Local LLM](#local-llm)
+* [Default Configuration](#default-configuration)
+* [Configuration](#configuration)
+  * [Example Configuration](#example-configuration)
+* [others](#others)
+  * [Check Your Account Balance](#check-your-account-balance)
+  * [Flexible Window](#flexible-window)
+
+<!-- mtoc-end -->
+
 ## Screenshots
 
 https://github.com/user-attachments/assets/1cac9b3c-e03e-478a-9eda-8b1a1856fd89
