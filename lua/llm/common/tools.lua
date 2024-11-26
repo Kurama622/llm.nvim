@@ -5,6 +5,7 @@ local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local NuiText = require("nui.text")
 local conf = require("llm.config")
+local F = require("llm.common.func")
 
 function M.CompareAction(
   bufnr,
