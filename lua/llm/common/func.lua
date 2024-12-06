@@ -36,29 +36,24 @@ local function utf8_char_length(byte)
   end
 end
 
-local function utf8_sub(str, start_char, end_char)
-  local start_index = 1
-  local end_index = #str
-  local i = 1
-  local char_count = 0
-  local byte = string.byte
+local function utf8_sub(s, i, j)
+  i = i or 1
+  j = j or -1
 
-  while i <= #str do
-    local b = byte(str, i)
-    char_count = char_count + 1
-    local char_len = utf8_char_length(b)
+  local start, stop = i, #s
+  local utf8_len, pos = 0, 1
 
-    if char_count == start_char then
-      start_index = i
-    end
-    if char_count == end_char + 1 then
-      end_index = i - 1
+  while pos <= stop do
+    local c = s:byte(pos)
+    local char_len = utf8_char_length(c)
+    utf8_len = utf8_len + char_len
+    pos = pos + char_len
+    if utf8_len >= j then
+      stop = pos - 1
       break
     end
-    i = i + char_len
   end
-
-  return string.sub(str, start_index, end_index)
+  return s:sub(start, stop)
 end
 
 local function wait_ui_opts()
@@ -206,11 +201,11 @@ function M.GetVisualSelection()
     end
 
     lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_end[2], false)
-    lines[1] = string.sub(lines[1], s_start[3], -1)
     if n_lines == 1 then
-      lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3] - s_start[3] + 1)
+      lines[n_lines] = utf8_sub(lines[n_lines], s_start[3], s_end[3])
     else
-      lines[n_lines] = string.sub(lines[n_lines], 1, s_end[3])
+      lines[1] = utf8_sub(lines[1], s_start[3], #lines[1])
+      lines[n_lines] = utf8_sub(lines[n_lines], 1, s_end[3])
     end
   elseif mode == "V" then
     local vstart, vend = M.GetVisualSelectionRange()
