@@ -355,15 +355,29 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
   end
 
   local options = {
-    query = {
-      title = " 󰊿 Trans ",
-      hl = { link = "Keyword" },
-    },
     buftype = "nofile",
     spell = false,
     number = false,
     wrap = true,
     linebreak = false,
+    component_width = "60%",
+    component_height = "55%",
+    query = {
+      title = " 󰊿 Trans ",
+      hl = { link = "Define" },
+    },
+    input_box_opts = {
+      size = "15%",
+      win_options = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+    },
+    preview_box_opts = {
+      size = "85%",
+      win_options = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+    },
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
@@ -379,6 +393,7 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
         top_align = "center",
       },
     },
+    win_options = options.input_box_opts.win_options,
   })
 
   local preview_box = Popup({
@@ -387,14 +402,15 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
       style = seamless.get_border_chars("rounded", "bottom"),
       text = { top = "", top_align = "center" },
     },
+    win_options = options.preview_box_opts.win_options,
   })
 
   local layout = F.CreateLayout(
-    "60%",
-    "55%",
+    options.component_width,
+    options.component_height,
     Layout.Box({
-      Layout.Box(input_box, { size = "15%" }),
-      Layout.Box(preview_box, { size = "85%", { grow = 1 } }),
+      Layout.Box(input_box, { size = options.input_box_opts.size }),
+      Layout.Box(preview_box, { size = options.preview_box_opts.size, { grow = 1 } }),
     }, { dir = "col" })
   )
 
