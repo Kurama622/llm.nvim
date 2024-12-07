@@ -150,7 +150,7 @@ Your next translator is not a translator.
 > Currently these functions have been integrated into https://github.com/Kurama622/llm.nvim/blob/main/lua/llm/common/tools.lua and no longer need to be defined.
 
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-trans-compress.png" alt="llm-trans" width="450">
+  <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="450">
 </p>
 
 ```lua
