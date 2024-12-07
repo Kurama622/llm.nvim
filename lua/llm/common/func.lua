@@ -189,7 +189,7 @@ end
 function M.GetVisualSelection()
   local mode = vim.api.nvim_get_mode().mode
   local lines = ""
-  if mode == "v" then
+  if mode == "v" or mode == "\x16" then
     local s_start, s_end
     local line_cur = vim.fn.getpos(".")
     local line_v = vim.fn.getpos("v")
@@ -205,7 +205,14 @@ function M.GetVisualSelection()
       lines[n_lines] = utf8_sub(lines[n_lines], s_start[3], s_end[3])
     else
       lines[1] = utf8_sub(lines[1], s_start[3], #lines[1])
-      lines[n_lines] = utf8_sub(lines[n_lines], 1, s_end[3])
+      if mode == "v" then
+        lines[n_lines] = utf8_sub(lines[n_lines], 1, s_end[3])
+      else
+        for n = 2, n_lines - 1 do
+          lines[n] = utf8_sub(lines[n], s_start[3], #lines[n])
+        end
+        lines[n_lines] = utf8_sub(lines[n_lines], s_start[3], s_end[3])
+      end
     end
   elseif mode == "V" then
     local vstart, vend = M.GetVisualSelectionRange()
