@@ -56,6 +56,26 @@ local function utf8_sub(s, i, j)
   return s:sub(start, stop)
 end
 
+local function display_sub(s, i, j)
+  i = i or 1
+  j = j or -1
+
+  local start, stop = i, #s
+  local utf8_len, pos = 0, 1
+
+  while pos <= stop do
+    local c = s:byte(pos)
+    local char_len = utf8_char_length(c)
+    utf8_len = utf8_len + vim.api.nvim_strwidth(s:sub(pos, pos + char_len - 1))
+    pos = pos + char_len
+    if utf8_len >= j then
+      stop = pos - 1
+      break
+    end
+  end
+  return s:sub(start, stop)
+end
+
 local function wait_ui_opts()
   local ui_width = vim.api.nvim_strwidth(conf.configs.spinner.text[1])
   return {
@@ -243,14 +263,17 @@ function M.CloseLLM()
     if state.session.filename ~= "current" then
       filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
     else
-      local _filename =
-        utf8_sub(state.session[state.session.filename][2].content, 1, conf.configs.max_history_name_length):gsub(".", {
-          ["["] = "\\[",
-          ["]"] = "\\]",
-          ["/"] = "",
-          ["\n"] = " ",
-          ["\r"] = " ",
-        })
+      local _filename = display_sub(
+        state.session[state.session.filename][2].content,
+        1,
+        conf.configs.max_history_name_length
+      ):gsub(".", {
+        ["["] = "\\[",
+        ["]"] = "\\]",
+        ["/"] = "%",
+        ["\n"] = " ",
+        ["\r"] = " ",
+      })
 
       filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
     end
