@@ -13,6 +13,10 @@
 >
 > Finally, and most importantly, you can use various free models (whether provided by `Cloudflare`, `Github models`, `siliconflow` or others).
 
+
+[My llm.nvim config](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua) might be helpful to you, as it includes various configuration methods.
+
+
 <!-- mtoc-start -->
 
 * [Screenshots](#screenshots)
@@ -33,7 +37,7 @@
 * [Default Configuration](#default-configuration)
 * [Configuration](#configuration)
   * [Example Configuration](#example-configuration)
-* [others](#others)
+* [Others](#others)
   * [Check Your Account Balance](#check-your-account-balance)
   * [Flexible Window](#flexible-window)
 
@@ -71,6 +75,7 @@ Can't understand the code? Don't worry, AI will explain every code snippet for y
 
 You can customize some useful tools to complete your tasks more effectively. Detailed tutorial can be found on [wiki](https://github.com/Kurama622/llm.nvim/wiki/App-Tools#how-to-add-an-application-tool-to-llmnvim).
 
+I have integrated some templates. Each template allows you to modify the prompt and the model you wish to use.
 
 #### Optimize Code
 
@@ -96,6 +101,13 @@ Let AI optimize your code. Press `y` to copy the optimized code, and `n` to igno
         app_handler = {
           OptimizeCode = {
             handler = tools.side_by_side_handler,
+            -- prompt = [[your prompt]],
+            -- fetch_key = function()
+            --   return "your api key"
+            -- end,
+            -- url = "https://models.inference.ai.azure.com/chat/completions",
+            -- model = "gpt-4o",
+            -- api_type = "openai",
           }
         }
     })
@@ -603,7 +615,7 @@ Finally, here is my personal configuration for reference.
 
 https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua
 
-## others
+## Others
 ### Check Your Account Balance
 
 - For siliconflow: https://api.siliconflow.cn/v1/user/info
