@@ -1,4 +1,5 @@
 local M = {}
+local luv = vim.loop
 
 local function get_win_width()
   return vim.o.columns
@@ -14,7 +15,14 @@ local output_box_start = input_box_start
 local output_box_width = math.floor(get_win_width() * 0.7 - history_box_width - 2)
 local history_box_start = math.floor(output_box_start + get_win_width() * 0.7 - history_box_width)
 
-local HOME = os.getenv("HOME")
+local HOME = ""
+
+local uname = luv.os_uname()
+if uname.sysname == "Linux" or uname.sysname == "Darwin" then
+  HOME = os.getenv("HOME")
+else
+  HOME = os.getenv("USERPROFILE")
+end
 
 M._ = {}
 
