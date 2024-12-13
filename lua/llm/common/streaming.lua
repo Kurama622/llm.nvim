@@ -47,31 +47,69 @@ function M.GetStreamingOutput(
 
   local stream_output = nil
 
-  if api_type == nil then
-    api_type = conf.configs.api_type
-  end
-  -- api_type: workers-ai, zhipu, openai
-  if api_type == "workers-ai" then
-    stream_output = function(chunk)
-      return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-    end
-  elseif api_type == "zhipu" then
-    stream_output = function(chunk)
-      return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-    end
-  elseif api_type == "openai" then
-    stream_output = function(chunk)
-      return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-    end
-  end
-
-  -- The priority of "streaming_handler" is higher than that of "api_type"
-  -- use "streaming_handler" in parameters. Generally, app tools will use it.
-  if streaming_handler ~= nil then
+  if streaming_handler then
     stream_output = function(chunk)
       return streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
     end
+  elseif api_type then
+    if api_type == "workers-ai" then
+      stream_output = function(chunk)
+        return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    elseif api_type == "zhipu" then
+      stream_output = function(chunk)
+        return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    elseif api_type == "openai" then
+      stream_output = function(chunk)
+        return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    end
+  elseif conf.configs.streaming_handler then
+    stream_output = function(chunk)
+      return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
+    end
+  elseif conf.configs.api_type then
+    if conf.configs.api_type == "workers-ai" then
+      stream_output = function(chunk)
+        return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    elseif conf.configs.api_type == "zhipu" then
+      stream_output = function(chunk)
+        return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    elseif conf.configs.api_type == "openai" then
+      stream_output = function(chunk)
+        return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    end
   end
+
+  -- if api_type == nil then
+  --   api_type = conf.configs.api_type
+  -- end
+  -- -- api_type: workers-ai, zhipu, openai
+  -- if api_type == "workers-ai" then
+  --   stream_output = function(chunk)
+  --     return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  --   end
+  -- elseif api_type == "zhipu" then
+  --   stream_output = function(chunk)
+  --     return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  --   end
+  -- elseif api_type == "openai" then
+  --   stream_output = function(chunk)
+  --     return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  --   end
+  -- end
+  --
+  -- -- The priority of "streaming_handler" is higher than that of "api_type"
+  -- -- use "streaming_handler" in parameters. Generally, app tools will use it.
+  -- if streaming_handler ~= nil then
+  --   stream_output = function(chunk)
+  --     return streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
+  --   end
+  -- end
 
   local _args = nil
   if url ~= nil then
