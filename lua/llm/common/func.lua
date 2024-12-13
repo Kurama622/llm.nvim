@@ -326,18 +326,20 @@ function M.ListFilesInPath()
   local json_file_list = vim.split(vim.fn.glob(path .. "/*.json"), "\n")
 
   for i = 1, #json_file_list do
-    if i > conf.configs.max_history_files then
-      vim.fn.delete(json_file_list[i])
-      table.remove(json_file_list, i)
-    else
-      json_file_list[i] = vim.fs.basename(json_file_list[i])
-    end
+    json_file_list[i] = vim.fs.basename(json_file_list[i])
   end
 
   table.sort(json_file_list, function(a, b)
     return luv.fs_stat(string.format("%s/%s", path, a)).mtime.sec
       > luv.fs_stat(string.format("%s/%s", path, b)).mtime.sec
   end)
+
+  for i = 1, #json_file_list do
+    if i > conf.configs.max_history_files then
+      vim.fn.delete(string.format("%s/%s", path, json_file_list[i]))
+      table.remove(json_file_list, i)
+    end
+  end
   return json_file_list
 end
 
