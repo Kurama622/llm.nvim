@@ -1,4 +1,5 @@
 local M = {}
+local luv = vim.loop
 
 local state = require("llm.state")
 local conf = require("llm.config")
@@ -321,18 +322,23 @@ function M.ToggleLLM()
 end
 
 function M.ListFilesInPath()
-  local files = {}
+  local path = conf.configs.history_path
+  local json_file_list = vim.split(vim.fn.glob(path .. "/*.json"), "\n")
 
-  local p = io.popen(string.format("ls -At %s  2>/dev/null", conf.configs.history_path))
-  for filename in p:lines() do
-    if #files < conf.configs.max_history_files then
-      table.insert(files, filename)
+  for i = 1, #json_file_list do
+    if i > conf.configs.max_history_files then
+      vim.fn.delete(json_file_list[i])
+      table.remove(json_file_list, i)
     else
-      os.execute(string.format("rm %s/%s", conf.configs.history_path, escape_string(filename)))
+      json_file_list[i] = vim.fs.basename(json_file_list[i])
     end
   end
-  p:close()
-  return files
+
+  table.sort(json_file_list, function(a, b)
+    return luv.fs_stat(string.format("%s/%s", path, a)).mtime.sec
+      > luv.fs_stat(string.format("%s/%s", path, b)).mtime.sec
+  end)
+  return json_file_list
 end
 
 function M.MoveHistoryCursor(offset)
