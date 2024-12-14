@@ -108,7 +108,7 @@ Please optimize this code according to the format, and respond in Chinese.]]
   end
 
   local options = {
-    func = M.CompareAction,
+    exit_handler = M.CompareAction,
     code_hl = { fg = "#6aa84f", bg = "NONE" },
     separator_hl = { fg = "#6aa84f", bg = "#333333" },
     border = "solid",
@@ -160,6 +160,7 @@ Please optimize this code according to the format, and respond in Chinese.]]
   table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. source_content })
 
   state.popwin = preview_box
+
   local worker = streaming(
     preview_box.bufnr,
     preview_box.winid,
@@ -168,12 +169,12 @@ Please optimize this code according to the format, and respond in Chinese.]]
     options.url,
     options.model,
     options.api_type,
-    nil, -- curl args
-    nil, -- streaming handler
-    nil, -- stdout handler
-    nil, -- stderr handler
+    options.args,
+    options.streaming_handler,
+    options.stdout_handler,
+    options.stderr_handler,
     function(ostr) -- exit handler
-      codeln = options.func(
+      codeln = options.exit_handler(
         bufnr,
         start_str,
         end_str,
@@ -323,7 +324,12 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
     fetch_key,
     options.url,
     options.model,
-    options.api_type
+    options.api_type,
+    options.args,
+    options.streaming_handler,
+    options.stdout_handler,
+    options.stderr_handler,
+    options.exit_handler
   )
 
   preview_box:map("n", "<C-c>", function()
@@ -448,7 +454,12 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
         fetch_key,
         options.url,
         options.model,
-        options.api_type
+        options.api_type,
+        options.args,
+        options.streaming_handler,
+        options.stdout_handler,
+        options.stderr_handler,
+        options.exit_handler
       )
     end
   end)
@@ -498,6 +509,8 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   content = (content:gsub(".", {
     ["'"] = "''",
   }))
+  local flexible_box = nil
+
   local options = {
     buftype = "nofile",
     spell = false,
@@ -512,19 +525,8 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   state.app.session[name] = {}
   table.insert(state.app.session[name], { role = "user", content = content })
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
-
-  local flexible_box = nil
-  F.GetUrlOutput(
-    state.app.session[name],
-    fetch_key,
-    opts.url,
-    opts.model,
-    opts.api_type,
-    nil,
-    nil,
-    nil,
-    nil,
-    function(output)
+  if options.exit_handler == nil then
+    options.exit_handler = function(output)
       flexible_box = F.FlexibleWindow(output, options.enter_flexible_window)
       flexible_box:mount()
       flexible_box:map("n", { "<esc>", "N", "n" }, function()
@@ -540,7 +542,21 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
         linebreak = options.linebreak,
       })
     end
+  end
+
+  F.GetUrlOutput(
+    state.app.session[name],
+    fetch_key,
+    options.url,
+    options.model,
+    options.api_type,
+    options.args,
+    options.parse_handler,
+    options.stdout_handler,
+    options.stderr_handler,
+    options.exit_handler
   )
+
   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
   vim.api.nvim_feedkeys(esc, "x", false)
   if options.exit_on_move then

@@ -607,46 +607,52 @@ function M.GetUrlOutput(
   end
 
   local body = nil
-
   local assistant_output = ""
-
   local parse = nil
 
-  if api_type == nil then
-    api_type = conf.configs.api_type
-  end
-  -- api_type: workers-ai, zhipu, openai
-  if api_type == "workers-ai" then
+  if parse_handler then
     parse = function(chunk)
-      assistant_output = chunk.response
+      assistant_output = parse_handler(chunk)
       return assistant_output
     end
-  elseif api_type == "zhipu" then
-    parse = function(chunk)
-      assistant_output = chunk.choices[1].message.content
-      return assistant_output
+  elseif api_type then
+    if api_type == "workers-ai" then
+      parse = function(chunk)
+        assistant_output = chunk.response
+        return assistant_output
+      end
+    elseif api_type == "zhipu" then
+      parse = function(chunk)
+        assistant_output = chunk.choices[1].message.content
+        return assistant_output
+      end
+    elseif api_type == "openai" then
+      parse = function(chunk)
+        assistant_output = chunk.choices[1].delta.content
+        return assistant_output
+      end
     end
-  elseif api_type == "openai" then
-    parse = function(chunk)
-      assistant_output = chunk.choices[1].delta.content
-      return assistant_output
-    end
-  end
-
-  -- The priority of "parse_handler" is higher than that of "api_type"
-  if conf.configs.parse_handler ~= nil then
-    -- use "parse_handler" in config
+  elseif conf.configs.parse_handler then
     parse = function(chunk)
       assistant_output = conf.configs.parse_handler(chunk)
       return assistant_output
     end
-  end
-
-  -- use "parse_handler" in parameters. Generally, app tools will use it.
-  if parse_handler ~= nil then
-    parse = function(chunk)
-      assistant_output = parse_handler(chunk)
-      return assistant_output
+  elseif conf.configs.api_type then
+    if conf.configs.api_type == "workers-ai" then
+      parse = function(chunk)
+        assistant_output = chunk.response
+        return assistant_output
+      end
+    elseif conf.configs.api_type == "zhipu" then
+      parse = function(chunk)
+        assistant_output = chunk.choices[1].message.content
+        return assistant_output
+      end
+    elseif conf.configs.api_type == "openai" then
+      parse = function(chunk)
+        assistant_output = chunk.choices[1].delta.content
+        return assistant_output
+      end
     end
   end
 
@@ -656,6 +662,7 @@ function M.GetUrlOutput(
       model = MODEL,
       max_tokens = conf.configs.max_tokens,
       messages = messages,
+      stream = false,
     }
 
     if conf.configs.temperature ~= nil then
@@ -729,13 +736,7 @@ function M.GetUrlOutput(
           return
         end
         local json = vim.json.decode(str)
-        if conf.configs.parse_handler ~= nil then
-          assistant_output = parse(json)
-        elseif api_type ~= nil then
-          assistant_output = parse(json)
-        else
-          parse(json)
-        end
+        assistant_output = parse(json)
       end)
     end,
     on_exit = function()
