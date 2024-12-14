@@ -202,11 +202,11 @@ function M.setup(opts)
   if not M.configs.save_session then
     M.configs.output_box_opts.size.width = M.configs.input_box_opts.size.width
   else
-    local file = io.open(M.configs.history_path, "rb")
-    if file then
-      file:close()
+    local dir = io.open(M.configs.history_path, "rb")
+    if dir then
+      dir:close()
     else
-      os.execute("mkdir -p " .. M.configs.history_path)
+      vim.fn.mkdir(M.configs.history_path, "p")
     end
   end
 

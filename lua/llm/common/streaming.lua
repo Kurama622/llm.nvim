@@ -211,7 +211,11 @@ function M.GetStreamingOutput(
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
-      assistant_output = stream_output(chunk)
+      if api_type or conf.configs.api_type or streaming_handler or conf.configs.streaming_handler then
+        assistant_output = stream_output(chunk)
+      else
+        stream_output(chunk)
+      end
       -- TODO: Add stdout handling
     end),
     on_stderr = function(_, err)
