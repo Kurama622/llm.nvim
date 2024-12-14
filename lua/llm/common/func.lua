@@ -146,6 +146,22 @@ function M.DeepCopy(t)
   return new_t
 end
 
+function M.GetUserRequestArgs(args, env)
+  local chunk, err = load(args, nil, "t", env)
+
+  if not chunk then
+    vim.notify("Custom args error: " .. err, vim.log.levels.ERROR)
+  else
+    local status, result = pcall(chunk)
+
+    if status then
+      return result
+    else
+      vim.notify("Custom args error: " .. tostring(result), vim.log.levels.ERROR)
+    end
+  end
+end
+
 function M.UpdateCursorPosition(bufnr, winid)
   if IsNotPopwin(winid) then
     winid = state.llm.winid
@@ -688,19 +704,7 @@ function M.GetUrlOutput(
       }
 
       setmetatable(env, { __index = _G })
-      local chunk, err = load(args, nil, "t", env)
-
-      if not chunk then
-        vim.notify("Custom args error: " .. err, vim.log.levels.ERROR)
-      else
-        local status, result = pcall(chunk)
-
-        if status then
-          _args = result
-        else
-          vim.notify("Custom args error: " .. tostring(result), vim.log.levels.ERROR)
-        end
-      end
+      _args = M.GetUserRequestArgs(args, env)
     end
 
     if parse == nil then
@@ -740,19 +744,7 @@ function M.GetUrlOutput(
       }
 
       setmetatable(env, { __index = _G })
-      local chunk, err = load(args, nil, "t", env)
-
-      if not chunk then
-        vim.notify("Custom args error: " .. err, vim.log.levels.ERROR)
-      else
-        local status, result = pcall(chunk)
-
-        if status then
-          _args = result
-        else
-          vim.notify("Custom args error: " .. tostring(result), vim.log.levels.ERROR)
-        end
-      end
+      _args = M.GetUserRequestArgs(args, env)
     end
 
     if parse == nil then
