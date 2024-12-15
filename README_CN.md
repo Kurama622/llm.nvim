@@ -1,0 +1,641 @@
+[English](README.md) | [**简体中文**](README_CN.md)
+
+<p align= "center">
+<img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+</p>
+
+---
+
+> [!IMPORTANT]
+> 免费的大语言模型插件，让你在Neovim中与大模型交互
+>
+> 1. 支持任意一款大模型，比如gpt，glm，kimi或者本地运行的大模型
+>
+> 2. 支持定义属于你自己的AI工具
+>
+> 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`或者其他的平台）
+
+
+<!-- mtoc-start -->
+
+* [截图](#截图)
+* [安装](#安装)
+  * [依赖](#依赖)
+  * [准备工作](#准备工作)
+    * [Cloudflare](#cloudflare)
+    * [ChatGLM (智谱清言)](#chatglm-智谱清言)
+    * [kimi (月之暗面)](#kimi-月之暗面)
+    * [siliconflow (硅基流动)](#siliconflow-硅基流动)
+    * [本地运行的大模型](#本地运行的大模型)
+  * [基本配置](#基本配置)
+  * [窗口风格配置](#窗口风格配置)
+  * [AI工具的配置](#ai工具的配置)
+  * [本地运行大模型](#本地运行大模型)
+* [默认快捷键](#默认快捷键)
+
+<!-- mtoc-end -->
+
+## 截图
+
+1. **聊天界面**
+
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
+</p>
+
+2. **快速翻译**
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="560">
+</p>
+
+3. **解释代码**
+<p align= "center">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
+</p>
+
+4. **优化代码**
+  - **并排展示**
+  <p align= "center">
+    <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="560">
+  </p>
+
+  - **嵌入到源文件展示**
+  <p align= "center">
+    <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-optim-gpt-compress.png" alt="llm-optimize-compare-action" width="560">
+  </p>
+
+5. **生成测试用例**
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/b288e3c9-7d25-40cb-8645-14dacb571529" alt="test-case" width="560">
+</p>
+
+6. **AI翻译**
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
+</p>
+
+## 安装
+
+### 依赖
+
+- `curl`: 请自行安装
+
+### 准备工作
+
+#### Cloudflare
+
+1. 注册[cloudflare](https://dash.cloudflare.com/)，获取账户和API Key. 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型.
+
+2. 在你的`zshrc`或者`bashrc`中设置`ACCOUNT` 和 `LLM_KEY`环境变量
+
+```bash
+export ACCOUNT=<Your ACCOUNT>
+export LLM_KEY=<Your API_KEY>
+```
+#### ChatGLM (智谱清言)
+
+1. 注册智谱清言：[https://open.bigmodel.cn/](https://open.bigmodel.cn/), 获取你的API Key.
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
+#### kimi (月之暗面)
+1. 注册月之暗面: [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench), 获取你的API Key.
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
+#### siliconflow (硅基流动)
+1. 注册硅基流动：[siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), 获取你的API Key. 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+#### 本地运行的大模型
+在你的`zshrc`或者`bashrc`中设置`LLM_KEY`为`NONE`
+```bash
+export LLM_KEY=NONE
+```
+### 基本配置
+
+> 如果url没有被配置，默认使用Cloudflare
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        prompt = "You are a helpful chinese assistant.",
+
+        prefix = {
+          user = { text = "😃 ", hl = "Title" },
+          assistant = { text = "⚡ ", hl = "Added" },
+        },
+
+        style = "float", -- right | left | above | below | float
+
+        -- [[ Github Models ]]
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o",
+        api_type = "openai",
+        --[[ 可选的: 如果你需要同时使用不同平台的模型，可以通过配置
+                     fetch_key 来保证不同模型使用不同的API Key]]
+        fetch_key = function()
+          return switch("enable_gpt")
+        end,
+
+        -- [[ cloudflare ]]
+        -- model = "@cf/google/gemma-7b-it-lora",
+
+        -- [[ ChatGLM ]]
+        -- url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        -- model = "glm-4-flash",
+
+        -- [[ kimi ]]
+        -- url = "https://api.moonshot.cn/v1/chat/completions",
+        -- model = "moonshot-v1-8k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
+        -- api_type = "openai",
+
+        -- [[ local llm ]]
+        -- url = "http://localhost:11434/api/chat",
+        -- model = "llama3.2:1b",
+        -- api_type = "local",
+        -- streaming_handler = local_llm_streaming_handler,
+        -- parse_handler = local_llm_parse_handler,
+
+        -- [[ siliconflow ]]
+        -- url = "https://api.siliconflow.cn/v1/chat/completions",
+        -- api_type = "openai",
+        -- model = "Qwen/Qwen2.5-7B-Instruct",
+        -- -- [optional: fetch_key]
+        -- fetch_key = function()
+        --   return switch("enable_siliconflow")
+        -- end,
+
+        max_tokens = 1024,
+        save_session = true,
+        max_history = 15,
+        history_path = "/tmp/history",    -- where to save history
+        temperature = 0.3,
+        top_p = 0.7,
+
+        -- stylua: ignore
+        keys = {
+          -- The keyboard mapping for the input window.
+          ["Input:Cancel"]      = { mode = "n", key = "<C-c>" },
+          ["Input:Submit"]      = { mode = "n", key = "<cr>" },
+          ["Input:Resend"]      = { mode = "n", key = "<C-r>" },
+
+          -- only works when "save_session = true"
+          ["Input:HistoryNext"] = { mode = "n", key = "<C-j>" },
+          ["Input:HistoryPrev"] = { mode = "n", key = "<C-k>" },
+
+          -- The keyboard mapping for the output window in "split" style.
+          ["Output:Ask"]        = { mode = "n", key = "i" },
+          ["Output:Cancel"]     = { mode = "n", key = "<C-c>" },
+          ["Output:Resend"]     = { mode = "n", key = "<C-r>" },
+
+          -- The keyboard mapping for the output and input windows in "float" style.
+          ["Session:Toggle"]    = { mode = "n", key = "<leader>ac" },
+          ["Session:Close"]     = { mode = "n", key = "<esc>" },
+        },
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+    },
+  },
+```
+
+- `prompt`: 模型的提示词
+- `prefix`: 对话角色的标志
+- `style`: 对话窗口的样式(float即浮动窗口，其他均为分割窗口)
+- `url`: 模型的API地址
+- `model`: 模型的名称
+- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `workers-ai`. `openai`的格式可以兼任大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析
+- `fetch_key`: 如果你需要同时使用不同平台的模型，可以通过配置`fetch_key`来保证不同模型使用不同的API Key，用法如下：
+  ```lua
+  fetch_key = function() return "<your api key>" end
+  ```
+- `max_tokens`: 模型的最大输出长度
+- `save_session`: 是否保存会话历史
+- `max_history`: 最多保存多少个会话
+- `history_path`: 会话历史的保存路径
+- `temperature`: 模型的temperature, 控制模型输出的随机性
+- `top_p`: 模型的top_p, 控制模型输出的随机性
+- `keys`: 不同窗口的快捷键设置，默认值见[默认快捷键](#默认快捷键)
+  - *浮动窗口风格下的快捷键*
+    - 输入窗口
+      - `Input:Cancel`: 取消对话
+      - `Input:Submit`: 提交问题
+      - `Input:Resend`: 重新回答
+      - `Input:HistoryNext`: 切换到下一个会话历史
+      - `Input:HistoryPrev`: 切换到上一个会话历史
+    - 整个对话界面
+      - `Session:Toggle`: 打开/隐藏对话界面
+      - `Session:Close`: 关闭对话界面
+  - *分割窗口风格下的快捷键*
+    - 输出窗口
+      - `Output:Ask`: 打开输入窗口
+      - `Output:Cancel`: 取消对话
+      - `Output:Resend`: 重新回答
+
+- `LLMSessionToggle`: 打开/隐藏对话界面
+- `LLMSelectedTextHandler`: 对选中的文本进行处理，如何处理取决于你传入什么提示词
+
+如果你使用本地运行的大模型，比如ollama运行的模型，你还需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
+
+
+### 窗口风格配置
+
+如果你想进一步配置对话界面的样式，你可以分别对`input_box_opts`、`output_box_opts`、`history_box_opts`和`popwin_opts`进行配置。
+
+它们的配置项都是相同的：
+- `relative`:
+  - `editor`: 该浮动窗口相对于当前编辑器窗口
+  - `cursor`: 该浮动窗口相对于当前光标位置
+  - `win` : 该浮动窗口相对于当前窗口
+
+- `position`: 窗口的位置
+- `size`: 窗口的大小
+- `enter`: 窗口是否自动获得焦点
+- `focusable`: 窗口是否可以获得焦点
+- `zindex`: 窗口的层级
+- `border` 
+  - `style`: 窗口的边框样式
+  - `text`: 窗口的边框文本
+- `win_options`: 窗口的选项
+ - `winblend`: 窗口的透明度
+ - `winhighlight`: 窗口的高亮
+
+更多信息可以查阅[nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        style = "float", -- right | left | above | below | float
+
+        -- [[ Github Models ]]
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o",
+        api_type = "openai",
+
+        input_box_opts = {
+          relative = "editor",
+          position = {
+            row = "85%",
+            col = 15,
+          },
+          size = {
+            height = "5%",
+            width = 120,
+          },
+
+          enter = true,
+          focusable = true,
+          zindex = 50,
+          border = {
+            style = "rounded",
+            text = {
+              top = " Enter Your Question ",
+              top_align = "center",
+            },
+          },
+          win_options = {
+            -- set window transparency
+            winblend = 20,
+            -- set window highlight
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+        output_box_opts = {
+          relative = "editor",
+          position = {
+            row = "35%",
+            col = 15,
+          },
+          size = {
+            height = "65%",
+            width = 90,
+          },
+          enter = true,
+          focusable = true,
+          zindex = 20,
+          border = {
+            style = "rounded",
+            text = {
+              top = " Preview ",
+              top_align = "center",
+            },
+          },
+          win_options = {
+            winblend = 20,
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+
+        history_box_opts = {
+          relative = "editor",
+          position = {
+            row = "35%",
+            col = 108,
+          },
+          size = {
+            height = "65%",
+            width = 27,
+          },
+          zindex = 70,
+          enter = false,
+          focusable = false,
+          border = {
+            style = "rounded",
+            text = {
+              top = " History ",
+              top_align = "center",
+            },
+          },
+          win_options = {
+            winblend = 20,
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+
+        -- LLMSelectedTextHandler windows options
+        popwin_opts = {
+          relative = "cursor",
+          position = {
+            row = -7,
+            col = 20,
+          },
+          size = {
+            width = "50%",
+            height = 15,
+          },
+          enter = true,
+          border = {
+            style = "rounded",
+            text = {
+              top = " Explain ",
+            },
+          },
+        },
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+    },
+  },
+```
+
+### AI工具的配置
+
+目前llm.nvim提供了一些AI工具的模板，方便大家去自定义自己的AI工具
+
+所有的AI工具都需要定义在`app_handler`中，以一对`key-value`的形式呈现，`key`为工具名称，`value`为工具的配置信息
+
+对于所有的AI工具，它们的配置项都是基本类似的:
+
+- `handler`: 使用哪个模板
+ - `side_by_side_handler`: 两个窗口并排展示结果
+ - `action_handler`: 在源文件中以diff的形式展示结果
+ - `qa_handler`: 单轮对话的AI
+ - 你也可以自定义函数
+- `prompt`: AI工具的提示词
+- `opts`
+ - `spell`: 是否有拼写检查,
+ - `number`: 是否显示行号,
+ - `wrap`: 是否自动换行,
+ - `linebreak`: 是否允许从单词中间换行
+ - `url`、`model`: 该AI工具使用哪个大模型
+ - `api_type`: 该AI工具输出的解析类型
+ - `streaming_handler`: 该AI工具使用自定义的流解析函数
+ - `parse_handler`: 该AI工具使用自定义的解析函数
+
+不同模板还有一些属于自己的专属配置项，待补充...
+
+我的一些AI工具配置:
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        app_handler = {
+          OptimizeCode = {
+            handler = tools.side_by_side_handler,
+            -- opts = {
+            --   streaming_handler = local_llm_streaming_handler,
+            -- },
+          },
+          TestCode = {
+            handler = tools.side_by_side_handler,
+            prompt = [[ Write some test cases for the following code, only return the test cases.
+            Give the code content directly, do not use code blocks or other tags to wrap it. ]],
+            opts = {
+              right = {
+                title = " Test Cases ",
+              },
+            },
+          },
+          OptimCompare = {
+            handler = tools.action_handler,
+            opts = {
+              fetch_key = function()
+                return switch("enable_gpt")
+              end,
+              url = "https://models.inference.ai.azure.com/chat/completions",
+              model = "gpt-4o",
+              api_type = "openai",
+            },
+          },
+
+          Translate = {
+            handler = tools.qa_handler,
+            opts = {
+              fetch_key = function()
+                return switch("enable_glm")
+              end,
+              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+              model = "glm-4-flash",
+              api_type = "zhipu",
+
+              component_width = "60%",
+              component_height = "50%",
+              query = {
+                title = " 󰊿 Trans ",
+                hl = { link = "Define" },
+              },
+              input_box_opts = {
+                size = "15%",
+                win_options = {
+                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+                },
+              },
+              preview_box_opts = {
+                size = "85%",
+                win_options = {
+                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+                },
+              },
+            },
+          },
+
+          -- check siliconflow's balance
+          UserInfo = {
+            handler = function()
+              local key = os.getenv("LLM_KEY")
+              local res = tools.curl_request_handler(
+                "https://api.siliconflow.cn/v1/user/info",
+                { "GET", "-H", string.format("'Authorization: Bearer %s'", key) }
+              )
+              if res ~= nil then
+                print("balance: " .. res.data.balance)
+              end
+            end,
+          },
+          WordTranslate = {
+            handler = tools.flexi_handler,
+            prompt = "Translate the following text to Chinese, please only return the translation",
+            opts = {
+              fetch_key = function()
+                return switch("enable_glm")
+              end,
+              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+              model = "glm-4-flash",
+              api_type = "zhipu",
+              args = [=[return string.format([[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']], url, LLM_KEY, vim.fn.json_encode(body))]=],
+              exit_on_move = true,
+              enter_flexible_window = false,
+            },
+          },
+          CodeExplain = {
+            handler = tools.flexi_handler,
+            prompt = "Explain the following code, please only return the explanation, and answer in Chinese",
+            opts = {
+              fetch_key = function()
+                return switch("enable_glm")
+              end,
+              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+              model = "glm-4-flash",
+              api_type = "zhipu",
+              enter_flexible_window = true,
+            },
+          },
+        },
+    })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
+      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+    },
+  },
+```
+
+
+### 本地运行大模型
+
+本地大模型需要自定义解析函数，对于流式输出，我们使用自定义的`streaming_handler`；对于一次性返回输出结果的AI工具，我们使用自定义的`parse_handler`
+
+下面是`ollama`运行`llama3.2:1b`的样例
+```lua
+local function local_llm_streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
+  if not chunk then
+    return assistant_output
+  end
+  local tail = chunk:sub(-1, -1)
+  if tail:sub(1, 1) ~= "}" then
+    line = line .. chunk
+  else
+    line = line .. chunk
+    local status, data = pcall(vim.fn.json_decode, line)
+    if not status or not data.message.content then
+      return assistant_output
+    end
+    assistant_output = assistant_output .. data.message.content
+    F.WriteContent(bufnr, winid, data.message.content)
+    line = ""
+  end
+  return assistant_output
+end
+
+local function local_llm_parse_handler(chunk)
+  local assistant_output = chunk.message.content
+  return assistant_output
+end
+
+return {
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    config = function()
+      require("llm").setup({
+        url = "http://localhost:11434/api/chat", -- your url
+        model = "llama3.2:1b",
+
+        streaming_handler = local_llm_streaming_handler,
+        app_handler = {
+          WordTranslate = {
+            handler = tools.flexi_handler,
+            prompt = "Translate the following text to Chinese, please only return the translation",
+            opts = {
+              fetch_key = function()
+                return switch("enable_glm")
+              end,
+              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+              model = "glm-4-flash",
+              api_type = "zhipu",
+              parse_handler = local_llm_parse_handler,
+              exit_on_move = true,
+              enter_flexible_window = false,
+            },
+          },
+        }
+      })
+    end,
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+}
+```
+
+## 默认快捷键
+
+- 浮动窗口风格下的快捷键
+
+| 窗口         | 按键         | 模式     | 描述                    |
+| ------------ | ------------ | -------- | ----------------------- |
+| Input        | `ctrl+g`     | `i`      | 提交你的问题            |
+| Input        | `ctrl+c`     | `i`      | 取消本轮对话            |
+| Input        | `ctrl+r`     | `i`      | 重新发起本轮对话        |
+| Input        | `ctrl+j`     | `i`      | 切换到下一个会话历史    |
+| Input        | `ctrl+k`     | `i`      | 切换到上一个会话历史    |
+| Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
+| Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
+
+- 分割窗口风格下的快捷键
+
+| 窗口         | 按键         | 模式     | 描述                    |
+| ------------ | ------------ | -------- | ----------------------- |
+| Input        | `<cr>`       | `n`      | 提交你的问题            |
+| Output       | `i`          | `n`      | 打开输入窗口            |
+| Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
+| Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |

@@ -1,3 +1,5 @@
+[**English**](README.md) | [简体中文](README_CN.md)
+
 <p align= "center">
 <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
 </p>
@@ -479,6 +481,7 @@ https://github.com/Kurama622/llm.nvim/blob/51350dc2028249b2ac04ec3b0763dcaca18bd
         save_session = true,              -- if false, history box will not be showed
         max_history = 15,                 -- max number of history
         history_path = "/tmp/history",    -- where to save history
+        style = "float", -- right | left | above | below | float
 
         input_box_opts = {
           relative = "editor",
@@ -509,7 +512,6 @@ https://github.com/Kurama622/llm.nvim/blob/51350dc2028249b2ac04ec3b0763dcaca18bd
           },
         },
         output_box_opts = {
-          style = "float", -- right | left | above | below | float
           relative = "editor",
           position = {
             row = "35%",
