@@ -116,7 +116,14 @@ function M.GetStreamingOutput(
         vim.fn.json_encode(body),
       }
     else
-      _args = args
+      local env = {
+        url = url,
+        authorization = authorization,
+        body = body,
+      }
+
+      setmetatable(env, { __index = _G })
+      _args = F.GetUserRequestArgs(args, env)
     end
 
     if stream_output == nil then
@@ -183,7 +190,15 @@ function M.GetStreamingOutput(
         vim.fn.json_encode(body),
       }
     else
-      _args = args
+      local env = {
+        ACCOUNT = ACCOUNT,
+        MODEL = MODEL,
+        authorization = authorization,
+        body = body,
+      }
+
+      setmetatable(env, { __index = _G })
+      _args = F.GetUserRequestArgs(args, env)
     end
 
     if stream_output == nil then

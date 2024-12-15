@@ -18,7 +18,7 @@ local function OpenLLM()
     nil,
     nil,
     nil,
-    nil,
+    conf.configs.args,
     conf.configs.streaming_handler
   )
 end
