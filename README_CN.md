@@ -411,20 +411,20 @@ export LLM_KEY=NONE
 对于所有的AI工具，它们的配置项都是基本类似的:
 
 - `handler`: 使用哪个模板
- - `side_by_side_handler`: 两个窗口并排展示结果
- - `action_handler`: 在源文件中以diff的形式展示结果
- - `qa_handler`: 单轮对话的AI
- - 你也可以自定义函数
+  - `side_by_side_handler`: 两个窗口并排展示结果
+  - `action_handler`: 在源文件中以diff的形式展示结果
+  - `qa_handler`: 单轮对话的AI
+  - 你也可以自定义函数
 - `prompt`: AI工具的提示词
 - `opts`
- - `spell`: 是否有拼写检查,
- - `number`: 是否显示行号,
- - `wrap`: 是否自动换行,
- - `linebreak`: 是否允许从单词中间换行
- - `url`、`model`: 该AI工具使用哪个大模型
- - `api_type`: 该AI工具输出的解析类型
- - `streaming_handler`: 该AI工具使用自定义的流解析函数
- - `parse_handler`: 该AI工具使用自定义的解析函数
+  - `spell`: 是否有拼写检查,
+  - `number`: 是否显示行号,
+  - `wrap`: 是否自动换行,
+  - `linebreak`: 是否允许从单词中间换行
+  - `url`、`model`: 该AI工具使用哪个大模型
+  - `api_type`: 该AI工具输出的解析类型
+  - `streaming_handler`: 该AI工具使用自定义的流解析函数
+  - `parse_handler`: 该AI工具使用自定义的解析函数
 
 不同模板还有一些属于自己的专属配置项，待补充...
 
@@ -433,8 +433,9 @@ export LLM_KEY=NONE
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
     config = function()
+      local tools = require("llm.common.tools")
       require("llm").setup({
         app_handler = {
           OptimizeCode = {
@@ -542,8 +543,13 @@ export LLM_KEY=NONE
     end,
     keys = {
       { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
-      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+      { "<leader>ts", mode = "x", "<cmd>LLMAppHandler WordTranslate<cr>" },
+      { "<leader>ae", mode = "v", "<cmd>LLMAppHandler CodeExplain<cr>" },
+      { "<leader>at", mode = "n", "<cmd>LLMAppHandler Translate<cr>" },
+      { "<leader>tc", mode = "x", "<cmd>LLMAppHandler TestCode<cr>" },
+      { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimCompare<cr>" },
+      { "<leader>au", mode = "n", "<cmd>LLMAppHandler UserInfo<cr>" },
+      -- { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
     },
   },
 ```
