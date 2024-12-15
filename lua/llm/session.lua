@@ -81,7 +81,7 @@ function M.NewSession()
       })
     end
 
-    if conf.configs.output_box_opts.style == "float" then
+    if conf.configs.style == "float" then
       local llm_popup = _popup(conf.configs.output_box_opts)
       state.llm.popup = llm_popup
 
@@ -185,7 +185,7 @@ function M.NewSession()
       if filename ~= "" or vim.bo.modifiable == false then
         bufnr = vim.api.nvim_create_buf(false, true)
         local win_options = {
-          split = conf.configs.output_box_opts.style,
+          split = conf.configs.style,
         }
         winid = vim.api.nvim_open_win(bufnr, true, win_options)
       end

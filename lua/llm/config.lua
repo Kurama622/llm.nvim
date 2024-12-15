@@ -53,7 +53,6 @@ M._.input_box_opts = {
 }
 
 M._.output_box_opts = {
-  style = "float", -- right | left | above | below | float
   relative = "editor",
   position = {
     row = "35%",
@@ -148,6 +147,7 @@ M.configs = {
   streaming_handler = nil,
   temperature = nil,
   top_p = nil,
+  style = "float", -- right | left | above | below | float
   spinner = { text = { "-", "\\", "|", "/" }, hl = "Title" },
 
   prefix = {
