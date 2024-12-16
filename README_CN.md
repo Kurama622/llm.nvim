@@ -680,6 +680,8 @@ return {
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
 
+---
+
 ## 常见问题
 
 1. **windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题**
@@ -688,86 +690,92 @@ return {
 
 - 基础对话功能以及部分AI工具（使用流式输出）自定义请求格式
 
-定义args参数，与prompt同层级
-```lua
+  定义args参数，与prompt同层级
+  ```lua
   --[[ custom request args ]]
   args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-```
+  ```
 
 - AI工具（使用非流式输出）自定义请求格式
 
-在`opts`中定义args
-```lua
-  WordTranslate = {
-    handler = tools.flexi_handler,
-    prompt = "Translate the following text to Chinese, please only return the translation",
-    opts = {
-      fetch_key = function()
-        return switch("enable_glm")
-      end,
-      url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-      model = "glm-4-flash",
-      api_type = "zhipu",
-      args = [=[return string.format([[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']], url, LLM_KEY, vim.fn.json_encode(body))]=],
-      exit_on_move = true,
-      enter_flexible_window = false,
+  在`opts`中定义args
+  ```lua
+    WordTranslate = {
+      handler = tools.flexi_handler,
+      prompt = "Translate the following text to Chinese, please only return the translation",
+      opts = {
+        fetch_key = function()
+          return switch("enable_glm")
+        end,
+        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        model = "glm-4-flash",
+        api_type = "zhipu",
+        args = [=[return string.format([[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']], url, LLM_KEY, vim.fn.json_encode(body))]=],
+        exit_on_move = true,
+        enter_flexible_window = false,
+      },
     },
-  },
-```
+  ```
+
 > [!NOTE]
 > 需要根据你的实际情况去修改args
+
 
 2. **多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key**
 
 - 创建一个`.env`文件，专门保存你的各种Key。注意：此文件不要上传Github
 
 - 在zshrc或者bashrc中加载`.env`，并定义一些函数，用于切换不同的大模型
-```bash
-source ~/.config/zsh/.env
+  ```bash
+  source ~/.config/zsh/.env
 
-export ACCOUNT=$WORKERS_AI_ACCOUNT
-export LLM_KEY=$SILICONFLOW_TOKEN
-
-enable_workers_ai() {
-  export LLM_KEY=$WORKERS_AI_KEY
-}
-
-enable_glm() {
-  export LLM_KEY=$GLM_KEY
-}
-
-enable_kimi() {
-  export LLM_KEY=$KIMI_KEY
-}
-
-enable_gpt() {
-  export LLM_KEY=$GITHUB_TOKEN
-}
-
-enable_siliconflow() {
+  export ACCOUNT=$WORKERS_AI_ACCOUNT
   export LLM_KEY=$SILICONFLOW_TOKEN
-}
-enable_openai() {
-  export LLM_KEY=$OPENAI_KEY
-}
-enable_local() {
-  export LLM_KEY=$LOCAL_LLM_KEY
-}
-```
+
+  enable_workers_ai() {
+    export LLM_KEY=$WORKERS_AI_KEY
+  }
+
+  enable_glm() {
+    export LLM_KEY=$GLM_KEY
+  }
+
+  enable_kimi() {
+    export LLM_KEY=$KIMI_KEY
+  }
+
+  enable_gpt() {
+    export LLM_KEY=$GITHUB_TOKEN
+  }
+
+  enable_siliconflow() {
+    export LLM_KEY=$SILICONFLOW_TOKEN
+  }
+  enable_openai() {
+    export LLM_KEY=$OPENAI_KEY
+  }
+  enable_local() {
+    export LLM_KEY=$LOCAL_LLM_KEY
+  }
+  ```
 
 - 最后在llm.nvim配置文件中，添加`switch`函数
-```lua
-local function switch(shell_func)
-  -- [LINK] https://github.com/Kurama622/dotfiles/blob/main/zsh/module/func.zsh
-  local p = io.popen(string.format("source ~/.config/zsh/module/func.zsh; %s; echo $LLM_KEY", shell_func))
-  local key = p:read()
-  p:close()
-  return key
-end
-```
-通过`fetch_key`完成Key的切换
-```lua
-  fetch_key = function()
-    return switch("enable_glm")
-  end,
-```
+  ```lua
+  local function switch(shell_func)
+    -- [LINK] https://github.com/Kurama622/dotfiles/blob/main/zsh/module/func.zsh
+    local p = io.popen(string.format("source ~/.config/zsh/module/func.zsh; %s; echo $LLM_KEY", shell_func))
+    local key = p:read()
+    p:close()
+    return key
+  end
+  ```
+  通过`fetch_key`完成Key的切换
+  ```lua
+    fetch_key = function()
+      return switch("enable_glm")
+    end,
+  ```
+
+3. **不同解析函数的优先级**
+
+  AI工具配置`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
