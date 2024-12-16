@@ -273,9 +273,12 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   local options = {
     left = {
       title = " Source ",
+      focusable = false,
     },
     right = {
       title = " Preview ",
+      focusable = true,
+      enter = true,
     },
     buftype = "nofile",
     spell = false,
@@ -287,8 +290,8 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   options = vim.tbl_deep_extend("force", options, opts or {})
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
-  local source_box = F.CreatePopup(options.left.title, false)
-  local preview_box = F.CreatePopup(options.right.title, true, { enter = true })
+  local source_box = F.CreatePopup(options.left.title, false, options.left)
+  local preview_box = F.CreatePopup(options.right.title, true, options.right)
 
   local layout = F.CreateLayout(
     "80%",
