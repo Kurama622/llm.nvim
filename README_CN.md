@@ -11,7 +11,7 @@
 >
 > 1. 支持任意一款大模型，比如gpt，glm，kimi或者本地运行的大模型
 >
-> 2. 支持定义属于你自己的AI工具
+> 2. 支持定义属于你自己的AI工具，且不同工具可以使用不同的模型
 >
 > 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`或者其他的平台）
 
@@ -32,6 +32,7 @@
   * [AI工具的配置](#ai工具的配置)
   * [本地运行大模型](#本地运行大模型)
 * [默认快捷键](#默认快捷键)
+* [常见问题](#常见问题)
 
 <!-- mtoc-end -->
 
@@ -121,7 +122,14 @@ export LLM_KEY=<Your API_KEY>
 ```bash
 export LLM_KEY=NONE
 ```
+
 ### 基本配置
+
+**一些你应该知道的命令**
+
+- `LLMSessionToggle`: 打开/隐藏对话界面
+- `LLMSelectedTextHandler`: 对选中的文本进行处理，如何处理取决于你传入什么提示词
+- `LLMAppHandler`: 调用AI工具
 
 > 如果url没有被配置，默认使用Cloudflare
 
@@ -248,9 +256,6 @@ export LLM_KEY=NONE
       - `Output:Ask`: 打开输入窗口
       - `Output:Cancel`: 取消对话
       - `Output:Resend`: 重新回答
-
-- `LLMSessionToggle`: 打开/隐藏对话界面
-- `LLMSelectedTextHandler`: 对选中的文本进行处理，如何处理取决于你传入什么提示词
 
 如果你使用本地运行的大模型，比如ollama运行的模型，你还需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
 
@@ -425,8 +430,37 @@ export LLM_KEY=NONE
   - `api_type`: 该AI工具输出的解析类型
   - `streaming_handler`: 该AI工具使用自定义的流解析函数
   - `parse_handler`: 该AI工具使用自定义的解析函数
+  - `border`：浮动窗口的边框样式
 
-不同模板还有一些属于自己的专属配置项，待补充...
+**不同模板还有一些属于自己的专属配置项**
+
+- `qa_handler`的`opts`中你还可以定义：
+  - `component_width`: 组件的宽度
+  - `component_height`: 组件的高度
+  - `query`
+      - `title`: 组件的标题，会显示在组件上方居中处
+      - `hl` : 标题的高亮
+  - `input_box_opts`: 输入框的窗口选项（`size`, `win_options`）
+  - `preview_box_opts`: 预览框的窗口选项（`size`, `win_options`）
+
+*目前的action_handler的样式，我觉得不太好看，后面应该会有修改*
+- `action_handler`的`opts`中你还可以定义:
+  - `code_hl`: llm生成的建议代码的高亮色
+  - `separator_hl`: 原始代码和建议代码之间的分隔符的高亮色
+  - `border`
+  - `win_options`
+
+- `side_by_side_handler`的`opts`中你还可以定义:
+  - `left` 左窗口
+    - `title`: 窗口的标题
+    - `focusable`: 是否允许窗口获得焦点
+    - `border`
+    - `win_options`
+  - `right` 右窗口
+    - `title`: 窗口的标题
+    - `focusable`: 是否允许窗口获得焦点
+    - `border`
+    - `win_options`
 
 我的一些AI工具配置:
 ```lua
@@ -645,3 +679,95 @@ return {
 | Output       | `i`          | `n`      | 打开输入窗口            |
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
+
+## 常见问题
+
+1. **windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题**
+
+使用自定义请求格式
+
+- 基础对话功能以及部分AI工具（使用流式输出）自定义请求格式
+
+定义args参数，与prompt同层级
+```lua
+  --[[ custom request args ]]
+  args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
+```
+
+- AI工具（使用非流式输出）自定义请求格式
+
+在`opts`中定义args
+```lua
+  WordTranslate = {
+    handler = tools.flexi_handler,
+    prompt = "Translate the following text to Chinese, please only return the translation",
+    opts = {
+      fetch_key = function()
+        return switch("enable_glm")
+      end,
+      url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      model = "glm-4-flash",
+      api_type = "zhipu",
+      args = [=[return string.format([[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']], url, LLM_KEY, vim.fn.json_encode(body))]=],
+      exit_on_move = true,
+      enter_flexible_window = false,
+    },
+  },
+```
+> [!NOTE]
+> 需要根据你的实际情况去修改args
+
+2. **多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key**
+
+- 创建一个`.env`文件，专门保存你的各种Key。注意：此文件不要上传Github
+
+- 在zshrc或者bashrc中加载`.env`，并定义一些函数，用于切换不同的大模型
+```bash
+source ~/.config/zsh/.env
+
+export ACCOUNT=$WORKERS_AI_ACCOUNT
+export LLM_KEY=$SILICONFLOW_TOKEN
+
+enable_workers_ai() {
+  export LLM_KEY=$WORKERS_AI_KEY
+}
+
+enable_glm() {
+  export LLM_KEY=$GLM_KEY
+}
+
+enable_kimi() {
+  export LLM_KEY=$KIMI_KEY
+}
+
+enable_gpt() {
+  export LLM_KEY=$GITHUB_TOKEN
+}
+
+enable_siliconflow() {
+  export LLM_KEY=$SILICONFLOW_TOKEN
+}
+enable_openai() {
+  export LLM_KEY=$OPENAI_KEY
+}
+enable_local() {
+  export LLM_KEY=$LOCAL_LLM_KEY
+}
+```
+
+- 最后在llm.nvim配置文件中，添加`switch`函数
+```lua
+local function switch(shell_func)
+  -- [LINK] https://github.com/Kurama622/dotfiles/blob/main/zsh/module/func.zsh
+  local p = io.popen(string.format("source ~/.config/zsh/module/func.zsh; %s; echo $LLM_KEY", shell_func))
+  local key = p:read()
+  p:close()
+  return key
+end
+```
+通过`fetch_key`完成Key的切换
+```lua
+  fetch_key = function()
+    return switch("enable_glm")
+  end,
+```
