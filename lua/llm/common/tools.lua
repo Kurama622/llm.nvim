@@ -508,12 +508,6 @@ function M.curl_request_handler(url, args)
 end
 
 function M.flexi_handler(name, F, state, _, prompt, opts)
-  local content = prompt .. ":\n" .. F.GetVisualSelection()
-  content = (content:gsub(".", {
-    ["'"] = "''",
-  }))
-  local flexible_box = nil
-
   local options = {
     buftype = "nofile",
     spell = false,
@@ -522,9 +516,21 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
     linebreak = false,
     exit_on_move = false,
     enter_flexible_window = true,
+    apply_visual_selection = true,
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+
+  local content = prompt
+  if options.apply_visual_selection then
+    content = content .. ":\n" .. F.GetVisualSelection()
+  end
+
+  content = (content:gsub(".", {
+    ["'"] = "''",
+  }))
+  local flexible_box = nil
+
   state.app.session[name] = {}
   table.insert(state.app.session[name], { role = "user", content = content })
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
