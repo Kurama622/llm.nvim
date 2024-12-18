@@ -75,6 +75,11 @@
   <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
 </p>
 
+7. **生成git commit信息**
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/29ec926c-b8e4-4490-8158-331dffcb28fc" alt="llm-git-commit-msg" width="560">
+</p>
+
 ## 安装
 
 ### 依赖
@@ -419,6 +424,7 @@ export LLM_KEY=NONE
   - `side_by_side_handler`: 两个窗口并排展示结果
   - `action_handler`: 在源文件中以diff的形式展示结果
   - `qa_handler`: 单轮对话的AI
+  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 )
   - 你也可以自定义函数
 - `prompt`: AI工具的提示词
 - `opts`
@@ -462,8 +468,13 @@ export LLM_KEY=NONE
     - `border`
     - `win_options`
 
+- `flexi_handler`的`opts`中你还可以定义:
+  - `exit_on_move`: 是否在光标移动时关闭弹性窗口
+  - `enter_flexible_window`: 是否在弹性窗口弹出时自动进入窗口,
+  - `apply_visual_selection`: 是否要在`prompt`后追加选中的文本内容
+
 我的一些AI工具配置:
-```lua
+~~~lua
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
@@ -572,6 +583,28 @@ export LLM_KEY=NONE
               enter_flexible_window = true,
             },
           },
+          CommitMsg = {
+            handler = tools.flexi_handler,
+            prompt = string.format(
+              [[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me. Respond with message only. DO NOT format the message in Markdown code blocks, DO NOT use backticks:
+
+```diff
+%s
+```
+]],
+              vim.fn.system("git diff --no-ext-diff --staged")
+            ),
+            opts = {
+              fetch_key = function()
+                return switch("enable_glm")
+              end,
+              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+              model = "glm-4-flash",
+              api_type = "zhipu",
+              enter_flexible_window = true,
+              apply_visual_selection = false,
+            },
+          },
         },
     })
     end,
@@ -586,7 +619,7 @@ export LLM_KEY=NONE
       -- { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
     },
   },
-```
+~~~
 
 
 ### 本地运行大模型
