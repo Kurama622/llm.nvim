@@ -421,10 +421,10 @@ export LLM_KEY=NONE
 对于所有的AI工具，它们的配置项都是基本类似的:
 
 - `handler`: 使用哪个模板
-  - `side_by_side_handler`: 两个窗口并排展示结果
-  - `action_handler`: 在源文件中以diff的形式展示结果
-  - `qa_handler`: 单轮对话的AI
-  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 )
+  - `side_by_side_handler`: 两个窗口并排展示结果, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
+  - `action_handler`: 在源文件中以diff的形式展示结果, 按`Y`/`y`接受LLM建议代码，按`N`/`n`/`<ESC>`拒绝
+  - `qa_handler`: 单轮对话的AI, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
+  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 ), 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
   - 你也可以自定义函数
 - `prompt`: AI工具的提示词
 - `opts`
