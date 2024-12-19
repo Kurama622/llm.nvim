@@ -541,6 +541,10 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
       flexible_box:map("n", { "<esc>", "N", "n" }, function()
         flexible_box:unmount()
       end)
+      flexible_box:map("n", { "Y", "y" }, function()
+        vim.api.nvim_command("normal! ggVGy")
+        flexible_box:unmount()
+      end)
 
       F.SetBoxOpts({ flexible_box }, {
         filetype = { "markdown", "markdown" },
