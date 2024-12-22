@@ -80,37 +80,9 @@ function M.action_handler(name, F, state, streaming, prompt, opts)
     diff = require("llm.common.diff_style.mini_diff")
   end
 
-  if prompt == nil then
-    prompt = [[Optimize the code, correct syntax errors, make the code more concise, and enhance reusability.
-
-Provide optimization ideas and the complete code after optimization. Mark the output code block with # BEGINCODE and # ENDCODE.
-
-The indentation of the optimized code should remain consistent with the original code. Here is an example:
-
-The original code is:
-<space><space><space><space>def func(a, b)
-<space><space><space><space><space><space><space><space>return a + b
-
-Optimization ideas:
-1. The function name `func` is not clear. Based on the context, it is determined that this function is meant to implement the functionality of adding two numbers, so the function name is changed to `add`.
-2. There is a syntax issue in the function definition; it should end with a colon. It should be `def add(a, b):`.
-
-Since the original code is indented by N spaces, the optimized code is also indented by N spaces.
-
-The optimized code is:
-
-```<language>
-# BEGINCODE
-<space><space><space><space>def add(a, b):
-<space><space><space><space><space><space><space><space>return a + b
-# ENDCODE
-```
-
-Please optimize this code according to the format, and respond in Chinese.]]
-  end
-
   local options = {
     separator = "─",
+    language = "English",
     input = {
       buftype = "nofile",
       relative = "win",
@@ -140,6 +112,39 @@ Please optimize this code according to the format, and respond in Chinese.]]
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+
+  if prompt == nil then
+    prompt = string.format(
+      [[Optimize the code, correct syntax errors, make the code more concise, and enhance reusability.
+
+Provide optimization ideas and the complete code after optimization. Mark the output code block with # BEGINCODE and # ENDCODE.
+
+The indentation of the optimized code should remain consistent with the original code. Here is an example:
+
+The original code is:
+<space><space><space><space>def func(a, b)
+<space><space><space><space><space><space><space><space>return a + b
+
+Optimization ideas:
+1. The function name `func` is not clear. Based on the context, it is determined that this function is meant to implement the functionality of adding two numbers, so the function name is changed to `add`.
+2. There is a syntax issue in the function definition; it should end with a colon. It should be `def add(a, b):`.
+
+Since the original code is indented by N spaces, the optimized code is also indented by N spaces.
+
+The optimized code is:
+
+```<language>
+# BEGINCODE
+<space><space><space><space>def add(a, b):
+<space><space><space><space><space><space><space><space>return a + b
+# ENDCODE
+```
+
+Please optimize this code according to the format, and respond in %s.]],
+      options.language
+    )
+  end
+
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
   local bufnr = vim.api.nvim_get_current_buf()
