@@ -233,6 +233,10 @@ Please optimize this code according to the format, and respond in Chinese.]]
   end)
 
   preview_box:map("n", { "<esc>" }, function()
+    if worker.job then
+      worker.job:shutdown()
+      worker.job = nil
+    end
     if diff then
       diff:reject()
     end
