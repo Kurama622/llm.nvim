@@ -199,6 +199,24 @@ export LLM_KEY=NONE
         temperature = 0.3,
         top_p = 0.7,
 
+        spinner = {
+          text = {
+            "󰧞󰧞",
+            "󰧞󰧞",
+            "󰧞󰧞",
+            "󰧞󰧞",
+          },
+          hl = "Title",
+        },
+
+        display = {
+          diff = {
+            layout = "vertical", -- vertical|horizontal split for default provider
+            opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
+            provider = "mini_diff", -- default|mini_diff
+          },
+        },
+
         -- stylua: ignore
         keys = {
           -- The keyboard mapping for the input window.
@@ -245,6 +263,10 @@ export LLM_KEY=NONE
 - `history_path`: 会话历史的保存路径
 - `temperature`: 模型的temperature, 控制模型输出的随机性
 - `top_p`: 模型的top_p, 控制模型输出的随机性
+- `spinner`: 模型输出的等待动画 (非流式输出时生效)
+- `display`
+  - `diff`: diff的显示风格（优化代码并显示diff时生效, 截图中的风格为mini_diff, 需要安装[mini.diff](https://github.com/echasnovski/mini.diff)）
+
 - `keys`: 不同窗口的快捷键设置，默认值见[默认快捷键](#默认快捷键)
   - *浮动窗口风格下的快捷键*
     - 输入窗口
@@ -455,6 +477,7 @@ export LLM_KEY=NONE
   - `preview_box_opts`: 预览框的窗口选项（`size`, `win_options`）
 
 - `action_handler`的`opts`中你还可以定义:
+  - `language`: 输出结果使用的语言（`English`/`Chinese`/`Japanese`等）
   - `input`
     - `relative`: 分割窗口的相对位置（`editor`/`win`）,
     - `position`: 分割窗口的相对位置（`top`/`left`/`right`/`bottom`）,
