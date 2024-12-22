@@ -168,6 +168,13 @@ M.configs = {
 
   app_handler = {},
 
+  display = {
+    diff = {
+      layout = "vertical", -- vertical|horizontal split for default provider
+      opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
+      provider = "default", -- default|mini_diff
+    },
+  },
   -- stylua: ignore
   keys = {
     -- The keyboard mapping for the input window.

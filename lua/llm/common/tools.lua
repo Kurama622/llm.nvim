@@ -2,82 +2,84 @@ local M = {}
 
 local event = require("nui.utils.autocmd").event
 local Popup = require("nui.popup")
+local Split = require("nui.split")
 local Layout = require("nui.layout")
 local NuiText = require("nui.text")
 local conf = require("llm.config")
 local F = require("llm.common.func")
 local seamless = require("llm.common.seamless_border")
+local diff = require("llm.common.diff_style")
 
-function M.CompareAction(
-  bufnr,
+local function overwrite_selection(context, contents)
+  if context.start_col > 0 then
+    context.start_col = context.start_col - 1
+  end
+
+  vim.api.nvim_buf_set_text(
+    context.bufnr,
+    context.start_line - 1,
+    context.start_col,
+    context.end_line - 1,
+    context.end_col,
+    contents
+  )
+  vim.api.nvim_win_set_cursor(context.winnr, { context.start_line, context.start_col })
+end
+
+local function single_turn_dialogue(
+  preview_box,
+  state,
+  name,
+  streaming,
+  fetch_key,
+  options,
   start_str,
   end_str,
-  mark_id,
-  extmark,
-  extmark_opts,
-  space_text,
-  start_line,
-  end_line,
-  codeln,
-  offset,
-  ostr,
-  code_hl,
-  separator_hl
+  context
 )
-  local pattern = string.format("%s(.-)%s", start_str, end_str)
-  local res = ostr:match(pattern)
-  if res == nil then
-    print("The code block format is incorrect, please manually copy the generated code.")
-    return codeln
-  end
+  F.AppendChunkToBuffer(preview_box.bufnr, preview_box.winid, "-----\n")
 
-  -- set highlight
-  vim.api.nvim_set_hl(0, "LLMSuggestCode", code_hl)
-  vim.api.nvim_set_hl(0, "LLMSeparator", separator_hl)
+  return streaming(
+    preview_box.bufnr,
+    preview_box.winid,
+    state.app.session[name],
+    fetch_key,
+    options.url,
+    options.model,
+    options.api_type,
+    options.args,
+    options.streaming_handler,
+    options.stdout_handler,
+    options.stderr_handler,
+    function(ostr)
+      local pattern = string.format("%s(.-)%s", start_str, end_str)
+      local res = ostr:match(pattern)
+      if res == nil then
+        print("The code block format is incorrect, please manually copy the generated code.")
+      end
+      local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
 
-  for _, v in ipairs({ "raw", "separator", "llm" }) do
-    extmark[v] = vim.api.nvim_create_namespace(v)
-    local text = v == "raw" and "<<<<<<< " .. v .. space_text
-      or v == "separator" and "======= " .. space_text
-      or ">>>>>>> " .. v .. space_text
-    extmark_opts[v] = {
-      virt_text = { { text, "LLMSeparator" } },
-      virt_text_pos = "overlay",
-    }
-  end
-
-  extmark["code"] = vim.api.nvim_create_namespace("code")
-  extmark_opts["code"] = {}
-  mark_id["code"] = {}
-
-  if offset ~= 0 then
-    -- create line to display raw separator virtual text
-    F.InsertTextLine(bufnr, 0, "")
-  end
-
-  mark_id["raw"] = vim.api.nvim_buf_set_extmark(bufnr, extmark.raw, start_line - 2 + offset, 0, extmark_opts.raw)
-
-  -- create line to display the separator virtual text
-  F.InsertTextLine(bufnr, end_line + offset, "")
-  mark_id["separator"] =
-    vim.api.nvim_buf_set_extmark(bufnr, extmark.separator, end_line + offset, 0, extmark_opts.separator)
-
-  for l in res:gmatch("[^\r\n]+") do
-    -- create line to display the code suggested by the LLM
-    F.InsertTextLine(bufnr, end_line + codeln + 1 + offset, "")
-    extmark_opts.code[codeln] = { virt_text = { { l, "LLMSuggestCode" } }, virt_text_pos = "overlay" }
-    mark_id.code[codeln] =
-      vim.api.nvim_buf_set_extmark(bufnr, extmark.code, end_line + codeln + 1 + offset, 0, extmark_opts.code[codeln])
-    codeln = codeln + 1
-  end
-
-  -- create line to display LLM separator virtual text
-  F.InsertTextLine(bufnr, end_line + codeln + 1 + offset, "")
-  mark_id["llm"] = vim.api.nvim_buf_set_extmark(bufnr, extmark.llm, end_line + codeln + 1 + offset, 0, extmark_opts.llm)
-  return codeln
+      if res then
+        overwrite_selection(context, vim.split(res, "\n"))
+      end
+      diff = diff.new({
+        bufnr = context.bufnr,
+        cursor_pos = context.cursor_pos,
+        filetype = context.filetype,
+        contents = contents,
+        winnr = context.winnr,
+      })
+    end
+  )
 end
 
 function M.action_handler(name, F, state, streaming, prompt, opts)
+  if conf.configs.display.diff.provider == "default" then
+    diff = require("llm.common.diff_style.default")
+  elseif conf.configs.display.diff.provider == "mini_diff" then
+    diff = require("llm.common.diff_style.mini_diff")
+  end
+
   if prompt == nil then
     prompt = [[Optimize the code, correct syntax errors, make the code more concise, and enhance reusability.
 
@@ -108,90 +110,108 @@ Please optimize this code according to the format, and respond in Chinese.]]
   end
 
   local options = {
-    exit_handler = M.CompareAction,
-    code_hl = { fg = "#6aa84f", bg = "NONE" },
-    separator_hl = { fg = "#6aa84f", bg = "#333333" },
-    border = "solid",
-    win_options = { winblend = 0, winhighlight = "Normal:Normal" },
-    buftype = "nofile",
-    spell = false,
-    number = true,
-    wrap = true,
-    linebreak = false,
+    separator = "─",
+    input = {
+      buftype = "nofile",
+      relative = "win",
+      position = "bottom",
+      size = "25%",
+      enter = true,
+      spell = false,
+      number = false,
+      relativenumber = false,
+      wrap = true,
+      linebreak = false,
+      signcolumn = "no",
+    },
+    output = {
+      buftype = "nofile",
+      relative = "editor",
+      position = "right",
+      size = "25%",
+      enter = true,
+      spell = false,
+      number = false,
+      relativenumber = false,
+      wrap = true,
+      linebreak = false,
+      signcolumn = "no",
+    },
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
-  local start_line, end_line = F.GetVisualSelectionRange()
   local bufnr = vim.api.nvim_get_current_buf()
-  local source_content = F.GetVisualSelection()
+  local winnr = vim.api.nvim_get_current_win()
+  local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
+  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
+  local source_content = F.GetVisualSelection(lines)
 
-  local preview_box = Popup({ enter = true, border = options.border, win_options = options.win_options })
+  F.VisMode2NorMode()
 
-  local layout = F.CreateLayout(
-    "30%",
-    "98%",
-    Layout.Box({ Layout.Box(preview_box, { size = "100%" }) }, { dir = "row" }),
-    { position = { row = "50%", col = "100%" } }
-  )
-
-  layout:mount()
-
-  local mark_id = {}
-  local extmark = {}
-  local extmark_opts = {}
-  local space_text = string.rep(" ", vim.o.columns - 7)
-  local start_str = "# BEGINCODE"
-  local end_str = "# ENDCODE"
-  local codeln = 0
-  local offset = start_line == 1 and 1 or 0
-
-  F.SetBoxOpts({ preview_box }, {
-    filetype = { "markdown" },
-    buftype = options.buftype,
-    spell = options.spell,
-    number = options.number,
-    wrap = options.wrap,
-    linebreak = options.linebreak,
+  local preview_box = Split({
+    relative = options.output.relative,
+    position = options.output.position,
+    size = options.output.size,
+    enter = options.output.enter,
+    buf_options = {
+      filetype = "markdown",
+      buftype = options.output.buftype,
+    },
+    win_options = {
+      spell = options.output.spell,
+      number = options.output.number,
+      relativenumber = options.output.relativenumber,
+      wrap = options.output.wrap,
+      linebreak = options.output.linebreak,
+      signcolumn = options.output.signcolumn,
+    },
   })
 
+  preview_box:mount()
+  local input_box = Split({
+    relative = options.input.relative,
+    position = options.input.position,
+    size = options.input.size,
+    enter = options.input.enter,
+    buf_options = {
+      filetype = "markdown",
+      buftype = options.input.buftype,
+    },
+    win_options = {
+      spell = options.input.spell,
+      number = options.input.number,
+      relativenumber = options.input.relativenumber,
+      wrap = options.input.wrap,
+      linebreak = options.input.linebreak,
+      signcolumn = options.input.signcolumn,
+    },
+  })
+
+  local start_str = "# BEGINCODE\n"
+  local end_str = "\n# ENDCODE"
+
   state.app["session"][name] = {}
-  table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. source_content })
+  table.insert(state.app.session[name], { role = "system", content = prompt })
+  table.insert(state.app.session[name], { role = "user", content = source_content })
 
   state.popwin = preview_box
 
-  local worker = streaming(
-    preview_box.bufnr,
-    preview_box.winid,
-    state.app.session[name],
-    fetch_key,
-    options.url,
-    options.model,
-    options.api_type,
-    options.args,
-    options.streaming_handler,
-    options.stdout_handler,
-    options.stderr_handler,
-    function(ostr) -- exit handler
-      codeln = options.exit_handler(
-        bufnr,
-        start_str,
-        end_str,
-        mark_id,
-        extmark,
-        extmark_opts,
-        space_text,
-        start_line,
-        end_line,
-        codeln,
-        offset,
-        ostr,
-        options.code_hl,
-        options.separator_hl
-      )
-    end
-  )
+  local context = {
+    bufnr = bufnr,
+    filetype = F.GetFileType(bufnr),
+    contents = lines,
+    winnr = winnr,
+    cursor_pos = cursor_pos,
+    start_line = start_line,
+    start_col = start_col,
+    end_line = end_line,
+    end_col = end_col,
+  }
+
+  local worker =
+    single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
 
   preview_box:map("n", "<C-c>", function()
     if worker.job then
@@ -200,52 +220,63 @@ Please optimize this code according to the format, and respond in Chinese.]]
     end
   end)
 
-  preview_box:map("n", { "<esc>", "N", "n" }, function()
-    if worker.job then
-      worker.job:shutdown()
-      print("Suspend output...")
-      vim.wait(200, function() end)
-      worker.job = nil
+  preview_box:map("n", { "Y", "y" }, function()
+    if diff then
+      diff:accept()
     end
-    if codeln ~= 0 then
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.raw, mark_id.raw)
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.separator, mark_id.separator)
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.llm, mark_id.llm)
-      for i = 0, codeln - 1 do
-        vim.api.nvim_buf_del_extmark(bufnr, extmark.code, mark_id.code[i])
-      end
-
-      -- remove the line created to display the code suggested by LLM.
-      F.RemoveTextLines(bufnr, end_line + offset, end_line + codeln + 2 + offset)
-      if offset ~= 0 then
-        -- remove the line created to display the raw separator.
-        F.RemoveTextLines(bufnr, 0, 1)
-      end
-    end
-    layout:unmount()
   end)
 
-  preview_box:map("n", { "Y", "y" }, function()
-    if codeln ~= 0 then
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.raw, mark_id.raw)
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.separator, mark_id.separator)
-      vim.api.nvim_buf_del_extmark(bufnr, extmark.llm, mark_id.llm)
-
-      -- remove the line created to display the LLM separator.
-      F.RemoveTextLines(bufnr, end_line + codeln + 1 + offset, end_line + codeln + 2 + offset)
-      -- remove raw code
-      F.RemoveTextLines(bufnr, start_line - 1, end_line + 1 + offset)
-
-      for i = 0, codeln - 1 do
-        vim.api.nvim_buf_del_extmark(bufnr, extmark.code, mark_id.code[i])
-      end
-
-      for i = 0, codeln - 1 do
-        -- Write the code suggested by the LLM.
-        F.ReplaceTextLine(bufnr, start_line - 1 + i, extmark_opts.code[i].virt_text[1][1])
-      end
+  preview_box:map("n", { "N", "n" }, function()
+    if diff then
+      diff:reject()
     end
-    layout:unmount()
+  end)
+
+  preview_box:map("n", { "<esc>" }, function()
+    if worker.job then
+      worker.job:shutdown()
+      worker.job = nil
+    end
+    if diff then
+      diff:reject()
+    end
+    preview_box:unmount()
+  end)
+
+  preview_box:map("n", { "I", "i" }, function()
+    input_box:mount()
+    vim.api.nvim_command("startinsert")
+    input_box:map("n", { "<esc>" }, function()
+      input_box:unmount()
+    end)
+
+    input_box:map("n", { "Y", "y" }, function()
+      if diff then
+        diff:accept()
+      end
+    end)
+
+    input_box:map("n", { "N", "n" }, function()
+      if diff then
+        diff:reject()
+      end
+    end)
+
+    input_box:map("n", { "<CR>" }, function()
+      local contents = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+      table.remove(state.app.session[name], #state.app.session[name])
+      state.app.session[name][#state.app.session[name]].content = state.app.session[name][#state.app.session[name]].content
+        .. "\n"
+        .. table.concat(contents, "\n")
+      vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
+      worker =
+        single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
+    end)
+  end)
+
+  preview_box:map("n", { "<C-r>" }, function()
+    table.remove(state.app.session[name], #state.app.session[name])
+    worker = single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
   end)
 end
 
@@ -570,8 +601,9 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
     options.exit_handler
   )
 
-  local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-  vim.api.nvim_feedkeys(esc, "x", false)
+  F.VisMode2NorMode()
+  -- local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+  -- vim.api.nvim_feedkeys(esc, "x", false)
   if options.exit_on_move then
     vim.api.nvim_create_autocmd("CursorMoved", {
       callback = function()

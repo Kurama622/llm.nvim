@@ -146,6 +146,22 @@ function M.DeepCopy(t)
   return new_t
 end
 
+function M.GetFileType(bufnr)
+  bufnr = bufnr or 0
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+
+  if ft == "cpp" then
+    return "C++"
+  end
+
+  return ft
+end
+
+function M.VisMode2NorMode()
+  local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+  vim.api.nvim_feedkeys(esc, "x", false)
+end
+
 function M.GetUserRequestArgs(args, env)
   local chunk, err = load(args, nil, "t", env)
 
@@ -210,51 +226,90 @@ function M.NewLine(bufnr, winid)
   state.cursor.has_prefix = true
 end
 
+---@param bufnr number
+---@param winid number
+---@param content string
 function M.WriteContent(bufnr, winid, content)
   M.AppendChunkToBuffer(bufnr, winid, content)
 end
 
-function M.GetVisualSelectionRange()
-  local line_v = vim.fn.getpos("v")[2]
-  local line_cur = vim.api.nvim_win_get_cursor(0)[1]
-  if line_v > line_cur then
-    return line_cur, line_v
-  end
-  return line_v, line_cur
+---@param mode string
+---@return boolean
+local function is_visual_mode(mode)
+  return mode == "v" or mode == "V" or mode == "\x16"
 end
 
-function M.GetVisualSelection()
-  local mode = vim.api.nvim_get_mode().mode
-  local lines = ""
-  if mode == "v" or mode == "\x16" then
-    local s_start, s_end
-    local line_cur = vim.fn.getpos(".")
-    local line_v = vim.fn.getpos("v")
-    local n_lines = math.abs(line_v[2] - line_cur[2]) + 1
-    if (n_lines == 1 and line_cur[3] > line_v[3]) or line_cur[2] > line_v[2] then
-      s_start, s_end = line_v, line_cur
-    else
-      s_start, s_end = line_cur, line_v
-    end
+function M.GetVisualSelectionRange(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  -- store the current mode
+  local mode = vim.fn.mode()
+  -- if we're not in visual mode, we need to re-enter it briefly
+  local is_visual = is_visual_mode(mode)
 
-    lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_end[2], false)
-    if n_lines == 1 then
-      lines[n_lines] = utf8_sub(lines[n_lines], s_start[3], s_end[3])
+  -- Get positions
+  local start_pos, end_pos
+  if is_visual then
+    -- If we're in visual mode, use 'v' and '.'
+    start_pos = vim.fn.getpos("v")
+    end_pos = vim.fn.getpos(".")
+  else
+    -- Fallback to marks if not in visual mode
+    start_pos = vim.fn.getpos("'<")
+    end_pos = vim.fn.getpos("'>")
+  end
+
+  local start_line = start_pos[2]
+  local start_col = start_pos[3]
+  local end_line = end_pos[2]
+  local end_col = end_pos[3]
+
+  -- normalize the range to start < end
+  if start_line > end_line or (start_line == end_line and start_col > end_col) then
+    start_line, end_line = end_line, start_line
+    start_col, end_col = end_col, start_col
+  end
+
+  local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+
+  -- get whole buffer if there is no current/previous visual selection
+  if start_line == 0 then
+    lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    start_line = 1
+    start_col = 0
+    end_line = #lines
+    end_col = #lines[#lines]
+  end
+
+  local n_lines = #lines
+  -- Handle partial line selections
+  if n_lines > 0 then
+    if mode == "V" or (not is_visual and vim.fn.visualmode() == "V") then
+      -- For line-wise selection, use full lines
+      start_col = 1
+      end_col = #lines[#lines]
     else
-      lines[1] = utf8_sub(lines[1], s_start[3], #lines[1])
-      if mode == "v" then
-        lines[n_lines] = utf8_sub(lines[n_lines], 1, s_end[3])
+      -- For character-wise selection, respect the columns
+      if n_lines == 1 then
+        lines[1] = utf8_sub(lines[1], start_col, end_col)
       else
-        for n = 2, n_lines - 1 do
-          lines[n] = utf8_sub(lines[n], s_start[3], #lines[n])
+        lines[1] = utf8_sub(lines[1], start_col, #lines[1])
+        if mode == "v" then
+          lines[n_lines] = utf8_sub(lines[n_lines], 1, end_col)
+        else
+          for n = 2, n_lines - 1 do
+            lines[n] = utf8_sub(lines[n], start_col, #lines[n])
+          end
+          lines[n_lines] = utf8_sub(lines[n_lines], start_col, end_col)
         end
-        lines[n_lines] = utf8_sub(lines[n_lines], s_start[3], s_end[3])
       end
     end
-  elseif mode == "V" then
-    local vstart, vend = M.GetVisualSelectionRange()
-    lines = vim.fn.getline(vstart, vend)
   end
+  return lines, start_line, start_col, end_line, end_col
+end
+
+function M.GetVisualSelection(lines)
+  -- Only retrieve the first return parameter of the `GetVisualSelectionRange` function.
+  lines = lines or M.GetVisualSelectionRange()
   local seletion = table.concat(lines, "\n")
   return seletion
 end

@@ -130,7 +130,7 @@ Show the diff between your code and the optimized code in source file. Press `y`
 > Currently these functions have been integrated into https://github.com/Kurama622/llm.nvim/blob/main/lua/llm/common/tools.lua and no longer need to be defined.
 
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-optim-gpt-compress.png" alt="llm-optimize-compare-action" width="450">
+  <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="450">
 </p>
 
 ```lua

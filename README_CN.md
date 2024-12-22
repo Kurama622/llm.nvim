@@ -62,7 +62,7 @@
 
   - **嵌入到源文件展示**
   <p align= "center">
-    <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-optim-gpt-compress.png" alt="llm-optimize-compare-action" width="560">
+    <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="560">
   </p>
 
 5. **生成测试用例**
@@ -422,7 +422,12 @@ export LLM_KEY=NONE
 
 - `handler`: 使用哪个模板
   - `side_by_side_handler`: 两个窗口并排展示结果, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
-  - `action_handler`: 在源文件中以diff的形式展示结果, 按`Y`/`y`接受LLM建议代码，按`N`/`n`/`<ESC>`拒绝
+  - `action_handler`: 在源文件中以diff的形式展示结果
+    - `Y`/`y`: 接受LLM建议代码
+    - `N`/`n`: 拒绝LLM建议代码
+    - `<ESC>`: 直接退出
+    - `I/i`: 输入优化的补充条件
+    - `<C-r>`: 直接重新优化
   - `qa_handler`: 单轮对话的AI, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
   - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 ), 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
   - 你也可以自定义函数
@@ -449,12 +454,17 @@ export LLM_KEY=NONE
   - `input_box_opts`: 输入框的窗口选项（`size`, `win_options`）
   - `preview_box_opts`: 预览框的窗口选项（`size`, `win_options`）
 
-*目前的action_handler的样式，我觉得不太好看，后面应该会有修改*
 - `action_handler`的`opts`中你还可以定义:
-  - `code_hl`: llm生成的建议代码的高亮色
-  - `separator_hl`: 原始代码和建议代码之间的分隔符的高亮色
-  - `border`
-  - `win_options`
+  - `input`
+    - `relative`: 分割窗口的相对位置（`editor`/`win`）,
+    - `position`: 分割窗口的相对位置（`top`/`left`/`right`/`bottom`）,
+    - `size`: 分割窗口的比例（默认是25%）,
+    - `enter`: 是否自动进入窗口,
+  - `output`
+    - `relative`: 同上`input`,
+    - `position`: 同上`input`,
+    - `size`: 同上`input`,
+    - `enter`: 同上`input`,
 
 - `side_by_side_handler`的`opts`中你还可以定义:
   - `left` 左窗口
