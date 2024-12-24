@@ -35,6 +35,7 @@
   * [AI工具的配置](#ai工具的配置)
   * [本地运行大模型](#本地运行大模型)
 * [默认快捷键](#默认快捷键)
+* [作者的配置文件](#作者的配置文件)
 * [常见问题](#常见问题)
 
 <!-- mtoc-end -->
@@ -661,6 +662,7 @@ export LLM_KEY=NONE
       { "<leader>tc", mode = "x", "<cmd>LLMAppHandler TestCode<cr>" },
       { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimCompare<cr>" },
       { "<leader>au", mode = "n", "<cmd>LLMAppHandler UserInfo<cr>" },
+      { "<leader>ag", mode = "n", "<cmd>LLMAppHandler CommitMsg<cr>" },
       -- { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
     },
   },
@@ -757,6 +759,10 @@ return {
 | Output       | `i`          | `n`      | 打开输入窗口            |
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
+
+## 作者的配置文件
+
+[plugins/llm.lua](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua)
 
 ---
 
