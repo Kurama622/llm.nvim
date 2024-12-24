@@ -1,7 +1,9 @@
-[English](README.md) | [**简体中文**](README_CN.md)
-
-<p align= "center">
-<img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+<p align="center">
+  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+</p>
+<p align="center">
+  <a href="README.md">English</a> |
+  <a href="README_CN.md"><b>简体中文</b></a>
 </p>
 
 ---
@@ -25,6 +27,7 @@
     * [Cloudflare](#cloudflare)
     * [ChatGLM (智谱清言)](#chatglm-智谱清言)
     * [kimi (月之暗面)](#kimi-月之暗面)
+    * [Github Models](#github-models)
     * [siliconflow (硅基流动)](#siliconflow-硅基流动)
     * [本地运行的大模型](#本地运行的大模型)
   * [基本配置](#基本配置)
@@ -115,6 +118,14 @@ export LLM_KEY=<Your API_KEY>
 export LLM_KEY=<Your API_KEY>
 ```
 
+#### Github Models
+1. 获取你的Github [Token](https://github.com/settings/tokens)
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Github Token>
+```
+
 #### siliconflow (硅基流动)
 1. 注册硅基流动：[siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), 获取你的API Key. 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型
 
@@ -122,6 +133,7 @@ export LLM_KEY=<Your API_KEY>
 ```bash
 export LLM_KEY=<Your API_KEY>
 ```
+
 #### 本地运行的大模型
 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`为`NONE`
 ```bash

@@ -1,7 +1,9 @@
-[**English**](README.md) | [简体中文](README_CN.md)
-
-<p align= "center">
-<img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+<p align="center">
+  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+</p>
+<p align="center">
+  <a href="README.md"><b>English</b></a> |
+  <a href="README_CN.md">简体中文</a>
 </p>
 
 ---
