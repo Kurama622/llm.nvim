@@ -192,7 +192,6 @@ export LLM_KEY=NONE
         -- [[ local llm ]]
         -- url = "http://localhost:11434/api/chat",
         -- model = "llama3.2:1b",
-        -- api_type = "local",
         -- streaming_handler = local_llm_streaming_handler,
         -- parse_handler = local_llm_parse_handler,
 
@@ -716,12 +715,6 @@ return {
             handler = tools.flexi_handler,
             prompt = "Translate the following text to Chinese, please only return the translation",
             opts = {
-              fetch_key = function()
-                return switch("enable_glm")
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
               parse_handler = local_llm_parse_handler,
               exit_on_move = true,
               enter_flexible_window = false,
