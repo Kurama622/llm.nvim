@@ -683,46 +683,118 @@ function M.GetUrlOutput(
 
   if parse_handler then
     parse = function(chunk)
-      assistant_output = parse_handler(chunk)
-      return assistant_output
+      local success, err = pcall(function()
+        assistant_output = parse_handler(chunk)
+      end)
+
+      if success then
+        return assistant_output
+      else
+        print(vim.inspect(chunk))
+        print("Error occurred:", err)
+        return ""
+      end
     end
   elseif api_type then
     if api_type == "workers-ai" then
       parse = function(chunk)
-        assistant_output = chunk.response
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.result.response
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     elseif api_type == "zhipu" then
       parse = function(chunk)
-        assistant_output = chunk.choices[1].message.content
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.choices[1].message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     elseif api_type == "openai" then
       parse = function(chunk)
-        assistant_output = chunk.choices[1].delta.content
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.choices[1].message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     end
   elseif conf.configs.parse_handler then
     parse = function(chunk)
-      assistant_output = conf.configs.parse_handler(chunk)
-      return assistant_output
+      local success, err = pcall(function()
+        assistant_output = conf.configs.parse_handler(chunk)
+      end)
+
+      if success then
+        return assistant_output
+      else
+        print(vim.inspect(chunk))
+        print("Error occurred:", err)
+        return ""
+      end
     end
   elseif conf.configs.api_type then
     if conf.configs.api_type == "workers-ai" then
       parse = function(chunk)
-        assistant_output = chunk.response
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.result.response
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     elseif conf.configs.api_type == "zhipu" then
       parse = function(chunk)
-        assistant_output = chunk.choices[1].message.content
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.choices[1].message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     elseif conf.configs.api_type == "openai" then
       parse = function(chunk)
-        assistant_output = chunk.choices[1].delta.content
-        return assistant_output
+        local success, err = pcall(function()
+          assistant_output = chunk.choices[1].message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          print(vim.inspect(chunk))
+          print("Error occurred:", err)
+          return ""
+        end
       end
     end
   end
