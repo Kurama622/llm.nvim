@@ -64,7 +64,7 @@
     <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="560">
   </p>
 
-  - **嵌入到源文件展示**
+  - **以diff的形式展示**
   <p align= "center">
     <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="560">
   </p>
@@ -264,7 +264,7 @@ export LLM_KEY=NONE
 - `style`: 对话窗口的样式(float即浮动窗口，其他均为分割窗口)
 - `url`: 模型的API地址
 - `model`: 模型的名称
-- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `workers-ai`. `openai`的格式可以兼任大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析
+- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `workers-ai`. `openai`的格式可以兼容大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析
 - `fetch_key`: 如果你需要同时使用不同平台的模型，可以通过配置`fetch_key`来保证不同模型使用不同的API Key，用法如下：
   ```lua
   fetch_key = function() return "<your api key>" end
@@ -467,9 +467,9 @@ export LLM_KEY=NONE
   - 你也可以自定义函数
 - `prompt`: AI工具的提示词
 - `opts`
-  - `spell`: 是否有拼写检查,
-  - `number`: 是否显示行号,
-  - `wrap`: 是否自动换行,
+  - `spell`: 是否有拼写检查
+  - `number`: 是否显示行号
+  - `wrap`: 是否自动换行
   - `linebreak`: 是否允许从单词中间换行
   - `url`、`model`: 该AI工具使用哪个大模型
   - `api_type`: 该AI工具输出的解析类型
@@ -491,15 +491,15 @@ export LLM_KEY=NONE
 - `action_handler`的`opts`中你还可以定义:
   - `language`: 输出结果使用的语言（`English`/`Chinese`/`Japanese`等）
   - `input`
-    - `relative`: 分割窗口的相对位置（`editor`/`win`）,
-    - `position`: 分割窗口的相对位置（`top`/`left`/`right`/`bottom`）,
-    - `size`: 分割窗口的比例（默认是25%）,
-    - `enter`: 是否自动进入窗口,
+    - `relative`: 分割窗口的相对位置（`editor`/`win`）
+    - `position`: 分割窗口的位置（`top`/`left`/`right`/`bottom`）
+    - `size`: 分割窗口的比例（默认是25%）
+    - `enter`: 是否自动进入窗口
   - `output`
-    - `relative`: 同上`input`,
-    - `position`: 同上`input`,
-    - `size`: 同上`input`,
-    - `enter`: 同上`input`,
+    - `relative`: 同`input`
+    - `position`: 同`input`
+    - `size`: 同`input`
+    - `enter`: 同`input`
 
 - `side_by_side_handler`的`opts`中你还可以定义:
   - `left` 左窗口
@@ -515,7 +515,7 @@ export LLM_KEY=NONE
 
 - `flexi_handler`的`opts`中你还可以定义:
   - `exit_on_move`: 是否在光标移动时关闭弹性窗口
-  - `enter_flexible_window`: 是否在弹性窗口弹出时自动进入窗口,
+  - `enter_flexible_window`: 是否在弹性窗口弹出时自动进入窗口
   - `apply_visual_selection`: 是否要在`prompt`后追加选中的文本内容
 
 我的一些AI工具配置:
@@ -855,4 +855,4 @@ return {
 
 3. **不同解析函数的优先级**
 
-  AI工具配置`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
+  AI工具配置的`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
