@@ -893,8 +893,12 @@ function M.GetUrlOutput(
         if str:sub(1, 1) ~= "{" then
           return
         end
-        local json = vim.json.decode(str)
-        assistant_output = parse(json)
+        local success, result = pcall(vim.json.decode, str)
+        if success then
+          assistant_output = parse(result)
+        else
+          print("Error occurred:", result)
+        end
       end)
     end,
     on_exit = function()
