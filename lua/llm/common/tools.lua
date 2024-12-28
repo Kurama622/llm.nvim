@@ -555,7 +555,27 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
     enter_flexible_window = true,
     apply_visual_selection = true,
     win_opts = {},
-    accept_action = nil,
+    accept = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
+      action = nil,
+    },
+    reject = {
+      mapping = {
+        mode = "n",
+        keys = { "N", "n" },
+      },
+      action = nil,
+    },
+    close = {
+      mapping = {
+        mode = "n",
+        keys = { "<esc>" },
+      },
+      action = nil,
+    },
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
@@ -577,17 +597,25 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
     options.exit_handler = function(output)
       flexible_box = F.FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
       flexible_box:mount()
-      flexible_box:map("n", { "<esc>", "N", "n" }, function()
-        flexible_box:unmount()
-      end)
-      flexible_box:map("n", { "Y", "y" }, function()
-        if options.accept_action ~= nil then
-          options.accept_action()
-        else
+
+      local default_actions = {
+        accept = function()
           vim.api.nvim_command("normal! ggVGy")
-        end
-        flexible_box:unmount()
-      end)
+        end,
+        reject = function() end,
+        close = function() end,
+      }
+      -- set keymaps and action
+      for _, v in ipairs({ "accept", "reject", "close" }) do
+        flexible_box:map(options[v].mapping.mode, options[v].mapping.keys, function()
+          if options[v].action ~= nil then
+            options[v].action()
+          else
+            default_actions[v]()
+          end
+          flexible_box:unmount()
+        end)
+      end
 
       F.SetBoxOpts({ flexible_box }, {
         filetype = { "markdown", "markdown" },
