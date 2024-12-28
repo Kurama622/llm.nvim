@@ -167,6 +167,8 @@ M.configs = {
   popwin_opts = M._.popwin_opts,
 
   app_handler = {},
+  enable_trace = false,
+  log_level = 1,
 
   display = {
     diff = {
@@ -205,6 +207,8 @@ M.session = {
 function M.setup(opts)
   M.configs = vim.tbl_deep_extend("force", M.configs, opts or {})
   table.insert(M.session.messages, { role = "system", content = M.configs.prompt })
+
+  require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
   if not M.configs.save_session then
     M.configs.output_box_opts.size.width = M.configs.input_box_opts.size.width

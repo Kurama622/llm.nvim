@@ -7,6 +7,7 @@ local streaming = require("llm.common.streaming")
 local _popup = require("nui.popup")
 local Menu = require("nui.menu")
 local F = require("llm.common.func")
+local LOG = require("llm.common.log")
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
@@ -52,7 +53,7 @@ function M.LLMSelectedTextHandler(description)
       F.WinMapping(state.popwin, v.mode, v.key, function()
         if state.llm.worker.job then
           state.llm.worker.job:shutdown()
-          print("Suspend output...")
+          LOG:INFO("Suspend output...")
           vim.wait(200, function() end)
           state.llm.worker.job = nil
           vim.api.nvim_command("doautocmd BufEnter")
@@ -125,7 +126,7 @@ function M.NewSession()
             end
           end,
           on_submit = function(item)
-            print("Menu Submitted: ", item.text)
+            LOG:TRACE("Menu Submitted: " .. item.text)
           end,
         })
 

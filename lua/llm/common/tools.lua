@@ -9,6 +9,7 @@ local conf = require("llm.config")
 local F = require("llm.common.func")
 local seamless = require("llm.common.seamless_border")
 local diff = require("llm.common.diff_style")
+local LOG = require("llm.common.log")
 
 local function overwrite_selection(context, contents)
   if context.start_col > 0 then
@@ -55,7 +56,7 @@ local function single_turn_dialogue(
       local pattern = string.format("%s(.-)%s", start_str, end_str)
       local res = ostr:match(pattern)
       if res == nil then
-        print("The code block format is incorrect, please manually copy the generated code.")
+        LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
       end
       local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
 
@@ -381,7 +382,7 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   preview_box:map("n", { "<esc>", "N", "n" }, function()
     if worker.job then
       worker.job:shutdown()
-      print("Suspend output...")
+      LOG:INFO("Suspend output...")
       vim.wait(200, function() end)
       worker.job = nil
     end
@@ -514,7 +515,7 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
     v:map("n", { "<esc>", "N", "n" }, function()
       if worker.job then
         worker.job:shutdown()
-        print("Suspend output...")
+        LOG:INFO("Suspend output...")
         vim.wait(200, function() end)
         worker.job = nil
       end
@@ -553,6 +554,8 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
     exit_on_move = false,
     enter_flexible_window = true,
     apply_visual_selection = true,
+    win_opts = {},
+    accept_action = nil,
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
@@ -572,13 +575,17 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
   if options.exit_handler == nil then
     options.exit_handler = function(output)
-      flexible_box = F.FlexibleWindow(output, options.enter_flexible_window)
+      flexible_box = F.FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
       flexible_box:mount()
       flexible_box:map("n", { "<esc>", "N", "n" }, function()
         flexible_box:unmount()
       end)
       flexible_box:map("n", { "Y", "y" }, function()
-        vim.api.nvim_command("normal! ggVGy")
+        if options.accept_action ~= nil then
+          options.accept_action()
+        else
+          vim.api.nvim_command("normal! ggVGy")
+        end
         flexible_box:unmount()
       end)
 

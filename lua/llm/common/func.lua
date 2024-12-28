@@ -5,6 +5,7 @@ local state = require("llm.state")
 local conf = require("llm.config")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
+local LOG = require("llm.common.log")
 
 local function IsNotPopwin(winid)
   return state.popwin == nil or winid ~= state.popwin.winid
@@ -77,9 +78,13 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
-local function wait_ui_opts()
+local function trim_leading_whitespace(str)
+  return (str:gsub("^[\n%s]*", ""))
+end
+
+function M.wait_ui_opts(win_opts)
   local ui_width = vim.api.nvim_strwidth(conf.configs.spinner.text[1])
-  return {
+  local opts = {
     relative = "cursor",
     position = {
       row = -1,
@@ -100,9 +105,11 @@ local function wait_ui_opts()
       winhighlight = "Normal:NONE,FloatBorder:FloatBorder",
     },
   }
+  opts = vim.tbl_deep_extend("force", opts, win_opts or {})
+  return opts
 end
 
-local function show_spinner(waiting_state)
+function M.show_spinner(waiting_state)
   local spinner_frames = conf.configs.spinner.text
   local spinner_hl = conf.configs.spinner.hl
   local frame = 1
@@ -324,7 +331,7 @@ end
 function M.CloseLLM()
   if state.llm.worker.job then
     state.llm.worker.job:shutdown()
-    print("Suspend output...")
+    LOG:INFO("Suspend output...")
     vim.wait(200, function() end)
     state.llm.worker.job = nil
   end
@@ -459,7 +466,12 @@ function M.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid
   else
     line = line .. chunk
     local json_str = line:sub(7, -1)
-    local data = vim.fn.json_decode(json_str)
+    local status, data = pcall(vim.fn.json_decode, json_str)
+
+    if not status then
+      LOG:TRACE("json decode error: " .. json_str)
+    end
+
     assistant_output = assistant_output .. data.response
     M.WriteContent(bufnr, winid, data.response)
     line = ""
@@ -481,22 +493,33 @@ function M.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
     local end_idx = line:find("}}]}", 1, true)
     local json_str = nil
 
-    while start_idx ~= nil and end_idx ~= nil do
-      if start_idx < end_idx then
-        json_str = line:sub(7, end_idx + 3)
-      end
-      local data = vim.fn.json_decode(json_str)
-      assistant_output = assistant_output .. data.choices[1].delta.content
-      M.WriteContent(bufnr, winid, data.choices[1].delta.content)
+    if start_idx == nil or end_idx == nil then
+      LOG:TRACE(line)
+    else
+      while start_idx ~= nil and end_idx ~= nil do
+        if start_idx < end_idx then
+          json_str = line:sub(7, end_idx + 3)
+        end
 
-      if end_idx + 4 > #line then
-        line = ""
-        break
-      else
-        line = line:sub(end_idx + 4)
+        local status, data = pcall(vim.fn.json_decode, json_str)
+
+        if not status or not data.choices[1].delta.content then
+          LOG:TRACE("json decode error: " .. json_str)
+          break
+        end
+
+        assistant_output = assistant_output .. data.choices[1].delta.content
+        M.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+        if end_idx + 4 > #line then
+          line = ""
+          break
+        else
+          line = line:sub(end_idx + 4)
+        end
+        start_idx = line:find("data: ", 1, true)
+        end_idx = line:find("}}]}", 1, true)
       end
-      start_idx = line:find("data: ", 1, true)
-      end_idx = line:find("}}]}", 1, true)
     end
   end
   return assistant_output
@@ -511,33 +534,38 @@ function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
     line = line .. chunk
   else
     line = line .. chunk
-
+    line = trim_leading_whitespace(line)
     local start_idx = line:find("data: ", 1, true)
     local end_idx = line:find("}]", 1, true)
     local json_str = nil
 
-    while start_idx ~= nil and end_idx ~= nil do
-      if start_idx < end_idx then
-        json_str = line:sub(7, end_idx + 1) .. "}"
+    if start_idx == nil or end_idx == nil then
+      LOG:TRACE(line)
+    else
+      while start_idx ~= nil and end_idx ~= nil do
+        if start_idx < end_idx then
+          json_str = line:sub(7, end_idx + 1) .. "}"
+        end
+
+        local status, data = pcall(vim.fn.json_decode, json_str)
+
+        if not status or not data.choices[1].delta.content then
+          LOG:TRACE("json decode error: " .. json_str)
+          break
+        end
+
+        assistant_output = assistant_output .. data.choices[1].delta.content
+        M.WriteContent(bufnr, winid, data.choices[1].delta.content)
+
+        if end_idx + 2 > #line then
+          line = ""
+          break
+        else
+          line = line:sub(end_idx + 2)
+        end
+        start_idx = line:find("data: ", 1, true)
+        end_idx = line:find("}]", 1, true)
       end
-
-      local status, data = pcall(vim.fn.json_decode, json_str)
-
-      if not status or not data.choices[1].delta.content then
-        break
-      end
-
-      assistant_output = assistant_output .. data.choices[1].delta.content
-      M.WriteContent(bufnr, winid, data.choices[1].delta.content)
-
-      if end_idx + 2 > #line then
-        line = ""
-        break
-      else
-        line = line:sub(end_idx + 2)
-      end
-      start_idx = line:find("data: ", 1, true)
-      end_idx = line:find("}]", 1, true)
     end
   end
   return assistant_output
@@ -589,7 +617,7 @@ function M.SetBoxOpts(box_list, opts)
   end
 end
 
-function M.FlexibleWindow(str, enter_flexible_win)
+function M.FlexibleWindow(str, enter_flexible_win, user_opts)
   local text = vim.split(str, "\n")
   local width = 0
   local height = #text
@@ -602,10 +630,10 @@ function M.FlexibleWindow(str, enter_flexible_win)
         height = height + 1
       end
     end
-    text[i] = " " .. line
+    text[i] = "" .. line
   end
 
-  local win_width = math.min(width + 2, max_win_width)
+  local win_width = math.min(width, max_win_width)
   local win_height = math.min(height, max_win_height)
 
   local opts = {
@@ -630,6 +658,7 @@ function M.FlexibleWindow(str, enter_flexible_win)
     },
   }
 
+  opts = vim.tbl_deep_extend("force", opts, user_opts or {})
   local flexible_box = Popup(opts)
 
   vim.api.nvim_buf_set_lines(flexible_box.bufnr, 0, -1, false, text)
@@ -648,7 +677,7 @@ function M.GetUrlOutput(
   stderr_handler,
   exit_handler
 )
-  local wait_box_opts = wait_ui_opts()
+  local wait_box_opts = M.wait_ui_opts()
   local wait_box = Popup(wait_box_opts)
 
   local waiting_state = {
@@ -660,7 +689,7 @@ function M.GetUrlOutput(
   }
 
   waiting_state.box:mount()
-  show_spinner(waiting_state)
+  M.show_spinner(waiting_state)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 
@@ -690,8 +719,8 @@ function M.GetUrlOutput(
       if success then
         return assistant_output
       else
-        print(vim.inspect(chunk))
-        print("Error occurred:", err)
+        LOG:TRACE(vim.inspect(chunk))
+        LOG:ERROR("Error occurred:" .. err)
         return ""
       end
     end
@@ -705,8 +734,8 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
@@ -719,8 +748,8 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
@@ -733,8 +762,8 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
@@ -748,8 +777,8 @@ function M.GetUrlOutput(
       if success then
         return assistant_output
       else
-        print(vim.inspect(chunk))
-        print("Error occurred:", err)
+        LOG:TRACE(vim.inspect(chunk))
+        LOG:ERROR("Error occurred:" .. err)
         return ""
       end
     end
@@ -763,8 +792,8 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
@@ -777,13 +806,14 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
     elseif conf.configs.api_type == "openai" then
       parse = function(chunk)
+        LOG:TRACE(vim.inspect(chunk))
         local success, err = pcall(function()
           assistant_output = chunk.choices[1].message.content
         end)
@@ -791,8 +821,8 @@ function M.GetUrlOutput(
         if success then
           return assistant_output
         else
-          print(vim.inspect(chunk))
-          print("Error occurred:", err)
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
           return ""
         end
       end
@@ -890,6 +920,7 @@ function M.GetUrlOutput(
         for _, line in ipairs(data) do
           str = str .. line
         end
+        str = trim_leading_whitespace(str)
         if str:sub(1, 1) ~= "{" then
           return
         end
@@ -897,7 +928,7 @@ function M.GetUrlOutput(
         if success then
           assistant_output = parse(result)
         else
-          print("Error occurred:", result)
+          LOG:ERROR("Error occurred:" .. result)
         end
       end)
     end,
