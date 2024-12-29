@@ -473,15 +473,15 @@ export LLM_KEY=NONE
 对于所有的AI工具，它们的配置项都是基本类似的:
 
 - `handler`: 使用哪个模板
-  - `side_by_side_handler`: 两个窗口并排展示结果, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
+  - `side_by_side_handler`: 两个窗口并排展示结果
   - `action_handler`: 在源文件中以diff的形式展示结果
     - `Y`/`y`: 接受LLM建议代码
     - `N`/`n`: 拒绝LLM建议代码
     - `<ESC>`: 直接退出
     - `I/i`: 输入优化的补充条件
     - `<C-r>`: 直接重新优化
-  - `qa_handler`: 单轮对话的AI, 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
-  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 ), 按`Y`/`y`复制输出结果并退出，按`N`/`n`/`<ESC>`直接退出
+  - `qa_handler`: 单轮对话的AI
+  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 )
   - 你也可以自定义函数
 - `prompt`: AI工具的提示词
 - `opts`
@@ -494,6 +494,21 @@ export LLM_KEY=NONE
   - `streaming_handler`: 该AI工具使用自定义的流解析函数
   - `parse_handler`: 该AI工具使用自定义的解析函数
   - `border`：浮动窗口的边框样式
+  - `accept`
+    - `mapping`: 接受AI输出的按键映射
+      - `mode`: 映射对应的vim模式, 默认为`n`
+      - `keys`: 你的按键, 默认为`Y`/`y`
+    - `action`: 接受AI输出时执行的函数，默认是复制到剪贴板
+  - `reject`
+    - `mapping`: 拒绝AI输出的按键映射
+      - `mode`: 映射对应的vim模式, 默认为`n`
+      - `keys`: 你的按键, 默认为`N`/`n`
+    - `action`: 拒绝AI输出时执行的函数，默认是什么也不做或者关闭AI工具窗口
+  - `close`
+    - `mapping`: 关闭AI工具的按键映射
+      - `mode`: 映射对应的vim模式, 默认为`n`
+      - `keys`: 你的按键, 默认为`<ESC>`
+    - `action`: 关闭AI工具，默认是拒绝所有AI输出并关闭AI工具窗口
 
 **不同模板还有一些属于自己的专属配置项**
 

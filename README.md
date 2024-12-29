@@ -470,15 +470,15 @@ All AI tools need to be defined in `app_handler`, presented in the form of a pai
 For all AI tools, their configuration options are similar:
 
 - `handler`: Which template to use
-  - `side_by_side_handler`: Display results in two windows side by side, press `Y`/`y` to copy the output and exit, or press `N`/`n`/<ESC> to exit directly
+  - `side_by_side_handler`: Display results in two windows side by side
   - `action_handler`: Display results in the source file in the form of a diff
     - `Y`/`y`: Accept LLM suggested code
     - `N`/`n`: Reject LLM suggested code
     - `<ESC>`: Exit directly
     - `I`/`i`: Input additional optimization conditions
     - `<C-r>`: Optimize again directly
-  - `qa_handler`: AI for single-round dialogue, press `Y`/`y` to copy the output and exit, or press `N`/`n`/<ESC> to exit directly
-  - `flexi_handler`: Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text), press `Y`/`y` to copy the output and exit, or press `N`/`n`/<ESC> to exit directly
+  - `qa_handler`: AI for single-round dialogue
+  - `flexi_handler`: Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text)
   - You can also customize functions
 - `prompt`: Prompt words for the AI tool
 - `opts`
@@ -491,6 +491,21 @@ For all AI tools, their configuration options are similar:
   - `streaming_handler`: This AI tool uses a custom streaming parsing function
   - `parse_handler`: This AI tool uses a custom parsing function
   - `border`: Floating window border style
+  - `accept`
+    - `mapping`: The key mapping for accepting the output
+      - `mode`: Vim mode (Default mode: `n`)
+      - `keys`: Your key mappings. (Default keys: `Y`/`y`)
+    - `action`: The action for accepting the output, which is executed when accepting the output. (Default action: Copy the output)
+  - `reject`
+    - `mapping`: The key mapping for rejecting the output
+      - `mode`: Vim mode (Default mode: `n`)
+      - `keys`: Your key mappings. (Default keys: `N`/`n`)
+    - `action`: The action for rejecting the output, which is executed when rejecting the output. (Default action: None or close the window)
+  - `close`
+    - `mapping`: The key mapping for closing the AI tool
+      - `mode`: Vim mode (Default mode: `n`)
+      - `keys`: Your key mappings. (Default keys: `<ESC>`)
+    - `action`: The action for closing the AI tool. (Default action: Reject all output and close the window)
 
 Different templates also have some exclusive configuration items of their own.
 
