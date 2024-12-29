@@ -18,6 +18,7 @@
 > 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`、`openrouter`或者其他的平台）
 
 
+# 目录
 <!-- mtoc-start -->
 
 * [截图](#截图)
@@ -89,6 +90,8 @@
   <img src="https://github.com/user-attachments/assets/29ec926c-b8e4-4490-8158-331dffcb28fc" alt="llm-git-commit-msg" width="560">
 </p>
 
+[⬆ 返回目录](#目录)
+
 ## 安装
 
 ### 依赖
@@ -153,6 +156,8 @@ export LLM_KEY=<Your API_KEY>
 ```bash
 export LLM_KEY=NONE
 ```
+
+[⬆ 返回目录](#目录)
 
 ### 基本配置
 
@@ -320,6 +325,7 @@ export LLM_KEY=NONE
 
 如果你使用本地运行的大模型，比如ollama运行的模型，你还需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
 
+[⬆ 返回目录](#目录)
 
 ### 窗口风格配置
 
@@ -467,6 +473,8 @@ export LLM_KEY=NONE
     },
   },
 ```
+
+[⬆ 返回目录](#目录)
 
 ### AI工具的配置
 
@@ -716,6 +724,7 @@ Based on this format, generate appropriate commit messages. Respond with message
   },
 ~~~
 
+[⬆ 返回目录](#目录)
 
 ### 本地运行大模型
 
@@ -779,6 +788,8 @@ return {
 }
 ```
 
+[⬆ 返回目录](#目录)
+
 ## 默认快捷键
 
 - 浮动窗口风格下的快捷键
@@ -801,6 +812,8 @@ return {
 | Output       | `i`          | `n`      | 打开输入窗口            |
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
+
+[⬆ 返回目录](#目录)
 
 ## 作者的配置文件
 
@@ -846,6 +859,7 @@ return {
 > [!NOTE]
 > 需要根据你的实际情况去修改args
 
+[⬆ 返回目录](#目录)
 
 ### 多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key
 
@@ -902,9 +916,13 @@ return {
     end,
   ```
 
+[⬆ 返回目录](#目录)
+
 ### 不同解析函数的优先级
 
   AI工具配置的`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
+
+[⬆ 返回目录](#目录)
 
 ### AI生成git commit信息的功能如何与lazygit集成在一起?
 
@@ -931,3 +949,5 @@ return {
       end,
     }
   ```
+
+[⬆ 返回目录](#目录)

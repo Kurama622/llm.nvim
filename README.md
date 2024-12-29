@@ -16,6 +16,7 @@
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
 
+# Contents
 <!-- mtoc-start -->
 
 * [Screenshots](#screenshots)
@@ -86,6 +87,8 @@
   <img src="https://github.com/user-attachments/assets/29ec926c-b8e4-4490-8158-331dffcb28fc" alt="llm-git-commit-msg" width="560">
 </p>
 
+[⬆ back to top](#contents)
+
 ## Installation
 
 ### Dependencies
@@ -151,6 +154,9 @@ Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=NONE
 ```
+
+[⬆ back to top](#contents)
+
 
 ### Basic Configuration
 
@@ -318,6 +324,8 @@ export LLM_KEY=NONE
 
 If you use a local LLM, such as a model running on ollama, you also need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
 
+[⬆ back to top](#contents)
+
 ### Window Style Configuration
 
 If you want to further configure the style of the conversation interface, you can configure `input_box_opts`, `output_box_opts`, `history_box_opts`, and `popwin_opts` separately.
@@ -464,6 +472,8 @@ More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.
     },
   },
 ```
+
+[⬆ back to top](#contents)
 
 ### Configuration of AI Tools
 
@@ -713,6 +723,8 @@ Based on this format, generate appropriate commit messages. Respond with message
   },
 ~~~
 
+[⬆ back to top](#contents)
+
 ### Local LLM Configuration
 
 Local LLMs require custom parsing functions; for streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
@@ -775,6 +787,8 @@ return {
 }
 ```
 
+[⬆ back to top](#contents)
+
 ## Default Shortcuts
 
 - floating window
@@ -798,6 +812,7 @@ return {
 | Output       | `ctrl+c`     | `n`      | Cancel dialog response  |
 | Output       | `ctrl+r`     | `n`      | Rerespond to the dialog |
 
+[⬆ back to top](#contents)
 
 ## Author's configuration
 
@@ -843,6 +858,7 @@ Use a custom request format
 > [!NOTE]
 > You need to modify the args according to your actual situation.
 
+[⬆ back to top](#contents)
 
 ### Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.
 
@@ -899,9 +915,13 @@ Use a custom request format
     end,
   ```
 
+[⬆ back to top](#contents)
+
 ### Priority of different parse/streaming functions
 
   AI tool configuration's `streaming_handler` or `parse_handler` > AI tool configuration's `api_type` > Main configuration's `streaming_handler` or `parse_handler` > Main configuration's `api_type`
+
+[⬆ back to top](#contents)
 
 ### How can the AI-generated git commit message feature be integrated with lazygit
   ```lua
@@ -927,3 +947,4 @@ Use a custom request format
     end,
   }
   ```
+[⬆ back to top](#contents)
