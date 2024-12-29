@@ -104,7 +104,7 @@ export LLM_KEY=<Your API_KEY>
 
 1. Register ZhiPu QingYan: [https://open.bigmodel.cn/](https://open.bigmodel.cn/), obtain your API Key.
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Your API_KEY>
 ```
@@ -112,7 +112,7 @@ export LLM_KEY=<Your API_KEY>
 #### kimi (月之暗面)
 1. Register Moonshot AI: [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench), obtain your API Key.
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Your API_KEY>
 ```
@@ -120,7 +120,7 @@ export LLM_KEY=<Your API_KEY>
 #### Github Models
 1. Obtain your [Github Token](https://github.com/settings/tokens)
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Github Token>
 ```
@@ -128,7 +128,7 @@ export LLM_KEY=<Github Token>
 #### siliconflow (硅基流动)
 1. Register for Siliconflow: [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), obtain your API Key. You can see all models on Siliconflow [here](https://cloud.siliconflow.cn/models), and select 'Only Free' to see all free models.
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Your API_KEY>
 ```
@@ -136,7 +136,7 @@ export LLM_KEY=<Your API_KEY>
 #### openrouter
 1. Register openrouter: [openrouter](https://openrouter.ai/), obtain your API Key.
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Your API_KEY>
 ```
