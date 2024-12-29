@@ -165,6 +165,8 @@ The optimized code is:
 Please optimize this code according to the format, and respond in %s.]],
       options.language
     )
+  elseif type(prompt) == "function" then
+    prompt = prompt()
   end
 
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
@@ -331,6 +333,8 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
             }
 
             请按照格式，帮我优化这段代码：]]
+  elseif type(prompt) == "function" then
+    prompt = prompt()
   end
 
   local source_content = F.GetVisualSelection()
@@ -459,6 +463,8 @@ end
 function M.qa_handler(name, F, state, streaming, prompt, opts)
   if prompt == nil then
     prompt = [[请帮我把这段话翻译成英语, 直接给出翻译结果: ]]
+  elseif type(prompt) == "function" then
+    prompt = prompt()
   end
 
   local options = {
@@ -671,6 +677,10 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+
+  if type(prompt) == "function" then
+    prompt = prompt()
+  end
 
   local content = prompt
   if options.apply_visual_selection then
