@@ -11,7 +11,7 @@
 > [!IMPORTANT]
 > A free large language model(LLM) plugin that allows you to interact with LLM in Neovim.
 >
-> 1. Supports any large model, such as GPT, GLM, Kimi, or locally running large models.
+> 1. Supports any LLM, such as GPT, GLM, Kimi, deepseek or local LLMs (such as ollama).
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
@@ -46,7 +46,7 @@
 
 ## Screenshots
 
-1. **Chat interface**
+1. **Chat**
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
 </p>
