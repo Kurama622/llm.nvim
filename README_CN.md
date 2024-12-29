@@ -15,7 +15,7 @@
 >
 > 2. 支持定义属于你自己的AI工具，且不同工具可以使用不同的模型
 >
-> 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`或者其他的平台）
+> 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`、`openrouter`或者其他的平台）
 
 
 <!-- mtoc-start -->
@@ -29,6 +29,7 @@
     * [kimi (月之暗面)](#kimi-月之暗面)
     * [Github Models](#github-models)
     * [siliconflow (硅基流动)](#siliconflow-硅基流动)
+    * [openrouter](#openrouter)
     * [本地运行的大模型](#本地运行的大模型)
   * [基本配置](#基本配置)
   * [窗口风格配置](#窗口风格配置)
@@ -135,6 +136,14 @@ export LLM_KEY=<Github Token>
 export LLM_KEY=<Your API_KEY>
 ```
 
+#### openrouter
+1. 注册openrouter：[openrouter](https://openrouter.ai/), 获取你的API Key.
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
 #### 本地运行的大模型
 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`为`NONE`
 ```bash
@@ -202,6 +211,15 @@ export LLM_KEY=NONE
         -- -- [optional: fetch_key]
         -- fetch_key = function()
         --   return switch("enable_siliconflow")
+        -- end,
+
+        -- [[ openrouter ]]
+        -- url = "https://openrouter.ai/api/v1/chat/completions",
+        -- model = "google/gemini-2.0-flash-exp:free",
+        -- max_tokens = 8000,
+        -- api_type = "openai",
+        -- fetch_key = function()
+        --   return switch("enable_openrouter")
         -- end,
 
         max_tokens = 1024,

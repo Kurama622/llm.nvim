@@ -13,7 +13,7 @@
 >
 > 1. Supports any large model, such as GPT, GLM, Kimi, or locally running large models.
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
-> 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, or other platforms).
+> 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
 
 <!-- mtoc-start -->
@@ -27,6 +27,7 @@
     * [kimi (月之暗面)](#kimi-月之暗面)
     * [Github Models](#github-models)
     * [siliconflow (硅基流动)](#siliconflow-硅基流动)
+    * [openrouter](#openrouter)
     * [Local LLM](#local-llm)
   * [Basic Configuration](#basic-configuration)
   * [Window Style Configuration](#window-style-configuration)
@@ -132,6 +133,15 @@ export LLM_KEY=<Github Token>
 export LLM_KEY=<Your API_KEY>
 ```
 
+#### openrouter
+1. Register openrouter: [openrouter](https://openrouter.ai/), obtain your API Key.
+
+2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
+
 #### Local LLM
 Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
 ```bash
@@ -199,6 +209,15 @@ export LLM_KEY=NONE
         -- -- [optional: fetch_key]
         -- fetch_key = function()
         --   return switch("enable_siliconflow")
+        -- end,
+
+        -- [[ openrouter ]]
+        -- url = "https://openrouter.ai/api/v1/chat/completions",
+        -- model = "google/gemini-2.0-flash-exp:free",
+        -- max_tokens = 8000,
+        -- api_type = "openai",
+        -- fetch_key = function()
+        --   return switch("enable_openrouter")
         -- end,
 
         max_tokens = 1024,
