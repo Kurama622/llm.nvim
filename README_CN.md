@@ -38,6 +38,10 @@
 * [默认快捷键](#默认快捷键)
 * [作者的配置文件](#作者的配置文件)
 * [常见问题](#常见问题)
+  * [windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题](#windows的curl使用格式与linux不一样llmnvim默认的请求格式windows下会有问题)
+  * [多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key](#多个大模型切换频繁更改llm_key的值很麻烦而且我不想在neovim的配置文件中暴露我的key)
+  * [不同解析函数的优先级](#不同解析函数的优先级)
+  * [AI生成git commit信息的功能如何与lazygit集成在一起?](#ai生成git-commit信息的功能如何与lazygit集成在一起)
 
 <!-- mtoc-end -->
 
@@ -806,7 +810,7 @@ return {
 
 ## 常见问题
 
-1. **windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题**
+### windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题
 
 使用自定义请求格式
 
@@ -843,7 +847,7 @@ return {
 > 需要根据你的实际情况去修改args
 
 
-2. **多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key**
+### 多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key
 
 - 创建一个`.env`文件，专门保存你的各种Key。注意：此文件不要上传Github
 
@@ -898,6 +902,32 @@ return {
     end,
   ```
 
-3. **不同解析函数的优先级**
+### 不同解析函数的优先级
 
   AI工具配置的`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
+
+### AI生成git commit信息的功能如何与lazygit集成在一起?
+
+  ```lua
+    {
+      "kdheepak/lazygit.nvim",
+      lazy = true,
+      cmd = {
+        "LazyGit",
+        "LazyGitConfig",
+        "LazyGitCurrentFile",
+        "LazyGitFilter",
+        "LazyGitFilterCurrentFile",
+      },
+      -- optional for floating window border decoration
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+      },
+      config = function()
+        vim.keymap.set("t", "<C-c>", function()
+          vim.api.nvim_win_close(vim.api.nvim_get_current_win(), true)
+          vim.api.nvim_command("LLMAppHandler CommitMsg")
+        end, { desc = "AI Commit Msg" })
+      end,
+    }
+  ```

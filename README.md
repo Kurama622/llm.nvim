@@ -36,6 +36,10 @@
 * [Default Shortcuts](#default-shortcuts)
 * [Author's configuration](#authors-configuration)
 * [Q&A](#qa)
+  * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
+  * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
+  * [Priority of different parse/streaming functions](#priority-of-different-parsestreaming-functions)
+  * [How can the AI-generated git commit message feature be integrated with lazygit](#how-can-the-ai-generated-git-commit-message-feature-be-integrated-with-lazygit)
 
 <!-- mtoc-end -->
 
@@ -86,7 +90,7 @@
 
 ### Dependencies
 
-- `curl`:
+- `curl`
 
 ### Preconditions
 
@@ -803,7 +807,7 @@ return {
 
 ## Q&A
 
-1. **The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.**
+### The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.
 
 Use a custom request format
 
@@ -840,7 +844,7 @@ Use a custom request format
 > You need to modify the args according to your actual situation.
 
 
-2. **Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.**
+### Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.
 
 - Create a `.env` file specifically to store your various keys. Note: Do not upload this file to GitHub.
 
@@ -895,5 +899,31 @@ Use a custom request format
     end,
   ```
 
-3. **Priority of different parse/streaming functions**
+### Priority of different parse/streaming functions
+
   AI tool configuration's `streaming_handler` or `parse_handler` > AI tool configuration's `api_type` > Main configuration's `streaming_handler` or `parse_handler` > Main configuration's `api_type`
+
+### How can the AI-generated git commit message feature be integrated with lazygit
+  ```lua
+  {
+    "kdheepak/lazygit.nvim",
+    lazy = true,
+    cmd = {
+      "LazyGit",
+      "LazyGitConfig",
+      "LazyGitCurrentFile",
+      "LazyGitFilter",
+      "LazyGitFilterCurrentFile",
+    },
+    -- optional for floating window border decoration
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    config = function()
+      vim.keymap.set("t", "<C-c>", function()
+        vim.api.nvim_win_close(vim.api.nvim_get_current_win(), true)
+        vim.api.nvim_command("LLMAppHandler CommitMsg")
+      end, { desc = "AI Commit Msg" })
+    end,
+  }
+  ```
