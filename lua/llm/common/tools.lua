@@ -110,6 +110,27 @@ function M.action_handler(name, F, state, streaming, prompt, opts)
       linebreak = false,
       signcolumn = "no",
     },
+    accept = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
+      action = nil,
+    },
+    reject = {
+      mapping = {
+        mode = "n",
+        keys = { "N", "n" },
+      },
+      action = nil,
+    },
+    close = {
+      mapping = {
+        mode = "n",
+        keys = { "<esc>" },
+      },
+      action = nil,
+    },
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
@@ -226,28 +247,38 @@ Please optimize this code according to the format, and respond in %s.]],
     end
   end)
 
-  preview_box:map("n", { "Y", "y" }, function()
-    if diff then
-      diff:accept()
-    end
-  end)
+  local default_actions = {
+    accept = function()
+      if diff then
+        diff:accept()
+      end
+    end,
+    reject = function()
+      if diff then
+        diff:reject()
+      end
+    end,
+    close = function()
+      if worker.job then
+        worker.job:shutdown()
+        LOG:INFO("Suspend output...")
+        worker.job = nil
+      end
+      if diff then
+        diff:reject()
+      end
+      preview_box:unmount()
+    end,
+  }
 
-  preview_box:map("n", { "N", "n" }, function()
-    if diff then
-      diff:reject()
-    end
-  end)
-
-  preview_box:map("n", { "<esc>" }, function()
-    if worker.job then
-      worker.job:shutdown()
-      worker.job = nil
-    end
-    if diff then
-      diff:reject()
-    end
-    preview_box:unmount()
-  end)
+  for _, k in ipairs({ "accept", "reject", "close" }) do
+    preview_box:map(options[k].mapping.mode, options[k].mapping.keys, function()
+      default_actions[k]()
+      if options[k].action ~= nil then
+        options[k].action()
+      end
+    end)
+  end
 
   preview_box:map("n", { "I", "i" }, function()
     input_box:mount()
@@ -256,17 +287,14 @@ Please optimize this code according to the format, and respond in %s.]],
       input_box:unmount()
     end)
 
-    input_box:map("n", { "Y", "y" }, function()
-      if diff then
-        diff:accept()
-      end
-    end)
-
-    input_box:map("n", { "N", "n" }, function()
-      if diff then
-        diff:reject()
-      end
-    end)
+    for _, k in ipairs({ "accept", "reject" }) do
+      input_box:map(options[k].mapping.mode, options[k].mapping.keys, function()
+        default_actions[k]()
+        if options[k].action ~= nil then
+          options[k].action()
+        end
+      end)
+    end
 
     input_box:map("n", { "<CR>" }, function()
       local contents = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
@@ -322,6 +350,27 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
     number = true,
     wrap = true,
     linebreak = false,
+    accept = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
+      action = nil,
+    },
+    reject = {
+      mapping = {
+        mode = "n",
+        keys = { "N", "n" },
+      },
+      action = nil,
+    },
+    close = {
+      mapping = {
+        mode = "n",
+        keys = { "<esc>" },
+      },
+      action = nil,
+    },
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
@@ -379,20 +428,32 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
     end
   end)
 
-  preview_box:map("n", { "<esc>", "N", "n" }, function()
-    if worker.job then
-      worker.job:shutdown()
-      LOG:INFO("Suspend output...")
-      vim.wait(200, function() end)
-      worker.job = nil
+  local default_actions = {
+    accept = function()
+      vim.api.nvim_set_current_win(preview_box.winid)
+      vim.api.nvim_command("normal! ggVGky")
+    end,
+    reject = function() end,
+    close = function() end,
+  }
+  for _, v in ipairs({ source_box, preview_box }) do
+    for _, k in ipairs({ "accept", "reject", "close" }) do
+      v:map(options[k].mapping.mode, options[k].mapping.keys, function()
+        if worker.job then
+          worker.job:shutdown()
+          LOG:INFO("Suspend output...")
+          vim.wait(200, function() end)
+          worker.job = nil
+        end
+        if options[k].action ~= nil then
+          options[k].action()
+        else
+          default_actions[k]()
+        end
+        layout:unmount()
+      end)
     end
-    layout:unmount()
-  end)
-
-  preview_box:map("n", { "Y", "y" }, function()
-    vim.api.nvim_command("normal! ggVGky")
-    layout:unmount()
-  end)
+  end
 end
 
 function M.qa_handler(name, F, state, streaming, prompt, opts)
@@ -423,6 +484,27 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
+    },
+    accept = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
+      action = nil,
+    },
+    reject = {
+      mapping = {
+        mode = "n",
+        keys = { "N", "n" },
+      },
+      action = nil,
+    },
+    close = {
+      mapping = {
+        mode = "n",
+        keys = { "<esc>" },
+      },
+      action = nil,
     },
   }
 
@@ -511,22 +593,32 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
     vim.api.nvim_set_current_win(input_box.winid)
   end)
 
-  for _, v in ipairs({ input_box, preview_box }) do
-    v:map("n", { "<esc>", "N", "n" }, function()
-      if worker.job then
-        worker.job:shutdown()
-        LOG:INFO("Suspend output...")
-        vim.wait(200, function() end)
-        worker.job = nil
-      end
-      layout:unmount()
-    end)
-
-    v:map("n", { "Y", "y" }, function()
+  local default_actions = {
+    accept = function()
       vim.api.nvim_set_current_win(preview_box.winid)
       vim.api.nvim_command("normal! ggVGky")
-      layout:unmount()
-    end)
+    end,
+    reject = function() end,
+    close = function() end,
+  }
+
+  for _, v in ipairs({ input_box, preview_box }) do
+    for _, k in ipairs({ "accept", "reject", "close" }) do
+      v:map(options[k].mapping.mode, options[k].mapping.keys, function()
+        if worker.job then
+          worker.job:shutdown()
+          LOG:INFO("Suspend output...")
+          vim.wait(200, function() end)
+          worker.job = nil
+        end
+        if options[k].action ~= nil then
+          options[k].action()
+        else
+          default_actions[k]()
+        end
+        layout:unmount()
+      end)
+    end
   end
 end
 
