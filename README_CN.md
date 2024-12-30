@@ -30,6 +30,7 @@
     * [kimi (月之暗面)](#kimi-月之暗面)
     * [Github Models](#github-models)
     * [siliconflow (硅基流动)](#siliconflow-硅基流动)
+    * [Deepseek](#deepseek)
     * [openrouter](#openrouter)
     * [本地运行的大模型](#本地运行的大模型)
   * [基本配置](#基本配置)
@@ -143,6 +144,14 @@ export LLM_KEY=<Github Token>
 export LLM_KEY=<Your API_KEY>
 ```
 
+#### Deepseek
+1. 注册Deepseek: [deepseek](https://platform.deepseek.com/api_keys), 获取你的API Key.
+
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
+```bash
+export LLM_KEY=<Your API_KEY>
+```
+
 #### openrouter
 1. 注册openrouter：[openrouter](https://openrouter.ai/), 获取你的API Key.
 
@@ -225,10 +234,17 @@ export LLM_KEY=NONE
         -- [[ openrouter ]]
         -- url = "https://openrouter.ai/api/v1/chat/completions",
         -- model = "google/gemini-2.0-flash-exp:free",
-        -- max_tokens = 8000,
         -- api_type = "openai",
         -- fetch_key = function()
         --   return switch("enable_openrouter")
+        -- end,
+
+        -- [[deepseek]]
+        -- url = "https://api.deepseek.com/chat/completions",
+        -- model = "deepseek-chat",
+        -- api_type = "openai",
+        -- fetch_key = function()
+        --   return switch("enable_deepseek")
         -- end,
 
         max_tokens = 1024,
