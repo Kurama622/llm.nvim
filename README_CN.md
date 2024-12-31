@@ -88,7 +88,7 @@
 
 7. **生成git commit信息**
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/29ec926c-b8e4-4490-8158-331dffcb28fc" alt="llm-git-commit-msg" width="560">
+  <img src="https://github.com/user-attachments/assets/261b21c5-0df0-48c2-916b-07f5ce0c981d" alt="llm-git-commit-msg" width="560">
 </p>
 
 [⬆ 返回目录](#目录)
