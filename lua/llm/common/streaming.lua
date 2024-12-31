@@ -64,6 +64,10 @@ function M.GetStreamingOutput(
       stream_output = function(chunk)
         return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
       end
+    elseif api_type == "ollama" then
+      stream_output = function(chunk)
+        return F.OllamaStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
     end
   elseif conf.configs.streaming_handler then
     stream_output = function(chunk)
@@ -81,6 +85,10 @@ function M.GetStreamingOutput(
     elseif conf.configs.api_type == "openai" then
       stream_output = function(chunk)
         return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+      end
+    elseif conf.configs.api_type == "ollama" then
+      stream_output = function(chunk)
+        return F.OllamaStreamingHandler(chunk, line, assistant_output, bufnr, winid)
       end
     end
   end

@@ -470,6 +470,7 @@ function M.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid
 
     if not status then
       LOG:TRACE("json decode error: " .. json_str)
+      return assistant_output
     end
 
     assistant_output = assistant_output .. data.response
@@ -567,6 +568,27 @@ function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
         end_idx = line:find("}]", 1, true)
       end
     end
+  end
+  return assistant_output
+end
+
+function M.OllamaStreamingHandler(chunk, line, assistant_output, bufnr, winid)
+  if not chunk then
+    return assistant_output
+  end
+  local tail = chunk:sub(-1, -1)
+  if tail:sub(1, 1) ~= "}" then
+    line = line .. chunk
+  else
+    line = line .. chunk
+    local status, data = pcall(vim.fn.json_decode, line)
+    if not status or not data.message.content then
+      LOG:TRACE("json decode error: " .. data)
+      return assistant_output
+    end
+    assistant_output = assistant_output .. data.message.content
+    M.WriteContent(bufnr, winid, data.message.content)
+    line = ""
   end
   return assistant_output
 end
@@ -767,6 +789,20 @@ function M.GetUrlOutput(
           return ""
         end
       end
+    elseif api_type == "ollama" then
+      parse = function(chunk)
+        local success, err = pcall(function()
+          assistant_output = chunk.message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
+          return ""
+        end
+      end
     end
   elseif conf.configs.parse_handler then
     parse = function(chunk)
@@ -816,6 +852,20 @@ function M.GetUrlOutput(
         LOG:TRACE(vim.inspect(chunk))
         local success, err = pcall(function()
           assistant_output = chunk.choices[1].message.content
+        end)
+
+        if success then
+          return assistant_output
+        else
+          LOG:TRACE(vim.inspect(chunk))
+          LOG:ERROR("Error occurred:" .. err)
+          return ""
+        end
+      end
+    elseif conf.configs.api_type == "ollama" then
+      parse = function(chunk)
+        local success, err = pcall(function()
+          assistant_output = chunk.message.content
         end)
 
         if success then
