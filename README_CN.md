@@ -219,8 +219,7 @@ export LLM_KEY=NONE
         -- [[ local llm ]]
         -- url = "http://localhost:11434/api/chat",
         -- model = "llama3.2:1b",
-        -- streaming_handler = local_llm_streaming_handler,
-        -- parse_handler = local_llm_parse_handler,
+        -- api_type = "ollama",
 
         -- [[ siliconflow ]]
         -- url = "https://api.siliconflow.cn/v1/chat/completions",
@@ -307,7 +306,7 @@ export LLM_KEY=NONE
 - `style`: 对话窗口的样式(float即浮动窗口，其他均为分割窗口)
 - `url`: 模型的API地址
 - `model`: 模型的名称
-- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `workers-ai`. `openai`的格式可以兼容大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析
+- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `ollama`, `workers-ai`. `openai`的格式可以兼容大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析。如果你使用ollama来运行模型，你可以配置`ollama`。
 - `fetch_key`: 如果你需要同时使用不同平台的模型，可以通过配置`fetch_key`来保证不同模型使用不同的API Key，用法如下：
   ```lua
   fetch_key = function() return "<your api key>" end
@@ -339,7 +338,7 @@ export LLM_KEY=NONE
       - `Output:Cancel`: 取消对话
       - `Output:Resend`: 重新回答
 
-如果你使用本地运行的大模型，比如ollama运行的模型，你还需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
+如果你使用本地运行的大模型（但不是用ollama运行的），你可能需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
 
 [⬆ 返回目录](#目录)
 

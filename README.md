@@ -215,11 +215,10 @@ export LLM_KEY=NONE
         -- model = "moonshot-v1-8k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
         -- api_type = "openai",
 
-        -- [[ local llm ]]
+        -- [[ ollama ]]
         -- url = "http://localhost:11434/api/chat",
         -- model = "llama3.2:1b",
-        -- streaming_handler = local_llm_streaming_handler,
-        -- parse_handler = local_llm_parse_handler,
+        -- api_type = "ollama",
 
         -- [[ siliconflow ]]
         -- url = "https://api.siliconflow.cn/v1/chat/completions",
@@ -306,7 +305,7 @@ export LLM_KEY=NONE
 - `style`: Style of the Chat UI (float means floating window, others are split windows).
 - `url`: Model api url.
 - `model`: Model name.
-- `api_type`: The parsing format of the model output: `openai`, `zhipu`, `workers-ai`. The `openai` format is compatible with most models, but `ChatGLM` can only be parsed using the `zhipu` format, and `cloudflare` can only be parsed using the `workers-ai` format.
+- `api_type`: The parsing format of the model output: `openai`, `zhipu`, `ollama`, `workers-ai`. The `openai` format is compatible with most models, but `ChatGLM` can only be parsed using the `zhipu` format, and `cloudflare` can only be parsed using the `workers-ai` format. If you use ollama to run the model, you can use `ollama`.
 - `fetch_key`: If you need to use models from different platforms simultaneously, you can configure `fetch_key` to ensure that different models use different API Keys. The usage is as follows:
   ```lua
   fetch_key = function() return "<your api key>" end
@@ -338,7 +337,7 @@ export LLM_KEY=NONE
       - `Output:Cancel`: Cancel diaglog response.
       - `Output:Resend`: Rerespond to the dialog.
 
-If you use a local LLM, such as a model running on ollama, you also need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
+If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
 
 [⬆ back to top](#contents)
 
