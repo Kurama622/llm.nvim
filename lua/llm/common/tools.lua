@@ -170,7 +170,6 @@ function M.action_handler(name, F, state, streaming, prompt, opts)
     --     )
     prompt = string.format(
       [[You are an AI programming assistant.
-You are currently plugged in to the Neovim text editor on a user's machine.
 
 Your core tasks include:
 - Code quality and adherence to best practices
@@ -250,9 +249,10 @@ When given a task:
   local start_str = "```"
   local end_str = "```"
 
-  state.app["session"][name] = {}
-  table.insert(state.app.session[name], { role = "system", content = prompt })
-  table.insert(state.app.session[name], { role = "user", content = source_content })
+  state.app["session"][name] = {
+    { role = "system", content = prompt },
+    { role = "user", content = source_content },
+  }
 
   state.popwin = preview_box
 
@@ -333,9 +333,7 @@ When given a task:
     input_box:map("n", { "<CR>" }, function()
       local contents = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
       table.remove(state.app.session[name], #state.app.session[name])
-      state.app.session[name][#state.app.session[name]].content = state.app.session[name][#state.app.session[name]].content
-        .. "\n"
-        .. table.concat(contents, "\n")
+      state.app.session[name][1].content = state.app.session[name][1].content .. "\n" .. table.concat(contents, "\n")
       vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
       worker =
         single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
@@ -351,20 +349,23 @@ end
 function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   local ft = vim.bo.filetype
   if prompt == nil then
-    prompt = [[优化代码, 修改语法错误, 让代码更简洁, 增强可复用性，
-            你要像copliot那样，直接给出代码内容, 不要使用代码块或其他标签包裹!
+    prompt = [[You are an AI programming assistant.
 
-            下面是一个例子，假设我们需要优化下面这段代码:
-            void test() {
-             return 0
-            }
+Your core tasks include:
+- Code quality and adherence to best practices
+- Potential bugs or edge cases
+- Performance optimizations
+- Readability and maintainability
+- Any security concerns
 
-            输出格式应该为：
-            int test() {
-              return 0;
-            }
+You must:
+- Follow the user's requirements carefully and to the letter.
+- DO NOT use Markdown formatting in your answers.
+- Avoid wrapping the output in triple backticks.
+- The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
 
-            请按照格式，帮我优化这段代码：]]
+When given a task:
+- ONLY OUTPUT THE RELEVANT CODE.]]
   elseif type(prompt) == "function" then
     prompt = prompt()
   end
@@ -438,8 +439,10 @@ function M.side_by_side_handler(name, F, state, streaming, prompt, opts)
   state.popwin = source_box
   F.WriteContent(source_box.bufnr, source_box.winid, source_content)
 
-  state.app["session"][name] = {}
-  table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. source_content })
+  state.app["session"][name] = {
+    { role = "system", content = prompt },
+    { role = "user", content = source_content },
+  }
 
   state.popwin = preview_box
   local worker = streaming(
@@ -594,7 +597,6 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
 
   local worker = { job = nil }
 
-  state.app["session"][name] = {}
   input_box:map("n", "<enter>", function()
     -- clear preview_box content [optional]
     vim.api.nvim_buf_set_lines(preview_box.bufnr, 0, -1, false, {})
@@ -605,7 +607,10 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
     -- clear input_box content
     vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
     if input ~= "" then
-      table.insert(state.app.session[name], { role = "user", content = prompt .. "\n" .. input })
+      state.app.session[name] = {
+        { role = "system", content = prompt },
+        { role = "user", content = input },
+      }
       state.popwin = preview_box
       worker = streaming(
         preview_box.bufnr,
@@ -711,21 +716,25 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   options = vim.tbl_deep_extend("force", options, opts or {})
 
   if type(prompt) == "function" then
-    prompt = prompt()
+    prompt = (prompt():gsub(".", {
+      ["'"] = "''",
+    }))
   end
 
-  local content = prompt
+  local content = ""
   if options.apply_visual_selection then
-    content = content .. ":\n" .. F.GetVisualSelection()
+    content = (F.GetVisualSelection():gsub(".", {
+      ["'"] = "''",
+    }))
   end
 
-  content = (content:gsub(".", {
-    ["'"] = "''",
-  }))
   local flexible_box = nil
 
-  state.app.session[name] = {}
-  table.insert(state.app.session[name], { role = "user", content = content })
+  if content == "" then
+    state.app.session[name] = { { role = "user", content = prompt } }
+  else
+    state.app.session[name] = { { role = "system", content = prompt }, { role = "user", content = content } }
+  end
   local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
   if options.exit_handler == nil then
     options.exit_handler = function(output)
@@ -776,8 +785,6 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   )
 
   F.VisMode2NorMode()
-  -- local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-  -- vim.api.nvim_feedkeys(esc, "x", false)
   if options.exit_on_move then
     vim.api.nvim_create_autocmd("CursorMoved", {
       callback = function()

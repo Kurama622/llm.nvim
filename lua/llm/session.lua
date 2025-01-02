@@ -25,11 +25,13 @@ local function OpenLLM()
 end
 
 function M.LLMSelectedTextHandler(description)
-  local content = description .. ":\n" .. F.GetVisualSelection()
+  local content = F.GetVisualSelection()
   state.popwin = _popup(conf.configs.popwin_opts)
   state.popwin:mount()
-  state.session[state.popwin.winid] = {}
-  table.insert(state.session[state.popwin.winid], { role = "user", content = content })
+  state.session[state.popwin.winid] = {
+    { role = "system", content = description },
+    { role = "user", content = content },
+  }
 
   vim.api.nvim_set_option_value("filetype", "markdown", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
