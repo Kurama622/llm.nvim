@@ -53,8 +53,11 @@ local function single_turn_dialogue(
     options.stdout_handler,
     options.stderr_handler,
     function(ostr)
-      local pattern = string.format("%s(.-)%s", start_str, end_str)
-      local res = ostr:match(pattern)
+      local pattern = string.format("%s%%w*\n(.-)\n%s", start_str, end_str)
+      local res = ""
+      for match in ostr:gmatch(pattern) do
+        res = res .. match
+      end
       if res == nil then
         LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
       end
@@ -136,33 +139,59 @@ function M.action_handler(name, F, state, streaming, prompt, opts)
   options = vim.tbl_deep_extend("force", options, opts or {})
 
   if prompt == nil then
+    --     prompt = string.format(
+    --       [[Optimize the code, correct syntax errors, make the code more concise, and enhance reusability.
+    --
+    -- Provide optimization ideas and the complete code after optimization. Mark the output code block with # BEGINCODE and # ENDCODE.
+    --
+    -- The indentation of the optimized code should remain consistent with the original code. Here is an example:
+    --
+    -- The original code is:
+    -- <space><space><space><space>def func(a, b)
+    -- <space><space><space><space><space><space><space><space>return a + b
+    --
+    -- Optimization ideas:
+    -- 1. The function name `func` is not clear. Based on the context, it is determined that this function is meant to implement the functionality of adding two numbers, so the function name is changed to `add`.
+    -- 2. There is a syntax issue in the function definition; it should end with a colon. It should be `def add(a, b):`.
+    --
+    -- Since the original code is indented by N spaces, the optimized code is also indented by N spaces.
+    --
+    -- The optimized code is:
+    --
+    -- ```<language>
+    -- # BEGINCODE
+    -- <space><space><space><space>def add(a, b):
+    -- <space><space><space><space><space><space><space><space>return a + b
+    -- # ENDCODE
+    -- ```
+    --
+    -- Please optimize this code according to the format, and respond in %s.]],
+    --       options.language
+    --     )
     prompt = string.format(
-      [[Optimize the code, correct syntax errors, make the code more concise, and enhance reusability.
+      [[You are an AI programming assistant.
+You are currently plugged in to the Neovim text editor on a user's machine.
 
-Provide optimization ideas and the complete code after optimization. Mark the output code block with # BEGINCODE and # ENDCODE.
+Your core tasks include:
+- Code quality and adherence to best practices
+- Potential bugs or edge cases
+- Performance optimizations
+- Readability and maintainability
+- Any security concerns
 
-The indentation of the optimized code should remain consistent with the original code. Here is an example:
+You must:
+- Follow the user's requirements carefully and to the letter.
+- Keep your answers short and impersonal, especially if the user responds with context outside of your tasks.
+- Use Markdown formatting in your answers.
+- Include the programming language name at the start of the Markdown code blocks.
+- Avoid line numbers in code blocks.
+- Avoid wrapping the whole response in triple backticks.
+- The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
+- All non-code responses must use %s.
 
-The original code is:
-<space><space><space><space>def func(a, b)
-<space><space><space><space><space><space><space><space>return a + b
-
-Optimization ideas:
-1. The function name `func` is not clear. Based on the context, it is determined that this function is meant to implement the functionality of adding two numbers, so the function name is changed to `add`.
-2. There is a syntax issue in the function definition; it should end with a colon. It should be `def add(a, b):`.
-
-Since the original code is indented by N spaces, the optimized code is also indented by N spaces.
-
-The optimized code is:
-
-```<language>
-# BEGINCODE
-<space><space><space><space>def add(a, b):
-<space><space><space><space><space><space><space><space>return a + b
-# ENDCODE
-```
-
-Please optimize this code according to the format, and respond in %s.]],
+When given a task:
+1. Think step-by-step and describe your plan for what to build in pseudocode, written out in great detail, unless asked not to do so.
+2. Output the code in a **SINGLE** code block, being careful to only return relevant code.]],
       options.language
     )
   elseif type(prompt) == "function" then
@@ -218,8 +247,8 @@ Please optimize this code according to the format, and respond in %s.]],
     },
   })
 
-  local start_str = "# BEGINCODE\n"
-  local end_str = "\n# ENDCODE"
+  local start_str = "```"
+  local end_str = "```"
 
   state.app["session"][name] = {}
   table.insert(state.app.session[name], { role = "system", content = prompt })
@@ -284,6 +313,9 @@ Please optimize this code according to the format, and respond in %s.]],
 
   preview_box:map("n", { "I", "i" }, function()
     input_box:mount()
+    if diff then
+      diff:reject()
+    end
     vim.api.nvim_command("startinsert")
     input_box:map("n", { "<esc>" }, function()
       input_box:unmount()
