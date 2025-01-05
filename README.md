@@ -20,6 +20,14 @@
 <!-- mtoc-start -->
 
 * [Screenshots](#screenshots)
+  * [Chat](#chat)
+  * [Quick Translation](#quick-translation)
+  * [Explain Code](#explain-code)
+  * [Optimize Code](#optimize-code)
+  * [Generate Test Cases](#generate-test-cases)
+  * [AI Translation](#ai-translation)
+  * [Generate Git Commit Message](#generate-git-commit-message)
+  * [Generate Doc String](#generate-doc-string)
 * [Installation](#installation)
   * [Dependencies](#dependencies)
   * [Preconditions](#preconditions)
@@ -47,22 +55,22 @@
 
 ## Screenshots
 
-1. **Chat**
+### Chat
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
 </p>
 
-2. **Quick Translation**
+### Quick Translation
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="560">
 </p>
 
-3. **Explain Code**
+### Explain Code
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
 </p>
 
-4. **Optimize Code**
+### Optimize Code
   - **Display side by side**
   <p align= "center">
     <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="560">
@@ -73,19 +81,24 @@
     <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="560">
   </p>
 
-5. **Generate Test Cases**
+### Generate Test Cases
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/b288e3c9-7d25-40cb-8645-14dacb571529" alt="test-case" width="560">
 </p>
 
-6. **AI Translation**
+### AI Translation
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
 </p>
 
-7. **Generate Git Commit Message**
+### Generate Git Commit Message
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/261b21c5-0df0-48c2-916b-07f5ce0c981d" alt="llm-git-commit-msg" width="560">
+</p>
+
+### Generate Doc String
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="560">
 </p>
 
 [⬆ back to top](#contents)
