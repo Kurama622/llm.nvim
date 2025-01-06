@@ -383,6 +383,9 @@ When given a task:
     end)
 
     preview_box:map("n", { "<C-r>" }, function()
+      if diff and diff.valid then
+        diff:reject()
+      end
       table.remove(state.app.session[name], #state.app.session[name])
       worker =
         single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
