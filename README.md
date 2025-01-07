@@ -844,7 +844,7 @@ return {
 
 ## Author's configuration
 
-[plugins/llm.lua](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm.lua)
+[plugins/llm](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm)
 
 ---
 
