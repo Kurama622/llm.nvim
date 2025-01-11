@@ -5,16 +5,6 @@ local function get_win_width()
   return vim.o.columns
 end
 
--- default box width
-local input_box_width = math.floor(get_win_width() * 0.7)
-local input_box_start = math.floor(get_win_width() * 0.15)
-
-local history_box_width = 27
-local output_box_start = input_box_start
-
-local output_box_width = math.floor(get_win_width() * 0.7 - history_box_width - 2)
-local history_box_start = math.floor(output_box_start + get_win_width() * 0.7 - history_box_width)
-
 local HOME = ""
 
 local uname = luv.os_uname()
@@ -25,82 +15,72 @@ else
 end
 
 M._ = {}
-
-M._.input_box_opts = {
+M._.chat_ui_opts = {
   relative = "editor",
-  position = {
-    row = "85%",
-    col = input_box_start,
-  },
+  position = "50%",
   size = {
-    height = "5%",
-    width = input_box_width,
+    width = "80%",
+    height = "80%",
   },
-  enter = true,
-  focusable = true,
-  zindex = 50,
-  border = {
-    style = "rounded",
-    text = {
-      top = " Enter Your Question ",
-      top_align = "center",
+  input = {
+    relative = "editor", -- for split style
+    position = {
+      row = "80%", -- for split style
+      col = "50%",
     },
-  },
-  win_options = {
-    winblend = 0,
-    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-  },
-}
-
-M._.output_box_opts = {
-  relative = "editor",
-  position = {
-    row = "35%",
-    col = output_box_start,
-  },
-  size = {
-    height = "65%",
-    width = output_box_width,
-  },
-  enter = true,
-  focusable = true,
-  zindex = 20,
-  border = {
-    style = "rounded",
-    text = {
-      top = " Preview ",
-      top_align = "center",
+    enter = true,
+    focusable = true,
+    zindex = 50,
+    border = {
+      style = "rounded",
+      text = {
+        top = " Enter Your Question ",
+        top_align = "center",
+      },
     },
-  },
-  win_options = {
-    winblend = 0,
-    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-  },
-}
-
-M._.history_box_opts = {
-  relative = "editor",
-  position = {
-    row = "35%",
-    col = history_box_start,
-  },
-  size = {
-    height = "65%",
-    width = history_box_width,
-  },
-  zindex = 70,
-  enter = false,
-  focusable = false,
-  border = {
-    style = "rounded",
-    text = {
-      top = " History ",
-      top_align = "center",
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
+    size = { row = "15%", col = "100%" },
+    order = 3,
   },
-  win_options = {
-    winblend = 0,
-    winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  output = {
+    enter = true,
+    focusable = true,
+    zindex = 50,
+    border = {
+      style = "rounded",
+      text = {
+        top = " Preview ",
+        top_align = "center",
+      },
+    },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+    size = { row = "85%", col = "80%" },
+    order = 1,
+  },
+  history = {
+    zindex = 50,
+    enter = false,
+    focusable = false,
+    max_width = 20,
+    border = {
+      style = "rounded",
+      text = {
+        top = " History ",
+        top_align = "center",
+      },
+    },
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+    size = { row = "85%", col = "20%" },
+    order = 2,
   },
 }
 
@@ -160,9 +140,7 @@ M.configs = {
   max_history_name_length = 10,
   save_session = true,
 
-  input_box_opts = M._.input_box_opts,
-  output_box_opts = M._.output_box_opts,
-  history_box_opts = M._.history_box_opts,
+  chat_ui_opts = M._.chat_ui_opts,
 
   popwin_opts = M._.popwin_opts,
 
@@ -210,9 +188,7 @@ function M.setup(opts)
 
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
-  if not M.configs.save_session then
-    M.configs.output_box_opts.size.width = M.configs.input_box_opts.size.width
-  else
+  if M.configs.save_session then
     local dir = io.open(M.configs.history_path, "rb")
     if dir then
       dir:close()
@@ -221,9 +197,7 @@ function M.setup(opts)
     end
   end
 
-  M._.input_box_opts = M.configs.input_box_opts
-  M._.output_box_opts = M.configs.output_box_opts
-  M._.history_box_opts = M.configs.history_box_opts
+  M._.chat_ui_opts = M.configs.chat_ui_opts
 
   M.prefix.user = M.configs.prefix.user
   M.prefix.assistant = M.configs.prefix.assistant
