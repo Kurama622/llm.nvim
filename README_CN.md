@@ -357,7 +357,7 @@ export LLM_KEY=NONE
 
 ### 窗口风格配置
 
-如果你想进一步配置对话界面的样式，你可以分别对`input_box_opts`、`output_box_opts`、`history_box_opts`和`popwin_opts`进行配置。
+如果你想进一步配置对话界面的样式，你可以分别对`chat_ui_opts`和`popwin_opts`进行配置。
 
 它们的配置项都是相同的：
 - `relative`:
@@ -379,128 +379,7 @@ export LLM_KEY=NONE
 
 更多信息可以查阅[nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 
-```lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
-    config = function()
-      require("llm").setup({
-        style = "float", -- right | left | above | below | float
-
-        -- [[ Github Models ]]
-        url = "https://models.inference.ai.azure.com/chat/completions",
-        model = "gpt-4o",
-        api_type = "openai",
-
-        input_box_opts = {
-          relative = "editor",
-          position = {
-            row = "85%",
-            col = 15,
-          },
-          size = {
-            height = "5%",
-            width = 120,
-          },
-
-          enter = true,
-          focusable = true,
-          zindex = 50,
-          border = {
-            style = "rounded",
-            text = {
-              top = " Enter Your Question ",
-              top_align = "center",
-            },
-          },
-          win_options = {
-            -- set window transparency
-            winblend = 20,
-            -- set window highlight
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-          },
-        },
-        output_box_opts = {
-          relative = "editor",
-          position = {
-            row = "35%",
-            col = 15,
-          },
-          size = {
-            height = "65%",
-            width = 90,
-          },
-          enter = true,
-          focusable = true,
-          zindex = 20,
-          border = {
-            style = "rounded",
-            text = {
-              top = " Preview ",
-              top_align = "center",
-            },
-          },
-          win_options = {
-            winblend = 20,
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-          },
-        },
-
-        history_box_opts = {
-          relative = "editor",
-          position = {
-            row = "35%",
-            col = 108,
-          },
-          size = {
-            height = "65%",
-            width = 27,
-          },
-          zindex = 70,
-          enter = false,
-          focusable = false,
-          border = {
-            style = "rounded",
-            text = {
-              top = " History ",
-              top_align = "center",
-            },
-          },
-          win_options = {
-            winblend = 20,
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-          },
-        },
-
-        -- LLMSelectedTextHandler windows options
-        popwin_opts = {
-          relative = "cursor",
-          position = {
-            row = -7,
-            col = 20,
-          },
-          size = {
-            width = "50%",
-            height = 15,
-          },
-          enter = true,
-          border = {
-            style = "rounded",
-            text = {
-              top = " Explain ",
-            },
-          },
-        },
-      })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
-      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
-    },
-  },
-```
+示例: [ui/config.lua](examples/ui/config.lua)
 
 [⬆ 返回目录](#目录)
 
