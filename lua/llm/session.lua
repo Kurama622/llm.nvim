@@ -62,6 +62,8 @@ function M.NewSession()
     if conf.configs.style == "float" then
       _layout.chat_ui()
       state.layout.popup:mount()
+      vim.api.nvim_set_current_win(state.input.popup.winid)
+      vim.api.nvim_command("startinsert")
       bufnr = state.llm.popup.bufnr
       winid = state.llm.popup.winid
 
@@ -139,8 +141,6 @@ function M.NewSession()
           end, { noremap = true })
         end
       end
-      vim.api.nvim_win_set_cursor(state.input.popup.winid, { 1, 1 })
-      vim.api.nvim_command("startinsert")
       conf.session.status = 1
     else
       if filename ~= "" or vim.bo.modifiable == false then
@@ -169,7 +169,7 @@ function M.NewSession()
               },
             })
             state.input.popup:mount()
-            vim.api.nvim_win_set_cursor(state.input.popup.winid, { 1, 1 })
+            vim.api.nvim_set_current_win(state.input.popup.winid)
             vim.api.nvim_command("startinsert")
             for name, d in pairs(conf.configs.keys) do
               if name == "Input:Submit" then
