@@ -3,6 +3,23 @@ local conf = require("llm.config")
 local streaming = require("llm.common.streaming")
 local F = require("llm.common.func")
 
+local highlight = {
+  LLMBlueNormal = { fg = "#65bcff", bg = "NONE" },
+  LLMBlueLight = { fg = "#B0E2FF", bg = "NONE" },
+  LlmRedNormal = { fg = "#ff7eb9", bg = "NONE" },
+  LlmRedLight = { fg = "#fca7ea", bg = "NONE" },
+  LlmGreenNormal = { fg = "#4fd6be", bg = "NONE" },
+  LlmGreenLight = { fg = "#b8db87", bg = "NONE" },
+  LlmYellowNormal = { fg = "#ff966c", bg = "NONE" },
+  LlmYellowLight = { fg = "#f9e2af", bg = "NONE" },
+  LlmGrayNormal = { fg = "#828bb8", bg = "NONE" },
+  LlmGrayLight = { fg = "#9c9c9c", bg = "NONE" },
+}
+
+for k, v in pairs(highlight) do
+  vim.api.nvim_set_hl(0, k, v)
+end
+
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
   state.llm.worker = streaming.GetStreamingOutput(
