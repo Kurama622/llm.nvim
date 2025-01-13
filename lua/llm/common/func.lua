@@ -3,6 +3,7 @@ local luv = vim.loop
 
 local state = require("llm.state")
 local conf = require("llm.config")
+local job = require("plenary.job")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local LOG = require("llm.common.log")
@@ -79,6 +80,9 @@ local function display_sub(s, i, j)
 end
 
 local function trim_leading_whitespace(str)
+  if str == nil then
+    return ""
+  end
   return (str:gsub("^[\n%s]*", ""))
 end
 
@@ -738,6 +742,7 @@ function M.GetUrlOutput(
   local body = nil
   local assistant_output = ""
   local parse = nil
+  local authorization = "Authorization: Bearer " .. LLM_KEY
 
   if parse_handler then
     parse = function(chunk)
@@ -904,12 +909,18 @@ function M.GetUrlOutput(
     end
 
     if args == nil then
-      _args = string.format(
-        [[curl %s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']],
+      _args = {
         url,
-        LLM_KEY,
-        vim.fn.json_encode(body)
-      )
+        "-N",
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        authorization,
+        "-d",
+        vim.fn.json_encode(body),
+      }
     else
       local env = {
         url = url,
@@ -942,13 +953,18 @@ function M.GetUrlOutput(
     end
 
     if args == nil then
-      _args = string.format(
-        [[curl https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s -N -X POST -H "Content-Type: application/json" -H "Authorization: Bearer %s" -d '%s']],
-        ACCOUNT,
-        MODEL,
-        LLM_KEY,
-        vim.fn.json_encode(body)
-      )
+      _args = {
+        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
+        "-N",
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "-H",
+        authorization,
+        "-d",
+        vim.fn.json_encode(body),
+      }
     else
       local env = {
         ACCOUNT = ACCOUNT,
@@ -970,14 +986,12 @@ function M.GetUrlOutput(
     end
   end
 
-  vim.fn.jobstart(_args, {
-    on_stdout = function(job_id, data, event_type)
-      vim.schedule(function()
-        local str = ""
-        for _, line in ipairs(data) do
-          str = str .. line
-        end
-        str = trim_leading_whitespace(str)
+  job
+    :new({
+      command = "curl",
+      args = _args,
+      on_stdout = vim.schedule_wrap(function(_, data)
+        local str = trim_leading_whitespace(data)
         if str:sub(1, 1) ~= "{" then
           return
         end
@@ -987,20 +1001,20 @@ function M.GetUrlOutput(
         else
           LOG:ERROR("Error occurred:" .. result)
         end
-      end)
-    end,
-    on_exit = function()
-      table.insert(messages, { role = "assistant", content = assistant_output })
-      waiting_state.box:unmount()
-      waiting_state.finish = true
-      if exit_handler ~= nil then
-        local callback_func = vim.schedule_wrap(function()
-          exit_handler(assistant_output)
-        end)
-        callback_func()
-      end
-    end,
-  })
+      end),
+      on_exit = vim.schedule_wrap(function()
+        table.insert(messages, { role = "assistant", content = assistant_output })
+        waiting_state.box:unmount()
+        waiting_state.finish = true
+        if exit_handler ~= nil then
+          local callback_func = vim.schedule_wrap(function()
+            exit_handler(assistant_output)
+          end)
+          callback_func()
+        end
+      end),
+    })
+    :start()
 end
 
 return M
