@@ -4,29 +4,14 @@ local uin = require("llm.common.input")
 local conf = require("llm.config")
 local state = require("llm.state")
 local streaming = require("llm.common.streaming")
-local _popup = require("nui.popup")
-local Menu = require("nui.menu")
+local Popup = require("nui.popup")
 local F = require("llm.common.func")
 local LOG = require("llm.common.log")
-
-local function OpenLLM()
-  F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker = streaming.GetStreamingOutput(
-    state.llm.bufnr,
-    state.llm.winid,
-    state.session[state.session.filename],
-    conf.configs.fetch_key,
-    nil,
-    nil,
-    nil,
-    conf.configs.args,
-    conf.configs.streaming_handler
-  )
-end
+local _layout = require("llm.common.layout")
 
 function M.LLMSelectedTextHandler(description)
   local content = F.GetVisualSelection()
-  state.popwin = _popup(conf.configs.popwin_opts)
+  state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
   state.session[state.popwin.winid] = {
     { role = "system", content = description },
@@ -74,115 +59,88 @@ function M.NewSession()
     local filename = vim.api.nvim_buf_get_name(bufnr)
     local winid = vim.api.nvim_get_current_win()
 
-    local cmd_output = vim.fn.execute(":autocmd")
-
-    local open_llm_autocmd_exists = string.match(cmd_output, "OpenLLM")
-    if not open_llm_autocmd_exists then
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "OpenLLM",
-        callback = OpenLLM,
-      })
-    end
-
     if conf.configs.style == "float" then
-      local llm_popup = _popup(conf.configs.output_box_opts)
-      state.llm.popup = llm_popup
+      _layout.chat_ui()
+      state.layout.popup:mount()
+      vim.api.nvim_set_current_win(state.input.popup.winid)
+      vim.api.nvim_command("startinsert")
+      bufnr = state.llm.popup.bufnr
+      winid = state.llm.popup.winid
 
-      llm_popup:mount()
-      bufnr = llm_popup.bufnr
-      winid = llm_popup.winid
+      -------------------------------------------------------------------------
+      --- init current session
+      -------------------------------------------------------------------------
+      state.session.filename = "current"
+      if not state.session[state.session.filename] then
+        state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+      end
+      F.RefreshLLMText(state.session[state.session.filename])
 
       if conf.configs.save_session then
-        local history_popup = Menu(conf.configs.history_box_opts, {
-          lines = (function()
-            local items = F.ListFilesInPath()
-            state.history.list = { Menu.item("current") }
-            for _, item in ipairs(items) do
-              table.insert(state.history.list, Menu.item(item))
-            end
-            return state.history.list
-          end)(),
-          max_width = 20,
-          keymap = {
-            focus_next = { "j", "<Down>", "<Tab>" },
-            focus_prev = { "k", "<Up>", "<S-Tab>" },
-            submit = { "<CR>", "<Space>" },
-          },
-          on_change = function(item)
-            if item.text == "current" then
-              state.session.filename = item.text
-              if not state.session[item.text] then
-                state.session[item.text] = F.DeepCopy(conf.session.messages)
-              end
-              F.RefreshLLMText(state.session[item.text])
-            else
-              local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
-              state.session.filename = item.text
-              if not state.session[item.text] then
-                local file = io.open(sess_file, "r")
-                local messages = vim.fn.json_decode(file:read())
-                state.session[item.text] = messages
-                file:close()
-              end
-              F.RefreshLLMText(state.session[item.text])
-            end
-          end,
-          on_submit = function(item)
-            LOG:TRACE("Menu Submitted: " .. item.text)
-          end,
-        })
-
-        history_popup:mount()
         local unmap_list = { "<Esc>", "<C-c>", "<CR>", "<Space>" }
         for _, v in ipairs(unmap_list) do
-          history_popup:unmap("n", v)
+          state.history.popup:unmap("n", v)
         end
-        state.history.popup = history_popup
-      end
-
-      -- set autocmds
-      local user_autocmd_lists = {
-        close_llm = {
-          exist = string.match(cmd_output, "CloseLLM"),
-          pattern = "CloseLLM",
-          callback = F.CloseLLM,
-        },
-        close_input = {
-          exist = string.match(cmd_output, "CloseInput"),
-          pattern = "CloseInput",
-          callback = F.CloseInput,
-        },
-        close_history = {
-          exist = string.match(cmd_output, "CloseHistory"),
-          pattern = "CloseHistory",
-          callback = F.CloseHistory,
-        },
-      }
-
-      for _, v in pairs(user_autocmd_lists) do
-        if not v.exist then
-          vim.api.nvim_create_autocmd("User", {
-            pattern = v.pattern,
-            callback = v.callback,
-          })
-        end
+        state.history.popup = state.history.popup
       end
 
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Session:Close" then
-          F.WinMapping(llm_popup, v.mode, v.key, function()
+          F.WinMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
-            vim.api.nvim_exec_autocmds("User", { pattern = "CloseInput" })
-            vim.api.nvim_exec_autocmds("User", { pattern = "CloseHistory" })
+            state.session = { filename = nil }
             conf.session.status = -1
             vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          F.WinMapping(llm_popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.WinMapping(state.llm.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
         end
       end
-      uin.SetInput(bufnr, winid)
+
+      for k, v in pairs(conf.configs.keys) do
+        if k == "Input:Submit" then
+          F.WinMapping(state.input.popup, v.mode, v.key, function()
+            local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
+            local input = table.concat(input_table, "\n")
+            if not conf.configs.save_session then
+              state.session.filename = "current"
+              if not state.session[state.session.filename] then
+                state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+              end
+            end
+            vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
+            if input ~= "" then
+              table.insert(state.session[state.session.filename], { role = "user", content = input })
+              F.SetRole(bufnr, winid, "user")
+              F.AppendChunkToBuffer(bufnr, winid, input)
+              F.NewLine(bufnr, winid)
+              vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+            end
+          end, { noremap = true })
+        elseif k == "Input:Cancel" then
+          F.WinMapping(state.input.popup, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+        elseif k == "Input:Resend" then
+          F.WinMapping(state.input.popup, v.mode, v.key, F.ResendLLM, { noremap = true, silent = true })
+        elseif k == "Session:Close" then
+          F.WinMapping(state.input.popup, v.mode, v.key, function()
+            F.CloseLLM()
+            state.session = { filename = nil }
+            conf.session.status = -1
+            vim.api.nvim_command("doautocmd BufEnter")
+          end, { noremap = true })
+        elseif k == "Session:Toggle" then
+          F.WinMapping(state.input.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+        elseif conf.configs.save_session and k == "Input:HistoryNext" then
+          F.WinMapping(state.input.popup, v.mode, v.key, function()
+            F.MoveHistoryCursor(1)
+          end, { noremap = true })
+        elseif conf.configs.save_session and k == "Input:HistoryPrev" then
+          F.WinMapping(state.input.popup, v.mode, v.key, function()
+            F.MoveHistoryCursor(-1)
+          end, { noremap = true })
+        end
+      end
       conf.session.status = 1
     else
       if filename ~= "" or vim.bo.modifiable == false then
@@ -197,7 +155,51 @@ function M.NewSession()
       for k, v in pairs(conf.configs.keys) do
         if k == "Output:Ask" then
           vim.keymap.set(v.mode, v.key, function()
-            uin.SetInput(bufnr, winid)
+            state.input.popup = Popup({
+              relative = conf.configs.chat_ui_opts.input.relative,
+              position = conf.configs.chat_ui_opts.input.position,
+              enter = conf.configs.chat_ui_opts.input.enter,
+              focusable = conf.configs.chat_ui_opts.input.focusable,
+              zindex = conf.configs.chat_ui_opts.input.zindex,
+              border = conf.configs.chat_ui_opts.input.border,
+              win_options = conf.configs.chat_ui_opts.input.win_options,
+              size = {
+                height = conf.configs.chat_ui_opts.input.size.row,
+                width = conf.configs.chat_ui_opts.input.size.col,
+              },
+            })
+            state.input.popup:mount()
+            vim.api.nvim_set_current_win(state.input.popup.winid)
+            vim.api.nvim_command("startinsert")
+            for name, d in pairs(conf.configs.keys) do
+              if name == "Input:Submit" then
+                F.WinMapping(state.input.popup, d.mode, d.key, function()
+                  local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
+                  local input = table.concat(input_table, "\n")
+                  state.session.filename = "current"
+                  if not state.session[state.session.filename] then
+                    state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+                  end
+                  state.input.popup:unmount()
+                  if input ~= "" then
+                    table.insert(state.session[state.session.filename], { role = "user", content = input })
+                    F.SetRole(bufnr, winid, "user")
+                    F.AppendChunkToBuffer(bufnr, winid, input)
+                    F.NewLine(bufnr, winid)
+                    vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                  end
+                end, { noremap = true })
+              elseif name == "Session:Close" then
+                F.WinMapping(state.input.popup, d.mode, d.key, function()
+                  F.CloseLLM()
+                  state.session = { filename = nil }
+                  conf.session.status = -1
+                  vim.api.nvim_command("doautocmd BufEnter")
+                end, { noremap = true })
+              elseif name == "Session:Toggle" then
+                F.WinMapping(state.input.popup, d.mode, d.key, F.ToggleLLM, { noremap = true })
+              end
+            end
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Cancel" then
           vim.keymap.set(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })

@@ -324,6 +324,7 @@ end
 function M.CancelLLM()
   if state.llm.worker.job then
     state.llm.worker.job:shutdown()
+    LOG:INFO("Suspend output...")
     state.llm.worker.job = nil
   end
 end
@@ -335,9 +336,17 @@ function M.CloseLLM()
     vim.wait(200, function() end)
     state.llm.worker.job = nil
   end
-  state.llm.popup:unmount()
+  if state.layout.popup then
+    state.layout.popup:unmount()
 
-  if conf.configs.save_session and #state.session[state.session.filename] > 2 then
+    for _, comp in ipairs({ state.layout, state.input, state.llm, state.history }) do
+      comp.popup = nil
+    end
+  else
+    state.input.popup:unmount()
+  end
+
+  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
     local filename = nil
     if state.session.filename ~= "current" then
       filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
@@ -357,8 +366,10 @@ function M.CloseLLM()
       filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
     end
     local file = io.open(filename, "w")
-    file:write(vim.fn.json_encode(state.session[state.session.filename]))
-    file:close()
+    if file then
+      file:write(vim.fn.json_encode(state.session[state.session.filename]))
+      file:close()
+    end
   end
 end
 
@@ -380,22 +391,18 @@ end
 
 function M.ToggleLLM()
   if conf.session.status == 1 then
-    if state.llm.popup then
-      state.llm.popup:hide()
-      state.history.popup:hide()
+    if state.layout.popup then
+      state.layout.popup:hide()
       conf.session.status = 0
     end
-    state.input.popup:hide()
   elseif conf.session.status == 0 then
-    if state.llm.popup then
-      state.llm.popup:show()
-      state.history.popup:show()
+    if state.layout.popup then
+      state.layout.popup:show()
       state.llm.winid = state.llm.popup.winid
       vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
       vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
       conf.session.status = 1
     end
-    state.input.popup:show()
   end
 end
 
