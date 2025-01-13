@@ -378,7 +378,7 @@ Their configuration options are the same:
 
 More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md).
 
-Example: [ui/config.lua](examples/ui/config.lua)
+Example: [UI](examples/ui)
 
 [⬆ back to top](#contents)
 

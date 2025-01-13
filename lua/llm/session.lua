@@ -1,6 +1,5 @@
 local M = {}
 
-local uin = require("llm.common.input")
 local conf = require("llm.config")
 local state = require("llm.state")
 local streaming = require("llm.common.streaming")

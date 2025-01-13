@@ -379,7 +379,7 @@ export LLM_KEY=NONE
 
 更多信息可以查阅[nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 
-示例: [ui/config.lua](examples/ui/config.lua)
+示例: [UI](examples/ui)
 
 [⬆ 返回目录](#目录)
 

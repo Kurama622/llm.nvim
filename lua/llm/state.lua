@@ -1,4 +1,3 @@
-local conf = require("llm.config")
 local M = {}
 
 M.cursor = {

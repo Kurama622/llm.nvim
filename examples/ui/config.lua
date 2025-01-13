@@ -6,6 +6,10 @@ return {
     cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
     config = function()
       require("llm").setup({
+        prefix = {
+          user = { text = "  ", hl = "Title" },
+          assistant = { text = "  ", hl = "Added" },
+        },
         chat_ui_opts = {
           relative = "editor",
           position = "50%",
@@ -23,15 +27,14 @@ return {
             focusable = true,
             zindex = 50,
             border = {
-              style = "rounded",
               text = {
-                top = Text(" Enter Your Question ", "String"),
+                top = Text("  Enter Your Question ", "LlmYellowNormal"),
                 top_align = "center",
               },
             },
             win_options = {
               winblend = 0,
-              winhighlight = "Normal:Normal,FloatBorder:Float",
+              winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
             },
             size = { row = "10%", col = "80%" },
             order = 2,
@@ -68,7 +71,7 @@ return {
             },
             win_options = {
               winblend = 0,
-              winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+              winhighlight = "Normal:LlmBlueNormal,FloatBorder:FloatBorder",
             },
             size = { row = "100%", col = "20%" },
             order = 3,
