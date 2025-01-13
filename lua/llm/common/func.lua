@@ -926,6 +926,7 @@ function M.GetUrlOutput(
         url = url,
         LLM_KEY = LLM_KEY,
         body = body,
+        authorization = authorization,
       }
 
       setmetatable(env, { __index = _G })
@@ -971,6 +972,7 @@ function M.GetUrlOutput(
         MODEL = MODEL,
         LLM_KEY = LLM_KEY,
         body = body,
+        authorization = authorization,
       }
 
       setmetatable(env, { __index = _G })
