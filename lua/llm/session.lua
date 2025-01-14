@@ -94,6 +94,11 @@ function M.NewSession()
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.WinMapping(state.llm.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+        elseif k == "Focus:Input" then
+          F.WinMapping(state.llm.popup, v.mode, v.key, function()
+            vim.api.nvim_set_current_win(state.input.popup.winid)
+            vim.api.nvim_command("startinsert")
+          end, { noremap = true })
         end
       end
 
@@ -137,6 +142,11 @@ function M.NewSession()
         elseif conf.configs.save_session and k == "Input:HistoryPrev" then
           F.WinMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(-1)
+          end, { noremap = true })
+        elseif k == "Focus:Output" then
+          F.WinMapping(state.input.popup, v.mode, v.key, function()
+            vim.api.nvim_set_current_win(state.llm.popup.winid)
+            vim.api.nvim_command("stopinsert")
           end, { noremap = true })
         end
       end
