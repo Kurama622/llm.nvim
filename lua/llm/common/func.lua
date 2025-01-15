@@ -348,6 +348,7 @@ function M.CloseLLM()
     end
   else
     state.input.popup:unmount()
+    state.input.popup = nil
   end
 
   if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then

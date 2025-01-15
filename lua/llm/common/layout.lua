@@ -18,23 +18,28 @@ local function reformat_size(size)
   return size
 end
 
---- @param size1 {row: number, col: number}
---- @param size2 {row: number, col: number}
+--- @param size1 {height: number, width: number}
+--- @param size2 {height: number, width: number}
 --- @return string|nil
 --- @return number
 local function get_sublayout_opts(size1, size2)
   local opts = { nil, 0 }
-  if size1.row == size2.row and size1.col + size2.col == 1 then
-    opts = { "col", size1.row }
-  elseif size1.col == size2.col and size1.row + size2.row == 1 then
-    opts = { "row", size1.col }
+  if size1.height == size2.height and size1.width + size2.width == 1 then
+    opts = { "width", size1.height }
+  elseif size1.width == size2.width and size1.height + size2.height == 1 then
+    opts = { "height", size1.width }
   end
   return unpack(opts)
 end
 
 local _not = {
-  row = "col",
-  col = "row",
+  height = "width",
+  width = "height",
+}
+
+local _dir = {
+  height = "row",
+  width = "col",
 }
 
 ---create chat ui
@@ -44,7 +49,7 @@ local _not = {
 ---@param popup_other_opts table|nil
 function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup_other_opts)
   local layout = layout_opts or conf.configs.chat_ui_opts
-  local input = popup_input_opts or conf.configs.chat_ui_opts.input
+  local input = popup_input_opts or conf.configs.chat_ui_opts.input.float
   local output = popup_output_opts or conf.configs.chat_ui_opts.output
   local other = popup_other_opts or conf.configs.chat_ui_opts.history
 
@@ -119,90 +124,90 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     })
   end
   for _, size in ipairs({ input.size, output.size, other.size }) do
-    size.row = reformat_size(size.row)
-    size.col = reformat_size(size.col)
+    size.height = reformat_size(size.height)
+    size.width = reformat_size(size.width)
   end
   if popup_input_opts == nil and popup_output_opts == nil and popup_other_opts == nil and conf.configs.save_session then
-    local _dir, _size = nil, nil
-    _dir, _size = get_sublayout_opts(input.size, output.size)
-    if _dir then
+    local _align, _size = nil, nil
+    _align, _size = get_sublayout_opts(input.size, output.size)
+    if _align then
       if output.order < input.order then
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.llm.popup, { size = output.size[_dir] }),
-              Layout.Box(state.input.popup, { size = input.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.history.popup, { size = other.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.llm.popup, { size = output.size[_align] }),
+              Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       else
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.input.popup, { size = input.size[_dir] }),
-              Layout.Box(state.llm.popup, { size = output.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.history.popup, { size = other.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.input.popup, { size = input.size[_align] }),
+              Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       end
       return
     end
 
-    _dir, _size = get_sublayout_opts(output.size, other.size)
-    if _dir then
+    _align, _size = get_sublayout_opts(output.size, other.size)
+    if _align then
       if output.order < other.order then
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.llm.popup, { size = output.size[_dir] }),
-              Layout.Box(state.history.popup, { size = other.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.input.popup, { size = input.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.llm.popup, { size = output.size[_align] }),
+              Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       else
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.history.popup, { size = other.size[_dir] }),
-              Layout.Box(state.llm.popup, { size = output.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.input.popup, { size = input.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.history.popup, { size = other.size[_align] }),
+              Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       end
       return
     end
 
-    _dir, _size = get_sublayout_opts(input.size, other.size)
-    if _dir then
+    _align, _size = get_sublayout_opts(input.size, other.size)
+    if _align then
       if input.order < other.order then
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.input.popup, { size = input.size[_dir] }),
-              Layout.Box(state.history.popup, { size = other.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.llm.popup, { size = output.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.input.popup, { size = input.size[_align] }),
+              Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       else
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
             Layout.Box({
-              Layout.Box(state.history.popup, { size = other.size[_dir] }),
-              Layout.Box(state.input.popup, { size = input.size[_dir], grow = 1 }),
-            }, { dir = _not[_dir], size = _size }),
-            Layout.Box(state.llm.popup, { size = output.size[_not[_dir]] }),
-          }, { dir = _dir })
+              Layout.Box(state.history.popup, { size = other.size[_align] }),
+              Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+            }, { dir = _dir[_not[_align]], size = _size }),
+            Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+          }, { dir = _dir[_align] })
         )
       end
       return
@@ -213,16 +218,16 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
-            Layout.Box(state.llm.popup, { size = output.size.row }),
-            Layout.Box(state.input.popup, { size = input.size.row }),
+            Layout.Box(state.llm.popup, { size = output.size.height }),
+            Layout.Box(state.input.popup, { size = input.size.height }),
           }, { dir = "col" })
         )
       else
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
-            Layout.Box(state.input.popup, { size = input.size.row }),
-            Layout.Box(state.llm.popup, { size = output.size.row }),
+            Layout.Box(state.input.popup, { size = input.size.height }),
+            Layout.Box(state.llm.popup, { size = output.size.height }),
           }, { dir = "col" })
         )
       end
@@ -231,16 +236,16 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
-            Layout.Box(state.llm.popup, { size = output.size.col }),
-            Layout.Box(state.input.popup, { size = input.size.col }),
+            Layout.Box(state.llm.popup, { size = output.size.width }),
+            Layout.Box(state.input.popup, { size = input.size.width }),
           }, { dir = "row" })
         )
       else
         state.layout.popup = Layout(
           { relative = layout.relative, position = layout.position, size = layout.size },
           Layout.Box({
-            Layout.Box(state.input.popup, { size = input.size.col }),
-            Layout.Box(state.llm.popup, { size = output.size.col }),
+            Layout.Box(state.input.popup, { size = input.size.width }),
+            Layout.Box(state.llm.popup, { size = output.size.width }),
           }, { dir = "row" })
         )
       end

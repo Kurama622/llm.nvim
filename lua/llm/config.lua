@@ -23,27 +23,46 @@ M._.chat_ui_opts = {
     height = "80%",
   },
   input = {
-    relative = "editor", -- for split style
-    position = {
-      row = "80%", -- for split style
-      col = "50%",
-    },
-    enter = true,
-    focusable = true,
-    zindex = 50,
-    border = {
-      style = "rounded",
-      text = {
-        top = " Enter Your Question ",
-        top_align = "center",
+    float = {
+      enter = true,
+      focusable = true,
+      zindex = 50,
+      border = {
+        style = "rounded",
+        text = {
+          top = " Enter Your Question ",
+          top_align = "center",
+        },
       },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "15%", width = "100%" },
+      order = 3,
     },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    split = {
+      relative = "editor",
+      position = {
+        row = "80%",
+        col = "50%",
+      },
+      enter = true,
+      focusable = true,
+      zindex = 50,
+      border = {
+        style = "rounded",
+        text = {
+          top = " Enter Your Question ",
+          top_align = "center",
+        },
+      },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "10%", width = "80%" },
     },
-    size = { row = "15%", col = "100%" },
-    order = 3,
   },
   output = {
     enter = true,
@@ -60,7 +79,7 @@ M._.chat_ui_opts = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
-    size = { row = "85%", col = "80%" },
+    size = { height = "85%", width = "80%" },
     order = 1,
   },
   history = {
@@ -79,7 +98,7 @@ M._.chat_ui_opts = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
     },
-    size = { row = "85%", col = "20%" },
+    size = { height = "85%", width = "20%" },
     order = 2,
   },
 }
