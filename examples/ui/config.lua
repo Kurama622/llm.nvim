@@ -17,63 +17,59 @@ return {
             width = "80%",
             height = "80%",
           },
+          win_options = {
+            winblend = 0,
+            winhighlight = "Normal:String,FloatBorder:Float",
+          },
           input = {
-            relative = "editor", -- for split style
-            position = {
-              row = "80%", -- for split style
-              col = "50%",
-            },
-            enter = true,
-            focusable = true,
-            zindex = 50,
-            border = {
-              text = {
-                top = Text("  Enter Your Question ", "LlmYellowNormal"),
-                top_align = "center",
+            float = {
+              border = {
+                text = {
+                  top = Text("  Enter Your Question ", "LlmYellowNormal"),
+                  top_align = "center",
+                },
               },
+              win_options = {
+                winblend = 0,
+                winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
+              },
+              size = { height = "10%", width = "80%" },
+              order = 2,
             },
-            win_options = {
-              winblend = 0,
-              winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
+            -- for split style
+            split = {
+              relative = "editor",
+              position = {
+                row = "80%",
+                col = "50%",
+              },
+              border = {
+                text = {
+                  top = Text("  Enter Your Question ", "LlmYellowNormal"),
+                  top_align = "center",
+                },
+              },
+              win_options = {
+                winblend = 0,
+                winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
+              },
+              size = { height = "10%", width = "80%" },
             },
-            size = { row = "10%", col = "80%" },
-            order = 2,
           },
           output = {
-            enter = true,
-            focusable = true,
-            zindex = 50,
-            border = {
-              style = "rounded",
-              text = {
-                top = " Preview ",
-                top_align = "center",
-              },
-            },
-            win_options = {
-              winblend = 0,
-              winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-            },
-            size = { row = "90%", col = "80%" },
+            size = { height = "90%", width = "80%" },
             order = 1,
-          },
-          zindex = 50,
-          history = {
-            enter = false,
-            focusable = false,
-            max_width = 20,
-            border = {
-              style = "rounded",
-              text = {
-                top = " History ",
-                top_align = "center",
-              },
-            },
             win_options = {
               winblend = 0,
-              winhighlight = "Normal:LlmBlueNormal,FloatBorder:FloatBorder",
+              winhighlight = "Normal:Normal,FloatBorder:Title",
             },
-            size = { row = "100%", col = "20%" },
+          },
+          history = {
+            size = { height = "100%", width = "20%" },
+            win_options = {
+              winblend = 0,
+              winhighlight = "Normal:LlmBlueNormal,FloatBorder:Title",
+            },
             order = 3,
           },
         },
