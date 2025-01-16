@@ -203,7 +203,6 @@ function M.NewSession()
                 elseif name == "Session:Close" then
                   F.WinMapping(state.input.popup, d.mode, d.key, function()
                     F.CloseLLM()
-                    state.session = { filename = nil }
                     conf.session.status = -1
                     vim.api.nvim_command("doautocmd BufEnter")
                   end, { noremap = true })
