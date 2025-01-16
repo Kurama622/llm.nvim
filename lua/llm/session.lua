@@ -191,6 +191,7 @@ function M.NewSession()
                       state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
                     end
                     state.input.popup:unmount()
+                    state.input.popup = nil
                     if input ~= "" then
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
