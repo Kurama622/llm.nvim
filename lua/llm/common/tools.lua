@@ -10,6 +10,7 @@ local F = require("llm.common.func")
 local seamless = require("llm.common.seamless_border")
 local diff = require("llm.common.diff_style")
 local LOG = require("llm.common.log")
+local completion = require("llm.common.completion")
 
 local function set_keymapping(mode, keymaps, callback, bufnr)
   for _, key in pairs(keymaps) do
@@ -855,6 +856,37 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
       end,
     })
   end
+end
+
+function M.completion_handler(name, F, state, _, prompt, opts)
+  local options = {
+    fim = true,
+    context_window = 12800,
+    context_ratio = 0.75,
+    stream = false,
+    parse_handler = nil,
+    stdout_handler = nil,
+    stderr_handler = nil,
+    timeout = 10,
+    keymap = {
+      virtual_text = {
+        accept = {
+          mode = "i",
+          keys = "<A-e>",
+        },
+        next = {
+          mode = "i",
+          keys = "<A-n>",
+        },
+        prev = {
+          mode = "i",
+          keys = "<A-p>",
+        },
+      },
+    },
+  }
+  options = vim.tbl_deep_extend("force", options, opts or {})
+  completion:init(options)
 end
 
 return M

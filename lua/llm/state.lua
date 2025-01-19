@@ -43,4 +43,8 @@ M.app = {
   session = {},
 }
 
+M.completion = {
+  jobs = {},
+  contents = {},
+}
 return M
