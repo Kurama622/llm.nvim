@@ -18,7 +18,7 @@ return {
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
     config = function()
       local tools = require("llm.common.tools")
       require("llm").setup({
