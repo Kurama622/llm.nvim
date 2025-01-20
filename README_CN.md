@@ -195,7 +195,7 @@ export LLM_KEY=NONE
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler" },
     config = function()
       require("llm").setup({
         prompt = "You are a helpful chinese assistant.",
@@ -475,7 +475,7 @@ export LLM_KEY=NONE
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
     config = function()
       local tools = require("llm.common.tools")
       require("llm").setup({
@@ -668,7 +668,7 @@ return {
   {
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSesionToggle", "LLMSelectedTextHandler" },
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler" },
     config = function()
       require("llm").setup({
         url = "http://localhost:11434/api/chat", -- your url
