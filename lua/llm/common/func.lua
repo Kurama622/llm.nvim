@@ -669,6 +669,12 @@ function M.FlexibleWindow(str, enter_flexible_win, user_opts)
 
   local win_width = math.min(width, max_win_width)
   local win_height = math.min(height, max_win_height)
+  if win_width < 1 or win_height < 1 then
+    LOG:ERROR(
+      string.format("Unable to create a window with width %s and height %s.", tostring(win_width), tostring(win_height))
+    )
+    return nil
+  end
 
   local opts = {
     relative = "cursor",

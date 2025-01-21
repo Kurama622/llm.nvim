@@ -7,25 +7,25 @@ function LOG:setup(enable_trace, log_level)
 end
 
 function LOG:DEBUG(msg)
-  if self.log_level >= 0 then
+  if self.log_level <= 0 then
     vim.notify(msg, vim.log.levels.DEBUG, { title = self.plugin_name })
   end
 end
 
 function LOG:INFO(msg)
-  if self.log_level >= 1 then
+  if self.log_level <= 1 then
     vim.notify(msg, vim.log.levels.INFO, { title = self.plugin_name })
   end
 end
 
 function LOG:WARN(msg)
-  if self.log_level >= 2 then
+  if self.log_level <= 2 then
     vim.notify(msg, vim.log.levels.WARN, { title = self.plugin_name })
   end
 end
 
 function LOG:ERROR(msg)
-  if self.log_level >= 3 then
+  if self.log_level <= 3 then
     vim.notify(msg, vim.log.levels.ERROR, { title = self.plugin_name })
   end
 end
