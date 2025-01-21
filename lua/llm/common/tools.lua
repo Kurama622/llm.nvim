@@ -801,7 +801,12 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
   if options.exit_handler == nil then
     options.exit_handler = function(output)
       flexible_box = F.FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
-      flexible_box:mount()
+      if flexible_box then
+        flexible_box:mount()
+      else
+        LOG:ERROR(string.format('your model output is "%s"', output))
+        return
+      end
 
       local default_actions = {
         accept = function()
