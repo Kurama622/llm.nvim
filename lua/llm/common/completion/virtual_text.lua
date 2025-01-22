@@ -9,8 +9,10 @@ local virtual_text = {
 }
 
 function virtual_text:clear()
-  self.rendered = false
-  vim.api.nvim_buf_del_extmark(0, self.ns_id, self.extmark_id)
+  if self.rendered then
+    self.rendered = false
+    vim.api.nvim_buf_del_extmark(0, self.ns_id, self.extmark_id)
+  end
 end
 
 function virtual_text:update_preview()
@@ -31,8 +33,8 @@ function virtual_text:update_preview()
     self.cursor_col = vim.fn.col(".")
     self.cursor_line = vim.fn.line(".")
     vim.api.nvim_buf_set_extmark(0, self.ns_id, self.cursor_line - 1, self.cursor_col - 1, extmark)
+    self.rendered = true
   end
-  self.rendered = true
 end
 
 function virtual_text:preview()
@@ -54,7 +56,20 @@ function virtual_text:accept()
   self:clear()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local line, col = cursor[1] - 1, cursor[2]
-  vim.api.nvim_buf_set_text(0, line, col, line, col, self.display_lines)
+  local ctrl_o = vim.api.nvim_replace_termcodes("<C-o>", true, false, true)
+  local down_key = vim.api.nvim_replace_termcodes("<down>", true, false, true)
+
+  vim.schedule_wrap(function()
+    vim.api.nvim_buf_set_text(0, line, col, line, col, self.display_lines)
+    if #self.display_lines == 1 then
+      -- move to eol. \15 is Ctrl-o
+      vim.api.nvim_feedkeys(ctrl_o .. "$", "n", false)
+    else
+      -- move cursor to the end of inserted text
+      vim.api.nvim_feedkeys(string.rep(down_key, #self.display_lines - 1), "n", false)
+      vim.api.nvim_feedkeys(ctrl_o .. "$", "n", false)
+    end
+  end)()
   vim.api.nvim_command("doautocmd CompleteDone")
 end
 

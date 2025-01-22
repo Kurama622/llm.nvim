@@ -873,6 +873,8 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     stdout_handler = nil,
     stderr_handler = nil,
     timeout = 10,
+    ignore_filetypes = {},
+    auto_trigger = true,
     keymap = {
       virtual_text = {
         accept = {
@@ -887,10 +889,18 @@ function M.completion_handler(name, F, state, _, prompt, opts)
           mode = "i",
           keys = "<A-p>",
         },
+        toggle = {
+          mode = "n",
+          keys = "<leader>cp",
+        },
       },
     },
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
+  options.ignore_filetypes_dict = {}
+  for _, value in ipairs(options.ignore_filetypes) do
+    options.ignore_filetypes_dict[value] = true
+  end
   completion:init(options)
 end
 

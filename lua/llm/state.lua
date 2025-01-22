@@ -46,5 +46,8 @@ M.app = {
 M.completion = {
   jobs = {},
   contents = {},
+  enable = true,
+  set_keymap = false,
+  set_autocmd = false,
 }
 return M

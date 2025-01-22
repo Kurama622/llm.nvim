@@ -61,10 +61,8 @@ function ollama.request(opts)
       end),
       on_exit = vim.schedule_wrap(function()
         if assistant_output ~= "" then
-          LOG:TRACE("output:" .. assistant_output)
           state.completion.contents[i - 1] = assistant_output
           if opts.exit_handler then
-            LOG:TRACE("start exit_handler")
             opts.exit_handler()
           end
         end
