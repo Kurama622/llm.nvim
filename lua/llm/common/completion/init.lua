@@ -6,12 +6,8 @@ local completion = {}
 
 function completion:init(opts)
   self.opts = opts
-  if self.opts.api_type == "ollama" then
-    self.provider = require("llm.common.completion.backends.ollama")
-  end
-  LOG:TRACE("llm.nvim completion provider: " .. self.provider.name)
-
-  self.opts.frontend = require("llm.common.completion.virtual_text")
+  self.backend = require("llm.common.completion.backends")(opts)
+  self.frontend = require("llm.common.completion.frontends")(opts)
   self:autocmd()
   self:keymap()
 end
@@ -29,7 +25,7 @@ function completion:autocmd()
         return
       end
       utils.terminate_all_jobs()
-      self.opts.frontend:clear()
+      self.frontend:clear()
     end,
   })
   if self.opts.auto_trigger then
@@ -59,7 +55,7 @@ function completion:autocmd()
         return
       end
       utils.terminate_all_jobs()
-      self.opts.frontend:clear()
+      self.frontend:clear()
     end,
   })
   state.completion.set_autocmd = true
@@ -75,18 +71,18 @@ function completion:keymap()
         LOG:WARN("Please enable llm.nvim completion.")
         return
       end
-      if self.opts.frontend.rendered then
-        self.opts.frontend:accept()
+      if self.frontend.rendered then
+        self.frontend:accept()
       elseif not self.opts.auto_trigger then
         LOG:TRACE("Manual trigger completion.")
         self:start()
       end
     end,
     next = function()
-      self.opts.frontend:next()
+      self.frontend:next()
     end,
     prev = function()
-      self.opts.frontend:prev()
+      self.frontend:prev()
     end,
     toggle = function()
       state.completion.enable = not state.completion.enable
@@ -118,13 +114,13 @@ function completion:start()
     self.opts.suffix = context.lines_after
   end
 
-  self.opts.frontend:clear()
+  self.frontend:clear()
   self.opts.exit_handler = function()
-    self.opts.frontend:preview()
+    self.frontend:preview()
   end
 
   if self.opts.prompt or self.opts.suffix then
-    self.provider.request(self.opts)
+    self.backend.request(self.opts)
   end
 end
 return completion

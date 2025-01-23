@@ -3,7 +3,7 @@ local state = require("llm.state")
 local utils = require("llm.common.completion.utils")
 local LOG = require("llm.common.log")
 
-local ollama = { name = "ollama" }
+local ollama = {}
 
 function ollama.parse(chunk, assistant_output)
   local success, err = pcall(function()
@@ -43,7 +43,7 @@ function ollama.request(opts)
     vim.fn.json_encode(body),
   }
 
-  for i = 1, opts.n_completions do
+  for i = 0, opts.n_completions do
     local assistant_output = ""
     local new_job = job:new({
       command = "curl",
@@ -61,7 +61,7 @@ function ollama.request(opts)
       end),
       on_exit = vim.schedule_wrap(function()
         if assistant_output ~= "" then
-          state.completion.contents[i - 1] = assistant_output
+          state.completion.contents[i] = assistant_output
           if opts.exit_handler then
             opts.exit_handler()
           end

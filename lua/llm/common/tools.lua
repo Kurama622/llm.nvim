@@ -875,6 +875,7 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     timeout = 10,
     ignore_filetypes = {},
     auto_trigger = true,
+    style = "virtual_text",
     keymap = {
       virtual_text = {
         accept = {
