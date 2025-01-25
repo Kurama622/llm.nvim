@@ -7,7 +7,10 @@ local ollama = {}
 
 function ollama.parse(chunk, assistant_output)
   local success, err = pcall(function()
-    assistant_output = chunk.response
+    -- for /api/generate
+    -- assistant_output = chunk.response
+    -- for /v1/completions
+    assistant_output = chunk.choices[1].text
   end)
 
   if success then
@@ -29,8 +32,12 @@ function ollama.request(opts)
     body["prompt"] = opts.prompt
     body["suffix"] = opts.suffix
   end
+  if opts.max_tokens then
+    body["max_tokens"] = opts.max_tokens
+  end
 
   local _args = {
+    "-L",
     opts.url,
     "-N",
     "-X",
@@ -64,8 +71,7 @@ function ollama.request(opts)
           LOG:TRACE("Assistant output: " .. assistant_output)
           state.completion.contents[i] = assistant_output
           if opts.exit_handler then
-            local items = { assistant_output }
-            opts.exit_handler(items)
+            opts.exit_handler({ state.completion.contents[i] })
           end
         end
       end),

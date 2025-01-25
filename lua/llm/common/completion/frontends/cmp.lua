@@ -19,7 +19,9 @@ function ncmp.get_keyword_pattern()
 end
 
 function ncmp:new()
-  local source = setmetatable({}, { __index = ncmp })
+  local source = setmetatable({}, { __index = self })
+  source.is_in_throttle = nil
+  source.debounce_timer = nil
   return source
 end
 
@@ -31,6 +33,13 @@ function ncmp:complete(ctx, callback)
   end
 
   local function _complete()
+    if self.opts.throttle > 0 then
+      self.is_in_throttle = true
+      vim.defer_fn(function()
+        self.is_in_throttle = nil
+      end, self.opts.throttle)
+    end
+
     local context = utils.get_context(ctx.context, self.opts)
 
     if self.opts.fim then
@@ -44,9 +53,9 @@ function ncmp:complete(ctx, callback)
       end
 
       local items = {}
-      for _, result in ipairs(state.completion.contents) do
+      for _, result in ipairs(data) do
         local line_entry = vim.split(result, "\n")
-        local item_label
+        local item_label = nil
         for _, line in ipairs(line_entry) do
           line = utils.remove_spaces(line)
           if line and line ~= "" then
@@ -54,16 +63,20 @@ function ncmp:complete(ctx, callback)
             break
           end
         end
+        if not item_label then
+          return
+        end
         table.insert(items, {
           label = item_label,
           documentation = {
             kind = cmp.lsp.MarkupKind.Markdown,
             value = "```" .. (vim.bo.ft or "") .. "\n" .. result .. "\n```",
           },
-          insertText = result,
           insertTextMode = lsp.InsertTextMode.AdjustIndentation,
+          insertText = result .. "$0",
+          insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
           cmp = {
-            kind_hl_group = "CmpItemKindMinuet",
+            kind_hl_group = "CmpItemKind",
             kind_text = "llm",
           },
         })
@@ -81,7 +94,20 @@ function ncmp:complete(ctx, callback)
     return
   end
 
-  _complete()
+  if self.opts.throttle > 0 and self.is_in_throttle then
+    callback()
+    return
+  end
+
+  if self.opts.debounce > 0 then
+    if self.debounce_timer and not self.debounce_timer:is_closing() then
+      self.debounce_timer:stop()
+      self.debounce_timer:close()
+    end
+    self.debounce_timer = vim.defer_fn(_complete, self.opts.debounce)
+  else
+    _complete()
+  end
 end
 
 return ncmp
