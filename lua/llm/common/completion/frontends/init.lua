@@ -20,6 +20,7 @@ local function init(opts)
     if opts.style == "nvim-cmp" then
       LOG:TRACE("llm.nvim completion style: nvim-cmp")
       local cmp = require("llm.common.completion.frontends.cmp")
+      require("cmp").register_source("llm", cmp:new())
       state.completion.frontend = cmp
       state.completion.frontend.opts = opts
       return cmp

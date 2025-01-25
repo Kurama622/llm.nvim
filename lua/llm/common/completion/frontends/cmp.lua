@@ -31,7 +31,6 @@ function ncmp:complete(ctx, callback)
   end
 
   local function _complete()
-    LOG:TRACE("cmp complete")
     local context = utils.get_context(ctx.context, self.opts)
 
     if self.opts.fim then
@@ -45,13 +44,23 @@ function ncmp:complete(ctx, callback)
       end
 
       local items = {}
-      for _, result in ipairs(data) do
+      for _, result in ipairs(state.completion.contents) do
+        local line_entry = vim.split(result, "\n")
+        local item_label
+        for _, line in ipairs(line_entry) do
+          line = utils.remove_spaces(line)
+          if line and line ~= "" then
+            item_label = line
+            break
+          end
+        end
         table.insert(items, {
-          label = result,
+          label = item_label,
           documentation = {
             kind = cmp.lsp.MarkupKind.Markdown,
             value = "```" .. (vim.bo.ft or "") .. "\n" .. result .. "\n```",
           },
+          insertText = result,
           insertTextMode = lsp.InsertTextMode.AdjustIndentation,
           cmp = {
             kind_hl_group = "CmpItemKindMinuet",
