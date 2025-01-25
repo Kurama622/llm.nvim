@@ -43,4 +43,13 @@ M.app = {
   session = {},
 }
 
+M.completion = {
+  jobs = {},
+  contents = {},
+  backend = nil,
+  frontend = nil,
+  enable = true,
+  set_keymap = false,
+  set_autocmd = false,
+}
 return M

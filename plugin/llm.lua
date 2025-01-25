@@ -1,6 +1,7 @@
 local state = require("llm.state")
 local conf = require("llm.config")
 local streaming = require("llm.common.streaming")
+local app = require("llm.app")
 local F = require("llm.common.func")
 
 local highlight = {
@@ -44,8 +45,13 @@ vim.api.nvim_create_user_command("LLMSelectedTextHandler", function(args)
 end, { nargs = 1 })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
-  require("llm.app").LLMAppHandler(args.fargs[1])
+  app.LLMAppHandler(args.fargs[1])
 end, { nargs = 1 })
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "AutoTrigger",
+  callback = app.auto_trigger,
+})
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "OpenLLM",
