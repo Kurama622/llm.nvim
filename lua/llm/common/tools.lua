@@ -873,7 +873,9 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     stdout_handler = nil,
     stderr_handler = nil,
     timeout = 10,
-    after_cursor_filter_length = 10,
+    throttle = 1000, -- only send the request every x milliseconds, use 0 to disable throttle.
+    -- debounce the request in x milliseconds, set to 0 to disable debounce
+    debounce = 400,
     ignore_filetypes = {},
     auto_trigger = true,
     style = "virtual_text",
@@ -905,9 +907,7 @@ function M.completion_handler(name, F, state, _, prompt, opts)
   end
 
   options.timeout = tostring(options.timeout)
-  if not options.ignore_filetypes_dict[vim.bo.ft] then
-    completion:init(options)
-  end
+  completion:init(options)
 end
 
 return M
