@@ -873,6 +873,7 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     stdout_handler = nil,
     stderr_handler = nil,
     timeout = 10,
+    after_cursor_filter_length = 10,
     ignore_filetypes = {},
     auto_trigger = true,
     style = "virtual_text",
@@ -902,7 +903,11 @@ function M.completion_handler(name, F, state, _, prompt, opts)
   for _, value in ipairs(options.ignore_filetypes) do
     options.ignore_filetypes_dict[value] = true
   end
-  completion:init(options)
+
+  options.timeout = tostring(options.timeout)
+  if not options.ignore_filetypes_dict[vim.bo.ft] then
+    completion:init(options)
+  end
 end
 
 return M

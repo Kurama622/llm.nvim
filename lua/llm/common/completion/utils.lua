@@ -1,4 +1,5 @@
 local state = require("llm.state")
+local LOG = require("llm.common.log")
 local uv = vim.uv or vim.loop
 local utils = {}
 
@@ -141,11 +142,44 @@ function utils.get_context(cmp_context, opts)
         vim.fn.strcharpart(lines_before, n_chars_before - math.floor(opts.context_window * opts.context_ratio))
     end
   end
-
   return {
     lines_before = lines_before,
     lines_after = lines_after,
   }
+end
+
+--- Remove the trailing and leading spaces for each string in the table
+---@param item string
+function utils.remove_spaces(item)
+  if item:find("%S") then -- only include entries that contains non-whitespace
+    -- replace the trailing spaces
+    item = item:gsub("%s+$", "")
+    -- replace the leading spaces
+    item = item:gsub("^%s+", "")
+  end
+
+  return item
+end
+
+--- If the last word of b is not a substring of the first word of a,
+--- And it there are no trailing spaces for b and no leading spaces for a,
+--- prepend the last word of b to a.
+---@param a string?
+---@param b string?
+---@return string?
+function utils.prepend_to_complete_word(a, b)
+  if not a or not b then
+    return a
+  end
+
+  local last_word_b = b:match("[%w_-]+$")
+  local first_word_a = a:match("^[%w_-]+")
+
+  if last_word_b and first_word_a and not first_word_a:find(last_word_b, 1, true) then
+    a = last_word_b .. a
+  end
+
+  return a
 end
 
 return utils

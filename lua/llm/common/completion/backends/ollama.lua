@@ -43,7 +43,7 @@ function ollama.request(opts)
     vim.fn.json_encode(body),
   }
 
-  for i = 0, opts.n_completions do
+  for i = 0, opts.n_completions - 1 do
     local assistant_output = ""
     local new_job = job:new({
       command = "curl",
@@ -61,9 +61,11 @@ function ollama.request(opts)
       end),
       on_exit = vim.schedule_wrap(function()
         if assistant_output ~= "" then
+          LOG:TRACE("Assistant output: " .. assistant_output)
           state.completion.contents[i] = assistant_output
           if opts.exit_handler then
-            opts.exit_handler()
+            local items = { assistant_output }
+            opts.exit_handler(items)
           end
         end
       end),

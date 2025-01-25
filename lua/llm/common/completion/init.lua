@@ -8,8 +8,10 @@ function completion:init(opts)
   self.opts = opts
   self.backend = require("llm.common.completion.backends")(opts)
   self.frontend = require("llm.common.completion.frontends")(opts)
-  self:autocmd()
-  self:keymap()
+  if opts.style == "virtual_text" then
+    self:autocmd()
+    self:keymap()
+  end
 end
 
 function completion:autocmd()
@@ -102,13 +104,9 @@ function completion:keymap()
 end
 
 function completion:start()
-  if self.opts.ignore_filetypes_dict[vim.bo.ft] then
-    return
-  end
   local context = utils.get_context(utils.make_cmp_context(), self.opts)
   local language = utils.add_language_comment()
   local tab = utils.add_tab_comment()
-  self.opts.timeout = tostring(self.opts.timeout)
   if self.opts.fim then
     self.opts.prompt = language .. "\n" .. tab .. "\n" .. context.lines_before
     self.opts.suffix = context.lines_after
