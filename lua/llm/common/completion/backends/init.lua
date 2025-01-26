@@ -8,6 +8,11 @@ local function init(opts)
       state.completion.backend = ollama
       LOG:TRACE("llm.nvim completion provider: ollama")
       return ollama
+    elseif opts.api_type == "deepseek" then
+      local deepseek = require("llm.common.completion.backends.deepseek")
+      state.completion.backend = deepseek
+      LOG:TRACE("llm.nvim completion provider: deepseek")
+      return deepseek
     end
   else
     return state.completion.backend
