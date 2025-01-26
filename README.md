@@ -21,6 +21,7 @@
 
 * [Screenshots](#screenshots)
   * [Chat](#chat)
+  * [Code Completions](#code-completions)
   * [Quick Translation](#quick-translation)
   * [Explain Code](#explain-code)
   * [Optimize Code](#optimize-code)
@@ -45,6 +46,7 @@
   * [Local LLM Configuration](#local-llm-configuration)
 * [Default Shortcuts](#default-shortcuts)
 * [Author's configuration](#authors-configuration)
+* [Acknowledgments](#acknowledgments)
 * [Q&A](#qa)
   * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
   * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
@@ -59,6 +61,17 @@
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
 </p>
+
+### Code Completions
+  - **virtual text**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="560">
+  </p>
+
+  - **blink.cmp or nvim-cmp**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/fb3a2f90-2ccf-4588-9ee7-0ce54a1cc67d" alt="completion-blink-cmp" width="560">
+  </p>
 
 ### Quick Translation
 <p align= "center">
@@ -724,6 +737,13 @@ return {
 ## Author's configuration
 
 [plugins/llm](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm)
+
+## Acknowledgments
+
+We would like to express our heartfelt gratitude to the contributors of the following open-source projects, whose code has provided invaluable inspiration and reference for the development of llm.nvim:
+
+- [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): Diff style and prompt.
+- [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): Code completions.
 
 ---
 

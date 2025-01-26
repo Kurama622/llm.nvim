@@ -11,6 +11,7 @@ You can place the configuration of the tools you need in the `app_handler`.
 - [Optimize-Code-and-Display-Diff](./Optimize-Code-and-Display-Diff/config.lua)
 - [Word-Translate](./Word-Translate/config.lua)
 - [Generate-Docstring](./Generate-Docstring/config.lua)
+- [Code-Completions](./Code-Completions/config.lua)
 
 
 ```lua
@@ -97,7 +98,97 @@ return {
     },
   },
 }
+```
+---
 
+## Code Completions
+
+1. You can use `autocmd` to enable the completion feature of llm.nvim.
+
+```lua
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  callback = function()
+    vim.api.nvim_command("LLMAppHandler Completion")
+  end,
+})
 ```
+
+2. You can make the completion of llm.nvim take effect immediately by disabling lazy loading. (Completion AI tool requires setting `auto_trigger = true`)
+
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+  lazy = false,
+  config = function()
+    ...
+  end,
+}
 ```
+
+### blink.cmp
+
+Completion AI tool requires setting `style = blink.cmp`
+
+- blink.cmp config
+
+```lua
+{
+    "saghen/blink.cmp",
+    opts = {
+      completion = {
+        trigger = { prefetch_on_insert = false },
+      },
+
+      keymap = {
+        ["<C-y>"] = {
+          function(cmp)
+            cmp.show({ providers = { "llm" } })
+          end,
+        },
+      },
+
+      sources = {
+        -- if you want to use auto-complete
+        default = { "llm" },
+        providers = {
+          llm = {
+            name = "llm",
+            module = "llm.common.completion.frontends.blink",
+            timeout_ms = 10000,
+            score_offset = 100,
+            async = true,
+          },
+        },
+      },
+    },
+  }
+```
+
+### nvim-cmp
+
+Completion AI tool requires setting `style = nvim-cmp`
+
+```lua
+{
+  "hrsh7th/nvim-cmp",
+  optional = true,
+  opts = function(_, opts)
+    -- if you wish to use autocomplete
+    table.insert(opts.sources, 1, {
+      name = "llm",
+      group_index = 1,
+      priority = 100,
+    })
+
+    opts.performance = {
+      -- It is recommended to increase the timeout duration due to
+      -- the typically slower response speed of LLMs compared to
+      -- other completion sources. This is not needed when you only
+      -- need manual completion.
+      fetching_timeout = 5000,
+    }
+  end,
+},
+
 ```
