@@ -173,7 +173,7 @@ function utils.prepend_to_complete_word(a, b)
   end
 
   local last_word_b = b:match("[%w_-]+$")
-  local first_word_a = a:match("^[%w_-]+")
+  local first_word_a = a:match("^[%s%w_-]+")
 
   if last_word_b and first_word_a and not first_word_a:find(last_word_b, 1, true) then
     a = last_word_b .. a

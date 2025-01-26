@@ -62,6 +62,7 @@ function blink:get_completions(ctx, callback)
         end
         table.insert(items, {
           label = item_label,
+          filterText = result,
           documentation = {
             kind = "markdown",
             value = "```" .. (vim.bo.ft or "") .. "\n" .. result .. "\n```",
