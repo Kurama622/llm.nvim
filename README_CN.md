@@ -23,6 +23,7 @@
 
 * [截图](#截图)
   * [聊天界面](#聊天界面)
+  * [代码补全](#代码补全)
   * [快速翻译](#快速翻译)
   * [解释代码](#解释代码)
   * [优化代码](#优化代码)
@@ -47,6 +48,7 @@
   * [本地运行大模型](#本地运行大模型)
 * [默认快捷键](#默认快捷键)
 * [作者的配置文件](#作者的配置文件)
+* [致谢](#致谢)
 * [常见问题](#常见问题)
   * [windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题](#windows的curl使用格式与linux不一样llmnvim默认的请求格式windows下会有问题)
   * [多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key](#多个大模型切换频繁更改llm_key的值很麻烦而且我不想在neovim的配置文件中暴露我的key)
@@ -62,6 +64,17 @@
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
 </p>
+
+### 代码补全
+  - **虚拟文本**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="560">
+  </p>
+
+  - **blink.cmp 或 nvim-cmp**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/fb3a2f90-2ccf-4588-9ee7-0ce54a1cc67d" alt="completion-blink-cmp" width="560">
+  </p>
 
 ### 快速翻译
 <p align= "center">
@@ -725,6 +738,13 @@ return {
 ## 作者的配置文件
 
 [plugins/llm](https://github.com/Kurama622/.lazyvim/blob/main/lua/plugins/llm)
+
+## 致谢
+
+以下开源项目为llm.nvim提供了宝贵的灵感和参考:
+
+- [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): diff的显示风格以及大模型提示词
+- [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): 代码补全功能
 
 ---
 

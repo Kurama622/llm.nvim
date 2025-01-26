@@ -10,6 +10,7 @@ local F = require("llm.common.func")
 local seamless = require("llm.common.seamless_border")
 local diff = require("llm.common.diff_style")
 local LOG = require("llm.common.log")
+local completion = require("llm.common.completion")
 
 local function set_keymapping(mode, keymaps, callback, bufnr)
   for _, key in pairs(keymaps) do
@@ -860,6 +861,53 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
       end,
     })
   end
+end
+
+function M.completion_handler(name, F, state, _, prompt, opts)
+  local options = {
+    fim = true,
+    context_window = 12800,
+    context_ratio = 0.75,
+    stream = false,
+    parse_handler = nil,
+    stdout_handler = nil,
+    stderr_handler = nil,
+    timeout = 10,
+    throttle = 1000, -- only send the request every x milliseconds, use 0 to disable throttle.
+    -- debounce the request in x milliseconds, set to 0 to disable debounce
+    debounce = 400,
+    ignore_filetypes = {},
+    auto_trigger = true,
+    style = "virtual_text",
+    keymap = {
+      virtual_text = {
+        accept = {
+          mode = "i",
+          keys = "<A-e>",
+        },
+        next = {
+          mode = "i",
+          keys = "<A-n>",
+        },
+        prev = {
+          mode = "i",
+          keys = "<A-p>",
+        },
+        toggle = {
+          mode = "n",
+          keys = "<leader>cp",
+        },
+      },
+    },
+  }
+  options = vim.tbl_deep_extend("force", options, opts or {})
+  options.ignore_filetypes_dict = {}
+  for _, value in ipairs(options.ignore_filetypes) do
+    options.ignore_filetypes_dict[value] = true
+  end
+
+  options.timeout = tostring(options.timeout)
+  completion:init(options)
 end
 
 return M
