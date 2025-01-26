@@ -562,6 +562,10 @@ function M.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
 
         local status, data = pcall(vim.fn.json_decode, json_str)
 
+        if data.choices[1] == nil then
+          break
+        end
+
         if not status or not data.choices[1].delta.content then
           LOG:TRACE("json decode error: " .. json_str)
           break
