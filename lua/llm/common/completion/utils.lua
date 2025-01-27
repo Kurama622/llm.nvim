@@ -1,3 +1,7 @@
+-- This file uses code from minuet-ai.nvim
+-- Source: https://github.com/milanglacier/minuet-ai.nvim
+-- License: GNU General Public License v3.0
+-- Copyright (c) minuet-ai.nvim contributors
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local uv = vim.uv or vim.loop
