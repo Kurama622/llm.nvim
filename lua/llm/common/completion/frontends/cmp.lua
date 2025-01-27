@@ -1,3 +1,4 @@
+-- referenced from minuet-ai.nvim: https://github.com/milanglacier/minuet-ai.nvim
 local ncmp = {}
 local state = require("llm.state")
 local LOG = require("llm.common.log")
