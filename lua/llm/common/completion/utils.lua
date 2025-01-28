@@ -9,7 +9,6 @@ local utils = {}
 
 function utils.clear_completion() end
 
--- refer: https://github.com/milanglacier/minuet-ai.nvim
 ---@param job Job
 function utils.remove_job(job)
   for i, j in ipairs(state.completion.jobs) do
