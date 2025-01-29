@@ -5,8 +5,8 @@ local app = require("llm.app")
 local F = require("llm.common.func")
 
 local highlight = {
-  LLMBlueNormal = { fg = "#65bcff", bg = "NONE" },
-  LLMBlueLight = { fg = "#B0E2FF", bg = "NONE" },
+  LlmBlueNormal = { fg = "#65bcff", bg = "NONE" },
+  LlmBlueLight = { fg = "#B0E2FF", bg = "NONE" },
   LlmRedNormal = { fg = "#ff7eb9", bg = "NONE" },
   LlmRedLight = { fg = "#fca7ea", bg = "NONE" },
   LlmGreenNormal = { fg = "#4fd6be", bg = "NONE" },
