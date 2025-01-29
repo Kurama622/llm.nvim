@@ -883,7 +883,7 @@ function M.completion_handler(name, F, state, _, prompt, opts)
       virtual_text = {
         accept = {
           mode = "i",
-          keys = "<A-e>",
+          keys = "<A-a>",
         },
         next = {
           mode = "i",

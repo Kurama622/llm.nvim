@@ -98,6 +98,8 @@ function completion:keymap()
   for name, km in pairs(self.opts.keymap.virtual_text) do
     vim.api.nvim_set_keymap(km.mode, km.keys, "", {
       callback = callbacks[name],
+      noremap = true,
+      silent = true,
     })
   end
   state.completion.set_keymap = true
