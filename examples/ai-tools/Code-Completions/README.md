@@ -40,13 +40,39 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
 ### virtual text
 
-```lua
+Completion AI tool requires setting `style = "virtual_text"`
 
+Set key mapping for `virtual_text`
+```lua
+Completion = {
+  opts = {
+    keymap = {
+      virtual_text = {
+        accept = {
+          mode = "i",
+          keys = "<A-a>",
+        },
+        next = {
+          mode = "i",
+          keys = "<A-n>",
+        },
+        prev = {
+          mode = "i",
+          keys = "<A-p>",
+        },
+        toggle = {
+          mode = "n",
+          keys = "<leader>cp",
+        },
+      },
+    },
+  },
+}
 ```
 
 ### blink.cmp
 
-Completion AI tool requires setting `style = blink.cmp`
+Completion AI tool requires setting `style = "blink.cmp"`
 
 - blink.cmp config
 
@@ -85,7 +111,7 @@ Completion AI tool requires setting `style = blink.cmp`
 
 ### nvim-cmp
 
-Completion AI tool requires setting `style = nvim-cmp`
+Completion AI tool requires setting `style = "nvim-cmp"`
 
 ```lua
 {
