@@ -70,7 +70,7 @@
 
   - **blink.cmp or nvim-cmp**
   <p align= "center">
-    <img src="https://github.com/user-attachments/assets/fb3a2f90-2ccf-4588-9ee7-0ce54a1cc67d" alt="completion-blink-cmp" width="560">
+    <img src="https://github.com/user-attachments/assets/38cbcb76-8110-43da-af5a-3b5cf8876283" alt="completion-blink-cmp" width="560">
   </p>
 
 ### Quick Translation
