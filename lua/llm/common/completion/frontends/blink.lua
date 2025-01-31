@@ -8,7 +8,7 @@ local blink = {}
 function blink:clear() end
 
 function blink.get_trigger_characters()
-  return { "@", ".", "(", "[", ":", "{" }
+  return { "@", ".", "(", "[", ":", "{", " " }
 end
 
 function blink.new()

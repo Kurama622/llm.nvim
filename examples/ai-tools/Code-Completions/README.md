@@ -81,7 +81,11 @@ Completion AI tool requires setting `style = "blink.cmp"`
     "saghen/blink.cmp",
     opts = {
       completion = {
-        trigger = { prefetch_on_insert = false },
+        trigger = {
+          prefetch_on_insert = false
+          -- allow triggering by white space
+          show_on_blocked_trigger_characters = {},
+        },
       },
 
       keymap = {
