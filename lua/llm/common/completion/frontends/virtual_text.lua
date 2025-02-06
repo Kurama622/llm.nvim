@@ -159,7 +159,9 @@ function virtual_text:autocmd()
   vim.api.nvim_create_autocmd("InsertLeavePre", {
     group = virt_group,
     callback = function()
-      if not state.completion.enable then
+      local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+        or self.opts.filetypes[vim.bo.ft]
+      if not (state.completion.enable and cond) then
         return
       end
       utils.terminate_all_jobs()
@@ -170,7 +172,9 @@ function virtual_text:autocmd()
     vim.api.nvim_create_autocmd("InsertEnter", {
       group = virt_group,
       callback = function()
-        if not state.completion.enable then
+        local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+          or self.opts.filetypes[vim.bo.ft]
+        if not (state.completion.enable and cond) then
           return
         end
         self:start()
@@ -179,7 +183,9 @@ function virtual_text:autocmd()
     vim.api.nvim_create_autocmd("TextChangedI", {
       group = virt_group,
       callback = function()
-        if not state.completion.enable then
+        local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+          or self.opts.filetypes[vim.bo.ft]
+        if not (state.completion.enable and cond) then
           return
         end
         self:start()
@@ -189,7 +195,9 @@ function virtual_text:autocmd()
   vim.api.nvim_create_autocmd("CompleteDone", {
     group = virt_group,
     callback = function()
-      if not state.completion.enable then
+      local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+        or self.opts.filetypes[vim.bo.ft]
+      if not (state.completion.enable and cond) then
         return
       end
       utils.terminate_all_jobs()

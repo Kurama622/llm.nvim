@@ -25,7 +25,9 @@ function blink:get_completions(ctx, callback)
   end
 
   local function _complete()
-    if self.opts.ignore_filetypes_dict[vim.bo.ft] then
+    local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+      or self.opts.filetypes[vim.bo.ft]
+    if not cond then
       return
     end
 

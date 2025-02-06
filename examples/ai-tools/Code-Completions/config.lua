@@ -23,7 +23,10 @@ Completion = {
     n_completions = 3,
     context_window = 512,
     max_tokens = 256,
-    ignore_filetypes = {},
+    -- A mapping of filetype to true or false, to enable completion.
+    filetypes = { sh = false },
+    -- Whether to enable completion of not for filetypes not specifically listed above.
+    default_filetype_enabled = true,
     auto_trigger = true,
     style = "virtual_text", -- nvim-cmp or blink.cmp
     timeout = 10, -- max request time

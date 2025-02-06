@@ -876,7 +876,8 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     throttle = 1000, -- only send the request every x milliseconds, use 0 to disable throttle.
     -- debounce the request in x milliseconds, set to 0 to disable debounce
     debounce = 400,
-    ignore_filetypes = {},
+    filetypes = {},
+    default_filetype_enabled = true,
     auto_trigger = true,
     style = "virtual_text",
     keymap = {
@@ -901,10 +902,6 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     },
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
-  options.ignore_filetypes_dict = {}
-  for _, value in ipairs(options.ignore_filetypes) do
-    options.ignore_filetypes_dict[value] = true
-  end
 
   options.timeout = tostring(options.timeout)
   completion:init(options)
