@@ -15,6 +15,9 @@
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
+> [!NOTE]
+> The configurations of different LLMs (such as **ollama**, **deepseek**), UI interface configurations, and AI tools (including **code completion**) should be checked in the [examples](examples) first. Here you will find most of the information you want to know.
+
 
 # Contents
 <!-- mtoc-start -->
@@ -41,8 +44,11 @@
     * [openrouter](#openrouter)
     * [Local LLM](#local-llm)
   * [Basic Configuration](#basic-configuration)
+    * [Examples](#examples)
   * [Window Style Configuration](#window-style-configuration)
+    * [Examples](#examples-1)
   * [Configuration of AI Tools](#configuration-of-ai-tools)
+    * [Examples](#examples-2)
   * [Local LLM Configuration](#local-llm-configuration)
 * [Default Shortcuts](#default-shortcuts)
 * [Author's configuration](#authors-configuration)
@@ -203,128 +209,11 @@ export LLM_KEY=NONE
 
 > If the URL is not configured, the default is to use Cloudflare.
 
-```lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler" },
-    config = function()
-      require("llm").setup({
-        prompt = "You are a helpful chinese assistant.",
+#### Examples
 
-        prefix = {
-          user = { text = "😃 ", hl = "Title" },
-          assistant = { text = "⚡ ", hl = "Added" },
-        },
+For more details or examples, please refer to [Chat Configuration](examples/chat/).
 
-        style = "float", -- right | left | above | below | float
-
-        -- [[ Github Models ]]
-        url = "https://models.inference.ai.azure.com/chat/completions",
-        model = "gpt-4o",
-        api_type = "openai",
-        --[[ Optional: If you need to use models from different platforms simultaneously,
-        you can configure the `fetch_key` to ensure that different models use different API Keys.]]
-        fetch_key = function()
-          return switch("enable_gpt")
-        end,
-
-        -- [[ cloudflare ]]
-        -- model = "@cf/google/gemma-7b-it-lora",
-
-        -- [[ ChatGLM ]]
-        -- url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        -- model = "glm-4-flash",
-
-        -- [[ kimi ]]
-        -- url = "https://api.moonshot.cn/v1/chat/completions",
-        -- model = "moonshot-v1-8k", -- "moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"
-        -- api_type = "openai",
-
-        -- [[ ollama ]]
-        -- url = "http://localhost:11434/api/chat",
-        -- model = "llama3.2:1b",
-        -- api_type = "ollama",
-
-        -- [[ siliconflow ]]
-        -- url = "https://api.siliconflow.cn/v1/chat/completions",
-        -- api_type = "openai",
-        -- model = "Qwen/Qwen2.5-7B-Instruct",
-        -- -- [optional: fetch_key]
-        -- fetch_key = function()
-        --   return switch("enable_siliconflow")
-        -- end,
-
-        -- [[ openrouter ]]
-        -- url = "https://openrouter.ai/api/v1/chat/completions",
-        -- model = "google/gemini-2.0-flash-exp:free",
-        -- api_type = "openai",
-        -- fetch_key = function()
-        --   return switch("enable_openrouter")
-        -- end,
-
-        -- [[deepseek]]
-        -- url = "https://api.deepseek.com/chat/completions",
-        -- model = "deepseek-chat",
-        -- api_type = "openai",
-        -- fetch_key = function()
-        --   return switch("enable_deepseek")
-        -- end,
-
-        max_tokens = 1024,
-        save_session = true,
-        max_history = 15,
-        history_path = "/tmp/history",    -- where to save history
-        temperature = 0.3,
-        top_p = 0.7,
-
-        spinner = {
-          text = {
-            "󰧞󰧞",
-            "󰧞󰧞",
-            "󰧞󰧞",
-            "󰧞󰧞",
-          },
-          hl = "Title",
-        },
-
-        display = {
-          diff = {
-            layout = "vertical", -- vertical|horizontal split for default provider
-            opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
-            provider = "mini_diff", -- default|mini_diff
-          },
-        },
-
-        -- stylua: ignore
-        keys = {
-          -- The keyboard mapping for the input window.
-          ["Input:Cancel"]      = { mode = "n", key = "<C-c>" },
-          ["Input:Submit"]      = { mode = "n", key = "<cr>" },
-          ["Input:Resend"]      = { mode = "n", key = "<C-r>" },
-
-          -- only works when "save_session = true"
-          ["Input:HistoryNext"] = { mode = "n", key = "<C-j>" },
-          ["Input:HistoryPrev"] = { mode = "n", key = "<C-k>" },
-
-          -- The keyboard mapping for the output window in "split" style.
-          ["Output:Ask"]        = { mode = "n", key = "i" },
-          ["Output:Cancel"]     = { mode = "n", key = "<C-c>" },
-          ["Output:Resend"]     = { mode = "n", key = "<C-r>" },
-
-          -- The keyboard mapping for the output and input windows in "float" style.
-          ["Session:Toggle"]    = { mode = "n", key = "<leader>ac" },
-          ["Session:Close"]     = { mode = "n", key = "<esc>" },
-        },
-      })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
-      { "<leader>t", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
-    },
-  },
-```
+**Meanings of some configuration options**
 
 - `prompt`: Model prompt.
 - `prefix`: Dialog role indicator.
@@ -365,6 +254,7 @@ export LLM_KEY=NONE
 
 If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
 
+
 [⬆ back to top](#contents)
 
 ### Window Style Configuration
@@ -391,7 +281,9 @@ Their configuration options are the same:
 
 More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md).
 
-Example: [UI](examples/ui)
+#### Examples
+
+For more details or examples, please refer to [UI Configuration](examples/ui/).
 
 [⬆ back to top](#contents)
 
@@ -400,6 +292,10 @@ Example: [UI](examples/ui)
 Currently, llm.nvim provides some templates for AI tools, making it convenient for everyone to customize their own AI tools.
 
 All AI tools need to be defined in `app_handler`, presented in the form of a pair of `key-value` (`key` is the tool name and `value` is the configuration information of the tool).
+
+#### Examples
+
+For more details or examples, please refer to [AI Tools Configuration](examples/ai-tools/).
 
 For all AI tools, their configuration options are similar:
 
