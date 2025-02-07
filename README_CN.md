@@ -686,54 +686,24 @@ return {
 
 - 创建一个`.env`文件，专门保存你的各种Key。注意：此文件不要上传Github
 
-- 在zshrc或者bashrc中加载`.env`，并定义一些函数，用于切换不同的大模型
+```bash
+export GITHUB_TOKEN=xxxxxxx
+export DEEPSEEK_TOKEN=xxxxxxx
+export SILICONFLOW_TOKEN=xxxxxxx
+```
+
+- 在zshrc或者bashrc中加载`.env`
   ```bash
   source ~/.config/zsh/.env
 
-  export ACCOUNT=$WORKERS_AI_ACCOUNT
-  export LLM_KEY=$SILICONFLOW_TOKEN
-
-  enable_workers_ai() {
-    export LLM_KEY=$WORKERS_AI_KEY
-  }
-
-  enable_glm() {
-    export LLM_KEY=$GLM_KEY
-  }
-
-  enable_kimi() {
-    export LLM_KEY=$KIMI_KEY
-  }
-
-  enable_gpt() {
-    export LLM_KEY=$GITHUB_TOKEN
-  }
-
-  enable_siliconflow() {
-    export LLM_KEY=$SILICONFLOW_TOKEN
-  }
-  enable_openai() {
-    export LLM_KEY=$OPENAI_KEY
-  }
-  enable_local() {
-    export LLM_KEY=$LOCAL_LLM_KEY
-  }
+  # 默认使用Github Models
+  export LLM_KEY=$GITHUB_TOKEN
   ```
 
-- 最后在llm.nvim配置文件中，添加`switch`函数
-  ```lua
-  local function switch(shell_func)
-    -- [LINK] https://github.com/Kurama622/dotfiles/blob/main/zsh/module/func.zsh
-    local p = io.popen(string.format("source ~/.config/zsh/module/func.zsh; %s; echo $LLM_KEY", shell_func))
-    local key = p:read()
-    p:close()
-    return key
-  end
-  ```
-  通过`fetch_key`完成Key的切换
+- 最后在llm.nvim配置文件中，通过`fetch_key`完成Key的切换
   ```lua
     fetch_key = function()
-      return switch("enable_glm")
+      return vim.env.DEEPSEEK_TOKEN
     end,
   ```
 

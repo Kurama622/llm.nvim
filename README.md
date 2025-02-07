@@ -687,54 +687,24 @@ Use a custom request format
 
 - Create a `.env` file specifically to store your various keys. Note: Do not upload this file to GitHub.
 
-- Load the `.env` file in `zshrc` or `bashrc` and define some functions to switch between different LLMs.
+```bash
+export GITHUB_TOKEN=xxxxxxx
+export DEEPSEEK_TOKEN=xxxxxxx
+export SILICONFLOW_TOKEN=xxxxxxx
+```
+
+- Load the `.env` file in `zshrc` or `bashrc`
   ```bash
   source ~/.config/zsh/.env
 
-  export ACCOUNT=$WORKERS_AI_ACCOUNT
-  export LLM_KEY=$SILICONFLOW_TOKEN
-
-  enable_workers_ai() {
-    export LLM_KEY=$WORKERS_AI_KEY
-  }
-
-  enable_glm() {
-    export LLM_KEY=$GLM_KEY
-  }
-
-  enable_kimi() {
-    export LLM_KEY=$KIMI_KEY
-  }
-
-  enable_gpt() {
-    export LLM_KEY=$GITHUB_TOKEN
-  }
-
-  enable_siliconflow() {
-    export LLM_KEY=$SILICONFLOW_TOKEN
-  }
-  enable_openai() {
-    export LLM_KEY=$OPENAI_KEY
-  }
-  enable_local() {
-    export LLM_KEY=$LOCAL_LLM_KEY
-  }
+  # Default to using the LLM provided by Github Models.
+  export LLM_KEY=$GITHUB_TOKEN
   ```
 
-- Finally, add the `switch` function in the llm.nvim configuration file.
-  ```lua
-  local function switch(shell_func)
-    -- [LINK] https://github.com/Kurama622/dotfiles/blob/main/zsh/module/func.zsh
-    local p = io.popen(string.format("source ~/.config/zsh/module/func.zsh; %s; echo $LLM_KEY", shell_func))
-    local key = p:read()
-    p:close()
-    return key
-  end
-  ```
-  Switching keys is completed through `fetch_key`.
+- Finally, switching keys is completed through `fetch_key`.
   ```lua
     fetch_key = function()
-      return switch("enable_glm")
+      return vim.env.DEEPSEEK_TOKEN
     end,
   ```
 
