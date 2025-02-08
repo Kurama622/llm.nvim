@@ -879,6 +879,7 @@ function M.completion_handler(name, F, state, _, prompt, opts)
     filetypes = {},
     default_filetype_enabled = true,
     auto_trigger = true,
+    only_trigger_by_keywords = true,
     style = "virtual_text",
     keymap = {
       virtual_text = {
