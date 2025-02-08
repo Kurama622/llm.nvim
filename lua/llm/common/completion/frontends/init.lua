@@ -22,9 +22,9 @@ local function init(opts)
       if cond then
         LOG:TRACE("llm.nvim completion style: nvim-cmp")
         local ncmp = require("llm.common.completion.frontends.cmp")
-        require("cmp").register_source("llm", ncmp:new())
         state.completion.frontend = ncmp
         state.completion.frontend.opts = opts
+        require("cmp").register_source("llm", ncmp:new())
         return ncmp
       end
     end

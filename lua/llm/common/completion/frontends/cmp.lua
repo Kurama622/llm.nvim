@@ -10,16 +10,18 @@ function ncmp.get_trigger_characters()
   return { "@", ".", "(", "[", ":", " " }
 end
 
-function ncmp.get_keyword_pattern()
-  -- NOTE: Don't trigger the completion by any keywords (use a pattern that
-  -- is not likely to be triggered.). only trigger on the given characters.
-  -- This is because candidates returned by LLMs are easily filtered out by
-  -- cmp due to that LLM oftern returns candidates contains the full content
-  -- in current line before the cursor.
-  return "^$"
-end
-
 function ncmp:new()
+  function ncmp.get_keyword_pattern()
+    -- NOTE: Don't trigger the completion by any keywords (use a pattern that
+    -- is not likely to be triggered.). only trigger on the given characters.
+    -- This is because candidates returned by LLMs are easily filtered out by
+    -- cmp due to that LLM oftern returns candidates contains the full content
+    -- in current line before the cursor.
+    if self.opts.only_trigger_by_keywords then
+      return "^$"
+    end
+  end
+
   local source = setmetatable({}, { __index = self })
   source.is_in_throttle = nil
   source.debounce_timer = nil
