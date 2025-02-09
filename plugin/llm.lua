@@ -70,3 +70,5 @@ vim.api.nvim_create_autocmd("VimResized", {
     end
   end,
 })
+
+vim.treesitter.language.register("markdown", "llm")

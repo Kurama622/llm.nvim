@@ -283,7 +283,7 @@ When given a task:
       size = options.output.size,
       enter = options.output.enter,
       buf_options = {
-        filetype = "markdown",
+        filetype = "llm",
         buftype = options.output.buftype,
       },
       win_options = {
@@ -306,7 +306,7 @@ When given a task:
       size = options.input.size,
       enter = options.input.enter,
       buf_options = {
-        filetype = "markdown",
+        filetype = "llm",
         buftype = options.input.buftype,
       },
       win_options = {
@@ -648,8 +648,8 @@ function M.qa_handler(name, F, state, streaming, prompt, opts)
   layout:mount()
   vim.api.nvim_command("startinsert")
 
-  F.SetBoxOpts({ preview_box }, {
-    filetype = { "markdown", "markdown" },
+  F.SetBoxOpts({ input_box, preview_box }, {
+    filetype = { "llm", "llm" },
     buftype = options.buftype,
     spell = options.spell,
     number = options.number,
@@ -828,7 +828,7 @@ function M.flexi_handler(name, F, state, _, prompt, opts)
       end
 
       F.SetBoxOpts({ flexible_box }, {
-        filetype = { "markdown", "markdown" },
+        filetype = { "llm", "llm" },
         buftype = options.buftype,
         spell = options.spell,
         number = options.number,
