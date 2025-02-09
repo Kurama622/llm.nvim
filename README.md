@@ -50,7 +50,8 @@
   * [Configuration of AI Tools](#configuration-of-ai-tools)
     * [Examples](#examples-2)
   * [Local LLM Configuration](#local-llm-configuration)
-* [Default Shortcuts](#default-shortcuts)
+* [Default Keyboard Shortcuts](#default-keyboard-shortcuts)
+  * [Window switch](#window-switch)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
 * [Q&A](#qa)
@@ -605,7 +606,7 @@ return {
 
 [⬆ back to top](#contents)
 
-## Default Shortcuts
+## Default Keyboard Shortcuts
 
 - floating window
 
@@ -618,6 +619,17 @@ return {
 | Input        | `ctrl+k`     | `i`      | Select the previous session history |
 | Output+Input | `<leader>ac` | `n`      | Toggle session                      |
 | Output+Input | `<esc>`      | `n`      | Close session                       |
+
+### Window switch
+
+> You can use `<C-w><C-w>` to switch windows, and if you find it ungraceful, you can also set your own shortcut key for window switching. (This feature has not set a default shortcut key)
+
+```lua
+    -- Switch from the output window to the input window.
+    ["Focus:Input"]       = { mode = "n", key = {"i", "<C-w>"} },
+    -- Switch from the input window to the output window.
+    ["Focus:Output"]      = { mode = { "n", "i" }, key = "<C-w>" },
+```
 
 - split window
 

@@ -52,6 +52,7 @@
     * [示例](#示例-2)
   * [本地运行大模型](#本地运行大模型)
 * [默认快捷键](#默认快捷键)
+  * [窗口切换](#窗口切换)
 * [作者的配置文件](#作者的配置文件)
 * [致谢](#致谢)
 * [常见问题](#常见问题)
@@ -617,6 +618,17 @@ return {
 | Input        | `ctrl+k`     | `i`      | 切换到上一个会话历史    |
 | Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
 | Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
+
+### 窗口切换
+
+> 你可以使用 `<C-w><C-w>` 来切换窗口，如果你觉得这种方式不方便，你可以设置你自己的快捷键来切换窗口 (该特性没有默认快捷键)。
+
+```lua
+    -- Switch from the output window to the input window.
+    ["Focus:Input"]       = { mode = "n", key = {"i", "<C-w>"} },
+    -- Switch from the input window to the output window.
+    ["Focus:Output"]      = { mode = { "n", "i" }, key = "<C-w>" },
+```
 
 - 分割窗口风格下的快捷键
 
