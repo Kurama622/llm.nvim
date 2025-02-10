@@ -347,8 +347,10 @@ function M.CloseLLM()
       comp.popup = nil
     end
   else
-    state.input.popup:unmount()
-    state.input.popup = nil
+    if state.input.popup then
+      state.input.popup:unmount()
+      state.input.popup = nil
+    end
   end
 
   if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
@@ -399,6 +401,12 @@ function M.ToggleLLM()
     if state.layout.popup then
       state.layout.popup:hide()
       conf.session.status = 0
+    else
+      vim.api.nvim_win_close(state.llm.winid, true)
+      if state.input.popup then
+        state.input.popup:hide()
+      end
+      conf.session.status = 0
     end
   elseif conf.session.status == 0 then
     if state.layout.popup then
@@ -406,6 +414,15 @@ function M.ToggleLLM()
       state.llm.winid = state.llm.popup.winid
       vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
       vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
+      conf.session.status = 1
+    else
+      local win_options = {
+        split = conf.configs.style,
+      }
+      state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
+      if state.input.popup then
+        state.input.popup:show()
+      end
       conf.session.status = 1
     end
   end
@@ -458,12 +475,22 @@ function M.RefreshLLMText(messages)
   end
 end
 
-function M.WinMapping(win, modes, keys, func, opts)
+function M.SetFloatKeyMapping(popup, modes, keys, func, opts)
   local _modes = type(modes) == "string" and { modes } or modes
   local _keys = type(keys) == "string" and { keys } or keys
   for i = 1, #_modes do
     for j = 1, #_keys do
-      win:map(_modes[i], _keys[j], func, opts)
+      popup:map(_modes[i], _keys[j], func, opts)
+    end
+  end
+end
+
+function M.SetSplitKeyMapping(modes, keys, func, opts)
+  local _modes = type(modes) == "string" and { modes } or modes
+  local _keys = type(keys) == "string" and { keys } or keys
+  for i = 1, #_modes do
+    for j = 1, #_keys do
+      vim.keymap.set(_modes[i], _keys[j], func, opts)
     end
   end
 end
