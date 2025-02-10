@@ -170,7 +170,7 @@ function M.NewSession()
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Output:Ask" then
-          vim.keymap.set(v.mode, v.key, function()
+          F.SetSplitKeyMapping(v.mode, v.key, function()
             if state.input.popup then
               vim.api.nvim_set_current_win(state.input.popup.winid)
               vim.api.nvim_command("startinsert")
@@ -220,7 +220,7 @@ function M.NewSession()
             end
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Toggle" then
-          vim.keymap.set(v.mode, v.key, F.ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, F.ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Close" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             vim.api.nvim_win_close(state.llm.winid, true)
@@ -228,9 +228,9 @@ function M.NewSession()
             conf.session.status = -1
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Cancel" then
-          vim.keymap.set(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Resend" then
-          vim.keymap.set(v.mode, v.key, F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
         end
       end
 
