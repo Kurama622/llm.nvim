@@ -36,7 +36,7 @@ function M.LLMSelectedTextHandler(description)
 
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
-      F.WinMapping(state.popwin, v.mode, v.key, function()
+      F.SetFloatKeyMapping(state.popwin, v.mode, v.key, function()
         if state.llm.worker.job then
           state.llm.worker.job:shutdown()
           LOG:INFO("Suspend output...")
@@ -47,7 +47,7 @@ function M.LLMSelectedTextHandler(description)
         state.popwin:unmount()
       end, { noremap = true })
     elseif k == "Output:Cancel" then
-      F.WinMapping(state.popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+      F.SetFloatKeyMapping(state.popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
     end
   end
 end
@@ -58,6 +58,9 @@ function M.NewSession()
     local filename = vim.api.nvim_buf_get_name(bufnr)
     local winid = vim.api.nvim_get_current_win()
 
+    -----------------------------------------------------
+    ---                FLOAT STYLE
+    -----------------------------------------------------
     if conf.configs.style == "float" then
       _layout.chat_ui()
       state.layout.popup:mount()
@@ -87,16 +90,16 @@ function M.NewSession()
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Session:Close" then
-          F.WinMapping(state.llm.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
             state.session = { filename = nil }
             conf.session.status = -1
             vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          F.WinMapping(state.llm.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
         elseif k == "Focus:Input" then
-          F.WinMapping(state.llm.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             vim.api.nvim_set_current_win(state.input.popup.winid)
             vim.api.nvim_command("startinsert")
           end, { noremap = true })
@@ -105,7 +108,7 @@ function M.NewSession()
 
       for k, v in pairs(conf.configs.keys) do
         if k == "Input:Submit" then
-          F.WinMapping(state.input.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
             local input = table.concat(input_table, "\n")
             if not conf.configs.save_session then
@@ -124,28 +127,28 @@ function M.NewSession()
             end
           end, { noremap = true })
         elseif k == "Input:Cancel" then
-          F.WinMapping(state.input.popup, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
         elseif k == "Input:Resend" then
-          F.WinMapping(state.input.popup, v.mode, v.key, F.ResendLLM, { noremap = true, silent = true })
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, F.ResendLLM, { noremap = true, silent = true })
         elseif k == "Session:Close" then
-          F.WinMapping(state.input.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.CloseLLM()
             state.session = { filename = nil }
             conf.session.status = -1
             vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          F.WinMapping(state.input.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
         elseif conf.configs.save_session and k == "Input:HistoryNext" then
-          F.WinMapping(state.input.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(1)
           end, { noremap = true })
         elseif conf.configs.save_session and k == "Input:HistoryPrev" then
-          F.WinMapping(state.input.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(-1)
           end, { noremap = true })
         elseif k == "Focus:Output" then
-          F.WinMapping(state.input.popup, v.mode, v.key, function()
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             vim.api.nvim_set_current_win(state.llm.popup.winid)
             vim.api.nvim_command("stopinsert")
           end, { noremap = true })
@@ -153,6 +156,9 @@ function M.NewSession()
       end
       conf.session.status = 1
     else
+      -----------------------------------------------------
+      ---                 SPLIT STYLE
+      -----------------------------------------------------
       if filename ~= "" or vim.bo.modifiable == false then
         bufnr = vim.api.nvim_create_buf(false, true)
         local win_options = {
@@ -164,7 +170,7 @@ function M.NewSession()
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Output:Ask" then
-          vim.keymap.set(v.mode, v.key, function()
+          F.SetSplitKeyMapping(v.mode, v.key, function()
             if state.input.popup then
               vim.api.nvim_set_current_win(state.input.popup.winid)
               vim.api.nvim_command("startinsert")
@@ -185,7 +191,7 @@ function M.NewSession()
               vim.api.nvim_command("startinsert")
               for name, d in pairs(conf.configs.keys) do
                 if name == "Input:Submit" then
-                  F.WinMapping(state.input.popup, d.mode, d.key, function()
+                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
                     local input = table.concat(input_table, "\n")
                     state.session.filename = "current"
@@ -203,23 +209,32 @@ function M.NewSession()
                     end
                   end, { noremap = true })
                 elseif name == "Session:Close" then
-                  F.WinMapping(state.input.popup, d.mode, d.key, function()
+                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     F.CloseLLM()
-                    conf.session.status = -1
                     vim.api.nvim_command("doautocmd BufEnter")
                   end, { noremap = true })
                 elseif name == "Session:Toggle" then
-                  F.WinMapping(state.input.popup, d.mode, d.key, F.ToggleLLM, { noremap = true })
+                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, F.ToggleLLM, { noremap = true })
                 end
               end
             end
           end, { buffer = bufnr, noremap = true, silent = true })
+        elseif k == "Session:Toggle" then
+          F.SetSplitKeyMapping(v.mode, v.key, F.ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
+        elseif k == "Session:Close" then
+          F.SetSplitKeyMapping(v.mode, v.key, function()
+            vim.api.nvim_win_close(state.llm.winid, true)
+            vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
+            conf.session.status = -1
+          end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Cancel" then
-          vim.keymap.set(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Resend" then
-          vim.keymap.set(v.mode, v.key, F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, F.ResendLLM, { buffer = bufnr, noremap = true, silent = true })
         end
       end
+
+      conf.session.status = 1
     end
 
     filename = os.date("/tmp/%Y%m%d-%H%M%S") .. ".llm"
