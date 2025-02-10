@@ -22,6 +22,7 @@ Completion = {
 
     -------------------------------------------------
     ---                  codeium
+    ---    dependency: "Exafunction/codeium.nvim"
     -------------------------------------------------
     -- api_type = "codeium",
     ------------------ end codeium ------------------

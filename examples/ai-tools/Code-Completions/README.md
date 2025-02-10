@@ -1,5 +1,9 @@
 ## Code Completions
 
+> [!NOTE]
+> For Codeium code completion, you need to set up dependencies:
+>
+> `dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim", "Exafunction/codeium.nvim" }`,
 <!-- mtoc-start -->
 
 * [Settings](#settings)
@@ -8,6 +12,7 @@
   * [nvim-cmp](#nvim-cmp)
 
 <!-- mtoc-end -->
+
 > [!NOTE]
 > Your model needs to support FIM (Fill-in-Middle).
 >
