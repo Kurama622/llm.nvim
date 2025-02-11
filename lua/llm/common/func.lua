@@ -396,35 +396,51 @@ function M.CloseHistory()
   end
 end
 
+local function hide_session()
+  if state.layout.popup then
+    state.layout.popup:hide()
+    conf.session.status = 0
+  else
+    vim.api.nvim_win_close(state.llm.winid, true)
+    if state.input.popup then
+      state.input.popup:hide()
+    end
+  end
+  conf.session.status = 0
+end
+
+local function new_session()
+  LOG:WARN('[Unrecommended Behavior] Last time, the window was closed without using the "Session:Close" shortcut key.')
+  conf.session.status = -1
+end
+
+local function show_session()
+  if state.layout.popup then
+    state.layout.popup:show()
+    state.llm.winid = state.llm.popup.winid
+    vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
+    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
+  else
+    local win_options = {
+      split = conf.configs.style,
+    }
+    state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
+    if state.input.popup then
+      state.input.popup:show()
+    end
+  end
+  conf.session.status = 1
+end
+
 function M.ToggleLLM()
   if conf.session.status == 1 then
-    if state.layout.popup then
-      state.layout.popup:hide()
-      conf.session.status = 0
+    if vim.api.nvim_win_is_valid(state.llm.winid) then
+      hide_session()
     else
-      vim.api.nvim_win_close(state.llm.winid, true)
-      if state.input.popup then
-        state.input.popup:hide()
-      end
-      conf.session.status = 0
+      new_session()
     end
   elseif conf.session.status == 0 then
-    if state.layout.popup then
-      state.layout.popup:show()
-      state.llm.winid = state.llm.popup.winid
-      vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
-      vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
-      conf.session.status = 1
-    else
-      local win_options = {
-        split = conf.configs.style,
-      }
-      state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
-      if state.input.popup then
-        state.input.popup:show()
-      end
-      conf.session.status = 1
-    end
+    show_session()
   end
 end
 
