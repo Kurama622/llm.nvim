@@ -306,12 +306,12 @@ function _layout.menu_preview(layout_opts, opts)
       end,
     })
     state.history.popup:mount()
-    if state.history.idx then
-      vim.api.nvim_win_set_cursor(state.history.popup.winid, { state.history.idx, 0 })
-      local node = state.history.popup.tree:get_node(state.history.idx)
+    if state.history.index then
+      vim.api.nvim_win_set_cursor(state.history.popup.winid, { state.history.index, 0 })
+      local node = state.history.popup.tree:get_node(state.history.index)
       state.history.popup._.on_change(node)
     else
-      state.history.idx = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
+      state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
     end
 
     state.history.popup:map("n", { "<cr>" }, function()
@@ -319,14 +319,14 @@ function _layout.menu_preview(layout_opts, opts)
     end)
 
     state.history.popup:map("n", { "<esc>" }, function()
-      local node = state.history.popup.tree:get_node(state.history.idx)
+      local node = state.history.popup.tree:get_node(state.history.index)
       state.history.popup._.on_change(node)
       state.history.popup:unmount()
       state.history.popup = nil
     end)
   else
     state.history.popup:show()
-    state.history.idx = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
+    state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
   end
 end
 return _layout

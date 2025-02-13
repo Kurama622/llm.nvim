@@ -225,6 +225,7 @@ function M.NewSession()
           F.SetSplitKeyMapping(v.mode, v.key, function()
             vim.api.nvim_win_close(state.llm.winid, true)
             vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
+            state.history.index = nil
             conf.session.status = -1
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
