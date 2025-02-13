@@ -197,7 +197,7 @@ function M.UpdateCursorPosition(bufnr, winid)
   vim.api.nvim_win_set_cursor(winid, { buffer_line_count, 0 })
 end
 
-function M.AppendChunkToBuffer(bufnr, winid, chunk)
+function M.AppendChunkToBuffer(bufnr, winid, chunk, detach)
   local line_count = vim.api.nvim_buf_line_count(bufnr)
   local last_line = vim.api.nvim_buf_get_lines(bufnr, line_count - 1, line_count, false)[1]
 
@@ -209,7 +209,7 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
     vim.api.nvim_buf_set_lines(bufnr, line_count - 1, line_count, false, { last_line .. lines[1] })
     vim.api.nvim_buf_set_lines(bufnr, line_count, line_count, false, vim.list_slice(lines, 2))
   end
-  if vim.api.nvim_win_is_valid(winid) then
+  if vim.api.nvim_win_is_valid(winid) and not detach then
     M.UpdateCursorPosition(bufnr, winid)
   end
   if state.cursor.has_prefix and IsNotPopwin(winid) then
@@ -227,13 +227,13 @@ function M.AppendChunkToBuffer(bufnr, winid, chunk)
   end
 end
 
-function M.SetRole(bufnr, winid, role)
+function M.SetRole(bufnr, winid, role, detach)
   state.cursor.role = role
-  M.AppendChunkToBuffer(bufnr, winid, conf.prefix[role].text)
+  M.AppendChunkToBuffer(bufnr, winid, conf.prefix[role].text, detach)
 end
 
-function M.NewLine(bufnr, winid)
-  M.AppendChunkToBuffer(bufnr, winid, "\n\n")
+function M.NewLine(bufnr, winid, detach)
+  M.AppendChunkToBuffer(bufnr, winid, "\n\n", detach)
   state.cursor.has_prefix = true
 end
 
@@ -479,14 +479,16 @@ function M.MoveHistoryCursor(offset)
   state.history.popup._.on_change(new_node)
 end
 
-function M.RefreshLLMText(messages)
-  vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
+function M.RefreshLLMText(messages, bufnr, winid, detach)
+  bufnr = bufnr or state.llm.popup.bufnr
+  winid = winid or state.llm.popup.winid
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
   for _, msg in ipairs(messages) do
     if msg.role == "system" then
     else
-      M.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, msg.role)
-      M.AppendChunkToBuffer(state.llm.popup.bufnr, state.llm.popup.winid, msg.content)
-      M.NewLine(state.llm.popup.bufnr, state.llm.popup.winid)
+      M.SetRole(bufnr, winid, msg.role, detach)
+      M.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
+      M.NewLine(bufnr, winid, detach)
     end
   end
 end

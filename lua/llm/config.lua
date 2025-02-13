@@ -65,41 +65,64 @@ M._.chat_ui_opts = {
     },
   },
   output = {
-    enter = true,
-    focusable = true,
-    zindex = 50,
-    border = {
-      style = "rounded",
-      text = {
-        top = " Preview ",
-        top_align = "center",
+    float = {
+      enter = true,
+      focusable = true,
+      zindex = 50,
+      border = {
+        style = "rounded",
+        text = {
+          top = " Preview ",
+          top_align = "center",
+        },
       },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "85%", width = "80%" },
+      order = 1,
     },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
-    size = { height = "85%", width = "80%" },
-    order = 1,
   },
   history = {
-    zindex = 50,
-    enter = false,
-    focusable = false,
-    max_width = 20,
-    border = {
-      style = "rounded",
-      text = {
-        top = " History ",
-        top_align = "center",
+    float = {
+      zindex = 50,
+      enter = false,
+      focusable = false,
+      max_width = 20,
+      border = {
+        style = "rounded",
+        text = {
+          top = " History ",
+          top_align = "center",
+        },
       },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "85%", width = "20%" },
+      order = 2,
     },
-    win_options = {
-      winblend = 0,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    split = {
+      zindex = 50,
+      enter = true,
+      focusable = true,
+      max_width = 20,
+      border = {
+        style = "rounded",
+        text = {
+          top = " History ",
+          top_align = "center",
+        },
+      },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "30%", width = "30%" },
+      order = 1,
     },
-    size = { height = "85%", width = "20%" },
-    order = 2,
   },
 }
 
@@ -193,6 +216,7 @@ M.configs = {
     -- The keyboard mapping for the output and input windows in "float" style.
     ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
     ["Session:Close"]  = { mode = "n", key = "<esc>" },
+    ["Session:History"]  = { mode = "n", key = "<C-h>" },
   },
 }
 

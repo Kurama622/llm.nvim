@@ -252,6 +252,10 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
       - `Output:Ask`: Open input window.
       - `Output:Cancel`: Cancel diaglog response.
       - `Output:Resend`: Rerespond to the dialog.
+      - `Session:History`: open session history.
+    - Chat UI
+      - `Session:Toggle`: open/hide the Chat UI.
+      - `Session:Close`: close the Chat UI.
 
 If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
 
@@ -633,12 +637,19 @@ return {
 
 - split window
 
-| window       | key          | mode     | desc                    |
-| ------------ | ------------ | -------- | ----------------------- |
-| Input        | `<cr>`       | `n`      | Submit your question    |
-| Output       | `i`          | `n`      | Open the input box      |
-| Output       | `ctrl+c`     | `n`      | Cancel dialog response  |
-| Output       | `ctrl+r`     | `n`      | Rerespond to the dialog |
+| window       | key          | mode     | desc                                 |
+| ------------ | ------------ | -------- | -----------------------              |
+| Input        | `<cr>`       | `n`      | Submit your question                 |
+| Output       | `i`          | `n`      | Open the input box                   |
+| Output       | `ctrl+c`     | `n`      | Cancel dialog response               |
+| Output       | `ctrl+r`     | `n`      | Rerespond to the dialog              |
+| Output       | `ctrl+h`     | `n`      | Open the history window              |
+| Output+Input | `<leader>ac` | `n`      | Toggle session                       |
+| Output+Input | `<esc>`      | `n`      | Close session                        |
+| History      | `j`          | `n`      | Preview the next session history     |
+| History      | `k`          | `n`      | Preview the previous session history |
+| History      | `<cr>`       | `n`      | Enter the selected session           |
+| History      | `<esc>`      | `n`      | Close the history window             |
 
 [⬆ back to top](#contents)
 

@@ -57,20 +57,24 @@ return {
             },
           },
           output = {
-            size = { height = "90%", width = "80%" },
-            order = 1,
-            win_options = {
-              winblend = 0,
-              winhighlight = "Normal:Normal,FloatBorder:Title",
+            float = {
+              size = { height = "90%", width = "80%" },
+              order = 1,
+              win_options = {
+                winblend = 0,
+                winhighlight = "Normal:Normal,FloatBorder:Title",
+              },
             },
           },
           history = {
-            size = { height = "100%", width = "20%" },
-            win_options = {
-              winblend = 0,
-              winhighlight = "Normal:LlmBlueNormal,FloatBorder:Title",
+            float = {
+              size = { height = "100%", width = "20%" },
+              win_options = {
+                winblend = 0,
+                winhighlight = "Normal:LlmBlueNormal,FloatBorder:Title",
+              },
+              order = 3,
             },
-            order = 3,
           },
         },
         -- popup window options

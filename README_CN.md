@@ -252,6 +252,10 @@ export LLM_KEY=NONE
       - `Output:Ask`: 打开输入窗口
       - `Output:Cancel`: 取消对话
       - `Output:Resend`: 重新回答
+      - `Session:History`: 打开会话历史窗口
+    - 整个对话界面
+      - `Session:Toggle`: 打开/隐藏对话界面
+      - `Session:Close`: 关闭对话界面
 
 如果你使用本地运行的大模型（但不是用ollama运行的），你可能需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
 
@@ -638,6 +642,13 @@ return {
 | Output       | `i`          | `n`      | 打开输入窗口            |
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
+| Output       | `ctrl+h`     | `n`      | 打开会话历史窗口        |
+| Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
+| Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
+| History      | `j`          | `n`      | 预览下一个会话历史      |
+| History      | `k`          | `n`      | 预览上一个会话历史      |
+| History      | `<cr>`       | `n`      | 进入选择的会话          |
+| History      | `<esc>`      | `n`      | 关闭会话历史窗口        |
 
 [⬆ 返回目录](#目录)
 

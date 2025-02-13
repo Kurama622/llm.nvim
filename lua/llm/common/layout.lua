@@ -50,8 +50,8 @@ local _dir = {
 function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup_other_opts)
   local layout = layout_opts or conf.configs.chat_ui_opts
   local input = popup_input_opts or conf.configs.chat_ui_opts.input.float
-  local output = popup_output_opts or conf.configs.chat_ui_opts.output
-  local other = popup_other_opts or conf.configs.chat_ui_opts.history
+  local output = popup_output_opts or conf.configs.chat_ui_opts.output.float
+  local other = popup_other_opts or conf.configs.chat_ui_opts.history.float
 
   state.input.popup = Popup({
     enter = input.enter,
@@ -253,4 +253,80 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
   end
 end
 
+function _layout.menu_preview(layout_opts, opts)
+  local layout = layout_opts or conf.configs.chat_ui_opts
+  opts = opts or conf.configs.chat_ui_opts.history.split
+
+  if state.history.popup == nil then
+    state.history.popup = Menu({
+      enter = opts.enter,
+      focusable = opts.focusable,
+      zindex = opts.zindex,
+      border = opts.border,
+      win_options = opts.win_options,
+      relative = layout.relative,
+      position = layout.position,
+      size = opts.size,
+    }, {
+      lines = (function()
+        local items = F.ListFilesInPath()
+        state.history.list = { Menu.item("current") }
+        for _, item in ipairs(items) do
+          table.insert(state.history.list, Menu.item(item))
+        end
+        return state.history.list
+      end)(),
+      max_width = opts.max_width,
+      keymap = {
+        focus_next = { "j", "<Down>", "<Tab>" },
+        focus_prev = { "k", "<Up>", "<S-Tab>" },
+        submit = { "<CR>", "<Space>" },
+      },
+      on_change = function(item)
+        -- TODO: item index
+        if item.text == "current" then
+          state.session.filename = item.text
+          if not state.session[item.text] then
+            state.session[item.text] = F.DeepCopy(conf.session.messages)
+          end
+          F.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
+        else
+          local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
+          state.session.filename = item.text
+          if not state.session[item.text] then
+            local file = io.open(sess_file, "r")
+            if file then
+              local messages = vim.fn.json_decode(file:read())
+              state.session[item.text] = messages
+              file:close()
+            end
+          end
+          F.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
+        end
+      end,
+    })
+    state.history.popup:mount()
+    if state.history.index then
+      vim.api.nvim_win_set_cursor(state.history.popup.winid, { state.history.index, 0 })
+      local node = state.history.popup.tree:get_node(state.history.index)
+      state.history.popup._.on_change(node)
+    else
+      state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
+    end
+
+    state.history.popup:map("n", { "<cr>" }, function()
+      state.history.popup:hide()
+    end)
+
+    state.history.popup:map("n", { "<esc>" }, function()
+      local node = state.history.popup.tree:get_node(state.history.index)
+      state.history.popup._.on_change(node)
+      state.history.popup:unmount()
+      state.history.popup = nil
+    end)
+  else
+    state.history.popup:show()
+    state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
+  end
+end
 return _layout
