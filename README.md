@@ -43,6 +43,8 @@
     * [Deepseek](#deepseek)
     * [openrouter](#openrouter)
     * [Local LLM](#local-llm)
+  * [Minimal installation example](#minimal-installation-example)
+* [Configuration](#configuration)
   * [Basic Configuration](#basic-configuration)
     * [Examples](#examples)
   * [Window Style Configuration](#window-style-configuration)
@@ -199,6 +201,22 @@ export LLM_KEY=NONE
 
 [⬆ back to top](#contents)
 
+### Minimal installation example
+
+- lazy.nvim
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+```
+
+## Configuration
 
 ### Basic Configuration
 
@@ -214,7 +232,9 @@ export LLM_KEY=NONE
 
 For more details or examples, please refer to [Chat Configuration](examples/chat/).
 
-**Meanings of some configuration options**
+<details>
+<summary><b>Click here to see meanings of some configuration options</b></summary>
+<br/>
 
 - `prompt`: Model prompt.
 - `prefix`: Dialog role indicator.
@@ -257,6 +277,8 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
       - `Session:Toggle`: open/hide the Chat UI.
       - `Session:Close`: close the Chat UI.
 
+</details>
+
 If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
 
 
@@ -266,6 +288,10 @@ If you use a local LLM (but not one running on ollama), you may need to define t
 
 If you want to further configure the style of the conversation interface, you can configure `chat_ui_opts` and `popwin_opts` separately.
  
+<details>
+<summary><b>Click here to see how to configure the window style</b></summary>
+<br/>
+
 Their configuration options are the same:
 - `relative`:
   - `editor`: The floating window relative to the current editor window.
@@ -284,6 +310,8 @@ Their configuration options are the same:
   - `winblend`: The transparency of the window.
   - `winhighlight`: The highlight of the window.
 
+</details>
+
 More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md).
 
 #### Examples
@@ -301,6 +329,10 @@ All AI tools need to be defined in `app_handler`, presented in the form of a pai
 #### Examples
 
 For more details or examples, please refer to [AI Tools Configuration](examples/ai-tools/).
+
+<details>
+<summary><b>Click here to see how to configure AI tools</b></summary>
+<br/>
 
 For all AI tools, their configuration options are similar:
 
@@ -544,6 +576,8 @@ Based on this format, generate appropriate commit messages. Respond with message
   },
 ~~~
 
+</details>
+
 [⬆ back to top](#contents)
 
 ### Local LLM Configuration
@@ -551,6 +585,11 @@ Based on this format, generate appropriate commit messages. Respond with message
 Local LLMs require custom parsing functions; for streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
  
 Below is an example of `ollama` running `llama3.2:1b`.
+
+<details>
+<summary><b>Expand the code.</b></summary>
+<br/>
+
 ```lua
 local function local_llm_streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
   if not chunk then
@@ -607,6 +646,8 @@ return {
   }
 }
 ```
+
+</details>
 
 [⬆ back to top](#contents)
 

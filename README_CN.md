@@ -44,6 +44,8 @@
     * [Deepseek](#deepseek)
     * [openrouter](#openrouter)
     * [本地运行的大模型](#本地运行的大模型)
+  * [最小安装示例](#最小安装示例)
+* [配置](#配置)
   * [基本配置](#基本配置)
     * [示例](#示例)
   * [窗口风格配置](#窗口风格配置)
@@ -200,6 +202,23 @@ export LLM_KEY=NONE
 
 [⬆ 返回目录](#目录)
 
+
+### 最小安装示例
+
+- lazy.nvim
+
+```lua
+  {
+    "Kurama622/llm.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
+    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    keys = {
+      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    },
+  }
+```
+
+## 配置
 ### 基本配置
 
 **一些你应该知道的命令**
@@ -214,7 +233,9 @@ export LLM_KEY=NONE
 
 对于更多细节和示例，请查看[Chat Configuration](examples/chat/).
 
-**一些配置项的含义**
+<details>
+<summary><b>点击查看配置项的含义</b></summary>
+<br/>
 
 - `prompt`: 模型的提示词
 - `prefix`: 对话角色的标志
@@ -257,6 +278,8 @@ export LLM_KEY=NONE
       - `Session:Toggle`: 打开/隐藏对话界面
       - `Session:Close`: 关闭对话界面
 
+</details>
+
 如果你使用本地运行的大模型（但不是用ollama运行的），你可能需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
 
 [⬆ 返回目录](#目录)
@@ -264,6 +287,10 @@ export LLM_KEY=NONE
 ### 窗口风格配置
 
 如果你想进一步配置对话界面的样式，你可以分别对`chat_ui_opts`和`popwin_opts`进行配置。
+
+<details>
+<summary><b>点击查看如何配置窗口风格</b></summary>
+<br/>
 
 它们的配置项都是相同的：
 - `relative`:
@@ -283,6 +310,8 @@ export LLM_KEY=NONE
  - `winblend`: 窗口的透明度
  - `winhighlight`: 窗口的高亮
 
+</details>
+
 更多信息可以查阅[nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 
 #### 示例
@@ -300,6 +329,10 @@ export LLM_KEY=NONE
 #### 示例
 
 对于更多细节和示例，请查看[AI Tools Configuration](examples/ai-tools/).
+
+<details>
+<summary><b>点击查看如何配置AI工具</b></summary>
+<br/>
 
 对于所有的AI工具，它们的配置项都是基本类似的:
 
@@ -543,6 +576,8 @@ Based on this format, generate appropriate commit messages. Respond with message
   },
 ~~~
 
+</details>
+
 [⬆ 返回目录](#目录)
 
 ### 本地运行大模型
@@ -550,6 +585,11 @@ Based on this format, generate appropriate commit messages. Respond with message
 本地大模型需要自定义解析函数，对于流式输出，我们使用自定义的`streaming_handler`；对于一次性返回输出结果的AI工具，我们使用自定义的`parse_handler`
 
 下面是`ollama`运行`llama3.2:1b`的样例
+
+<details>
+<summary><b>展开代码</b></summary>
+<br/>
+
 ```lua
 local function local_llm_streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
   if not chunk then
@@ -606,6 +646,7 @@ return {
   }
 }
 ```
+</details>
 
 [⬆ 返回目录](#目录)
 
