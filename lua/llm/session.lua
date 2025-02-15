@@ -224,7 +224,7 @@ function M.NewSession()
               vim.api.nvim_command("startinsert")
             else
               state.input.popup = Popup({
-                relative = conf.configs.chat_ui_opts.input.split.relative,
+                relative = conf.configs.chat_ui_opts.input.split.relative or conf.configs.chat_ui_opts.relative,
                 position = conf.configs.chat_ui_opts.input.split.position,
                 enter = conf.configs.chat_ui_opts.input.split.enter,
                 focusable = conf.configs.chat_ui_opts.input.split.focusable,

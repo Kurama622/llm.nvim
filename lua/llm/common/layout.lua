@@ -264,7 +264,7 @@ function _layout.menu_preview(layout_opts, opts)
       zindex = opts.zindex,
       border = opts.border,
       win_options = opts.win_options,
-      relative = layout.relative,
+      relative = opts.relative or layout.relative,
       position = layout.position,
       size = opts.size,
     }, {

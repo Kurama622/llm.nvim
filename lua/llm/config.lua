@@ -42,7 +42,6 @@ M._.chat_ui_opts = {
       order = 3,
     },
     split = {
-      relative = "editor",
       position = {
         row = "80%",
         col = "50%",
