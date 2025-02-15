@@ -350,6 +350,17 @@ function M.CloseLLM()
     if state.input.popup then
       state.input.popup:unmount()
       state.input.popup = nil
+      return
+    else
+      LOG:TRACE("Close Split window")
+      vim.api.nvim_win_close(state.llm.winid, true)
+      vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
+      if state.history.popup then
+        state.history.popup:unmount()
+        state.history.popup = nil
+      end
+      state.history.index = nil
+      conf.session.status = -1
     end
   end
 
@@ -393,54 +404,6 @@ function M.CloseHistory()
   if state.history.popup then
     state.session = { filename = nil }
     state.history.popup:unmount()
-  end
-end
-
-local function hide_session()
-  if state.layout.popup then
-    state.layout.popup:hide()
-    conf.session.status = 0
-  else
-    vim.api.nvim_win_close(state.llm.winid, true)
-    if state.input.popup then
-      state.input.popup:hide()
-    end
-  end
-  conf.session.status = 0
-end
-
-local function new_session()
-  LOG:WARN('[Unrecommended Behavior] Last time, the window was closed without using the "Session:Close" shortcut key.')
-  conf.session.status = -1
-end
-
-local function show_session()
-  if state.layout.popup then
-    state.layout.popup:show()
-    state.llm.winid = state.llm.popup.winid
-    vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
-    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
-  else
-    local win_options = {
-      split = conf.configs.style,
-    }
-    state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
-    if state.input.popup then
-      state.input.popup:show()
-    end
-  end
-  conf.session.status = 1
-end
-
-function M.ToggleLLM()
-  if conf.session.status == 1 then
-    if vim.api.nvim_win_is_valid(state.llm.winid) then
-      hide_session()
-    else
-      new_session()
-    end
-  elseif conf.session.status == 0 then
-    show_session()
   end
 end
 

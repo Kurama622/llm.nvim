@@ -8,6 +8,54 @@ local F = require("llm.common.func")
 local LOG = require("llm.common.log")
 local _layout = require("llm.common.layout")
 
+local function hide_session()
+  if state.layout.popup then
+    state.layout.popup:hide()
+    conf.session.status = 0
+  else
+    vim.api.nvim_win_close(state.llm.winid, true)
+    if state.input.popup then
+      state.input.popup:hide()
+    end
+  end
+  conf.session.status = 0
+end
+
+local function new_session()
+  LOG:WARN('[Unrecommended Behavior] Last time, the window was closed without using the "Session:Close" shortcut key.')
+  conf.session.status = -1
+end
+
+local function show_session()
+  if state.layout.popup then
+    state.layout.popup:show()
+    state.llm.winid = state.llm.popup.winid
+    vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
+    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
+  else
+    local win_options = {
+      split = conf.configs.style,
+    }
+    state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
+    if state.input.popup then
+      state.input.popup:show()
+    end
+  end
+  conf.session.status = 1
+end
+
+local function ToggleLLM()
+  if conf.session.status == 1 then
+    if vim.api.nvim_win_is_valid(state.llm.winid) then
+      hide_session()
+    else
+      new_session()
+    end
+  elseif conf.session.status == 0 then
+    show_session()
+  end
+end
+
 function M.LLMSelectedTextHandler(description)
   local content = F.GetVisualSelection()
   state.popwin = Popup(conf.configs.popwin_opts)
@@ -97,7 +145,7 @@ function M.NewSession()
             vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif k == "Focus:Input" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             vim.api.nvim_set_current_win(state.input.popup.winid)
@@ -138,7 +186,7 @@ function M.NewSession()
             vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
-          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, F.ToggleLLM, { noremap = true })
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif conf.configs.save_session and k == "Input:HistoryNext" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(1)
@@ -189,12 +237,13 @@ function M.NewSession()
               vim.api.nvim_set_option_value("filetype", "llm", { buf = state.input.popup.bufnr })
               vim.api.nvim_set_current_win(state.input.popup.winid)
               vim.api.nvim_command("startinsert")
+
               for name, d in pairs(conf.configs.keys) do
                 if name == "Input:Submit" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
                     local input = table.concat(input_table, "\n")
-                    state.session.filename = "current"
+                    state.session.filename = state.session.filename or "current"
                     if not state.session[state.session.filename] then
                       state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
                     end
@@ -214,19 +263,18 @@ function M.NewSession()
                     vim.api.nvim_command("doautocmd BufEnter")
                   end, { noremap = true })
                 elseif name == "Session:Toggle" then
-                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, F.ToggleLLM, { noremap = true })
+                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, ToggleLLM, { noremap = true })
                 end
               end
             end
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Toggle" then
-          F.SetSplitKeyMapping(v.mode, v.key, F.ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(v.mode, v.key, ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Close" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
-            vim.api.nvim_win_close(state.llm.winid, true)
-            vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
-            state.history.index = nil
-            conf.session.status = -1
+            F.CloseLLM()
+            state.session = { filename = nil }
+            vim.api.nvim_command("doautocmd BufEnter")
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
@@ -253,7 +301,7 @@ function M.NewSession()
     state.llm.bufnr = bufnr
     state.llm.winid = winid
   else
-    F.ToggleLLM()
+    ToggleLLM()
   end
 end
 

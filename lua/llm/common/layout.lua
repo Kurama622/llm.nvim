@@ -315,6 +315,7 @@ function _layout.menu_preview(layout_opts, opts)
     end
 
     state.history.popup:map("n", { "<cr>" }, function()
+      LOG:TRACE("history popup hide")
       state.history.popup:hide()
     end)
 
@@ -325,6 +326,7 @@ function _layout.menu_preview(layout_opts, opts)
       state.history.popup = nil
     end)
   else
+    LOG:TRACE("history popup show")
     state.history.popup:show()
     state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
   end
