@@ -327,6 +327,10 @@ function _layout.menu_preview(layout_opts, opts)
     end)
   else
     LOG:TRACE("history popup show")
+    -- The relative winid needs to be adjusted when "relative = win",
+    if state.history.popup.border.win_config.win then
+      state.history.popup.border.win_config.win = state.llm.winid
+    end
     state.history.popup:show()
     state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
   end
