@@ -7,7 +7,7 @@ local cmp = require("cmp")
 local lsp = require("cmp.types.lsp")
 
 function ncmp.get_trigger_characters()
-  return { "@", ".", "(", "[", ":", " " }
+  return { "@", ".", "(", "[", ":", "{", " " }
 end
 
 function ncmp:new()
