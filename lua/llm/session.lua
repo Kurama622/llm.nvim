@@ -13,7 +13,10 @@ local function hide_session()
     state.layout.popup:hide()
     conf.session.status = 0
   else
-    vim.api.nvim_win_close(state.llm.winid, true)
+    local success, _ = pcall(vim.api.nvim_win_close, state.llm.winid, true)
+    if not success then
+      LOG:WARN("Single window does not need to be hidden.")
+    end
     if state.input.popup then
       state.input.popup:hide()
     end
@@ -38,6 +41,10 @@ local function show_session()
     }
     state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
     if state.input.popup then
+      -- The relative winid needs to be adjusted when "relative = win",
+      if state.input.popup.border.win_config.win then
+        state.input.popup.border.win_config.win = state.llm.winid
+      end
       state.input.popup:show()
     end
   end

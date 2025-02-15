@@ -353,7 +353,7 @@ function M.CloseLLM()
       return
     else
       LOG:TRACE("Close Split window")
-      vim.api.nvim_win_close(state.llm.winid, true)
+      pcall(vim.api.nvim_win_close, state.llm.winid, true)
       vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
       if state.history.popup then
         state.history.popup:unmount()
