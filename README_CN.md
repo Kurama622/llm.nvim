@@ -36,14 +36,7 @@
 * [安装](#安装)
   * [依赖](#依赖)
   * [准备工作](#准备工作)
-    * [Cloudflare](#cloudflare)
-    * [ChatGLM (智谱清言)](#chatglm-智谱清言)
-    * [kimi (月之暗面)](#kimi-月之暗面)
-    * [Github Models](#github-models)
-    * [siliconflow (硅基流动)](#siliconflow-硅基流动)
-    * [Deepseek](#deepseek)
-    * [openrouter](#openrouter)
-    * [本地运行的大模型](#本地运行的大模型)
+    * [不同AI平台的官网](#不同ai平台的官网)
   * [最小安装示例](#最小安装示例)
 * [配置](#配置)
   * [基本配置](#基本配置)
@@ -135,70 +128,27 @@
 
 ### 准备工作
 
-#### Cloudflare
 
-1. 注册[cloudflare](https://dash.cloudflare.com/)，获取账户和API Key. 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型.
+1. 在官网注册并获取你的API Key (Cloudflare 需要额外获取你的 account).
 
-2. 在你的`zshrc`或者`bashrc`中设置`ACCOUNT` 和 `LLM_KEY`环境变量
+2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`环境变量(Cloudflare 需要额外设置 `ACCOUNT`)
 
-```bash
-export ACCOUNT=<Your ACCOUNT>
-export LLM_KEY=<Your API_KEY>
-```
-#### ChatGLM (智谱清言)
-
-1. 注册智谱清言：[https://open.bigmodel.cn/](https://open.bigmodel.cn/), 获取你的API Key.
-
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
 ```bash
 export LLM_KEY=<Your API_KEY>
+export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 ```
 
-#### kimi (月之暗面)
-1. 注册月之暗面: [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench), 获取你的API Key.
+#### 不同AI平台的官网
 
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
-```bash
-export LLM_KEY=<Your API_KEY>
-```
+- Cloudflare: [https://dash.cloudflare.com/](https://dash.cloudflare.com/), 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型.
+- ChatGLM (智谱清言): [https://open.bigmodel.cn/](https://open.bigmodel.cn/)
+- kimi (月之暗面): [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench)
+- Github Models: [Github Token](https://github.com/settings/tokens)
+- siliconflow (硅基流动): [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型
+- Deepseek: [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)
+- Openrouter: [https://openrouter.ai/](https://openrouter.ai/),
 
-#### Github Models
-1. 获取你的Github [Token](https://github.com/settings/tokens)
-
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
-```bash
-export LLM_KEY=<Github Token>
-```
-
-#### siliconflow (硅基流动)
-1. 注册硅基流动：[siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), 获取你的API Key. 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型
-
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-#### Deepseek
-1. 注册Deepseek: [deepseek](https://platform.deepseek.com/api_keys), 获取你的API Key.
-
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-#### openrouter
-1. 注册openrouter：[openrouter](https://openrouter.ai/), 获取你的API Key.
-
-2. 在你的`zshrc`或者`bashrc`中设置`LLM_KEY`
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-#### 本地运行的大模型
-在你的`zshrc`或者`bashrc`中设置`LLM_KEY`为`NONE`
-```bash
-export LLM_KEY=NONE
-```
+对于本地大模型, 在`zshrc` or `bashrc`中设置 `LLM_KEY` 为 `NONE`.
 
 [⬆ 返回目录](#目录)
 

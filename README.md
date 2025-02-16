@@ -35,14 +35,7 @@
 * [Installation](#installation)
   * [Dependencies](#dependencies)
   * [Preconditions](#preconditions)
-    * [Cloudflare](#cloudflare)
-    * [ChatGLM (智谱清言)](#chatglm-智谱清言)
-    * [kimi (月之暗面)](#kimi-月之暗面)
-    * [Github Models](#github-models)
-    * [siliconflow (硅基流动)](#siliconflow-硅基流动)
-    * [Deepseek](#deepseek)
-    * [openrouter](#openrouter)
-    * [Local LLM](#local-llm)
+    * [Websites of different AI platforms](#websites-of-different-ai-platforms)
   * [Minimal installation example](#minimal-installation-example)
 * [Configuration](#configuration)
   * [Basic Configuration](#basic-configuration)
@@ -133,71 +126,27 @@
 
 ### Preconditions
 
-#### Cloudflare
+1. Register on the official website and obtain your API Key (Cloudflare needs to obtain an additional account).
 
-1. Register [cloudflare](https://dash.cloudflare.com/), obtain an account and API Key. You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models.
+2. Set the `LLM_KEY` (Cloudflare needs to set an additional `ACCOUNT`) environment variable in your `zshrc` or `bashrc`.
 
-2. Set the `ACCOUNT` and `LLM_KEY` environment variables in your `zshrc` or `bashrc`.
-
-```bash
-export ACCOUNT=<Your ACCOUNT>
-export LLM_KEY=<Your API_KEY>
-```
-#### ChatGLM (智谱清言)
-
-1. Register ZhiPu QingYan: [https://open.bigmodel.cn/](https://open.bigmodel.cn/), obtain your API Key.
-
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
 ```bash
 export LLM_KEY=<Your API_KEY>
+export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 ```
 
-#### kimi (月之暗面)
-1. Register Moonshot AI: [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench), obtain your API Key.
+#### Websites of different AI platforms
 
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=<Your API_KEY>
-```
+- Cloudflare: [https://dash.cloudflare.com/](https://dash.cloudflare.com/), You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models.
+- ChatGLM (智谱清言): [https://open.bigmodel.cn/](https://open.bigmodel.cn/)
+- kimi (月之暗面): [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench)
+- Github Models: [Github Token](https://github.com/settings/tokens)
+- siliconflow (硅基流动): [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), You can see all models on Siliconflow [here](https://cloud.siliconflow.cn/models), and select 'Only Free' to see all free models.
+- Deepseek: [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)
+- Openrouter: [https://openrouter.ai/](https://openrouter.ai/),
 
-#### Github Models
-1. Obtain your [Github Token](https://github.com/settings/tokens)
+For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
 
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=<Github Token>
-```
-
-#### siliconflow (硅基流动)
-1. Register for Siliconflow: [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), obtain your API Key. You can see all models on Siliconflow [here](https://cloud.siliconflow.cn/models), and select 'Only Free' to see all free models.
-
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-#### Deepseek
-1. Register for Deepseek: [deepseek](https://platform.deepseek.com/api_keys), obtain your API Key.
-
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-#### openrouter
-1. Register openrouter: [openrouter](https://openrouter.ai/), obtain your API Key.
-
-2. Set the `LLM_KEY` environment variable in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=<Your API_KEY>
-```
-
-
-#### Local LLM
-Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
-```bash
-export LLM_KEY=NONE
-```
 
 [⬆ back to top](#contents)
 
