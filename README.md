@@ -233,7 +233,7 @@ export LLM_KEY=NONE
 For more details or examples, please refer to [Chat Configuration](examples/chat/).
 
 <details>
-<summary><b>Click here to see meanings of some configuration options</b></summary>
+<summary><b><i>Click here to see meanings of some configuration options</i></b></summary>
 <br/>
 
 - `prompt`: Model prompt.
@@ -289,7 +289,7 @@ If you use a local LLM (but not one running on ollama), you may need to define t
 If you want to further configure the style of the conversation interface, you can configure `chat_ui_opts` and `popwin_opts` separately.
  
 <details>
-<summary><b>Click here to see how to configure the window style</b></summary>
+<summary><b><i>Click here to see how to configure the window style</i></b></summary>
 <br/>
 
 Their configuration options are the same:
@@ -331,7 +331,7 @@ All AI tools need to be defined in `app_handler`, presented in the form of a pai
 For more details or examples, please refer to [AI Tools Configuration](examples/ai-tools/).
 
 <details>
-<summary><b>Click here to see how to configure AI tools</b></summary>
+<summary><b><i>Click here to see how to configure AI tools</i></b></summary>
 <br/>
 
 For all AI tools, their configuration options are similar:
@@ -606,7 +606,7 @@ Local LLMs require custom parsing functions; for streaming output, we use our cu
 Below is an example of `ollama` running `llama3.2:1b`.
 
 <details>
-<summary><b>Expand the code.</b></summary>
+<summary><b><i>Expand the code.</i></b></summary>
 <br/>
 
 ```lua

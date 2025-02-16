@@ -234,7 +234,7 @@ export LLM_KEY=NONE
 对于更多细节和示例，请查看[Chat Configuration](examples/chat/).
 
 <details>
-<summary><b>点击查看配置项的含义</b></summary>
+<summary><b><i>点击查看配置项的含义</i></b></summary>
 <br/>
 
 - `prompt`: 模型的提示词
@@ -289,7 +289,7 @@ export LLM_KEY=NONE
 如果你想进一步配置对话界面的样式，你可以分别对`chat_ui_opts`和`popwin_opts`进行配置。
 
 <details>
-<summary><b>点击查看如何配置窗口风格</b></summary>
+<summary><b><i>点击查看如何配置窗口风格</i></b></summary>
 <br/>
 
 它们的配置项都是相同的：
@@ -331,7 +331,7 @@ export LLM_KEY=NONE
 对于更多细节和示例，请查看[AI Tools Configuration](examples/ai-tools/).
 
 <details>
-<summary><b>点击查看如何配置AI工具</b></summary>
+<summary><b><i>点击查看如何配置AI工具</i></b></summary>
 <br/>
 
 对于所有的AI工具，它们的配置项都是基本类似的:
@@ -606,7 +606,7 @@ Based on this format, generate appropriate commit messages. Respond with message
 下面是`ollama`运行`llama3.2:1b`的样例
 
 <details>
-<summary><b>展开代码</b></summary>
+<summary><b><i>展开代码</i></b></summary>
 <br/>
 
 ```lua
