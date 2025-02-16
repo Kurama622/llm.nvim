@@ -445,7 +445,7 @@ My some AI tool configurations:
             handler = tools.action_handler,
             opts = {
               fetch_key = function()
-                return switch("enable_gpt")
+                return vim.env.GITHUB_TOKEN
               end,
               url = "https://models.inference.ai.azure.com/chat/completions",
               model = "gpt-4o",
@@ -457,7 +457,7 @@ My some AI tool configurations:
             handler = tools.qa_handler,
             opts = {
               fetch_key = function()
-                return switch("enable_glm")
+                return vim.env.GLM_KEY
               end,
               url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
               model = "glm-4-flash",
@@ -502,7 +502,7 @@ My some AI tool configurations:
             prompt = "Translate the following text to Chinese, please only return the translation",
             opts = {
               fetch_key = function()
-                return switch("enable_glm")
+                return vim.env.GLM_KEY
               end,
               url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
               model = "glm-4-flash",
@@ -517,7 +517,7 @@ My some AI tool configurations:
             prompt = "Explain the following code, please only return the explanation, and answer in Chinese",
             opts = {
               fetch_key = function()
-                return switch("enable_glm")
+                return vim.env.GLM_KEY
               end,
               url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
               model = "glm-4-flash",
@@ -528,16 +528,35 @@ My some AI tool configurations:
           CommitMsg = {
             handler = tools.flexi_handler,
             prompt = function()
-              return string.format(
-                [[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me:
-1. Start with an action verb (e.g., feat, fix, refactor, chore, etc.), followed by a colon.
-2. Briefly mention the file or module name that was changed.
-3. Describe the specific changes made.
+              -- Source: https://andrewian.dev/blog/ai-git-commits
+              return string.format([[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me:
+
+1. First line: conventional commit format (type: concise description) (remember to use semantic types like feat, fix, docs, style, refactor, perf, test, chore, etc.)
+2. Optional bullet points if more context helps:
+   - Keep the second line blank
+   - Keep them short and direct
+   - Focus on what changed
+   - Always be terse
+   - Don't overly explain
+   - Drop any fluffy or formal language
+
+Return ONLY the commit message - no introduction, no explanation, no quotes around it.
 
 Examples:
-- feat: update common/util.py, added test cases for util.py
-- fix: resolve bug in user/auth.py related to login validation
-- refactor: optimize database queries in models/query.py
+feat: add user auth system
+
+- Add JWT tokens for API auth
+- Handle token refresh for long sessions
+
+fix: resolve memory leak in worker pool
+
+- Clean up idle connections
+- Add timeout for stale workers
+
+Simple change example:
+fix: typo in README.md
+
+Very important: Do not respond with any of the examples. Your message must be based off the diff that is about to be provided, with a little bit of styling informed by the recent commits you're about to see.
 
 Based on this format, generate appropriate commit messages. Respond with message only. DO NOT format the message in Markdown code blocks, DO NOT use backticks:
 
@@ -550,7 +569,7 @@ Based on this format, generate appropriate commit messages. Respond with message
             end,
             opts = {
               fetch_key = function()
-                return switch("enable_glm")
+                return vim.env.GLM_KEY
               end,
               url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
               model = "glm-4-flash",
@@ -730,7 +749,7 @@ Use a custom request format
       prompt = "Translate the following text to Chinese, please only return the translation",
       opts = {
         fetch_key = function()
-          return switch("enable_glm")
+          return vim.env.GLM_KEY
         end,
         url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
         model = "glm-4-flash",
