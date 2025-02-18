@@ -4,7 +4,7 @@ local conf = require("llm.config")
 local state = require("llm.state")
 local streaming = require("llm.common.streaming")
 local Popup = require("nui.popup")
-local F = require("llm.common.func")
+local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 local _layout = require("llm.common.layout")
 

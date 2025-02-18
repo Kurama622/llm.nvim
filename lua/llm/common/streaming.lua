@@ -2,7 +2,8 @@ local M = {}
 
 local conf = require("llm.config")
 local job = require("plenary.job")
-local F = require("llm.common.func")
+local F = require("llm.common.api")
+local backends = require("llm.backends")
 
 function M.GetStreamingOutput(
   bufnr,
@@ -42,57 +43,13 @@ function M.GetStreamingOutput(
 
   local body = nil
 
-  local line = ""
-  local assistant_output = ""
-
-  local stream_output = nil
-
-  if streaming_handler then
-    stream_output = function(chunk)
-      return streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
-    end
-  elseif api_type then
-    if api_type == "workers-ai" then
-      stream_output = function(chunk)
-        return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif api_type == "zhipu" then
-      stream_output = function(chunk)
-        return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif api_type == "openai" then
-      stream_output = function(chunk)
-        return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif api_type == "ollama" then
-      stream_output = function(chunk)
-        return F.OllamaStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    end
-  elseif conf.configs.streaming_handler then
-    stream_output = function(chunk)
-      return conf.configs.streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
-    end
-  elseif conf.configs.api_type then
-    if conf.configs.api_type == "workers-ai" then
-      stream_output = function(chunk)
-        return F.WorkersAiStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif conf.configs.api_type == "zhipu" then
-      stream_output = function(chunk)
-        return F.ZhipuStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif conf.configs.api_type == "openai" then
-      stream_output = function(chunk)
-        return F.OpenAIStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    elseif conf.configs.api_type == "ollama" then
-      stream_output = function(chunk)
-        return F.OllamaStreamingHandler(chunk, line, assistant_output, bufnr, winid)
-      end
-    end
-  end
-
+  local context = {
+    line = "",
+    assistant_output = "",
+    bufnr = bufnr,
+    winid = winid,
+  }
+  local stream_output = backends.STREAMING_HANDLER(streaming_handler, api_type, conf.configs, context)
   local _args = nil
   if url ~= nil then
     body = {
@@ -142,30 +99,30 @@ function M.GetStreamingOutput(
         end
         local tail = chunk:sub(-1, -1)
         if tail:sub(1, 1) ~= "}" then
-          line = line .. chunk
+          context.line = context.line .. chunk
         else
-          line = line .. chunk
+          context.line = context.line .. chunk
 
-          local start_idx = line:find("data: ", 1, true)
-          local end_idx = line:find("}}]}", 1, true)
+          local start_idx = context.line:find("data: ", 1, true)
+          local end_idx = context.line:find("}}]}", 1, true)
           local json_str = nil
 
           while start_idx ~= nil and end_idx ~= nil do
             if start_idx < end_idx then
-              json_str = line:sub(7, end_idx + 3)
+              json_str = context.line:sub(7, end_idx + 3)
             end
             local data = vim.fn.json_decode(json_str)
-            assistant_output = assistant_output .. data.choices[1].delta.content
+            context.assistant_output = context.assistant_output .. data.choices[1].delta.content
             F.WriteContent(bufnr, winid, data.choices[1].delta.content)
 
-            if end_idx + 4 > #line then
-              line = ""
+            if end_idx + 4 > #context.line then
+              context.line = ""
               break
             else
-              line = line:sub(end_idx + 4)
+              context.line = context.line:sub(end_idx + 4)
             end
-            start_idx = line:find("data: ", 1, true)
-            end_idx = line:find("}}]}", 1, true)
+            start_idx = context.line:find("data: ", 1, true)
+            end_idx = context.line:find("}}]}", 1, true)
           end
         end
       end
@@ -217,14 +174,14 @@ function M.GetStreamingOutput(
         end
         local tail = chunk:sub(-1, -1)
         if tail:sub(1, 1) ~= "}" then
-          line = line .. chunk
+          context.line = context.line .. chunk
         else
-          line = line .. chunk
-          local json_str = line:sub(7, -1)
+          context.line = context.line .. chunk
+          local json_str = context.line:sub(7, -1)
           local data = vim.fn.json_decode(json_str)
-          assistant_output = assistant_output .. data.response
+          context.assistant_output = context.assistant_output .. data.response
           F.WriteContent(bufnr, winid, data.response)
-          line = ""
+          context.line = ""
         end
       end
     end
@@ -235,7 +192,7 @@ function M.GetStreamingOutput(
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
       if api_type or conf.configs.api_type or streaming_handler or conf.configs.streaming_handler then
-        assistant_output = stream_output(chunk)
+        context.assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
       end
@@ -248,7 +205,7 @@ function M.GetStreamingOutput(
       -- TODO: Add error handling
     end,
     on_exit = function()
-      table.insert(messages, { role = "assistant", content = assistant_output })
+      table.insert(messages, { role = "assistant", content = context.assistant_output })
       local newline_func = vim.schedule_wrap(function()
         F.NewLine(bufnr, winid)
       end)
@@ -256,7 +213,7 @@ function M.GetStreamingOutput(
       worker.job = nil
       if exit_handler ~= nil then
         local callback_func = vim.schedule_wrap(function()
-          exit_handler(assistant_output)
+          exit_handler(context.assistant_output)
         end)
         callback_func()
       end
