@@ -2,7 +2,7 @@ local M = {}
 
 local conf = require("llm.config")
 local F = require("llm.common.api")
-local streaming = require("llm.common.streaming").GetStreamingOutput
+local streaming = require("llm.common.io.streaming").GetStreamingOutput
 
 local state = require("llm.state")
 

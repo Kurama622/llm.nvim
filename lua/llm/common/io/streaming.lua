@@ -43,13 +43,13 @@ function M.GetStreamingOutput(
 
   local body = nil
 
-  local context = {
+  local ctx = {
     line = "",
     assistant_output = "",
     bufnr = bufnr,
     winid = winid,
   }
-  local stream_output = backends.STREAMING_HANDLER(streaming_handler, api_type, conf.configs, context)
+  local stream_output = backends.get_streaming_handler(streaming_handler, api_type, conf.configs, ctx)
   local _args = nil
   if url ~= nil then
     body = {
@@ -99,30 +99,30 @@ function M.GetStreamingOutput(
         end
         local tail = chunk:sub(-1, -1)
         if tail:sub(1, 1) ~= "}" then
-          context.line = context.line .. chunk
+          ctx.line = ctx.line .. chunk
         else
-          context.line = context.line .. chunk
+          ctx.line = ctx.line .. chunk
 
-          local start_idx = context.line:find("data: ", 1, true)
-          local end_idx = context.line:find("}}]}", 1, true)
+          local start_idx = ctx.line:find("data: ", 1, true)
+          local end_idx = ctx.line:find("}}]}", 1, true)
           local json_str = nil
 
           while start_idx ~= nil and end_idx ~= nil do
             if start_idx < end_idx then
-              json_str = context.line:sub(7, end_idx + 3)
+              json_str = ctx.line:sub(7, end_idx + 3)
             end
             local data = vim.fn.json_decode(json_str)
-            context.assistant_output = context.assistant_output .. data.choices[1].delta.content
+            ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
             F.WriteContent(bufnr, winid, data.choices[1].delta.content)
 
-            if end_idx + 4 > #context.line then
-              context.line = ""
+            if end_idx + 4 > #ctx.line then
+              ctx.line = ""
               break
             else
-              context.line = context.line:sub(end_idx + 4)
+              ctx.line = ctx.line:sub(end_idx + 4)
             end
-            start_idx = context.line:find("data: ", 1, true)
-            end_idx = context.line:find("}}]}", 1, true)
+            start_idx = ctx.line:find("data: ", 1, true)
+            end_idx = ctx.line:find("}}]}", 1, true)
           end
         end
       end
@@ -174,14 +174,14 @@ function M.GetStreamingOutput(
         end
         local tail = chunk:sub(-1, -1)
         if tail:sub(1, 1) ~= "}" then
-          context.line = context.line .. chunk
+          ctx.line = ctx.line .. chunk
         else
-          context.line = context.line .. chunk
-          local json_str = context.line:sub(7, -1)
+          ctx.line = ctx.line .. chunk
+          local json_str = ctx.line:sub(7, -1)
           local data = vim.fn.json_decode(json_str)
-          context.assistant_output = context.assistant_output .. data.response
+          ctx.assistant_output = ctx.assistant_output .. data.response
           F.WriteContent(bufnr, winid, data.response)
-          context.line = ""
+          ctx.line = ""
         end
       end
     end
@@ -192,7 +192,7 @@ function M.GetStreamingOutput(
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
       if api_type or conf.configs.api_type or streaming_handler or conf.configs.streaming_handler then
-        context.assistant_output = stream_output(chunk)
+        ctx.assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
       end
@@ -205,7 +205,7 @@ function M.GetStreamingOutput(
       -- TODO: Add error handling
     end,
     on_exit = function()
-      table.insert(messages, { role = "assistant", content = context.assistant_output })
+      table.insert(messages, { role = "assistant", content = ctx.assistant_output })
       local newline_func = vim.schedule_wrap(function()
         F.NewLine(bufnr, winid)
       end)
@@ -213,7 +213,7 @@ function M.GetStreamingOutput(
       worker.job = nil
       if exit_handler ~= nil then
         local callback_func = vim.schedule_wrap(function()
-          exit_handler(context.assistant_output)
+          exit_handler(ctx.assistant_output)
         end)
         callback_func()
       end
