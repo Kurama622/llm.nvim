@@ -8,6 +8,13 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
       if debug.getinfo(streaming_handler, "u").nparams == 3 then
         return streaming_handler(chunk, ctx, F)
       else
+        vim.notify(
+          "[Deprecated Usage] Please refer to the latest examples: https://github.com/Kurama622/llm.nvim?tab=readme-ov-file#local-llm-configuration ",
+          vim.log.levels.WARN,
+          {
+            title = "llm.nvim",
+          }
+        )
         return streaming_handler(chunk, ctx.line, ctx.assistant_output, ctx.bufnr, ctx.winid, F)
       end
     end
@@ -92,7 +99,7 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       end
     end
   elseif configs.parse_handler then
-    parse = function(chunk)
+    return function(chunk)
       local success, err = pcall(function()
         ctx.assistant_output = configs.parse_handler(chunk)
       end)
