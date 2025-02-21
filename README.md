@@ -49,6 +49,7 @@
   * [Window switch](#window-switch)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
+  * [Special thanks](#special-thanks)
 * [Q&A](#qa)
   * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
   * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
@@ -672,6 +673,11 @@ We would like to express our heartfelt gratitude to the contributors of the foll
 
 - [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): Diff style and prompt.
 - [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): Code completions.
+
+### Special thanks
+
+[ACKNOWLEDGMENTS](./ACKNOWLEDGMENTS.md)
+
 
 ---
 
