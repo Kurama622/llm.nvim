@@ -3,7 +3,7 @@ local Popup = require("nui.popup")
 local Menu = require("nui.menu")
 local conf = require("llm.config")
 local state = require("llm.state")
-local F = require("llm.common.func")
+local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 
 local _layout = {}

@@ -560,24 +560,24 @@ Based on this format, generate appropriate commit messages. Respond with message
 <br/>
 
 ```lua
-local function local_llm_streaming_handler(chunk, line, assistant_output, bufnr, winid, F)
+local function local_llm_streaming_handler(chunk, ctx, F)
   if not chunk then
-    return assistant_output
+    return ctx.assistant_output
   end
   local tail = chunk:sub(-1, -1)
   if tail:sub(1, 1) ~= "}" then
-    line = line .. chunk
+    ctx.line = ctx.line .. chunk
   else
-    line = line .. chunk
-    local status, data = pcall(vim.fn.json_decode, line)
+    ctx.line = ctx.line .. chunk
+    local status, data = pcall(vim.fn.json_decode, ctx.line)
     if not status or not data.message.content then
-      return assistant_output
+      return ctx.assistant_output
     end
-    assistant_output = assistant_output .. data.message.content
-    F.WriteContent(bufnr, winid, data.message.content)
-    line = ""
+    ctx.assistant_output = ctx.assistant_output .. data.message.content
+    F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
+    ctx.line = ""
   end
-  return assistant_output
+  return ctx.assistant_output
 end
 
 local function local_llm_parse_handler(chunk)

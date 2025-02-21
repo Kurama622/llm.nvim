@@ -1,8 +1,8 @@
 local state = require("llm.state")
 local conf = require("llm.config")
-local streaming = require("llm.common.streaming")
+local streaming = require("llm.common.io.streaming")
 local app = require("llm.app")
-local F = require("llm.common.func")
+local F = require("llm.common.api")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE" },
