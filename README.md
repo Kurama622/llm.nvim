@@ -138,13 +138,16 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 #### Websites of different AI platforms
 
-- Cloudflare: [https://dash.cloudflare.com/](https://dash.cloudflare.com/), You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models.
-- ChatGLM (智谱清言): [https://open.bigmodel.cn/](https://open.bigmodel.cn/)
-- kimi (月之暗面): [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench)
-- Github Models: [Github Token](https://github.com/settings/tokens)
-- siliconflow (硅基流动): [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), You can see all models on Siliconflow [here](https://cloud.siliconflow.cn/models), and select 'Only Free' to see all free models.
-- Deepseek: [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)
-- Openrouter: [https://openrouter.ai/](https://openrouter.ai/),
+| Platform               | Link to obtain api key                                                                                                      | Note                                                                                                                                                 |
+| -----------            | ----------                                                                                                                  | -------                                                                                                                                              |
+| Cloudflare             | [https://dash.cloudflare.com/](https://dash.cloudflare.com/)                                                                | You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models. |
+| ChatGLM(智谱清言)      | [https://open.bigmodel.cn/](https://open.bigmodel.cn/)                                                                      |                                                                                                                                                      |
+| Kimi(月之暗面)        | [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench) |                                                                                                                                                      |
+| Github Models          | [Github Token](https://github.com/settings/tokens)                                                                          |                                                                                                                                                      |
+| siliconflow (硅基流动) | [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F)                       | You can see all models on Siliconflow [here](https://cloud.siliconflow.cn/models), and select 'Only Free' to see all free models.                    |
+| Deepseek               | [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)                                            |                                                                                                                                                      |
+| Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                                                      |
+| Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 200 free calls to GPT-4o-mini are available every day.                                                                                               |
 
 For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
 

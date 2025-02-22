@@ -141,13 +141,16 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 #### 不同AI平台的官网
 
-- Cloudflare: [https://dash.cloudflare.com/](https://dash.cloudflare.com/), 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型.
-- ChatGLM (智谱清言): [https://open.bigmodel.cn/](https://open.bigmodel.cn/)
-- kimi (月之暗面): [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench)
-- Github Models: [Github Token](https://github.com/settings/tokens)
-- siliconflow (硅基流动): [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F), 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型
-- Deepseek: [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)
-- Openrouter: [https://openrouter.ai/](https://openrouter.ai/),
+| 平台                   | 获取API Key的链接                                                                                                           | 备注                                                                                                                    |
+| -----------            | ----------                                                                                                                  | -------                                                                                                                 |
+| Cloudflare             | [https://dash.cloudflare.com/](https://dash.cloudflare.com/)                                                                | 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型. |
+| ChatGLM(智谱清言)      | [https://open.bigmodel.cn/](https://open.bigmodel.cn/)                                                                      |                                                                                                                         |
+| Kimi(月之暗面)        | [Moonshot AI 开放平台](https://login.moonshot.cn/?source=https%3A%2F%2Fplatform.moonshot.cn%2Fredirect&appid=dev-workbench) |                                                                                                                         |
+| Github Models          | [Github Token](https://github.com/settings/tokens)                                                                          |                                                                                                                         |
+| siliconflow (硅基流动) | [siliconflow](https://account.siliconflow.cn/login?redirect=https%3A%2F%2Fcloud.siliconflow.cn%2F%3F)                       | 你可以在[这里](https://cloud.siliconflow.cn/models)看到硅基流动上所有的模型，选择`只看免费`可以看到所有的免费模型       |
+| Deepseek               | [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)                                            |                                                                                                                         |
+| Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                         |
+| Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 每天200次免费调用GPT-4o-mini.                                                                                           |
 
 对于本地大模型, 在`zshrc` or `bashrc`中设置 `LLM_KEY` 为 `NONE`.
 
