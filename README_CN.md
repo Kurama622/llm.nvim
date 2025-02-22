@@ -50,6 +50,7 @@
   * [窗口切换](#窗口切换)
 * [作者的配置文件](#作者的配置文件)
 * [致谢](#致谢)
+  * [特别鸣谢](#特别鸣谢)
 * [常见问题](#常见问题)
   * [windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题](#windows的curl使用格式与linux不一样llmnvim默认的请求格式windows下会有问题)
   * [多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key](#多个大模型切换频繁更改llm_key的值很麻烦而且我不想在neovim的配置文件中暴露我的key)
@@ -673,6 +674,9 @@ return {
 - [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): diff的显示风格以及大模型提示词
 - [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): 代码补全功能
 
+### 特别鸣谢
+
+[ACKNOWLEDGMENTS](./ACKNOWLEDGMENTS.md)
 ---
 
 ## 常见问题
