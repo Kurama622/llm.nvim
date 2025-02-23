@@ -675,6 +675,7 @@ return {
 以下开源项目为llm.nvim提供了宝贵的灵感和参考:
 
 - [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): diff的显示风格以及大模型提示词
+- [SmiteshP/nvim-navbuddy](https://github.com/SmiteshP/nvim-navbuddy): 部分界面设计
 - [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): 代码补全功能
 
 ### 特别鸣谢

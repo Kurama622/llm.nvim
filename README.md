@@ -675,6 +675,7 @@ return {
 We would like to express our heartfelt gratitude to the contributors of the following open-source projects, whose code has provided invaluable inspiration and reference for the development of llm.nvim:
 
 - [olimorris/codecompanion.nvim](https://github.com/olimorris/codecompanion.nvim): Diff style and prompt.
+- [SmiteshP/nvim-navbuddy](https://github.com/SmiteshP/nvim-navbuddy): UI.
 - [milanglacier/minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim): Code completions.
 
 ### Special thanks
