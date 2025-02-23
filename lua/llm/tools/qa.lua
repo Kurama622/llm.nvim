@@ -1,6 +1,6 @@
 local LOG = require("llm.common.log")
 local Popup = require("nui.popup")
-local seamless = require("llm.common.seamless_border")
+local ui = require("llm.common.ui")
 local conf = require("llm.config")
 local NuiText = require("nui.text")
 local Layout = require("nui.layout")
@@ -67,7 +67,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local input_box = Popup({
     enter = true,
     border = {
-      style = seamless.get_border_chars("rounded", "top"),
+      style = ui.seamless("rounded", "top"),
       text = {
         top = NuiText(options.query.title, "LLMQuery"),
         top_align = "center",
@@ -79,7 +79,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local preview_box = Popup({
     focusable = true,
     border = {
-      style = seamless.get_border_chars("rounded", "bottom"),
+      style = ui.seamless("rounded", "bottom"),
       text = { top = "", top_align = "center" },
     },
     win_options = options.preview_box_opts.win_options,
