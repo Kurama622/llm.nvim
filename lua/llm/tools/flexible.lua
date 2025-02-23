@@ -68,7 +68,7 @@ function M.handler(name, F, state, _, prompt, opts)
       if flexible_box then
         flexible_box:mount()
       else
-        LOG:ERROR(string.format('your model output is "%s"', output))
+        LOG:ERROR(string.format([[Your model's output is "%s"]], output))
         return
       end
 
@@ -92,7 +92,7 @@ function M.handler(name, F, state, _, prompt, opts)
       end
 
       F.SetBoxOpts({ flexible_box }, {
-        filetype = { "llm", "llm" },
+        filetype = { "llm" },
         buftype = options.buftype,
         spell = options.spell,
         number = options.number,
