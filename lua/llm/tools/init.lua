@@ -5,4 +5,5 @@ return {
   flexi_handler = require("llm.tools.flexible").handler,
   qa_handler = require("llm.tools.qa").handler,
   side_by_side_handler = require("llm.tools.side_by_side").handler,
+  disposable_ask_handler = require("llm.tools.disposable_ask").handler,
 }
