@@ -27,6 +27,7 @@
   * [Code Completions](#code-completions)
   * [Quick Translation](#quick-translation)
   * [Explain Code](#explain-code)
+  * [Ask](#ask)
   * [Optimize Code](#optimize-code)
   * [Generate Test Cases](#generate-test-cases)
   * [AI Translation](#ai-translation)
@@ -84,6 +85,14 @@
 ### Explain Code
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
+</p>
+
+### Ask
+
+> One-time, no history retained.
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
 </p>
 
 ### Optimize Code

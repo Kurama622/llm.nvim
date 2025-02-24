@@ -28,6 +28,7 @@
   * [代码补全](#代码补全)
   * [快速翻译](#快速翻译)
   * [解释代码](#解释代码)
+  * [随机提问](#随机提问)
   * [优化代码](#优化代码)
   * [生成测试用例](#生成测试用例)
   * [AI翻译](#ai翻译)
@@ -86,6 +87,14 @@
 ### 解释代码
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
+</p>
+
+### 随机提问
+
+> 一次性，不保留历史记录
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
 </p>
 
 ### 优化代码

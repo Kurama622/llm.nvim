@@ -5,6 +5,7 @@ You can place the configuration of the tools you need in the `app_handler`.
 
 - [AI-Commit-Messages](./AI-Commit-Messages/config.lua)
 - [AI-Translate](./AI-Translate/config.lua)
+- [Ask](./Ask/config.lua)
 - [Code-Explain](./Code-Explain/config.lua)
 - [Generate-Test-Cases](./Generate-Test-Cases/config.lua)
 - [Optimize-Code](./Optimize-Code/config.lua)

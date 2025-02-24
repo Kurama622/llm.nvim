@@ -63,14 +63,25 @@ local function ToggleLLM()
   end
 end
 
-function M.LLMSelectedTextHandler(description)
+function M.LLMSelectedTextHandler(description, builtin_called, opts)
   local content = F.GetVisualSelection()
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
-  state.session[state.popwin.winid] = {
-    { role = "system", content = description },
-    { role = "user", content = content },
-  }
+  if builtin_called then
+    if opts.prompt then
+      state.session[state.popwin.winid] = {
+        { role = "system", content = opts.prompt },
+      }
+    else
+      state.session[state.popwin.winid] = {}
+    end
+    table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
+  else
+    state.session[state.popwin.winid] = {
+      { role = "system", content = description },
+      { role = "user", content = content },
+    }
+  end
 
   vim.api.nvim_set_option_value("filetype", "llm", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
