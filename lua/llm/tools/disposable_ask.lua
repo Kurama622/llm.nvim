@@ -8,28 +8,36 @@ function M.handler(_, _, _, _, prompt, opts)
     prompt = prompt()
   end
 
-  local input_box = Popup({
-    relative = "cursor",
-    position = {
+  local options = {
+    win_options = {
+      winblend = 0,
+      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    },
+    border = {
+      style = opts.style or "rounded",
+      text = {
+        top = opts.title or " Ask ",
+        top_align = "center",
+      },
+    },
+    position = opts.position or {
       row = 0,
       col = 0,
     },
-    size = {
+    relative = opts.relative or "cursor",
+    size = opts.size or {
       width = "50%",
       height = "5%",
     },
     enter = true,
-    border = {
-      style = "rounded",
-      text = {
-        top = " ask ",
-        top_align = "center",
-      },
-    },
-    -- win_options = opts.win_options,
-  })
+  }
+
+  options = vim.tbl_deep_extend("force", options, opts or {})
+
+  local input_box = Popup(options)
 
   input_box:mount()
+  vim.api.nvim_set_option_value("filetype", "llm", { buf = input_box.bufnr })
   vim.api.nvim_command("startinsert")
   input_box:map("n", "<cr>", function()
     local description = table.concat(vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true), "\n")
