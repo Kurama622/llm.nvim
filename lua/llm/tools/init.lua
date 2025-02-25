@@ -6,4 +6,5 @@ return {
   qa_handler = require("llm.tools.qa").handler,
   side_by_side_handler = require("llm.tools.side_by_side").handler,
   disposable_ask_handler = require("llm.tools.disposable_ask").handler,
+  attach_to_chat_handler = require("llm.tools.attach_to_chat").handler,
 }

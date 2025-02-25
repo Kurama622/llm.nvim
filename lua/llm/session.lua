@@ -177,6 +177,10 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
             local input = table.concat(input_table, "\n")
+            if state.input.attach_content then
+              input = input .. "\n" .. state.input.attach_content
+              F.ClearAttach()
+            end
             if not conf.configs.save_session then
               state.session.filename = "current"
               if not state.session[state.session.filename] then
@@ -261,6 +265,10 @@ function M.NewSession()
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
                     local input = table.concat(input_table, "\n")
+                    if state.input.attach_content then
+                      input = input .. "\n" .. state.input.attach_content
+                      F.ClearAttach()
+                    end
                     state.session.filename = state.session.filename or "current"
                     if not state.session[state.session.filename] then
                       state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
