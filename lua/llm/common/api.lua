@@ -304,10 +304,12 @@ function api.CloseLLM()
     for _, comp in ipairs({ state.layout, state.input, state.llm, state.history }) do
       comp.popup = nil
     end
+    api.ClearAttach()
   else
     if state.input.popup then
       state.input.popup:unmount()
       state.input.popup = nil
+      api.ClearAttach()
       return
     else
       LOG:TRACE("Close Split window")

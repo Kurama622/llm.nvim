@@ -29,6 +29,7 @@
   * [快速翻译](#快速翻译)
   * [解释代码](#解释代码)
   * [随机提问](#随机提问)
+  * [给对话附加上下文](#给对话附加上下文)
   * [优化代码](#优化代码)
   * [生成测试用例](#生成测试用例)
   * [AI翻译](#ai翻译)
@@ -95,6 +96,12 @@
 
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
+</p>
+
+### 给对话附加上下文
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/1ff4bb76-90ea-409b-bba8-e2a461b3308d" alt="llm-attach" width="560">
 </p>
 
 ### 优化代码
