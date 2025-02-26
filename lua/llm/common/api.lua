@@ -265,6 +265,24 @@ function api.GetVisualSelection(lines)
   return seletion
 end
 
+function api.GetAttach(opts)
+  if opts.is_codeblock then
+    state.input.attach_content = string.format(
+      [[```%s
+%s
+```]],
+      vim.bo.ft,
+      api.GetVisualSelection()
+    )
+  else
+    state.input.attach_content = api.GetVisualSelection()
+  end
+end
+
+function api.ClearAttach()
+  state.input.attach_content = nil
+end
+
 function api.CancelLLM()
   if state.llm.worker.job then
     state.llm.worker.job:shutdown()
@@ -286,10 +304,12 @@ function api.CloseLLM()
     for _, comp in ipairs({ state.layout, state.input, state.llm, state.history }) do
       comp.popup = nil
     end
+    api.ClearAttach()
   else
     if state.input.popup then
       state.input.popup:unmount()
       state.input.popup = nil
+      api.ClearAttach()
       return
     else
       LOG:TRACE("Close Split window")

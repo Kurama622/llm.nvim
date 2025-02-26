@@ -28,6 +28,7 @@
   * [Quick Translation](#quick-translation)
   * [Explain Code](#explain-code)
   * [Ask](#ask)
+  * [Attach To Chat](#attach-to-chat)
   * [Optimize Code](#optimize-code)
   * [Generate Test Cases](#generate-test-cases)
   * [AI Translation](#ai-translation)
@@ -93,6 +94,12 @@
 
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
+</p>
+
+### Attach To Chat
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/1ff4bb76-90ea-409b-bba8-e2a461b3308d" alt="llm-attach" width="560">
 </p>
 
 ### Optimize Code

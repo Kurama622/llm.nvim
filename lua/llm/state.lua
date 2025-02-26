@@ -17,6 +17,7 @@ M.input = {
   popup = nil,
   bufnr = nil,
   winid = nil,
+  attach_content = nil,
 }
 
 M.history = {
