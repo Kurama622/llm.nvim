@@ -17,6 +17,9 @@
 > Your model needs to support FIM (Fill-in-Middle).
 >
 > In fact, you should also make the most of FIM as it has an advantage in completion, being able to fill in based on context rather than just continuing from the preceding text.
+>
+> **The url used by the code completion tool and the url used by the chat task are usually two different ones.**
+
 
 1. You can use `autocmd` to enable the completion feature of llm.nvim.
 

@@ -49,6 +49,7 @@
   * [Local LLM Configuration](#local-llm-configuration)
 * [Default Keyboard Shortcuts](#default-keyboard-shortcuts)
   * [Window switch](#window-switch)
+* [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
   * [Special thanks](#special-thanks)
@@ -679,6 +680,10 @@ return {
 | History      | `k`          | `n`      | Preview the previous session history |
 | History      | `<cr>`       | `n`      | Enter the selected session           |
 | History      | `<esc>`      | `n`      | Close the history window             |
+
+## TODO List
+
+[todo-list](https://github.com/Kurama622/llm.nvim/issues/44)
 
 [⬆ back to top](#contents)
 
