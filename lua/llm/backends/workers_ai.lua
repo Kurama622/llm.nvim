@@ -28,7 +28,11 @@ end
 
 function workers_ai.ParseHandler(chunk, ctx)
   local success, err = pcall(function()
-    ctx.assistant_output = chunk.result.response
+    if chunk and chunk.result then
+      ctx.assistant_output = chunk.result.response
+    else
+      error(vim.inspect(chunk))
+    end
   end)
 
   if success then

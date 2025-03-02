@@ -25,7 +25,11 @@ end
 
 function ollama.ParseHandler(chunk, ctx)
   local success, err = pcall(function()
-    ctx.assistant_output = chunk.message.content
+    if chunk and chunk.message then
+      ctx.assistant_output = chunk.message.content
+    else
+      error(vim.inspect(chunk))
+    end
   end)
 
   if success then
