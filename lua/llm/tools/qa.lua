@@ -123,9 +123,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
         { role = "user", content = input },
       }
       state.popwin = preview_box
-      options["bufnr"] = preview_box.bufnr
-      options["winid"] = preview_box.winid
-      options["messages"] = state.app.session[name]
+      options.bufnr = preview_box.bufnr
+      options.winid = preview_box.winid
+      options.messages = state.app.session[name]
       worker = streaming(options)
     end
   end)

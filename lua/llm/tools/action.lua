@@ -149,7 +149,7 @@ When given a task:
     { role = "system", content = prompt },
     { role = "user", content = source_content },
   }
-  options["messages"] = state.app.session[name]
+  options.messages = state.app.session[name]
   local default_actions = {}
   if options.only_display_diff then
     default_actions = {

@@ -22,9 +22,9 @@ function utils.single_turn_dialogue(preview_box, streaming, options, context, di
   if preview_box then
     F.AppendChunkToBuffer(preview_box.bufnr, preview_box.winid, "-----\n")
   end
-  options["bufnr"] = preview_box.bufnr
-  options["winid"] = preview_box.winid
-  options["exit_handler"] = function(ostr)
+  options.bufnr = preview_box.bufnr
+  options.winid = preview_box.winid
+  options.exit_handler = function(ostr)
     local pattern = string.format("%s%%w*\n(.-)\n%s", options.start_str, options.end_str)
     local res = {}
     for match in ostr:gmatch(pattern) do
