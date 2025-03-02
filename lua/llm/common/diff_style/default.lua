@@ -13,7 +13,7 @@ local api = vim.api
 ---@field winnr number The window number of the original buffer
 ---@field diff table The table containing the diff buffer and window
 ---@field valid boolean Whether the diff is valid
-local Diff = {}
+local Diff = { style = "default" }
 
 ---@class DiffArgs
 ---@field bufnr number
@@ -31,9 +31,8 @@ function Diff.new(args)
     cursor_pos = args.cursor_pos or nil,
     filetype = args.filetype,
     winnr = args.winnr,
-    valid = true,
   }, { __index = Diff })
-
+  Diff.valid = true
   -- Set the diff properties
   vim.cmd("set diffopt=" .. table.concat(conf.configs.display.diff.opts, ","))
 
@@ -84,14 +83,14 @@ end
 ---Accept the diff
 ---@return nil
 function Diff:accept()
-  self.valid = false
+  Diff.valid = false
   return self:teardown()
 end
 
 ---Reject the diff
 ---@return nil
 function Diff:reject()
-  self.valid = false
+  Diff.valid = false
   self:teardown()
   return api.nvim_buf_set_lines(self.bufnr, 0, -1, true, self.contents)
 end
@@ -99,7 +98,7 @@ end
 ---Close down the diff
 ---@return nil
 function Diff:teardown()
-  self.valid = false
+  Diff.valid = false
   vim.cmd("diffoff")
   api.nvim_win_close(self.diff.win, false)
 end

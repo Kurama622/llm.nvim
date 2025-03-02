@@ -14,7 +14,7 @@ local current_source
 ---@field bufnr number The buffer number of the original buffer
 ---@field contents string[] The contents of the original buffer
 ---@field valid boolean Whether the diff is valid
-local MiniDiff = {}
+local MiniDiff = { style = "MiniDiff" }
 
 ---@param args DiffArgs
 ---@return MiniDiff
@@ -22,9 +22,9 @@ function MiniDiff.new(args)
   local self = setmetatable({
     bufnr = args.bufnr,
     contents = args.contents,
-    valid = true,
   }, { __index = MiniDiff })
 
+  MiniDiff.valid = true
   -- Capture the current source before we disable it
   if vim.b.minidiff_summary then
     current_source = vim.b.minidiff_summary["source_name"]
@@ -55,7 +55,7 @@ end
 function MiniDiff:accept()
   vim.b[self.bufnr].minidiff_config = nil
   diff.disable(self.bufnr)
-  self.valid = false
+  MiniDiff.valid = false
 end
 
 ---Reject the diff
@@ -65,7 +65,7 @@ function MiniDiff:reject()
 
   vim.b[self.bufnr].minidiff_config = nil
   diff.disable(self.bufnr)
-  self.valid = false
+  MiniDiff.valid = false
 end
 
 ---Close down mini.diff
@@ -76,7 +76,7 @@ function MiniDiff:teardown()
     vim.b[self.bufnr].minidiff_config = diff.gen_source[current_source]()
     diff.enable(self.bufnr)
     current_source = nil
-    self.valid = false
+    MiniDiff.valid = false
   end
 end
 
