@@ -88,17 +88,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
-  state.llm.worker = streaming.GetStreamingOutput(
-    state.popwin.bufnr,
-    state.popwin.winid,
-    state.session[state.popwin.winid],
-    conf.configs.fetch_key,
-    nil,
-    nil,
-    nil,
-    nil,
-    conf.configs.streaming_handler
-  )
+  state.llm.worker = streaming.GetStreamingOutput({
+    bufnr = state.popwin.bufnr,
+    winid = state.popwin.winid,
+    messages = state.session[state.popwin.winid],
+    fetch_key = conf.configs.fetch_key,
+    streaming_handler = conf.configs.streaming_handler,
+  })
 
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then

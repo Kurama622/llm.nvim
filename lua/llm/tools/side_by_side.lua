@@ -68,7 +68,7 @@ When given a task:
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
-  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
   local source_box = F.CreatePopup(options.left.title, false, options.left)
   local preview_box = F.CreatePopup(options.right.title, true, options.right)
@@ -100,22 +100,12 @@ When given a task:
     { role = "system", content = prompt },
     { role = "user", content = source_content },
   }
+  options.messages = state.app["session"][name]
+  options.bufnr = preview_box.bufnr
+  options.winid = preview_box.winid
 
   state.popwin = preview_box
-  local worker = streaming(
-    preview_box.bufnr,
-    preview_box.winid,
-    state.app.session[name],
-    fetch_key,
-    options.url,
-    options.model,
-    options.api_type,
-    options.args,
-    options.streaming_handler,
-    options.stdout_handler,
-    options.stderr_handler,
-    options.exit_handler
-  )
+  local worker = streaming(options)
 
   preview_box:map("n", "<C-c>", function()
     if worker.job then

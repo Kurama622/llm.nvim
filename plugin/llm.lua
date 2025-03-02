@@ -23,17 +23,14 @@ end
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker = streaming.GetStreamingOutput(
-    state.llm.bufnr,
-    state.llm.winid,
-    state.session[state.session.filename],
-    conf.configs.fetch_key,
-    nil,
-    nil,
-    nil,
-    conf.configs.args,
-    conf.configs.streaming_handler
-  )
+  state.llm.worker = streaming.GetStreamingOutput({
+    bufnr = state.llm.bufnr,
+    winid = state.llm.winid,
+    messages = state.session[state.session.filename],
+    fetch_key = conf.configs.fetch_key,
+    args = conf.configs.args,
+    streaming_handler = conf.configs.streaming_handler,
+  })
 end
 
 vim.api.nvim_create_user_command("LLMSessionToggle", function()
