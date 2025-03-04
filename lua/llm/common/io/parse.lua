@@ -7,18 +7,7 @@ local job = require("plenary.job")
 local LOG = require("llm.common.log")
 
 local io_parse = {}
-function io_parse.GetOutput(
-  messages,
-  fetch_key,
-  url,
-  model,
-  api_type,
-  args,
-  parse_handler,
-  stdout_handler,
-  stderr_handler,
-  exit_handler
-)
+function io_parse.GetOutput(opts)
   local wait_box_opts = ui.wait_ui_opts()
   local wait_box = Popup(wait_box_opts)
 
@@ -35,17 +24,17 @@ function io_parse.GetOutput(
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 
-  if fetch_key ~= nil then
-    LLM_KEY = fetch_key()
+  if opts.fetch_key ~= nil then
+    LLM_KEY = opts.fetch_key()
   end
 
-  if url == nil then
-    url = conf.configs.url
+  if opts.url == nil then
+    opts.url = conf.configs.url
   end
 
   local MODEL = conf.configs.model
-  if model ~= nil then
-    MODEL = model
+  if opts.model ~= nil then
+    MODEL = opts.model
   end
 
   local body = nil
@@ -55,13 +44,13 @@ function io_parse.GetOutput(
     assistant_output = "",
   }
 
-  local parse = backends.get_parse_handler(parse_handler, api_type, conf.configs, ctx)
+  local parse = backends.get_parse_handler(opts.parse_handler, opts.api_type, conf.configs, ctx)
   local _args = nil
-  if url ~= nil then
+  if opts.url ~= nil then
     body = {
       model = MODEL,
       max_tokens = conf.configs.max_tokens,
-      messages = messages,
+      messages = opts.messages,
       stream = false,
     }
 
@@ -73,9 +62,9 @@ function io_parse.GetOutput(
       body.top_p = conf.configs.top_p
     end
 
-    if args == nil then
+    if opts.args == nil then
       _args = {
-        url,
+        opts.url,
         "-N",
         "-X",
         "POST",
@@ -88,14 +77,14 @@ function io_parse.GetOutput(
       }
     else
       local env = {
-        url = url,
+        url = opts.url,
         LLM_KEY = LLM_KEY,
         body = body,
         authorization = authorization,
       }
 
       setmetatable(env, { __index = _G })
-      _args = api.GetUserRequestArgs(args, env)
+      _args = api.GetUserRequestArgs(opts.args, env)
     end
 
     if parse == nil then
@@ -108,7 +97,7 @@ function io_parse.GetOutput(
   else
     body = {
       max_tokens = conf.configs.max_tokens,
-      messages = messages,
+      messages = opts.messages,
     }
     if conf.configs.temperature ~= nil then
       body.temperature = conf.configs.temperature
@@ -118,7 +107,7 @@ function io_parse.GetOutput(
       body.top_p = conf.configs.top_p
     end
 
-    if args == nil then
+    if opts.args == nil then
       _args = {
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
         "-N",
@@ -141,7 +130,7 @@ function io_parse.GetOutput(
       }
 
       setmetatable(env, { __index = _G })
-      _args = api.GetUserRequestArgs(args, env)
+      _args = api.GetUserRequestArgs(opts.args, env)
     end
 
     if parse == nil then
@@ -170,12 +159,12 @@ function io_parse.GetOutput(
         end
       end),
       on_exit = vim.schedule_wrap(function()
-        table.insert(messages, { role = "assistant", content = ctx.assistant_output })
+        table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
         waiting_state.box:unmount()
         waiting_state.finish = true
-        if exit_handler ~= nil then
+        if opts.exit_handler ~= nil then
           local callback_func = vim.schedule_wrap(function()
-            exit_handler(ctx.assistant_output)
+            opts.exit_handler(ctx.assistant_output)
           end)
           callback_func()
         end

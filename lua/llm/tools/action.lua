@@ -1,5 +1,5 @@
 local LOG = require("llm.common.log")
-local F = require("llm.common.api")
+local utils = require("llm.tools.utils")
 local diff = require("llm.common.diff_style")
 local parse = require("llm.common.io.parse")
 local conf = require("llm.config")
@@ -19,81 +19,15 @@ local function clear_keymapping(mode, keymaps, bufnr)
   end
 end
 
-local function overwrite_selection(context, contents)
-  if context.start_col > 0 then
-    context.start_col = context.start_col - 1
-  end
-
-  vim.api.nvim_buf_set_text(
-    context.bufnr,
-    context.start_line - 1,
-    context.start_col,
-    context.end_line - 1,
-    context.end_col,
-    contents
-  )
-  vim.api.nvim_win_set_cursor(context.winnr, { context.start_line, context.start_col })
-end
-
-local function single_turn_dialogue(
-  preview_box,
-  state,
-  name,
-  streaming,
-  fetch_key,
-  options,
-  start_str,
-  end_str,
-  context
-)
-  F.AppendChunkToBuffer(preview_box.bufnr, preview_box.winid, "-----\n")
-
-  return streaming(
-    preview_box.bufnr,
-    preview_box.winid,
-    state.app.session[name],
-    fetch_key,
-    options.url,
-    options.model,
-    options.api_type,
-    options.args,
-    options.streaming_handler,
-    options.stdout_handler,
-    options.stderr_handler,
-    function(ostr)
-      local pattern = string.format("%s%%w*\n(.-)\n%s", start_str, end_str)
-      local res = ""
-      for match in ostr:gmatch(pattern) do
-        res = res .. match
-      end
-      if res == nil then
-        LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
-      end
-      local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
-
-      if res then
-        overwrite_selection(context, vim.split(res, "\n"))
-      end
-      diff = diff.new({
-        bufnr = context.bufnr,
-        cursor_pos = context.cursor_pos,
-        filetype = context.filetype,
-        contents = contents,
-        winnr = context.winnr,
-      })
-    end
-  )
-end
-
 function M.handler(name, F, state, streaming, prompt, opts)
-  if conf.configs.display.diff.provider == "default" then
-    diff = require("llm.common.diff_style.default")
-  elseif conf.configs.display.diff.provider == "mini_diff" then
-    diff = require("llm.common.diff_style.mini_diff")
+  if diff.style == nil then
+    diff = diff:update()
   end
 
   local options = {
     separator = "─",
+    start_str = "```",
+    end_str = "```",
     only_display_diff = false,
     language = "English",
     templates = nil,
@@ -189,7 +123,7 @@ When given a task:
   if options.templates and options.templates[ft] then
     prompt = prompt .. string.format("\n\n%s", options.templates[ft])
   end
-  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
   local bufnr = vim.api.nvim_get_current_buf()
   local winnr = vim.api.nvim_get_current_win()
@@ -210,13 +144,12 @@ When given a task:
     end_line = end_line,
     end_col = end_col,
   }
-  local start_str = "```"
-  local end_str = "```"
 
   state.app["session"][name] = {
     { role = "system", content = prompt },
     { role = "user", content = source_content },
   }
+  options.messages = state.app.session[name]
   local default_actions = {}
   if options.only_display_diff then
     default_actions = {
@@ -237,40 +170,32 @@ When given a task:
       end,
     }
     options.exit_handler = function(ostr)
-      local pattern = string.format("%s%%w*\n(.-)\n%s", start_str, end_str)
-      local res = ""
+      local pattern = string.format("%s%%w*\n(.-)\n%s", options.start_str, options.end_str)
+      local res = {}
       for match in ostr:gmatch(pattern) do
-        res = res .. match
+        for _, value in ipairs(vim.split(match, "\n")) do
+          table.insert(res, value)
+        end
       end
-      if res == nil then
+      if vim.tbl_isempty(res) then
         LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
-      end
-      local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
+      else
+        local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
 
-      if res then
-        overwrite_selection(context, vim.split(res, "\n"))
+        utils.overwrite_selection(context, res)
+        setmetatable(diff, {
+          __index = diff.new({
+            bufnr = context.bufnr,
+            cursor_pos = context.cursor_pos,
+            filetype = context.filetype,
+            contents = contents,
+            winnr = context.winnr,
+          }),
+        })
       end
-      diff = diff.new({
-        bufnr = context.bufnr,
-        cursor_pos = context.cursor_pos,
-        filetype = context.filetype,
-        contents = contents,
-        winnr = context.winnr,
-      })
     end
 
-    parse.GetOutput(
-      state.app.session[name],
-      fetch_key,
-      options.url,
-      options.model,
-      options.api_type,
-      options.args,
-      options.parse_handler,
-      options.stdout_handler,
-      options.stderr_handler,
-      options.exit_handler
-    )
+    parse.GetOutput(options)
   else
     local preview_box = Split({
       relative = options.output.relative,
@@ -313,8 +238,7 @@ When given a task:
         signcolumn = options.input.signcolumn,
       },
     })
-    local worker =
-      single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
+    local worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
 
     preview_box:map("n", "<C-c>", function()
       if worker.job then
@@ -373,8 +297,7 @@ When given a task:
         table.remove(state.app.session[name], #state.app.session[name])
         state.app.session[name][1].content = state.app.session[name][1].content .. "\n" .. table.concat(contents, "\n")
         vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
-        worker =
-          single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
+        worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
       end)
     end)
 
@@ -383,8 +306,7 @@ When given a task:
         diff:reject()
       end
       table.remove(state.app.session[name], #state.app.session[name])
-      worker =
-        single_turn_dialogue(preview_box, state, name, streaming, fetch_key, options, start_str, end_str, context)
+      worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
     end)
   end
 

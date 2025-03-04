@@ -61,7 +61,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
-  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
   vim.api.nvim_set_hl(0, "LLMQuery", options.query.hl)
 
   local input_box = Popup({
@@ -123,20 +123,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
         { role = "user", content = input },
       }
       state.popwin = preview_box
-      worker = streaming(
-        preview_box.bufnr,
-        preview_box.winid,
-        state.app.session[name],
-        fetch_key,
-        options.url,
-        options.model,
-        options.api_type,
-        options.args,
-        options.streaming_handler,
-        options.stdout_handler,
-        options.stderr_handler,
-        options.exit_handler
-      )
+      options.bufnr = preview_box.bufnr
+      options.winid = preview_box.winid
+      options.messages = state.app.session[name]
+      worker = streaming(options)
     end
   end)
 

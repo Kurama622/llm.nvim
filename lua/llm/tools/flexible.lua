@@ -61,7 +61,8 @@ function M.handler(name, F, state, _, prompt, opts)
   else
     state.app.session[name] = { { role = "system", content = prompt }, { role = "user", content = content } }
   end
-  local fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.messages = state.app.session[name]
   if options.exit_handler == nil then
     options.exit_handler = function(output)
       flexible_box = ui.FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
@@ -102,18 +103,7 @@ function M.handler(name, F, state, _, prompt, opts)
     end
   end
 
-  parse.GetOutput(
-    state.app.session[name],
-    fetch_key,
-    options.url,
-    options.model,
-    options.api_type,
-    options.args,
-    options.parse_handler,
-    options.stdout_handler,
-    options.stderr_handler,
-    options.exit_handler
-  )
+  parse.GetOutput(options)
 
   F.VisMode2NorMode()
   if options.exit_on_move then

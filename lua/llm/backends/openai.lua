@@ -54,7 +54,11 @@ end
 
 function openai.ParseHandler(chunk, ctx)
   local success, err = pcall(function()
-    ctx.assistant_output = chunk.choices[1].message.content
+    if chunk and chunk.choices and chunk.choices[1] then
+      ctx.assistant_output = chunk.choices[1].message.content
+    else
+      error(vim.inspect(chunk))
+    end
   end)
 
   if success then
