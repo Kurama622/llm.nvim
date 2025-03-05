@@ -78,7 +78,7 @@
 
   - **blink.cmp 或 nvim-cmp**
   <p align= "center">
-    <img src="https://github.com/user-attachments/assets/38cbcb76-8110-43da-af5a-3b5cf8876283" alt="completion-blink-cmp" width="560">
+    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="560">
   </p>
 
 ### 快速翻译
