@@ -139,6 +139,7 @@ function M.NewSession()
       if not state.session[state.session.filename] then
         state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
       end
+
       F.RefreshLLMText(state.session[state.session.filename])
 
       if conf.configs.save_session then
@@ -154,9 +155,6 @@ function M.NewSession()
         if k == "Session:Close" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            conf.session.status = -1
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
@@ -184,6 +182,7 @@ function M.NewSession()
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
+            F.update_prompt()
             if input ~= "" then
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
@@ -199,9 +198,6 @@ function M.NewSession()
         elseif k == "Session:Close" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            conf.session.status = -1
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
@@ -271,6 +267,7 @@ function M.NewSession()
                     end
                     state.input.popup:unmount()
                     state.input.popup = nil
+                    F.update_prompt()
                     if input ~= "" then
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
@@ -282,7 +279,6 @@ function M.NewSession()
                 elseif name == "Session:Close" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     F.CloseLLM()
-                    vim.api.nvim_command("doautocmd BufEnter")
                   end, { noremap = true })
                 elseif name == "Session:Toggle" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, ToggleLLM, { noremap = true })
@@ -295,8 +291,6 @@ function M.NewSession()
         elseif k == "Session:Close" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()

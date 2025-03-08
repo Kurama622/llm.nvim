@@ -4,6 +4,7 @@ local conf = require("llm.config")
 local job = require("plenary.job")
 local F = require("llm.common.api")
 local backends = require("llm.backends")
+local state = require("llm.state")
 
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
@@ -203,6 +204,9 @@ function M.GetStreamingOutput(opts)
           opts.exit_handler(ctx.assistant_output)
         end)
         callback_func()
+      end
+      if state.summarize_suggestions.ctx then
+        setmetatable(state.summarize_suggestions, { __index = ctx })
       end
     end,
   })
