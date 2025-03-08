@@ -116,6 +116,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
           state.llm.worker.job = nil
           vim.api.nvim_command("doautocmd BufEnter")
         end
+        state.session[state.popwin.winid] = nil
         state.popwin:unmount()
       end, { noremap = true })
     elseif k == "Output:Cancel" then
