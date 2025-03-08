@@ -7,6 +7,7 @@ local Popup = require("nui.popup")
 local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 local _layout = require("llm.common.layout")
+local utils = require("llm.tools.utils")
 
 local function hide_session()
   if state.layout.popup then
@@ -64,7 +65,8 @@ local function ToggleLLM()
 end
 
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
-  local content = F.GetVisualSelection()
+  local lines = F.make_inline_context(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
+  local content = F.GetVisualSelection(lines)
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
   if builtin_called then
@@ -76,6 +78,14 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       state.session[state.popwin.winid] = {}
     end
     table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
+    F.update_prompt(state.popwin.winid)
+
+    utils.set_keymapping(opts._.display.mapping.mode, opts._.display.mapping.keys, function()
+      opts.action.display()
+      if opts._.display.action ~= nil then
+        opts._.display.action()
+      end
+    end, state.popwin.bufnr)
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
@@ -182,7 +192,7 @@ function M.NewSession()
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
-            F.update_prompt()
+            F.update_prompt(state.session.filename)
             if input ~= "" then
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
@@ -267,7 +277,7 @@ function M.NewSession()
                     end
                     state.input.popup:unmount()
                     state.input.popup = nil
-                    F.update_prompt()
+                    F.update_prompt(state.session.filename)
                     if input ~= "" then
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")

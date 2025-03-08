@@ -265,12 +265,8 @@ function api.GetVisualSelection(lines)
   return seletion
 end
 
-function api.GetAttach(opts)
-  local bufnr = vim.api.nvim_get_current_buf()
+function api.make_inline_context(opts, bufnr, name)
   local lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr)
-
-  api.VisMode2NorMode()
-
   if opts.inline_assistant then
     local winnr = vim.api.nvim_get_current_win()
     local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
@@ -291,8 +287,16 @@ function api.GetAttach(opts)
       end_str = "```\n<!%-%-/suggestion%-%->",
     }
     state.summarize_suggestions.prompt =
-      string.format(require("llm.tools.prompts").attach_to_chat, "<!--suggestion-->", "<!--/suggestion-->")
+      string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->")
   end
+  return lines
+end
+
+function api.GetAttach(opts)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = api.make_inline_context(opts, bufnr, "attach_to_chat")
+  api.VisMode2NorMode()
+
   if opts.is_codeblock then
     state.input.attach_content = string.format(
       [[```%s
@@ -311,14 +315,14 @@ function api.ClearAttach()
   state.input.attach_content = nil
 end
 
-function api.update_prompt()
+function api.update_prompt(name)
   if state.summarize_suggestions.prompt and not state.summarize_suggestions.status then
-    LOG:INFO(vim.inspect(state.session))
-    if state.session[state.session.filename][1].role == "system" then
-      state.session[state.session.filename][1].content =
-        string.format("%s\n%s", state.session[state.session.filename][1].content, state.summarize_suggestions.prompt)
+    if state.session[name][1].role == "system" then
+      state.session[name][1].content =
+        string.format("%s\n%s", state.session[name][1].content, state.summarize_suggestions.prompt)
       state.summarize_suggestions.status = true
-      LOG:INFO(vim.inspect(state.session[state.session.filename]))
+    else
+      table.insert(state.session[name], 1, { role = "system", content = state.summarize_suggestions.prompt })
     end
   end
 end
@@ -329,7 +333,6 @@ function api.reset_prompt()
       state.session[state.session.filename][1].content = conf.configs.prompt
       state.summarize_suggestions.prompt = nil
       state.summarize_suggestions.status = false
-      LOG:INFO(vim.inspect(state.session[state.session.filename]))
     end
   end
 end

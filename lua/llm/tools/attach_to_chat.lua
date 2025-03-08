@@ -90,7 +90,6 @@ function M.handler(_, _, _, _, _, opts)
   end
 
   if conf.session.status == -1 then
-    LOG:INFO("call NewSession")
     sess.NewSession()
   end
 
