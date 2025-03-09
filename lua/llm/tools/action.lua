@@ -7,18 +7,6 @@ local Split = require("nui.split")
 
 local M = {}
 
-local function set_keymapping(mode, keymaps, callback, bufnr)
-  for _, key in pairs(keymaps) do
-    vim.api.nvim_buf_set_keymap(bufnr, mode, key, "", { callback = callback })
-  end
-end
-
-local function clear_keymapping(mode, keymaps, bufnr)
-  for _, key in pairs(keymaps) do
-    vim.keymap.del(mode, key, { buffer = bufnr })
-  end
-end
-
 function M.handler(name, F, state, streaming, prompt, opts)
   if diff.style == nil then
     diff = diff:update()
@@ -170,29 +158,7 @@ When given a task:
       end,
     }
     options.exit_handler = function(ostr)
-      local pattern = string.format("%s%%w*\n(.-)\n%s", options.start_str, options.end_str)
-      local res = {}
-      for match in ostr:gmatch(pattern) do
-        for _, value in ipairs(vim.split(match, "\n")) do
-          table.insert(res, value)
-        end
-      end
-      if vim.tbl_isempty(res) then
-        LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
-      else
-        local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
-
-        utils.overwrite_selection(context, res)
-        setmetatable(diff, {
-          __index = diff.new({
-            bufnr = context.bufnr,
-            cursor_pos = context.cursor_pos,
-            filetype = context.filetype,
-            contents = contents,
-            winnr = context.winnr,
-          }),
-        })
-      end
+      utils.new_diff(diff, options, context, ostr)
     end
 
     parse.GetOutput(options)
@@ -278,7 +244,7 @@ When given a task:
         options.close.action()
       end
       for _, kk in ipairs({ "accept", "reject", "close" }) do
-        clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
+        utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
       end
     end)
 
@@ -311,14 +277,14 @@ When given a task:
   end
 
   for _, k in ipairs({ "accept", "reject", "close" }) do
-    set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
+    utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
       default_actions[k]()
       if options[k].action ~= nil then
         options[k].action()
       end
       if k == "close" then
         for _, kk in ipairs({ "accept", "reject", "close" }) do
-          clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
+          utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
         end
       end
     end, bufnr)

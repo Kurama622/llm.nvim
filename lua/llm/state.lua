@@ -54,4 +54,11 @@ M.completion = {
   set_keymap = false,
   set_autocmd = false,
 }
+M.summarize_suggestions = {
+  --- @type nil | {start_str:string, end_str:string}
+  pattern = nil,
+  ctx = nil,
+  prompt = nil,
+  status = false,
+}
 return M

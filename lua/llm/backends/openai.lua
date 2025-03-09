@@ -3,7 +3,7 @@ local F = require("llm.common.api")
 local openai = {}
 
 function openai.StreamingHandler(chunk, ctx)
-  if not chunk then
+  if chunk == "data: [DONE]" or not chunk then
     return ctx.assistant_output
   end
   local tail = chunk:sub(-1, -1)
