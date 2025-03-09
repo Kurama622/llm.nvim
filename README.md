@@ -93,14 +93,18 @@
 
 > One-time, no history retained.
 
+You can configure [inline_assistant](./examples/ai-tools/Ask/config.lua) to decide whether to display diffs (default: show by pressing 'd').
+
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
+  <img src="https://github.com/user-attachments/assets/e3300e1f-dbd2-4978-bd60-ddf9106257cb" alt="llm-ask" width="560">
 </p>
 
 ### Attach To Chat
 
+You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.lua) to decide whether to display diffs (default: show by pressing 'd').
+
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/1ff4bb76-90ea-409b-bba8-e2a461b3308d" alt="llm-attach" width="560">
+  <img src="https://github.com/user-attachments/assets/33ba7517-6cf1-4e52-b6b4-27e6a4fb1148" alt="llm-attach" width="560">
 </p>
 
 ### Optimize Code

@@ -95,14 +95,18 @@
 
 > 一次性，不保留历史记录
 
+你可以配置 [inline_assistant](./examples/ai-tools/Ask/config.lua) 来决定是否展示diff (默认按'd'展示)
+
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/9d234e47-b34c-46a3-a655-5a6f441a38fe" alt="llm-ask" width="560">
+  <img src="https://github.com/user-attachments/assets/e3300e1f-dbd2-4978-bd60-ddf9106257cb" alt="llm-ask" width="560">
 </p>
 
 ### 给对话附加上下文
 
+你可以配置 [inline_assistant](./examples/ai-tools/Ask/config.lua) 来决定是否展示diff (默认按'd'展示)
+
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/1ff4bb76-90ea-409b-bba8-e2a461b3308d" alt="llm-attach" width="560">
+  <img src="https://github.com/user-attachments/assets/33ba7517-6cf1-4e52-b6b4-27e6a4fb1148" alt="llm-attach" width="560">
 </p>
 
 ### 优化代码
