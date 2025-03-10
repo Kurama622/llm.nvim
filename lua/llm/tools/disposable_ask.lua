@@ -45,6 +45,7 @@ function M.handler(_, _, _, _, prompt, opts)
 
   local options = {
     inline_assistant = false,
+    language = "English",
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
@@ -123,8 +124,13 @@ function M.handler(_, _, _, _, prompt, opts)
   input_box:map("n", "<cr>", function()
     local description = table.concat(vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true), "\n")
     input_box:unmount()
-    local builtin_opts =
-      { prompt = prompt, inline_assistant = options.inline_assistant, action = default_actions, _ = options }
+    local builtin_opts = {
+      prompt = prompt,
+      inline_assistant = options.inline_assistant,
+      language = options.language,
+      action = default_actions,
+      _ = options,
+    }
     sess.LLMSelectedTextHandler(description, true, builtin_opts)
   end)
 

@@ -287,7 +287,7 @@ function api.make_inline_context(opts, bufnr, name)
       end_str = "```\n<!%-%-/suggestion%-%->",
     }
     state.summarize_suggestions.prompt =
-      string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->")
+      string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->", opts.language)
   end
   return lines
 end

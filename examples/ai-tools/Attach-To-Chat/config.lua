@@ -3,6 +3,7 @@ AttachToChat = {
   opts = {
     is_codeblock = true,
     inline_assistant = true,
+    language = "Chinese",
     -- display diff
     display = {
       mapping = {

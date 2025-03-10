@@ -7,6 +7,7 @@ Ask = {
     },
     title = " Ask ",
     inline_assistant = true,
+    language = "Chinese",
     -- display diff
     display = {
       mapping = {

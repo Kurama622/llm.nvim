@@ -40,6 +40,7 @@ function M.handler(_, _, _, _, _, opts)
   local options = {
     is_codeblock = false,
     inline_assistant = false,
+    language = "English",
 
     display = {
       mapping = {
