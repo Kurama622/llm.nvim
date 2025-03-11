@@ -7,6 +7,7 @@ local Popup = require("nui.popup")
 local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 local _layout = require("llm.common.layout")
+local utils = require("llm.tools.utils")
 
 local function hide_session()
   if state.layout.popup then
@@ -64,7 +65,8 @@ local function ToggleLLM()
 end
 
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
-  local content = F.GetVisualSelection()
+  local lines = F.make_inline_context(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
+  local content = F.GetVisualSelection(lines)
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
   if builtin_called then
@@ -76,6 +78,14 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       state.session[state.popwin.winid] = {}
     end
     table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
+    F.update_prompt(state.popwin.winid)
+
+    utils.set_keymapping(opts._.display.mapping.mode, opts._.display.mapping.keys, function()
+      opts.action.display()
+      if opts._.display.action ~= nil then
+        opts._.display.action()
+      end
+    end, state.popwin.bufnr)
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
@@ -92,8 +102,11 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     bufnr = state.popwin.bufnr,
     winid = state.popwin.winid,
     messages = state.session[state.popwin.winid],
-    fetch_key = conf.configs.fetch_key,
-    streaming_handler = conf.configs.streaming_handler,
+    url = opts._.url,
+    model = opts._.model,
+    fetch_key = opts._.fetch_key,
+    api_type = opts._.api_type,
+    streaming_handler = opts._.streaming_handler,
   })
 
   for k, v in pairs(conf.configs.keys) do
@@ -106,6 +119,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
           state.llm.worker.job = nil
           vim.api.nvim_command("doautocmd BufEnter")
         end
+        state.session[state.popwin.winid] = nil
         state.popwin:unmount()
       end, { noremap = true })
     elseif k == "Output:Cancel" then
@@ -139,6 +153,7 @@ function M.NewSession()
       if not state.session[state.session.filename] then
         state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
       end
+
       F.RefreshLLMText(state.session[state.session.filename])
 
       if conf.configs.save_session then
@@ -154,9 +169,6 @@ function M.NewSession()
         if k == "Session:Close" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            conf.session.status = -1
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
@@ -184,6 +196,7 @@ function M.NewSession()
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
+            F.update_prompt(state.session.filename)
             if input ~= "" then
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
@@ -199,9 +212,6 @@ function M.NewSession()
         elseif k == "Session:Close" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            conf.session.status = -1
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
@@ -271,6 +281,7 @@ function M.NewSession()
                     end
                     state.input.popup:unmount()
                     state.input.popup = nil
+                    F.update_prompt(state.session.filename)
                     if input ~= "" then
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
@@ -282,7 +293,6 @@ function M.NewSession()
                 elseif name == "Session:Close" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     F.CloseLLM()
-                    vim.api.nvim_command("doautocmd BufEnter")
                   end, { noremap = true })
                 elseif name == "Session:Toggle" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, ToggleLLM, { noremap = true })
@@ -295,8 +305,6 @@ function M.NewSession()
         elseif k == "Session:Close" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             F.CloseLLM()
-            state.session = { filename = nil }
-            vim.api.nvim_command("doautocmd BufEnter")
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()

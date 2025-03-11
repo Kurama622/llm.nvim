@@ -4,13 +4,15 @@ local conf = require("llm.config")
 local job = require("plenary.job")
 local F = require("llm.common.api")
 local backends = require("llm.backends")
+local state = require("llm.state")
 
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 
-  if opts.fetch_key ~= nil then
-    LLM_KEY = opts.fetch_key()
+  local fetch_key = opts.fetch_key or conf.configs.fetch_key
+  if fetch_key ~= nil then
+    LLM_KEY = fetch_key()
   end
 
   local authorization = "Authorization: Bearer " .. LLM_KEY
@@ -19,26 +21,22 @@ function M.GetStreamingOutput(opts)
     authorization = ""
   end
 
-  if opts.url == nil then
-    opts.url = conf.configs.url
-  end
-
-  local MODEL = conf.configs.model
-  if opts.model ~= nil then
-    MODEL = opts.model
-  end
+  local url = opts.url or conf.configs.url
+  local MODEL = opts.model or conf.configs.model
+  local api_type = opts.api_type or conf.configs.api_type
+  local streaming_handler = opts.streaming_handler or conf.configs.streaming_handler
 
   local body = nil
-
   local ctx = {
     line = "",
     assistant_output = "",
     bufnr = opts.bufnr,
     winid = opts.winid,
   }
-  local stream_output = backends.get_streaming_handler(opts.streaming_handler, opts.api_type, conf.configs, ctx)
+  local stream_output = backends.get_streaming_handler(streaming_handler, api_type, conf.configs, ctx)
+
   local _args = nil
-  if opts.url ~= nil then
+  if url ~= nil then
     body = {
       stream = true,
       model = MODEL,
@@ -56,7 +54,7 @@ function M.GetStreamingOutput(opts)
 
     if opts.args == nil then
       _args = {
-        opts.url,
+        url,
         "-N",
         "-X",
         "POST",
@@ -69,7 +67,7 @@ function M.GetStreamingOutput(opts)
       }
     else
       local env = {
-        url = opts.url,
+        url = url,
         authorization = authorization,
         body = body,
       }
@@ -178,7 +176,7 @@ function M.GetStreamingOutput(opts)
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
-      if opts.api_type or conf.configs.api_type or opts.streaming_handler or conf.configs.streaming_handler then
+      if api_type or streaming_handler then
         ctx.assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
@@ -203,6 +201,9 @@ function M.GetStreamingOutput(opts)
           opts.exit_handler(ctx.assistant_output)
         end)
         callback_func()
+      end
+      if state.summarize_suggestions.ctx then
+        setmetatable(state.summarize_suggestions, { __index = ctx })
       end
     end,
   })

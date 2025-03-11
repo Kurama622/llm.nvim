@@ -265,22 +265,83 @@ function api.GetVisualSelection(lines)
   return seletion
 end
 
+function api.make_inline_context(opts, bufnr, name)
+  local lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr)
+  if opts.inline_assistant then
+    local winnr = vim.api.nvim_get_current_win()
+    local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
+    local context = {
+      bufnr = bufnr,
+      filetype = api.GetFileType(bufnr),
+      contents = lines,
+      winnr = winnr,
+      cursor_pos = cursor_pos,
+      start_line = start_line,
+      start_col = start_col,
+      end_line = end_line,
+      end_col = end_col,
+    }
+    state.summarize_suggestions.ctx = context
+    state.summarize_suggestions.pattern = {
+      start_str = "<!%-%-suggestion%-%->\n```",
+      end_str = "```\n<!%-%-/suggestion%-%->",
+    }
+    state.summarize_suggestions.prompt =
+      string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->", opts.language)
+  end
+  return lines
+end
+
 function api.GetAttach(opts)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = api.make_inline_context(opts, bufnr, "attach_to_chat")
+  api.VisMode2NorMode()
+
   if opts.is_codeblock then
     state.input.attach_content = string.format(
       [[```%s
 %s
 ```]],
       vim.bo.ft,
-      api.GetVisualSelection()
+      api.GetVisualSelection(lines)
     )
   else
-    state.input.attach_content = api.GetVisualSelection()
+    state.input.attach_content = api.GetVisualSelection(lines)
   end
+  return bufnr
 end
 
 function api.ClearAttach()
   state.input.attach_content = nil
+end
+
+function api.update_prompt(name)
+  if state.summarize_suggestions.prompt and not state.summarize_suggestions.status then
+    if state.session[name][1].role == "system" then
+      state.session[name][1].content =
+        string.format("%s\n%s", state.session[name][1].content, state.summarize_suggestions.prompt)
+      state.summarize_suggestions.status = true
+    else
+      table.insert(state.session[name], 1, { role = "system", content = state.summarize_suggestions.prompt })
+    end
+  end
+end
+
+function api.reset_prompt()
+  if state.summarize_suggestions.status then
+    if state.session[state.session.filename][1].role == "system" then
+      state.session[state.session.filename][1].content = conf.configs.prompt
+      state.summarize_suggestions.prompt = nil
+      state.summarize_suggestions.status = false
+    end
+  end
+end
+
+function api.ClearSummarizeSuggestions()
+  state.summarize_suggestions.ctx = nil
+  state.summarize_suggestions.pattern = nil
+  api.reset_prompt()
+  state.summarize_suggestions.status = false
 end
 
 function api.CancelLLM()
@@ -298,6 +359,7 @@ function api.CloseLLM()
     vim.wait(200, function() end)
     state.llm.worker.job = nil
   end
+  -- float
   if state.layout.popup then
     state.layout.popup:unmount()
 
@@ -305,11 +367,15 @@ function api.CloseLLM()
       comp.popup = nil
     end
     api.ClearAttach()
+    api.ClearSummarizeSuggestions()
+    conf.session.status = -1
+    vim.api.nvim_command("doautocmd BufEnter")
   else
     if state.input.popup then
       state.input.popup:unmount()
       state.input.popup = nil
       api.ClearAttach()
+      vim.api.nvim_command("doautocmd BufEnter")
       return
     else
       LOG:TRACE("Close Split window")
@@ -319,6 +385,8 @@ function api.CloseLLM()
         state.history.popup:unmount()
         state.history.popup = nil
       end
+      api.ClearAttach()
+      api.ClearSummarizeSuggestions()
       state.history.index = nil
       conf.session.status = -1
     end
@@ -349,6 +417,7 @@ function api.CloseLLM()
       file:close()
     end
   end
+  state.session = { filename = nil }
 end
 
 function api.ResendLLM()
@@ -482,4 +551,11 @@ function api.SetBoxOpts(box_list, opts)
   end
 end
 
+function api.get_chat_ui_bufnr_list()
+  if conf.configs.style == "float" then
+    return { state.input.popup.bufnr, state.llm.popup.bufnr }
+  else
+    return { state.llm.bufnr }
+  end
+end
 return api
