@@ -102,8 +102,11 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     bufnr = state.popwin.bufnr,
     winid = state.popwin.winid,
     messages = state.session[state.popwin.winid],
-    fetch_key = conf.configs.fetch_key,
-    streaming_handler = conf.configs.streaming_handler,
+    url = opts._.url,
+    model = opts._.model,
+    fetch_key = opts._.fetch_key,
+    api_type = opts._.api_type,
+    streaming_handler = opts._.streaming_handler,
   })
 
   for k, v in pairs(conf.configs.keys) do
