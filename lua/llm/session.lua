@@ -65,10 +65,16 @@ local function ToggleLLM()
 end
 
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
+  opts = opts or {}
   local lines = F.make_inline_context(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
   local content = F.GetVisualSelection(lines)
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
+  vim.api.nvim_set_option_value("filetype", "llm", { buf = state.popwin.bufnr })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
+  vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
+  vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
+  vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
   if builtin_called then
     if opts.prompt then
       state.session[state.popwin.winid] = {
@@ -86,28 +92,27 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
         opts._.display.action()
       end
     end, state.popwin.bufnr)
+    state.llm.worker = streaming.GetStreamingOutput({
+      bufnr = state.popwin.bufnr,
+      winid = state.popwin.winid,
+      messages = state.session[state.popwin.winid],
+      url = opts._.url,
+      model = opts._.model,
+      fetch_key = opts._.fetch_key,
+      api_type = opts._.api_type,
+      streaming_handler = opts._.streaming_handler,
+    })
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
       { role = "user", content = content },
     }
+    state.llm.worker = streaming.GetStreamingOutput({
+      bufnr = state.popwin.bufnr,
+      winid = state.popwin.winid,
+      messages = state.session[state.popwin.winid],
+    })
   end
-
-  vim.api.nvim_set_option_value("filetype", "llm", { buf = state.popwin.bufnr })
-  vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
-  vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
-  vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
-  vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
-  state.llm.worker = streaming.GetStreamingOutput({
-    bufnr = state.popwin.bufnr,
-    winid = state.popwin.winid,
-    messages = state.session[state.popwin.winid],
-    url = opts._.url,
-    model = opts._.model,
-    fetch_key = opts._.fetch_key,
-    api_type = opts._.api_type,
-    streaming_handler = opts._.streaming_handler,
-  })
 
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
