@@ -1,5 +1,5 @@
 local summarize_suggestions_prompt =
-  [[- When the user provides code, analyze it to determine if optimizations are possible (e.g., efficiency, readability, simplicity, or potential errors). If optimizations are needed, reply strictly in the following FORMAT:
+  [[- When the user provides code, analyze it to determine if optimizations are possible (e.g., efficiency, readability, simplicity, or potential errors). If optimizations are needed or the user explicitly requests to modify the source file, reply strictly in the following FORMAT:
 %s
 ```<language>
 <content>
