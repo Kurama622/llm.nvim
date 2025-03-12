@@ -8,7 +8,7 @@ local M = {}
 
 function M.handler(name, F, state, streaming, prompt, opts)
   if prompt == nil then
-    prompt = [[请帮我把这段话翻译成英语, 直接给出翻译结果: ]]
+    prompt = require("llm.tools.prompts").qa
   elseif type(prompt) == "function" then
     prompt = prompt()
   end

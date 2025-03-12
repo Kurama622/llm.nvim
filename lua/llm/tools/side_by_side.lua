@@ -6,23 +6,7 @@ local LOG = require("llm.common.log")
 function M.handler(name, F, state, streaming, prompt, opts)
   local ft = vim.bo.filetype
   if prompt == nil then
-    prompt = [[You are an AI programming assistant.
-
-Your core tasks include:
-- Code quality and adherence to best practices
-- Potential bugs or edge cases
-- Performance optimizations
-- Readability and maintainability
-- Any security concerns
-
-You must:
-- Follow the user's requirements carefully and to the letter.
-- DO NOT use Markdown formatting in your answers.
-- Avoid wrapping the output in triple backticks.
-- The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
-
-When given a task:
-- ONLY OUTPUT THE RELEVANT CODE.]]
+    prompt = require("llm.tools.prompts").side_by_side
   elseif type(prompt) == "function" then
     prompt = prompt()
   end
