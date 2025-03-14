@@ -70,8 +70,9 @@ function blink:get_completions(ctx, callback)
             kind = "markdown",
             value = "```" .. (vim.bo.ft or "") .. "\n" .. result .. "\n```",
           },
-          insertText = result .. "$0",
-          insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
+          insertText = result,
+          -- use PlainText to ensure proper indentation.
+          insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
           -- TODO: use the provider name as kind name like nvim-cmp
           -- when blink supports non-lsp kind name.
           kind = vim.lsp.protocol.CompletionItemKind.Text,

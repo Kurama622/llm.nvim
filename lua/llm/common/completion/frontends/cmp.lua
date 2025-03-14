@@ -76,8 +76,9 @@ function ncmp:complete(ctx, callback)
             value = "```" .. (vim.bo.ft or "") .. "\n" .. result .. "\n```",
           },
           insertTextMode = lsp.InsertTextMode.AdjustIndentation,
-          insertText = result .. "$0",
-          insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
+          insertText = result,
+          -- use PlainText to ensure proper indentation.
+          insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
           cmp = {
             kind_hl_group = "CmpItemKind",
             kind_text = "llm",
