@@ -8,6 +8,15 @@ Ask = {
     title = " Ask ",
     inline_assistant = true,
     language = "Chinese",
+
+    -- [optinal] set your llm model
+    url = "https://api.chatanywhere.tech/v1/chat/completions",
+    model = "gpt-4o-mini",
+    api_type = "openai",
+    fetch_key = function()
+      return vim.env.CHAT_ANYWHERE_KEY
+    end,
+
     -- display diff
     display = {
       mapping = {
