@@ -22,6 +22,15 @@ function M.handler(_, _, _, _, prompt, opts)
       state.popwin:unmount()
       F.ClearSummarizeSuggestions()
     end,
+    copy_suggestion_code = function()
+      local display_opts = {}
+      setmetatable(display_opts, {
+        __index = state.summarize_suggestions,
+      })
+      utils.copy_suggestion_code(display_opts.pattern, display_opts.assistant_output)
+      state.popwin:unmount()
+      F.ClearSummarizeSuggestions()
+    end,
     accept = function()
       if diff and diff.valid then
         diff:accept()
@@ -73,6 +82,12 @@ function M.handler(_, _, _, _, prompt, opts)
         keys = { "d" },
       },
       action = nil,
+    },
+    copy_suggestion_code = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
     },
     accept = {
       mapping = {

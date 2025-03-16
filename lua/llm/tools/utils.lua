@@ -30,6 +30,21 @@ function utils.overwrite_selection(context, contents)
   vim.api.nvim_win_set_cursor(context.winnr, { context.start_line, context.start_col })
 end
 
+function utils.copy_suggestion_code(opts, suggestion)
+  local pattern = string.format("%s%%w*\n(.-)\n%s", opts.start_str, opts.end_str)
+  local res = {}
+  for match in suggestion:gmatch(pattern) do
+    for _, value in ipairs(vim.split(match, "\n")) do
+      table.insert(res, value)
+    end
+  end
+  if vim.tbl_isempty(res) then
+    LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
+  else
+    vim.fn.setreg("+", table.concat(res, "\n"))
+  end
+end
+
 function utils.new_diff(diff, opts, context, suggestion)
   local pattern = string.format("%s%%w*\n(.-)\n%s", opts.start_str, opts.end_str)
   local res = {}

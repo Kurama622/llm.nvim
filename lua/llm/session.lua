@@ -86,12 +86,14 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
     F.update_prompt(state.popwin.winid)
 
-    utils.set_keymapping(opts._.display.mapping.mode, opts._.display.mapping.keys, function()
-      opts.action.display()
-      if opts._.display.action ~= nil then
-        opts._.display.action()
-      end
-    end, state.popwin.bufnr)
+    for _, k in ipairs({ "display", "copy_suggestion_code" }) do
+      utils.set_keymapping(opts._[k].mapping.mode, opts._[k].mapping.keys, function()
+        opts.action[k]()
+        if opts._[k].action ~= nil then
+          opts._[k].action()
+        end
+      end, state.popwin.bufnr)
+    end
     state.llm.worker = streaming.GetStreamingOutput({
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
