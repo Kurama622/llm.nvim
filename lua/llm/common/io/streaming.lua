@@ -5,6 +5,7 @@ local job = require("plenary.job")
 local F = require("llm.common.api")
 local backends = require("llm.backends")
 local state = require("llm.state")
+local LOG = require("llm.common.log")
 
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
@@ -55,6 +56,7 @@ function M.GetStreamingOutput(opts)
     if opts.args == nil then
       _args = {
         url,
+        "-s",
         "-N",
         "-X",
         "POST",
@@ -128,6 +130,7 @@ function M.GetStreamingOutput(opts)
 
     if opts.args == nil then
       _args = {
+        "-s",
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
         "-N",
         "-X",
@@ -184,8 +187,8 @@ function M.GetStreamingOutput(opts)
       -- TODO: Add stdout handling
     end),
     on_stderr = function(_, err)
-      if err ~= nil and err:sub(1, 4) == "curl" then
-        print(err)
+      if err ~= nil then
+        LOG:ERROR(err)
       end
       -- TODO: Add error handling
     end,

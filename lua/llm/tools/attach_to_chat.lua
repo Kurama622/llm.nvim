@@ -21,6 +21,14 @@ function M.handler(_, _, _, _, _, opts)
       utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
       F.CloseLLM()
     end,
+    copy_suggestion_code = function()
+      local display_opts = {}
+      setmetatable(display_opts, {
+        __index = state.summarize_suggestions,
+      })
+      utils.copy_suggestion_code(display_opts.pattern, display_opts.assistant_output)
+      F.CloseLLM()
+    end,
     accept = function()
       if diff and diff.valid then
         diff:accept()
@@ -46,6 +54,13 @@ function M.handler(_, _, _, _, _, opts)
       mapping = {
         mode = "n",
         keys = { "d" },
+      },
+      action = nil,
+    },
+    copy_suggestion_code = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
       },
       action = nil,
     },
@@ -96,12 +111,14 @@ function M.handler(_, _, _, _, _, opts)
 
   local bufnr_list = F.get_chat_ui_bufnr_list()
   for _, ui_bufnr in ipairs(bufnr_list) do
-    utils.set_keymapping(options.display.mapping.mode, options.display.mapping.keys, function()
-      default_actions.display()
-      if options.display.action ~= nil then
-        options.display.action()
-      end
-    end, ui_bufnr)
+    for _, k in ipairs({ "display", "copy_suggestion_code" }) do
+      utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
+        default_actions[k]()
+        if options[k].action ~= nil then
+          options[k].action()
+        end
+      end, ui_bufnr)
+    end
   end
 end
 
