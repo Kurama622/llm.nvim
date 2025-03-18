@@ -64,6 +64,7 @@ function io_parse.GetOutput(opts)
 
     if opts.args == nil then
       _args = {
+        "-s",
         opts.url,
         "-N",
         "-X",
@@ -109,6 +110,7 @@ function io_parse.GetOutput(opts)
 
     if opts.args == nil then
       _args = {
+        "-s",
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
         "-N",
         "-X",
@@ -158,6 +160,12 @@ function io_parse.GetOutput(opts)
           LOG:ERROR("Error occurred:" .. result)
         end
       end),
+      on_stderr = function(_, err)
+        if err ~= nil then
+          LOG:ERROR(err)
+        end
+        -- TODO: Add error handling
+      end,
       on_exit = vim.schedule_wrap(function()
         table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
         waiting_state.box:unmount()

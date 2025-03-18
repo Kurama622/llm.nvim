@@ -55,8 +55,8 @@ function M.GetStreamingOutput(opts)
 
     if opts.args == nil then
       _args = {
-        url,
         "-s",
+        url,
         "-N",
         "-X",
         "POST",
