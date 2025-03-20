@@ -13,7 +13,7 @@ function deepseek.parse(chunk, assistant_output)
   if success then
     return assistant_output
   else
-    LOG:ERROR("Error occurred:" .. err)
+    LOG:ERROR(string.format("err: %s, chunk: %s", err, vim.inspect(chunk)))
     return ""
   end
 end
