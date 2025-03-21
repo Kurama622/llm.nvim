@@ -118,6 +118,10 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       fetch_key = opts._.fetch_key,
       api_type = opts._.api_type,
       streaming_handler = opts._.streaming_handler,
+      max_tokens = opts._.max_tokens,
+      temperatrue = opts._.temperatrue,
+      top_p = opts._.top_p,
+      keep_alive = opts._.keep_alive,
     })
   else
     state.session[state.popwin.winid] = {

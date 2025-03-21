@@ -38,6 +38,9 @@ function ollama.request(opts)
   if opts.max_tokens then
     body["max_tokens"] = opts.max_tokens
   end
+  if opts.keep_alive then
+    body["keep_alive"] = opts.keep_alive
+  end
 
   local _args = {
     "-L",

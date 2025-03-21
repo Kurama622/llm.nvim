@@ -26,8 +26,29 @@ function M.GetStreamingOutput(opts)
   local MODEL = opts.model or conf.configs.model
   local api_type = opts.api_type or conf.configs.api_type
   local streaming_handler = opts.streaming_handler or conf.configs.streaming_handler
+  local keep_alive = opts.keep_alive or conf.configs.keep_alive
+  local temperatrue = opts.temperature or conf.configs.temperature
+  local top_p = opts.top_p or conf.configs.top_p
+  local max_tokens = opts.max_tokens or conf.configs.max_tokens
 
-  local body = nil
+  local body = {
+    stream = true,
+    max_tokens = max_tokens,
+    messages = opts.messages,
+  }
+
+  if keep_alive then
+    body.keep_alive = keep_alive
+  end
+
+  if temperatrue then
+    body.temperature = temperatrue
+  end
+
+  if top_p then
+    body.top_p = top_p
+  end
+
   local ctx = {
     line = "",
     assistant_output = "",
@@ -38,20 +59,7 @@ function M.GetStreamingOutput(opts)
 
   local _args = nil
   if url ~= nil then
-    body = {
-      stream = true,
-      model = MODEL,
-      max_tokens = conf.configs.max_tokens,
-      messages = opts.messages,
-    }
-
-    if conf.configs.temperature ~= nil then
-      body.temperature = conf.configs.temperature
-    end
-
-    if conf.configs.top_p ~= nil then
-      body.top_p = conf.configs.top_p
-    end
+    body.model = MODEL
 
     if opts.args == nil then
       _args = {
@@ -115,19 +123,6 @@ function M.GetStreamingOutput(opts)
       end
     end
   else
-    body = {
-      stream = true,
-      max_tokens = conf.configs.max_tokens,
-      messages = opts.messages,
-    }
-    if conf.configs.temperature ~= nil then
-      body.temperature = conf.configs.temperature
-    end
-
-    if conf.configs.top_p ~= nil then
-      body.top_p = conf.configs.top_p
-    end
-
     if opts.args == nil then
       _args = {
         "-s",
