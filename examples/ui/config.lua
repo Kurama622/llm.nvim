@@ -90,6 +90,30 @@ return {
             winblend = 0,
             winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
           },
+
+          -- move popwin
+          move = {
+            left = {
+              mode = "n",
+              keys = "<left>",
+              distance = 5,
+            },
+            right = {
+              mode = "n",
+              keys = "<right>",
+              distance = 5,
+            },
+            up = {
+              mode = "n",
+              keys = "<up>",
+              distance = 2,
+            },
+            down = {
+              mode = "n",
+              keys = "<down>",
+              distance = 2,
+            },
+          },
         },
       })
     end,

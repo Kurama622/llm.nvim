@@ -70,6 +70,21 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   local content = F.GetVisualSelection(lines)
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
+  state.popwin.row, state.popwin.col = unpack(vim.api.nvim_win_get_position(0))
+  local update_cursor_pos = {
+    left = function(v)
+      state.popwin.col = state.popwin.col - v.distance
+    end,
+    right = function(v)
+      state.popwin.col = state.popwin.col + v.distance
+    end,
+    up = function(v)
+      state.popwin.row = state.popwin.row - v.distance
+    end,
+    down = function(v)
+      state.popwin.row = state.popwin.row + v.distance
+    end,
+  }
   vim.api.nvim_set_option_value("filetype", "llm", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
@@ -116,6 +131,15 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     })
   end
 
+  for k, v in pairs(conf.configs.popwin_opts.move) do
+    F.SetFloatKeyMapping(state.popwin, v.mode, v.keys, function()
+      update_cursor_pos[k](v)
+      state.popwin:update_layout({
+        relative = "editor",
+        position = { row = state.popwin.row, col = state.popwin.col },
+      })
+    end)
+  end
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
       F.SetFloatKeyMapping(state.popwin, v.mode, v.key, function()
