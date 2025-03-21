@@ -24,48 +24,52 @@ function io_parse.GetOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 
-  if opts.fetch_key ~= nil then
-    LLM_KEY = opts.fetch_key()
+  local fetch_key = opts.fetch_key or conf.configs.fetch_key
+  if fetch_key ~= nil then
+    LLM_KEY = fetch_key()
   end
-
-  if opts.url == nil then
-    opts.url = conf.configs.url
-  end
-
-  local MODEL = conf.configs.model
-  if opts.model ~= nil then
-    MODEL = opts.model
-  end
-
-  local body = nil
   local authorization = "Authorization: Bearer " .. LLM_KEY
+
+  local url = opts.url or conf.configs.url
+  local MODEL = opts.model or conf.configs.model
+  local api_type = opts.api_type or conf.configs.api_type
+  local parse_handler = opts.parse_handler or conf.configs.parse_handler
+  local keep_alive = opts.keep_alive or conf.configs.keep_alive
+  local temperatrue = opts.temperature or conf.configs.temperature
+  local top_p = opts.top_p or conf.configs.top_p
+  local max_tokens = opts.max_tokens or conf.configs.max_tokens
+
+  local body = {
+    stream = false,
+    max_tokens = max_tokens,
+    messages = opts.messages,
+  }
+
+  if keep_alive then
+    body.keep_alive = keep_alive
+  end
+
+  if temperatrue then
+    body.temperature = temperatrue
+  end
+
+  if top_p then
+    body.top_p = top_p
+  end
 
   local ctx = {
     assistant_output = "",
   }
 
-  local parse = backends.get_parse_handler(opts.parse_handler, opts.api_type, conf.configs, ctx)
+  local parse = backends.get_parse_handler(parse_handler, api_type, conf.configs, ctx)
   local _args = nil
-  if opts.url ~= nil then
-    body = {
-      model = MODEL,
-      max_tokens = conf.configs.max_tokens,
-      messages = opts.messages,
-      stream = false,
-    }
-
-    if conf.configs.temperature ~= nil then
-      body.temperature = conf.configs.temperature
-    end
-
-    if conf.configs.top_p ~= nil then
-      body.top_p = conf.configs.top_p
-    end
+  if url ~= nil then
+    body.model = MODEL
 
     if opts.args == nil then
       _args = {
         "-s",
-        opts.url,
+        url,
         "-N",
         "-X",
         "POST",
@@ -78,7 +82,7 @@ function io_parse.GetOutput(opts)
       }
     else
       local env = {
-        url = opts.url,
+        url = url,
         LLM_KEY = LLM_KEY,
         body = body,
         authorization = authorization,
@@ -96,18 +100,6 @@ function io_parse.GetOutput(opts)
       end
     end
   else
-    body = {
-      max_tokens = conf.configs.max_tokens,
-      messages = opts.messages,
-    }
-    if conf.configs.temperature ~= nil then
-      body.temperature = conf.configs.temperature
-    end
-
-    if conf.configs.top_p ~= nil then
-      body.top_p = conf.configs.top_p
-    end
-
     if opts.args == nil then
       _args = {
         "-s",
