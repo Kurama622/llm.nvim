@@ -16,7 +16,10 @@ function ollama.parse(chunk, assistant_output)
   if success then
     return assistant_output
   else
-    LOG:ERROR(string.format("err: %s, chunk: %s", err, vim.inspect(chunk)))
+    -- fix: The request will fail before the ollama model is loaded.
+    if not string.find(chunk.error.message, "llm server loading model") then
+      LOG:ERROR(string.format("err: %s, chunk: %s", err, vim.inspect(chunk)))
+    end
     return ""
   end
 end
@@ -38,6 +41,7 @@ function ollama.request(opts)
 
   local _args = {
     "-L",
+    "-s",
     opts.url,
     "-N",
     "-X",

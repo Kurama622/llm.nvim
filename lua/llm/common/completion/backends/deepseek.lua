@@ -41,6 +41,7 @@ function deepseek.request(opts)
 
   local _args = {
     "-L",
+    "-s",
     opts.url,
     "-N",
     "-X",
