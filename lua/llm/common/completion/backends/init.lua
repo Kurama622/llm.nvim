@@ -6,18 +6,18 @@ local function init(opts)
     if opts.api_type == "ollama" then
       local ollama = require("llm.common.completion.backends.ollama")
       state.completion.backend = ollama
-      LOG:TRACE("llm.nvim completion provider: ollama")
+      LOG:TRACE(string.format("llm.nvim completion provider: %s", opts.api_type))
       return ollama
-    elseif opts.api_type == "deepseek" then
+    elseif opts.api_type == "openai" or opts.api_type == "deepseek" then
       local deepseek = require("llm.common.completion.backends.deepseek")
       state.completion.backend = deepseek
-      LOG:TRACE("llm.nvim completion provider: deepseek")
+      LOG:TRACE(string.format("llm.nvim completion provider: %s", opts.api_type))
       return deepseek
     elseif opts.api_type == "codeium" then
       local codeium = require("llm.common.completion.backends.codeium"):init(opts)
 
       state.completion.backend = codeium
-      LOG:TRACE("llm.nvim completion provider: codeium")
+      LOG:TRACE(string.format("llm.nvim completion provider: %s", opts.api_type))
       return codeium
     end
   else

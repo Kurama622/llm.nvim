@@ -1,5 +1,5 @@
 -- referenced from minuet-ai.nvim: https://github.com/milanglacier/minuet-ai.nvim
-local ncmp = {}
+local ncmp = { name = "cmp" }
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local utils = require("llm.common.completion.utils")
@@ -85,9 +85,11 @@ function ncmp:complete(ctx, callback)
           },
         })
       end
-      callback({
-        items = items,
-      })
+      if not vim.tbl_isempty(items) then
+        callback({
+          items = items,
+        })
+      end
     end
     state.completion.backend.request(self.opts)
   end

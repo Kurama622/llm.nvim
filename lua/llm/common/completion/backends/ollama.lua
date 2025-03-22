@@ -26,6 +26,9 @@ end
 
 function ollama.request(opts)
   utils.terminate_all_jobs()
+  if state.completion.frontend.name == "cmp" then
+    state.completion.contents = {}
+  end
 
   local body = {
     model = opts.model,
@@ -57,7 +60,7 @@ function ollama.request(opts)
     vim.fn.json_encode(body),
   }
 
-  for i = 0, opts.n_completions - 1 do
+  for i = 1, opts.n_completions do
     local assistant_output = ""
     local new_job = job:new({
       command = "curl",
@@ -78,7 +81,11 @@ function ollama.request(opts)
           LOG:TRACE("Assistant output: " .. assistant_output)
           state.completion.contents[i] = assistant_output
           if opts.exit_handler then
-            opts.exit_handler({ state.completion.contents[i] })
+            if state.completion.frontend.name == "blink" then
+              opts.exit_handler({ state.completion.contents[i] })
+            else
+              opts.exit_handler(state.completion.contents)
+            end
           end
         end
       end),

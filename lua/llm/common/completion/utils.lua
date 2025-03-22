@@ -33,7 +33,6 @@ function utils.terminate_all_jobs()
     terminate_job(job.pid)
   end
   state.completion.jobs = {}
-  state.completion.contents = {}
 end
 
 function utils.add_language_comment()

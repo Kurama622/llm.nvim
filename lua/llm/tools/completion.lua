@@ -10,9 +10,9 @@ function M.handler(name, F, state, _, prompt, opts)
     stdout_handler = nil,
     stderr_handler = nil,
     timeout = 10,
-    throttle = 1000, -- only send the request every x milliseconds, use 0 to disable throttle.
+    throttle = 400, -- only send the request every x milliseconds, use 0 to disable throttle.
     -- debounce the request in x milliseconds, set to 0 to disable debounce
-    debounce = 400,
+    debounce = 200,
     filetypes = {},
     default_filetype_enabled = true,
     auto_trigger = true,

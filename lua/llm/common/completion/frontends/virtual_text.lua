@@ -5,6 +5,7 @@ local utils = require("llm.common.completion.utils")
 local uv = vim.uv or vim.loop
 
 local virtual_text = {
+  name = "virtual_text",
   rendered = false,
   choice = nil,
   ns_id = vim.api.nvim_create_namespace("llm.virtualtext"),
@@ -28,6 +29,7 @@ function virtual_text:start()
       return
     end
 
+    utils.terminate_all_jobs()
     self.is_on_throttle = true
     vim.defer_fn(function()
       self.is_on_throttle = false
@@ -41,6 +43,7 @@ function virtual_text:trigger(bufnr)
   if bufnr ~= vim.api.nvim_get_current_buf() or vim.fn.mode() ~= "i" then
     return
   end
+
   local timestamp = uv.now()
   self.timestamp = timestamp
   local context = utils.get_context(utils.make_cmp_context(), self.opts)
@@ -138,14 +141,14 @@ end
 
 function virtual_text:next()
   if #state.completion.contents > 1 then
-    self.choice = (self.choice + 1) % #state.completion.contents
+    self.choice = (self.choice + 1) % (#state.completion.contents + 1)
     self:update_preview()
   end
 end
 
 function virtual_text:prev()
   if #state.completion.contents > 1 then
-    self.choice = (self.choice - 1) % #state.completion.contents
+    self.choice = (self.choice - 1) % (#state.completion.contents + 1)
     self:update_preview()
   end
 end
@@ -165,6 +168,7 @@ function virtual_text:autocmd()
         return
       end
       utils.terminate_all_jobs()
+      state.completion.contents = {}
       self:clear()
     end,
   })
@@ -177,6 +181,7 @@ function virtual_text:autocmd()
         if not (state.completion.enable and cond) then
           return
         end
+        state.completion.contents = {}
         self:start()
       end,
     })
@@ -188,6 +193,7 @@ function virtual_text:autocmd()
         if not (state.completion.enable and cond) then
           return
         end
+        state.completion.contents = {}
         self:start()
       end,
     })

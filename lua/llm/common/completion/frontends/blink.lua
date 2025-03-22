@@ -3,7 +3,7 @@ local state = require("llm.state")
 local LOG = require("llm.common.log")
 local utils = require("llm.common.completion.utils")
 
-local blink = {}
+local blink = { name = "blink" }
 
 function blink:clear() end
 
