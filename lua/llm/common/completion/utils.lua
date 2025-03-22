@@ -177,8 +177,13 @@ function utils.prepend_to_complete_word(a, b)
   local last_word_b = b:match("[%w_-]+$")
   local first_word_a = a:match("^[%s%w_-]+")
 
-  if last_word_b and first_word_a and not (first_word_a:sub(1, vim.fn.strdisplaywidth(last_word_b)) == last_word_b) then
-    a = last_word_b .. a
+  if last_word_b then
+    if
+      first_word_a and not first_word_a:find(last_word_b, vim.fn.strdisplaywidth(last_word_b), true)
+      or not first_word_a
+    then
+      a = last_word_b .. a
+    end
   end
 
   return a
