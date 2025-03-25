@@ -155,6 +155,49 @@ Completion AI tool requires setting `style = "nvim-cmp"`
 ## UI(Icon)
 
 ### blink.cmp
+
+- only add a icon for llm
+
+```lua
+      completion = {
+        menu = {
+          scrollbar = false,
+          border = "rounded",
+          winhighlight = "Normal:BlinkCmpMenu,FloatBorder:FloatBorder",
+
+          draw = {
+            components = {
+              kind_icon = {
+                ellipsis = false,
+                text = function(ctx)
+                  if ctx.item.kind_name == "llm" then
+                    return " "
+                  else
+                    return ctx.kind_icon
+                  end
+                end,
+
+                highlight = function(ctx)
+                  if ctx.item.kind_name == "llm" then
+                    return "BlinkCmpKindSnippet"
+                  else
+                    return ctx.kind_hl
+                  end
+                end,
+              },
+            },
+          },
+        },
+        documentation = { window = { border = "rounded" } },
+        trigger = {
+          prefetch_on_insert = false,
+          show_on_blocked_trigger_characters = {},
+        },
+      },
+```
+
+- use `mini.icons`
+
 ```lua
       completion = {
         menu = {

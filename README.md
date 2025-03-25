@@ -170,7 +170,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                                                      |
 | Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 200 free calls to GPT-4o-mini are available every day.                                                                                               |
 
-For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.
+**For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.**
 
 
 [⬆ back to top](#contents)
