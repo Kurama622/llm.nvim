@@ -18,7 +18,10 @@
 > 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`、`openrouter`或者其他的平台）
 
 > [!NOTE]
-> 不同大模型的配置(比如**ollama**, **deepseek**)、 界面的配置、以及AI工具的配置(包括**代码补全**) 请先查阅 [examples](examples). 这里有你想知道的大部分内容。
+> 不同大模型的配置(比如**ollama**, **deepseek**)、 界面的配置、以及AI工具的配置(包括**代码补全**) 请先查阅 [examples](examples). 这里有你想知道的大部分内容。在使用插件之前，应该确保你的`LLM_KEY`是有效的，并且该环境变量已经生效。
+
+> 用户QQ群：1037412539
+
 
 # 目录
 <!-- mtoc-start -->
@@ -173,7 +176,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                         |
 | Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 每天200次免费调用GPT-4o-mini.                                                                                           |
 
-对于本地大模型, 在`zshrc` or `bashrc`中设置 `LLM_KEY` 为 `NONE`.
+**对于本地大模型, 在`zshrc` or `bashrc`中设置 `LLM_KEY` 为 `NONE`.**
 
 [⬆ 返回目录](#目录)
 

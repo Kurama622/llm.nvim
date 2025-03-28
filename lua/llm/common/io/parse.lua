@@ -142,7 +142,11 @@ function io_parse.GetOutput(opts)
       args = _args,
       on_stdout = vim.schedule_wrap(function(_, data)
         local str = api.trim_leading_whitespace(data)
-        if str:sub(1, 1) ~= "{" then
+        local prefix = str:sub(1, 1)
+        if prefix ~= "{" then
+          if prefix ~= "" then
+            LOG:ERROR(data)
+          end
           return
         end
         local success, result = pcall(vim.json.decode, str)

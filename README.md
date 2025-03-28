@@ -16,7 +16,8 @@
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
 > [!NOTE]
-> The configurations of different LLMs (such as **ollama**, **deepseek**), UI configurations, and AI tools (including **code completion**) should be checked in the [examples](examples) first. Here you will find most of the information you want to know.
+> The configurations of different LLMs (such as **ollama**, **deepseek**), UI configurations, and AI tools (including **code completion**) should be checked in the [examples](examples) first. Here you will find most of the information you want to know. Additionally, before using the plugin, you should ensure that your `LLM_KEY` is **valid** and that the environment variable is in effect.
+
 
 
 # Contents
