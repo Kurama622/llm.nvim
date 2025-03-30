@@ -21,6 +21,17 @@ Completion = {
     ------------------ end deepseek -----------------
 
     -------------------------------------------------
+    ---                 siliconflow
+    -------------------------------------------------
+    -- url = "https://api.siliconflow.cn/v1/completions",
+    -- model = "Qwen/Qwen2.5-Coder-7B-Instruct",
+    -- api_type = "openai",
+    -- fetch_key = function()
+    --   return "your api key"
+    -- end,
+    ------------------ end siliconflow -----------------
+
+    -------------------------------------------------
     ---                  codeium
     ---    dependency: "Exafunction/codeium.nvim"
     -------------------------------------------------
