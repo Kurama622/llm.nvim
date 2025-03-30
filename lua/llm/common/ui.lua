@@ -162,17 +162,20 @@ function ui.FlexibleWindow(str, enter_flexible_win, user_opts)
   local height = #text
   local max_win_width = math.floor(vim.o.columns * 0.7)
   local max_win_height = math.floor(vim.o.lines * 0.7)
+  local len = {}
   for i, line in ipairs(text) do
-    if vim.api.nvim_strwidth(line) > width then
-      width = vim.api.nvim_strwidth(line)
-      if width > max_win_width then
-        height = height + 1
-      end
+    len[i] = vim.api.nvim_strwidth(line)
+    if len[i] > width then
+      width = len[i]
     end
-    text[i] = "" .. line
   end
 
   local win_width = math.min(width, max_win_width)
+  for _, item in ipairs(len) do
+    if item > win_width then
+      height = height + math.ceil(item / win_width - 1)
+    end
+  end
   local win_height = math.min(height, max_win_height)
   if win_width < 1 or win_height < 1 then
     LOG:ERROR(
