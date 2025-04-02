@@ -8,3 +8,4 @@
 - [ollama](./ollama/config.lua)
 - [openrouter](./openrouter/config.lua)
 - [siliconflow](./siliconflow/config.lua)
+- [chatanywhere](./chatanywhere/)

@@ -65,11 +65,14 @@
 ## Screenshots
 
 ### Chat
+
+[models](./examples/chat/) | [UI](./examples/ui/)
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
 </p>
 
-### Code Completions
+### [Code Completions](./examples/ai-tools/Code-Completions/)
   - **virtual text**
   <p align= "center">
     <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="560">
@@ -80,17 +83,20 @@
     <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="560">
   </p>
 
-### Quick Translation
+### [Quick Translation](./examples/ai-tools/Word-Translate/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="560">
 </p>
 
 ### Explain Code
+
+[Streaming output](./examples/chat/deepseek/config.lua#L52) | [Non-streaming output](./examples/ai-tools/Code-Explain/config.lua)
+
 <p align= "center">
   <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
 </p>
 
-### Ask
+### [Ask](./examples/ai-tools/Ask/config.lua)
 
 > One-time, no history retained.
 
@@ -100,7 +106,7 @@ You can configure [inline_assistant](./examples/ai-tools/Ask/config.lua) to deci
   <img src="https://github.com/user-attachments/assets/e3300e1f-dbd2-4978-bd60-ddf9106257cb" alt="llm-ask" width="560">
 </p>
 
-### Attach To Chat
+### [Attach To Chat](./examples/ai-tools/Attach-To-Chat/config.lua)
 
 You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.lua) to decide whether to display diffs (default: show by pressing 'd').
 
@@ -109,32 +115,32 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 </p>
 
 ### Optimize Code
-  - **Display side by side**
+  - [**Display side by side**](./examples/ai-tools/Optimize-Code/config.lua)
   <p align= "center">
     <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="560">
   </p>
 
-  - **Display in the form of a diff**
+  - [**Display in the form of a diff**](./examples/ai-tools/Optimize-Code-and-Display-Diff/config.lua)
   <p align= "center">
     <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="560">
   </p>
 
-### Generate Test Cases
+### [Generate Test Cases](./examples/ai-tools/Generate-Test-Cases/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/b288e3c9-7d25-40cb-8645-14dacb571529" alt="test-case" width="560">
 </p>
 
-### AI Translation
+### [AI Translation](./examples/ai-tools/AI-Translate/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
 </p>
 
-### Generate Git Commit Message
+### [Generate Git Commit Message](./examples/ai-tools/AI-Commit-Messages/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/261b21c5-0df0-48c2-916b-07f5ce0c981d" alt="llm-git-commit-msg" width="560">
 </p>
 
-### Generate Doc String
+### [Generate Doc String](./examples/ai-tools/Generate-Docstring/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="560">
 </p>
