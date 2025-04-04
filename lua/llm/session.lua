@@ -212,6 +212,30 @@ function M.NewSession()
             vim.api.nvim_set_current_win(state.input.popup.winid)
             vim.api.nvim_command("startinsert")
           end, { noremap = true })
+        elseif k == "PageUp" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "page-up")
+          end, { noremap = true })
+        elseif k == "PageDown" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "page-down")
+          end, { noremap = true })
+        elseif k == "HalfPageUp" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "half-page-up")
+          end, { noremap = true })
+        elseif k == "HalfPageDown" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "half-page-down")
+          end, { noremap = true })
+        elseif k == "JumpToTop" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "top")
+          end, { noremap = true })
+        elseif k == "JumpToBottom" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.ScrollWindow(state.llm.popup.winid, "bottom")
+          end, { noremap = true })
         end
       end
 
