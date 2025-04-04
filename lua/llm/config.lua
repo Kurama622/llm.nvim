@@ -238,6 +238,14 @@ M.configs = {
     ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
     ["Session:Close"]  = { mode = "n", key = "<esc>" },
     ["Session:History"]  = { mode = "n", key = "<C-h>" },
+
+    -- Scroll
+    ["PageUp"]            = { mode = {"i","n"}, key = "<C-b>" },
+    ["PageDown"]          = { mode = {"i","n"}, key = "<C-f>" },
+    ["HalfPageUp"]        = { mode = {"i","n"}, key = "<C-u>" },
+    ["HalfPageDown"]      = { mode = {"i","n"}, key = "<C-d>" },
+    ["JumpToTop"]         = { mode = "n", key = "gg" },
+    ["JumpToBottom"]      = { mode = "n", key = "G" }
   },
 }
 

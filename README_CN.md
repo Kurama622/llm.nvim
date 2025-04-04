@@ -248,6 +248,12 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
       - `Input:Resend`: 重新回答
       - `Input:HistoryNext`: 切换到下一个会话历史
       - `Input:HistoryPrev`: 切换到上一个会话历史
+      - `PageUp`: 输出窗口向上翻页
+      - `HalfPageUp`: 输出窗口向上翻页(半页)
+      - `PageDown`: 输出窗口向下翻页
+      - `HalfPageDown`: 输出窗口向下翻页(半页)
+      - `JumpToTop`: 定位到输出窗口的顶部
+      - `JumpToBottom`: 定位到输出窗口的底部
     - 整个对话界面
       - `Session:Toggle`: 打开/隐藏对话界面
       - `Session:Close`: 关闭对话界面
@@ -663,6 +669,12 @@ return {
 | Input        | `ctrl+r`     | `i`      | 重新发起本轮对话        |
 | Input        | `ctrl+j`     | `i`      | 切换到下一个会话历史    |
 | Input        | `ctrl+k`     | `i`      | 切换到上一个会话历史    |
+| Input        | `Ctrl+b`     | `n`/`i`  | 输出窗口向上翻页        |
+| Input        | `Ctrl+f`     | `n`/`i`  | 输出窗口向下翻页        |
+| Input        | `Ctrl+u`     | `n`/`i`  | 输出窗口向上翻页(半页)  |
+| Input        | `Ctrl+d`     | `n`/`i`  | 输出窗口向下翻页(半页)  |
+| Input        | `gg`         | `n`      | 定位到输出窗口的顶部    |
+| Input        | `G`          | `n`      | 定位到输出窗口的底部    |
 | Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
 | Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
 

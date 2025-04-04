@@ -551,6 +551,65 @@ function api.SetBoxOpts(box_list, opts)
   end
 end
 
+--- Refer: https://github.com/ibhagwan/fzf-lua/blob/main/lua/fzf-lua/utils.lua
+local function zz()
+  local lnum1 = vim.api.nvim_win_get_cursor(0)[1]
+  local lcount = vim.api.nvim_buf_line_count(0)
+  local zb = "keepj norm! %dzb"
+  if lnum1 == lcount then
+    vim.fn.execute(zb:format(lnum1))
+    return
+  end
+  vim.cmd("norm! zvzz")
+  vim.cmd("norm! L")
+  lnum1 = vim.api.nvim_win_get_cursor(0)[1]
+  local lnum2 = vim.api.nvim_win_get_cursor(0)[1]
+  if lnum2 + vim.fn.getwinvar(0, "&scrolloff") >= lcount then
+    vim.fn.execute(zb:format(lnum2))
+  end
+  if lnum1 ~= lnum2 then
+    vim.cmd("keepj norm! ``")
+  end
+end
+
+--- Refer: https://github.com/ibhagwan/fzf-lua/blob/main/lua/fzf-lua/previewer/builtin.lua
+--- Scrolls the specified window in the given direction.
+--- @param winid number: The ID of the window to scroll.
+--- @param direction string: The direction to scroll.
+function api.ScrollWindow(winid, direction)
+  local height = vim.api.nvim_win_get_height(winid)
+  local input = ({
+    ["top"] = "gg",
+    ["bottom"] = "G",
+    ["half-page-up"] = ("%c"):format(0x15), -- [[]]
+    ["half-page-down"] = ("%c"):format(0x04), -- [[]]
+    ["page-up"] = ("%c"):format(0x02), -- [[]]
+    ["page-down"] = ("%c"):format(0x06), -- [[]]
+    ["line-up"] = "Mgk", -- ^Y doesn't seem to work
+    ["line-down"] = "Mgj", -- ^E doesn't seem to work
+  })[direction]
+
+  pcall(vim.api.nvim_win_call, winid, function()
+    -- ctrl-b (page-up) behaves in a non consistent way, unlike ctrl-u, if it can't
+    -- scroll a full page upwards it won't move the cursor, if the cursor is within
+    -- the first page it will still move the cursor to the bottom of the page (!?)
+    -- we therefore need special handling for both scenarios with `ctrl-b`:
+    --   (1) If the cursor is at line 1, do nothing
+    --   (2) Else, test the cursor before and after, if the new position is further
+    --       down the buffer than the original, we're in the first page ,goto line 1
+    local is_ctrl_b = string.byte(input, 1) == 2
+    local pos = is_ctrl_b and vim.api.nvim_win_get_cursor(0)
+    if is_ctrl_b and pos[1] == 1 then
+      return
+    end
+    vim.cmd([[norm! ]] .. input)
+    if is_ctrl_b and vim.api.nvim_win_get_cursor(0)[1] + 1 <= height then
+      vim.api.nvim_win_set_cursor(0, { math.max(pos[1] - height, 1), pos[2] })
+    end
+    zz()
+  end)
+end
+
 function api.get_chat_ui_bufnr_list()
   if conf.configs.style == "float" then
     return { state.input.popup.bufnr, state.llm.popup.bufnr }

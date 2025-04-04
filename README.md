@@ -245,6 +245,12 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
       - `Input:Resend`: Rerespond to the dialog.
       - `Input:HistoryNext`: Select the next session history.
       - `Input:HistoryPrev`: Select the previous session history.
+      - `PageUp`: Output Window page up
+      - `HalfPageUp`: Output Window page up (half)
+      - `PageDown`: Output window page down
+      - `HalfPageDown`: Output window page down (half)
+      - `JumpToTop`: Jump to the top (output window)
+      - `JumpToBottom`: Jump to the bottom (output window)
     - Chat UI
       - `Session:Toggle`: open/hide the Chat UI.
       - `Session:Close`: close the Chat UI.
@@ -662,6 +668,12 @@ return {
 | Input        | `ctrl+r`     | `i`      | Rerespond to the dialog             |
 | Input        | `ctrl+j`     | `i`      | Select the next session history     |
 | Input        | `ctrl+k`     | `i`      | Select the previous session history |
+| Input        | `Ctrl+b`     | `n`/`i`  | Output Window page up               |
+| Input        | `Ctrl+f`     | `n`/`i`  | Output window page down             |
+| Input        | `Ctrl+u`     | `n`/`i`  | Output Window page up (half)        |
+| Input        | `Ctrl+d`     | `n`/`i`  | Output window page down (half)      |
+| Input        | `gg`         | `n`      | Jump to the top (output window)     |
+| Input        | `G`          | `n`      | Jump to the bottom (output window)  |
 | Output+Input | `<leader>ac` | `n`      | Toggle session                      |
 | Output+Input | `<esc>`      | `n`      | Close session                       |
 
