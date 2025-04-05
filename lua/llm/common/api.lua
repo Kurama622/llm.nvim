@@ -266,7 +266,17 @@ function api.GetVisualSelection(lines)
 end
 
 function api.make_inline_context(opts, bufnr, name)
-  local lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr)
+  local lines, start_line, start_col, end_line, end_col
+
+  if is_visual_mode(opts.mode) then
+    lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr)
+  else
+    local pos = vim.fn.getpos(".")
+    lines = {}
+    start_line, end_line = pos[2], pos[2]
+    start_col, end_col = pos[3] - 1, pos[3] - 1
+  end
+
   if opts.inline_assistant then
     local winnr = vim.api.nvim_get_current_win()
     local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
@@ -297,7 +307,7 @@ function api.GetAttach(opts)
   local lines = api.make_inline_context(opts, bufnr, "attach_to_chat")
   api.VisMode2NorMode()
 
-  if opts.is_codeblock then
+  if opts.is_codeblock and not vim.tbl_isempty(lines) then
     state.input.attach_content = string.format(
       [[```%s
 %s
