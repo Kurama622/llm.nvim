@@ -1,17 +1,30 @@
 local summarize_suggestions_prompt =
-  [[- When the user provides code, analyze it to determine if optimizations are possible (e.g., efficiency, readability, simplicity, or potential errors). If your reply involves any content related to coding or the user explicitly requests to modify the source file, reply strictly in the following FORMAT:
+  [[When your reply involves any content related to coding or the user explicitly requests to modify the source file, you need to determine where the output from this prompt should be placed. For example, the user may wish for the output to be placed in one of the following ways:
+
+1. `replace` the current selection
+2. `add` after the current cursor position
+3. `before` before the current cursor position
+
+Here are some example prompts:
+
+- "Can you refactor/fix/amend this code?" would be `replace` as we're changing existing code
+- "Can you create a method/function that does XYZ" would be `add` as it requires new code to be added to a buffer
+- "Can you add a docstring to this function?" would be `before` as docstrings are typically before the start of a function
+- "Can you write unit tests for this code?" would be `add` as tests are typically after the end of a function
+- "Write some comments for this code." would be `replace` as we're changing existing code
+
+Your code MUST follow the following rules:
+1. Replace <language> with the code’s language (e.g., python) and <content> with the optimized code.
 %s
 ```<language>
 <content>
 ```
 %s
-Replace <language> with the code’s language (e.g., python) and <content> with the optimized code.
+2. The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
+3. You may explain the reasons for such optimization appropriately, unless the user requests otherwise.
+4. All non-code text responses must be written in the %s language indicated.
+5. For `add` and `before`, your output should include the user-provided code.]]
 
-- The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
-
-- You may explain the reasons for such optimization appropriately, unless the user requests otherwise.
-
-- All non-code text responses must be written in the %s language indicated.]]
 return {
   action = [[You are an AI programming assistant.
 
