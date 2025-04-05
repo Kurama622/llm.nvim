@@ -140,7 +140,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local default_actions = {
     accept = function()
       vim.api.nvim_set_current_win(preview_box.winid)
-      vim.api.nvim_command("normal! ggVGky")
+      vim.api.nvim_command("normal! ggVGkky")
     end,
     reject = function() end,
     close = function() end,
