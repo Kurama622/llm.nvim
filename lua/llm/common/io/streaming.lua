@@ -187,7 +187,7 @@ function M.GetStreamingOutput(opts)
       end
       -- TODO: Add error handling
     end,
-    on_exit = function()
+    on_exit = vim.schedule_wrap(function()
       table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
       local newline_func = vim.schedule_wrap(function()
         F.NewLine(opts.bufnr, opts.winid)
@@ -203,7 +203,7 @@ function M.GetStreamingOutput(opts)
       if state.summarize_suggestions.ctx then
         setmetatable(state.summarize_suggestions, { __index = ctx })
       end
-    end,
+    end),
   })
   worker.job:start()
 
