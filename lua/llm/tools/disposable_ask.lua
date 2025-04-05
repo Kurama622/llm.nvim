@@ -131,6 +131,7 @@ function M.handler(_, _, _, _, prompt, opts)
   end
 
   local input_box = Popup(options)
+  local mode = vim.fn.mode()
 
   input_box:mount()
 
@@ -145,6 +146,7 @@ function M.handler(_, _, _, _, prompt, opts)
       language = options.language,
       action = default_actions,
       _ = options,
+      mode = mode,
     }
     sess.LLMSelectedTextHandler(description, true, builtin_opts)
   end)
