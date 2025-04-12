@@ -52,6 +52,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
   local input = popup_input_opts or conf.configs.chat_ui_opts.input.float
   local output = popup_output_opts or conf.configs.chat_ui_opts.output.float
   local other = popup_other_opts or conf.configs.chat_ui_opts.history.float
+  local models = conf.configs.chat_ui_opts.models.float
 
   state.input.popup = Popup({
     enter = input.enter,
@@ -122,6 +123,43 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         LOG:TRACE("Menu Submitted: " .. item.text)
       end,
     })
+
+    if conf.configs.models then
+      state.models.popup = Menu({
+        enter = models.enter,
+        focusable = models.focusable,
+        zindex = models.zindex,
+        border = models.border,
+        win_options = models.win_options,
+      }, {
+        lines = (function()
+          state.models.list = {}
+          for idx, item in ipairs(conf.configs.models) do
+            local menu_item = Menu.item(item.name)
+            menu_item.idx = idx
+            table.insert(state.models.list, menu_item)
+          end
+          return state.models.list
+        end)(),
+        max_width = other.max_width,
+        keymap = {
+          focus_next = { "j", "<Down>", "<Tab>" },
+          focus_prev = { "k", "<Up>", "<S-Tab>" },
+          submit = { "<CR>", "<Space>" },
+        },
+        on_change = function(item)
+          conf.configs.url, conf.configs.model, conf.configs.api_type, conf.configs.max_tokens, conf.configs.fetch_key =
+            conf.configs.models[item.idx].url,
+            conf.configs.models[item.idx].model,
+            conf.configs.models[item.idx].api_type,
+            conf.configs.models[item.idx].max_tokens,
+            conf.configs.models[item.idx].fetch_key
+        end,
+        on_submit = function(item)
+          LOG:TRACE("Menu Submitted: " .. item.text)
+        end,
+      })
+    end
   end
   for _, size in ipairs({ input.size, output.size, other.size }) do
     size.height = reformat_size(size.height)
@@ -130,130 +168,285 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
   if popup_input_opts == nil and popup_output_opts == nil and popup_other_opts == nil and conf.configs.save_session then
     local _align, _size = nil, nil
     _align, _size = get_sublayout_opts(input.size, output.size)
-    if _align then
-      if output.order < input.order then
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+    if conf.configs.models then
+      if _align then
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.llm.popup, { size = output.size[_align] }),
-              Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
-      else
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+              Layout.Box({
+                Layout.Box(state.llm.popup, { size = output.size[_align] }),
+                Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                Layout.Box(state.history.popup, { size = "70%" }),
+              }, { dir = "col", size = other.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.input.popup, { size = input.size[_align] }),
-              Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
+              Layout.Box({
+                Layout.Box(state.input.popup, { size = input.size[_align] }),
+                Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                Layout.Box(state.history.popup, { size = "70%" }),
+              }, { dir = "col", size = other.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
       end
-      return
-    end
 
-    _align, _size = get_sublayout_opts(output.size, other.size)
-    if _align then
-      if output.order < other.order then
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+      _align, _size = get_sublayout_opts(output.size, other.size)
+      if _align then
+        if output.order < other.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.llm.popup, { size = output.size[_align] }),
-              Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
-      else
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+              Layout.Box({
+                Layout.Box(state.llm.popup, { size = output.size[_align] }),
+                Layout.Box({
+                  Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                  Layout.Box(state.history.popup, { size = "70%" }),
+                }, { dir = "col", size = other.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.history.popup, { size = other.size[_align] }),
-              Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
+              Layout.Box({
+                Layout.Box({
+                  Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                  Layout.Box(state.history.popup, { size = "70%" }),
+                }, { dir = "col", size = other.size[_align], grow = 1 }),
+                Layout.Box(state.llm.popup, { size = output.size[_align] }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
       end
-      return
-    end
 
-    _align, _size = get_sublayout_opts(input.size, other.size)
-    if _align then
-      if input.order < other.order then
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+      _align, _size = get_sublayout_opts(input.size, other.size)
+      if _align then
+        if input.order < other.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.input.popup, { size = input.size[_align] }),
-              Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
-      else
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
+              Layout.Box({
+                Layout.Box(state.input.popup, { size = input.size[_align] }),
+                Layout.Box({
+                  Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                  Layout.Box(state.history.popup, { size = "70%" }),
+                }, { dir = "col", size = other.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
             Layout.Box({
-              Layout.Box(state.history.popup, { size = other.size[_align] }),
-              Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
-            }, { dir = _dir[_not[_align]], size = _size }),
-            Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
-          }, { dir = _dir[_align] })
-        )
+              Layout.Box({
+                Layout.Box({
+                  Layout.Box(state.models.popup, { size = "30%", grow = 1 }),
+                  Layout.Box(state.history.popup, { size = "70%" }),
+                }, { dir = "col", size = other.size[_align], grow = 1 }),
+                Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
       end
-      return
+    else
+      if _align then
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.llm.popup, { size = output.size[_align] }),
+                Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.input.popup, { size = input.size[_align] }),
+                Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.history.popup, { size = other.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
+      end
+
+      _align, _size = get_sublayout_opts(output.size, other.size)
+      if _align then
+        if output.order < other.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.llm.popup, { size = output.size[_align] }),
+                Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.history.popup, { size = other.size[_align] }),
+                Layout.Box(state.llm.popup, { size = output.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.input.popup, { size = input.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
+      end
+
+      _align, _size = get_sublayout_opts(input.size, other.size)
+      if _align then
+        if input.order < other.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.input.popup, { size = input.size[_align] }),
+                Layout.Box(state.history.popup, { size = other.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.history.popup, { size = other.size[_align] }),
+                Layout.Box(state.input.popup, { size = input.size[_align], grow = 1 }),
+              }, { dir = _dir[_not[_align]], size = _size }),
+              Layout.Box(state.llm.popup, { size = output.size[_not[_align]] }),
+            }, { dir = _dir[_align] })
+          )
+        end
+        return
+      end
     end
   else
     if input.size.col == output.size.col then
-      if output.order < input.order then
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
-            Layout.Box(state.llm.popup, { size = output.size.height }),
-            Layout.Box(state.input.popup, { size = input.size.height }),
-          }, { dir = "col" })
-        )
+      if conf.configs.models then
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "20%", grow = 1 }),
+                Layout.Box(state.llm.popup, { size = "80%" }),
+              }, { dir = "row", size = output.size.height }),
+              Layout.Box(state.input.popup, { size = input.size.height }),
+            }, { dir = "col" })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.input.popup, { size = input.size.height }),
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "20%", grow = 1 }),
+                Layout.Box(state.llm.popup, { size = "80%" }),
+              }, { dir = "row", size = output.size.height }),
+            }, { dir = "col" })
+          )
+        end
       else
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
-            Layout.Box(state.input.popup, { size = input.size.height }),
-            Layout.Box(state.llm.popup, { size = output.size.height }),
-          }, { dir = "col" })
-        )
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.llm.popup, { size = output.size.height }),
+              Layout.Box(state.input.popup, { size = input.size.height }),
+            }, { dir = "col" })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.input.popup, { size = input.size.height }),
+              Layout.Box(state.llm.popup, { size = output.size.height }),
+            }, { dir = "col" })
+          )
+        end
       end
     elseif input.size.row == output.size.row then
-      if output.order < input.order then
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
-            Layout.Box(state.llm.popup, { size = output.size.width }),
-            Layout.Box(state.input.popup, { size = input.size.width }),
-          }, { dir = "row" })
-        )
+      if conf.configs.models then
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "20%", grow = 1 }),
+                Layout.Box(state.llm.popup, { size = "80%" }),
+              }, { dir = "col", size = output.size.width }),
+              Layout.Box(state.input.popup, { size = input.size.width }),
+            }, { dir = "row" })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.input.popup, { size = input.size.width }),
+              Layout.Box({
+                Layout.Box(state.models.popup, { size = "20%", grow = 1 }),
+                Layout.Box(state.llm.popup, { size = "80%" }),
+              }, { dir = "col", size = output.size.width }),
+            }, { dir = "row" })
+          )
+        end
       else
-        state.layout.popup = Layout(
-          { relative = layout.relative, position = layout.position, size = layout.size },
-          Layout.Box({
-            Layout.Box(state.input.popup, { size = input.size.width }),
-            Layout.Box(state.llm.popup, { size = output.size.width }),
-          }, { dir = "row" })
-        )
+        if output.order < input.order then
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.llm.popup, { size = output.size.width }),
+              Layout.Box(state.input.popup, { size = input.size.width }),
+            }, { dir = "row" })
+          )
+        else
+          state.layout.popup = Layout(
+            { relative = layout.relative, position = layout.position, size = layout.size },
+            Layout.Box({
+              Layout.Box(state.input.popup, { size = input.size.width }),
+              Layout.Box(state.llm.popup, { size = output.size.width }),
+            }, { dir = "row" })
+          )
+        end
       end
     end
   end
 end
 
-function _layout.menu_preview(layout_opts, opts)
+function _layout.history_preview(layout_opts, opts)
   local layout = layout_opts or conf.configs.chat_ui_opts
   opts = opts or conf.configs.chat_ui_opts.history.split
 
@@ -335,4 +528,34 @@ function _layout.menu_preview(layout_opts, opts)
     state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
   end
 end
+
+function _layout.models_preview(opts, name, on_choice)
+  opts = opts or conf.configs
+  name = name or "Chat"
+  on_choice = on_choice
+    or function(choice, idx)
+      if not choice then
+        return
+      else
+        LOG:INFO("Set the current model to " .. choice)
+      end
+      opts.url, opts.model, opts.api_type, opts.max_tokens, opts.fetch_key =
+        opts.models[idx].url,
+        opts.models[idx].model,
+        opts.models[idx].api_type,
+        opts.models[idx].max_tokens,
+        opts.models[idx].fetch_key
+    end
+  state.models[name] = { list = {} }
+  for _, item in ipairs(opts.models) do
+    table.insert(state.models[name].list, item.name)
+  end
+  vim.ui.select(state.models[name].list, {
+    prompt = "Models:",
+    format_item = function(item)
+      return item
+    end,
+  }, on_choice)
+end
+
 return _layout

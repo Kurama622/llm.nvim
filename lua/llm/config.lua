@@ -123,6 +123,46 @@ M._.chat_ui_opts = {
       order = 1,
     },
   },
+  models = {
+    float = {
+      zindex = 50,
+      enter = false,
+      focusable = false,
+      max_width = 20,
+      border = {
+        style = "rounded",
+        text = {
+          top = " Models ",
+          top_align = "center",
+        },
+      },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "85%", width = "20%" },
+      order = 2,
+    },
+    split = {
+      zindex = 50,
+      enter = true,
+      focusable = true,
+      max_width = 20,
+      border = {
+        style = "rounded",
+        text = {
+          top = " Models ",
+          top_align = "center",
+        },
+      },
+      win_options = {
+        winblend = 0,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      size = { height = "30%", width = "30%" },
+      order = 1,
+    },
+  },
 }
 
 M._.popwin_opts = {
@@ -182,8 +222,8 @@ M.prefix = {
 -- default configs
 M.configs = {
   prompt = "",
-  max_tokens = 1024,
-  model = "@cf/qwen/qwen1.5-14b-chat-awq",
+  max_tokens = nil,
+  model = nil,
   url = nil,
   api_type = nil,
   fetch_key = nil,
@@ -229,6 +269,10 @@ M.configs = {
     ["Input:HistoryNext"]  = { mode = "i", key = "<C-j>" },
     ["Input:HistoryPrev"]  = { mode = "i", key = "<C-k>" },
 
+    -- only works when models is not empty
+    ["Input:ModelsNext"]  = { mode = "i", key = "<C-S-j>" },
+    ["Input:ModelsPrev"]  = { mode = "i", key = "<C-S-k>" },
+
     -- The keyboard mapping for the output window in "split" style.
     ["Output:Ask"]  = { mode = "n", key = "i" },
     ["Output:Cancel"]  = { mode = "n", key = "<C-c>" },
@@ -238,6 +282,7 @@ M.configs = {
     ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
     ["Session:Close"]  = { mode = "n", key = "<esc>" },
     ["Session:History"]  = { mode = "n", key = "<C-h>" },
+    ["Session:Models"]  = { mode = "n", key = "<C-m>" },
 
     -- Scroll
     ["PageUp"]            = { mode = {"i","n"}, key = "<C-b>" },
