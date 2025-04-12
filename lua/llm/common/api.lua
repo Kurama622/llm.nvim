@@ -268,7 +268,8 @@ end
 function api.make_inline_context(opts, bufnr, name)
   local lines, start_line, start_col, end_line, end_col
 
-  if is_visual_mode(opts.mode) then
+  local mode = opts.mode or vim.fn.mode()
+  if is_visual_mode(mode) then
     lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr)
   else
     local pos = vim.fn.getpos(".")

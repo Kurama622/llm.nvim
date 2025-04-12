@@ -271,6 +271,8 @@ function M.setup(opts)
 
   M._.chat_ui_opts = M.configs.chat_ui_opts
 
+  M.configs.popwin_opts.border.text.top_user = M.configs.popwin_opts.border.text.top
+  M.configs.popwin_opts.border.text.top_builtin = " [<d>: display diff, <y>: copy code] "
   M.prefix.user = M.configs.prefix.user
   M.prefix.assistant = M.configs.prefix.assistant
 end

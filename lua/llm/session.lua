@@ -68,8 +68,16 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts = opts or {}
   local lines = F.make_inline_context(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
   local content = F.GetVisualSelection(lines)
+
+  if builtin_called then
+    conf.configs.popwin_opts.border.text.top = conf.configs.popwin_opts.border.text.top_builtin
+  else
+    conf.configs.popwin_opts.border.text.top = conf.configs.popwin_opts.border.text.top_user
+  end
+
   state.popwin = Popup(conf.configs.popwin_opts)
   state.popwin:mount()
+
   state.popwin.row, state.popwin.col = unpack(vim.api.nvim_win_get_position(0))
   local update_cursor_pos = {
     left = function(v)
