@@ -400,6 +400,25 @@ function M.NewSession()
   else
     ToggleLLM()
   end
+
+  -- copy suggestion code
+  local bufnr_list = { state.llm.bufnr }
+  if state.input.popup then
+    table.insert(bufnr_list, state.input.popup.bufnr)
+  end
+  for _, bufnr in ipairs(bufnr_list) do
+    for _, key in ipairs({ "y", "Y" }) do
+      vim.api.nvim_buf_set_keymap(bufnr, "n", key, "", {
+        callback = function()
+          utils.copy_suggestion_code({
+            start_str = "```",
+            end_str = "```",
+          }, table.concat(vim.api.nvim_buf_get_lines(state.llm.bufnr, 0, -1, false), "\n"))
+          LOG:INFO("Copy successful!")
+        end,
+      })
+    end
+  end
 end
 
 return M

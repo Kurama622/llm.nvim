@@ -294,11 +294,14 @@ function api.make_inline_context(opts, bufnr, name)
     }
     state.summarize_suggestions.ctx = context
     state.summarize_suggestions.pattern = {
-      start_str = "<!%-%-suggestion%-%->\n```",
-      end_str = "```\n<!%-%-/suggestion%-%->",
+      -- start_str = "<!%-%-suggestion%-%->\n```",
+      -- end_str = "```\n<!%-%-/suggestion%-%->",
+      start_str = "```",
+      end_str = "```",
     }
     state.summarize_suggestions.prompt =
-      string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->", opts.language)
+      -- string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->", opts.language)
+      string.format(require("llm.tools.prompts")[name], "", "", opts.language)
   end
   return lines
 end
