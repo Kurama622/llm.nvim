@@ -858,6 +858,7 @@ export SILICONFLOW_TOKEN=xxxxxxx
         -- set models list
         models = {
           {
+            name = "GithubModels",
             url = "https://models.inference.ai.azure.com/chat/completions",
             model = "gpt-4o-mini",
             api_type = "openai"
@@ -867,6 +868,10 @@ export SILICONFLOW_TOKEN=xxxxxxx
             -- max_tokens = 4096,
             -- temperature = 0.3,
             -- top_p = 0.7,
+          },
+          {
+            name = "Model2",
+            -- ...
           }
         },
     })
