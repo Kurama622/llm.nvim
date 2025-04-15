@@ -95,7 +95,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
   )
 
   layout:mount()
-  vim.api.nvim_command("startinsert")
 
   F.SetBoxOpts({ input_box, preview_box }, {
     filetype = { "llm", "llm" },
@@ -164,5 +163,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
       end)
     end
   end
+
+  -- Fix the vim.ui.select callback function not entering insert mode
+  vim.defer_fn(function()
+    vim.api.nvim_command("startinsert")
+  end, 50)
 end
 return M

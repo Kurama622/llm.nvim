@@ -59,6 +59,7 @@
   * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
   * [Priority of different parse/streaming functions](#priority-of-different-parsestreaming-functions)
   * [How can the AI-generated git commit message feature be integrated with lazygit](#how-can-the-ai-generated-git-commit-message-feature-be-integrated-with-lazygit)
+  * [How to switch models](#how-to-switch-models)
 
 <!-- mtoc-end -->
 
@@ -191,6 +192,13 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
     cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    config = function()
+      require("llm").setup({
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o-mini",
+        api_type = "openai"
+      })
+    end,
     keys = {
       { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
     },
@@ -245,6 +253,8 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
       - `Input:Resend`: Rerespond to the dialog.
       - `Input:HistoryNext`: Select the next session history.
       - `Input:HistoryPrev`: Select the previous session history.
+      - `Input:ModelsNext`: Select the next model.
+      - `Input:ModelsPrev`: Select the previous model.
       - `PageUp`: Output Window page up
       - `HalfPageUp`: Output Window page up (half)
       - `PageDown`: Output window page down
@@ -254,6 +264,8 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
     - Chat UI
       - `Session:Toggle`: open/hide the Chat UI.
       - `Session:Close`: close the Chat UI.
+      - `Session:History`: open the history window.
+      - `Session:Models`: open the model-list window.
   - *split style*
     - output window
       - `Output:Ask`: Open input window.
@@ -668,6 +680,8 @@ return {
 | Input        | `ctrl+r`     | `i`      | Rerespond to the dialog             |
 | Input        | `ctrl+j`     | `i`      | Select the next session history     |
 | Input        | `ctrl+k`     | `i`      | Select the previous session history |
+| Input        | `ctrl+shift+j`     | `i`      | Select the next model     |
+| Input        | `ctrl+shift+k`     | `i`      | Select the previous model |
 | Input        | `Ctrl+b`     | `n`/`i`  | Output Window page up               |
 | Input        | `Ctrl+f`     | `n`/`i`  | Output window page down             |
 | Input        | `Ctrl+u`     | `n`/`i`  | Output Window page up (half)        |
@@ -697,6 +711,7 @@ return {
 | Output       | `ctrl+c`     | `n`      | Cancel dialog response               |
 | Output       | `ctrl+r`     | `n`      | Rerespond to the dialog              |
 | Output       | `ctrl+h`     | `n`      | Open the history window              |
+| Output       | `ctrl+m`     | `n`      | Open the model-list window           |
 | Output+Input | `<leader>ac` | `n`      | Toggle session                       |
 | Output+Input | `<esc>`      | `n`      | Close session                        |
 | History      | `j`          | `n`      | Preview the next session history     |
@@ -826,4 +841,49 @@ export SILICONFLOW_TOKEN=xxxxxxx
     end,
   }
   ```
+[⬆ back to top](#contents)
+
+### How to switch models
+
+Need to configure models:
+
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
+  cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+  config = function()
+    require("llm").setup({
+        -- set models list
+        models = {
+          {
+            name = "GithubModels",
+            url = "https://models.inference.ai.azure.com/chat/completions",
+            model = "gpt-4o-mini",
+            api_type = "openai"
+            fetch_key = function()
+              return "<your api key>"
+            end,
+            -- max_tokens = 4096,
+            -- temperature = 0.3,
+            -- top_p = 0.7,
+          },
+          {
+            name = "Model2",
+            -- ...
+          }
+        },
+    })
+  end,
+  keys = {
+    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    -- float style
+    ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
+    ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
+
+    -- split style
+    ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
+  },
+}
+```
 [⬆ back to top](#contents)

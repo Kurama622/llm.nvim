@@ -27,6 +27,8 @@ M.history = {
   foucs_item = nil,
 }
 
+M.models = {}
+
 M.other = {
   popup = nil,
 }

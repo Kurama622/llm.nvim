@@ -62,6 +62,7 @@
   * [多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key](#多个大模型切换频繁更改llm_key的值很麻烦而且我不想在neovim的配置文件中暴露我的key)
   * [不同解析函数的优先级](#不同解析函数的优先级)
   * [AI生成git commit信息的功能如何与lazygit集成在一起?](#ai生成git-commit信息的功能如何与lazygit集成在一起)
+  * [如何切换模型](#如何切换模型)
 
 <!-- mtoc-end -->
 
@@ -195,6 +196,13 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
     "Kurama622/llm.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
     cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+    config = function()
+      require("llm").setup({
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o-mini",
+        api_type = "openai"
+      })
+    end,
     keys = {
       { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
     },
@@ -248,6 +256,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
       - `Input:Resend`: 重新回答
       - `Input:HistoryNext`: 切换到下一个会话历史
       - `Input:HistoryPrev`: 切换到上一个会话历史
+      - `Input:ModelsNext`: 切换到下一个模型
+      - `Input:ModelsPrev`: 切换到上一个模型
       - `PageUp`: 输出窗口向上翻页
       - `HalfPageUp`: 输出窗口向上翻页(半页)
       - `PageDown`: 输出窗口向下翻页
@@ -257,6 +267,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
     - 整个对话界面
       - `Session:Toggle`: 打开/隐藏对话界面
       - `Session:Close`: 关闭对话界面
+      - `Session:History`: 打开历史窗口.
+      - `Session:Models`: 打开模型列表窗口.
   - *分割窗口风格下的快捷键*
     - 输出窗口
       - `Output:Ask`: 打开输入窗口
@@ -662,21 +674,23 @@ return {
 
 - 浮动窗口风格下的快捷键
 
-| 窗口         | 按键         | 模式     | 描述                    |
-| ------------ | ------------ | -------- | ----------------------- |
-| Input        | `ctrl+g`     | `i`      | 提交你的问题            |
-| Input        | `ctrl+c`     | `i`      | 取消本轮对话            |
-| Input        | `ctrl+r`     | `i`      | 重新发起本轮对话        |
-| Input        | `ctrl+j`     | `i`      | 切换到下一个会话历史    |
-| Input        | `ctrl+k`     | `i`      | 切换到上一个会话历史    |
-| Input        | `Ctrl+b`     | `n`/`i`  | 输出窗口向上翻页        |
-| Input        | `Ctrl+f`     | `n`/`i`  | 输出窗口向下翻页        |
-| Input        | `Ctrl+u`     | `n`/`i`  | 输出窗口向上翻页(半页)  |
-| Input        | `Ctrl+d`     | `n`/`i`  | 输出窗口向下翻页(半页)  |
-| Input        | `gg`         | `n`      | 定位到输出窗口的顶部    |
-| Input        | `G`          | `n`      | 定位到输出窗口的底部    |
-| Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
-| Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
+| 窗口         | 按键           | 模式     | 描述                    |
+| ------------ | ------------   | -------- | ----------------------- |
+| Input        | `ctrl+g`       | `i`      | 提交你的问题            |
+| Input        | `ctrl+c`       | `i`      | 取消本轮对话            |
+| Input        | `ctrl+r`       | `i`      | 重新发起本轮对话        |
+| Input        | `ctrl+j`       | `i`      | 切换到下一个会话历史    |
+| Input        | `ctrl+k`       | `i`      | 切换到上一个会话历史    |
+| Input        | `ctrl+shift+j` | `i`      | 切换到下一个模型        |
+| Input        | `ctrl+shift+k` | `i`      | 切换到上一个模型        |
+| Input        | `Ctrl+b`       | `n`/`i`  | 输出窗口向上翻页        |
+| Input        | `Ctrl+f`       | `n`/`i`  | 输出窗口向下翻页        |
+| Input        | `Ctrl+u`       | `n`/`i`  | 输出窗口向上翻页(半页)  |
+| Input        | `Ctrl+d`       | `n`/`i`  | 输出窗口向下翻页(半页)  |
+| Input        | `gg`           | `n`      | 定位到输出窗口的顶部    |
+| Input        | `G`            | `n`      | 定位到输出窗口的底部    |
+| Output+Input | `<leader>ac`   | `n`      | 打开/隐藏对话界面       |
+| Output+Input | `<esc>`        | `n`      | 关闭对话界面            |
 
 ### 窗口切换
 
@@ -698,6 +712,7 @@ return {
 | Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
 | Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
 | Output       | `ctrl+h`     | `n`      | 打开会话历史窗口        |
+| Output       | `ctrl+m`     | `n`      | 打开模型列表窗口        |
 | Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
 | Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
 | History      | `j`          | `n`      | 预览下一个会话历史      |
@@ -827,4 +842,49 @@ export SILICONFLOW_TOKEN=xxxxxxx
     }
   ```
 
+[⬆ 返回目录](#目录)
+
+### 如何切换模型
+
+需要配置`models`:
+
+```lua
+{
+  "Kurama622/llm.nvim",
+  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
+  cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+  config = function()
+    require("llm").setup({
+        -- set models list
+        models = {
+          {
+            name = "GithubModels",
+            url = "https://models.inference.ai.azure.com/chat/completions",
+            model = "gpt-4o-mini",
+            api_type = "openai"
+            fetch_key = function()
+              return "<your api key>"
+            end,
+            -- max_tokens = 4096,
+            -- temperature = 0.3,
+            -- top_p = 0.7,
+          },
+          {
+            name = "Model2",
+            -- ...
+          }
+        },
+    })
+  end,
+  keys = {
+    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
+    -- float style
+    ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
+    ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
+
+    -- split style
+    ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
+  },
+}
+```
 [⬆ 返回目录](#目录)

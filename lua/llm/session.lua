@@ -290,6 +290,14 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(-1)
           end, { noremap = true })
+        elseif conf.configs.save_session and k == "Input:ModelsNext" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.MoveModelsCursor(1)
+          end, { noremap = true })
+        elseif conf.configs.save_session and k == "Input:ModelsPrev" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.MoveModelsCursor(-1)
+          end, { noremap = true })
         elseif k == "Focus:Output" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             vim.api.nvim_set_current_win(state.llm.popup.winid)
@@ -375,8 +383,14 @@ function M.NewSession()
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
-            _layout.menu_preview()
+            _layout.history_preview()
           end, { buffer = bufnr, noremap = true, silent = true })
+        elseif k == "Session:Models" then
+          if conf.configs.models then
+            F.SetSplitKeyMapping(v.mode, v.key, function()
+              _layout.models_preview()
+            end, { buffer = bufnr, noremap = true, silent = true })
+          end
         elseif k == "Output:Cancel" then
           F.SetSplitKeyMapping(v.mode, v.key, F.CancelLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Output:Resend" then

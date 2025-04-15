@@ -485,6 +485,19 @@ function api.MoveHistoryCursor(offset)
   state.history.popup._.on_change(new_node)
 end
 
+function api.MoveModelsCursor(offset)
+  local pos = vim.api.nvim_win_get_cursor(state.models.popup.winid)
+  local new_pos = pos[1] + offset
+  if new_pos > #state.models.list then
+    new_pos = 1
+  elseif new_pos < 1 then
+    new_pos = #state.models.list
+  end
+  vim.api.nvim_win_set_cursor(state.models.popup.winid, { new_pos, 0 })
+  local new_node = state.models.popup.tree:get_node(new_pos)
+  state.models.popup._.on_change(new_node)
+end
+
 function api.RefreshLLMText(messages, bufnr, winid, detach)
   bufnr = bufnr or state.llm.popup.bufnr
   winid = winid or state.llm.popup.winid

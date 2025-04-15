@@ -11,7 +11,9 @@ function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 
-  local fetch_key = opts.fetch_key or conf.configs.fetch_key
+  local fetch_key = opts.fetch_key
+    or conf.configs.fetch_key
+    or (conf.configs.models and conf.configs.models[1].fetch_key or nil)
   if fetch_key ~= nil then
     LLM_KEY = fetch_key()
   end
@@ -22,14 +24,24 @@ function M.GetStreamingOutput(opts)
     authorization = ""
   end
 
-  local url = opts.url or conf.configs.url
-  local MODEL = opts.model or conf.configs.model
-  local api_type = opts.api_type or conf.configs.api_type
-  local streaming_handler = opts.streaming_handler or conf.configs.streaming_handler
-  local keep_alive = opts.keep_alive or conf.configs.keep_alive
-  local temperatrue = opts.temperature or conf.configs.temperature
-  local top_p = opts.top_p or conf.configs.top_p
-  local max_tokens = opts.max_tokens or conf.configs.max_tokens
+  local url = opts.url or conf.configs.url or (conf.configs.models and conf.configs.models[1].url or nil)
+  local MODEL = opts.model or conf.configs.model or (conf.configs.models and conf.configs.models[1].model or nil)
+  local api_type = opts.api_type
+    or conf.configs.api_type
+    or (conf.configs.models and conf.configs.models[1].api_type or nil)
+  local streaming_handler = opts.streaming_handler
+    or conf.configs.streaming_handler
+    or (conf.configs.models and conf.configs.models[1].streaming_handler or nil)
+  local keep_alive = opts.keep_alive
+    or conf.configs.keep_alive
+    or (conf.configs.models and conf.configs.models[1].keep_alive or nil)
+  local temperatrue = opts.temperature
+    or conf.configs.temperature
+    or (conf.configs.models and conf.configs.models[1].temperatrue or nil)
+  local top_p = opts.top_p or conf.configs.top_p or (conf.configs.models and conf.configs.models[1].top_p or nil)
+  local max_tokens = opts.max_tokens
+    or conf.configs.max_tokens
+    or (conf.configs.models and conf.configs.models[1].max_tokens or nil)
 
   local body = {
     stream = true,
