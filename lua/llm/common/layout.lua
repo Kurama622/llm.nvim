@@ -18,6 +18,16 @@ local function reformat_size(size)
   return size
 end
 
+local function set_item_hl(popup, hl)
+  local ns = vim.api.nvim_create_namespace("SeletedItemHl")
+  local idx = vim.api.nvim_win_get_cursor(popup.winid)[1]
+  local count = vim.api.nvim_buf_line_count(popup.bufnr)
+  vim.api.nvim_buf_clear_namespace(popup.bufnr, ns, 0, count)
+
+  vim.hl.range(popup.bufnr, ns, "LlmGrayLight", { 0, 0 }, { count, -1 }, {})
+  vim.hl.range(popup.bufnr, ns, hl, { idx - 1, 0 }, { idx - 1, -1 }, {})
+end
+
 --- @param size1 {height: number, width: number}
 --- @param size2 {height: number, width: number}
 --- @return string|nil
@@ -77,6 +87,10 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
       win_options = other.win_options,
     })
   else
+    if not state.history.hl then
+      state.history.hl = other.win_options.winhighlight:match(":(.-),")
+      other.win_options.winhighlight = other.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+    end
     state.history.popup = Menu({
       enter = other.enter,
       focusable = other.focusable,
@@ -86,9 +100,9 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     }, {
       lines = (function()
         local items = F.ListFilesInPath()
-        state.history.list = { Menu.item("current") }
+        state.history.list = { Menu.item("current", { cmd = set_item_hl }) }
         for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item))
+          table.insert(state.history.list, Menu.item(item, { cmd = set_item_hl }))
         end
         return state.history.list
       end)(),
@@ -99,6 +113,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         submit = { "<CR>", "<Space>" },
       },
       on_change = function(item)
+        item.cmd(state.history.popup, state.history.hl)
         if item.text == "current" then
           state.session.filename = item.text
           if not state.session[item.text] then
@@ -125,6 +140,10 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     })
 
     if conf.configs.models then
+      if not state.models.hl then
+        state.models.hl = models.win_options.winhighlight:match(":(.-),")
+        models.win_options.winhighlight = models.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+      end
       state.models.popup = Menu({
         enter = models.enter,
         focusable = models.focusable,
@@ -135,7 +154,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         lines = (function()
           state.models.list = {}
           for idx, item in ipairs(conf.configs.models) do
-            local menu_item = Menu.item(item.name)
+            local menu_item = Menu.item(item.name, { cmd = set_item_hl })
             menu_item.idx = idx
             table.insert(state.models.list, menu_item)
           end
@@ -148,6 +167,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
           submit = { "<CR>", "<Space>" },
         },
         on_change = function(item)
+          item.cmd(state.models.popup, state.models.hl)
           conf.configs.url, conf.configs.model, conf.configs.api_type, conf.configs.max_tokens, conf.configs.fetch_key =
             conf.configs.models[item.idx].url,
             conf.configs.models[item.idx].model,
@@ -449,6 +469,10 @@ end
 function _layout.history_preview(layout_opts, opts)
   local layout = layout_opts or conf.configs.chat_ui_opts
   opts = opts or conf.configs.chat_ui_opts.history.split
+  if not state.history.hl then
+    state.history.hl = opts.win_options.winhighlight:match(":(.-),")
+    opts.win_options.winhighlight = opts.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+  end
 
   if state.history.popup == nil then
     state.history.popup = Menu({
@@ -463,9 +487,9 @@ function _layout.history_preview(layout_opts, opts)
     }, {
       lines = (function()
         local items = F.ListFilesInPath()
-        state.history.list = { Menu.item("current") }
+        state.history.list = { Menu.item("current", { cmd = set_item_hl }) }
         for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item))
+          table.insert(state.history.list, Menu.item(item, { cmd = set_item_hl }))
         end
         return state.history.list
       end)(),
@@ -476,6 +500,7 @@ function _layout.history_preview(layout_opts, opts)
         submit = { "<CR>", "<Space>" },
       },
       on_change = function(item)
+        item.cmd(state.history.popup, state.history.hl)
         -- TODO: item index
         if item.text == "current" then
           state.session.filename = item.text
