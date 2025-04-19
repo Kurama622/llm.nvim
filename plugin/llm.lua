@@ -6,7 +6,7 @@ local F = require("llm.common.api")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE" },
-  LlmBlueLight = { fg = "#B0E2FF", bg = "NONE" },
+  LlmBlueLight = { fg = "#b0e2ff", bg = "NONE" },
   LlmRedNormal = { fg = "#ff7eb9", bg = "NONE" },
   LlmRedLight = { fg = "#fca7ea", bg = "NONE" },
   LlmGreenNormal = { fg = "#4fd6be", bg = "NONE" },
@@ -16,7 +16,7 @@ local highlight = {
   LlmGrayNormal = { fg = "#828bb8", bg = "NONE" },
   LlmGrayLight = { fg = "#9c9c9c", bg = "NONE" },
   LlmPurpleNormal = { fg = "#c099ff", bg = "NONE" },
-  LlmPurpleLight = { fg = "#EE82EE", bg = "NONE" },
+  LlmPurpleLight = { fg = "#ee82ee", bg = "NONE" },
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE" },
 }
 
