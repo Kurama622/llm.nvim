@@ -17,6 +17,7 @@ local highlight = {
   LlmGrayLight = { fg = "#9c9c9c", bg = "NONE" },
   LlmPurpleNormal = { fg = "#c099ff", bg = "NONE" },
   LlmPurpleLight = { fg = "#EE82EE", bg = "NONE" },
+  LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE" },
 }
 
 for k, v in pairs(highlight) do

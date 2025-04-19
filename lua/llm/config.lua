@@ -98,7 +98,7 @@ M._.chat_ui_opts = {
       },
       win_options = {
         winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "85%", width = "20%" },
       order = 2,
@@ -117,7 +117,7 @@ M._.chat_ui_opts = {
       },
       win_options = {
         winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "30%", width = "30%" },
       order = 1,
@@ -138,7 +138,7 @@ M._.chat_ui_opts = {
       },
       win_options = {
         winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "85%", width = "20%" },
       order = 2,
@@ -157,7 +157,7 @@ M._.chat_ui_opts = {
       },
       win_options = {
         winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "30%", width = "30%" },
       order = 1,
