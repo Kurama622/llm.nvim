@@ -14,9 +14,9 @@ function utils.parse_suggestion(suggestion, pattern)
     end
 
     table.insert(res, c)
-    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, pos, s - 2), "\n"))
+    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, pos, s - 1), "\n"))
     local start_nr = linenr
-    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, s, e), "\n"))
+    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, s, e), "\n")) - 1
     local end_nr = linenr
     table.insert(range_tbl, { start_nr, end_nr })
     pos = e + 2
@@ -29,7 +29,7 @@ function utils.get_hunk_idx(range_tbl)
   local idx = 0
   for n, range in ipairs(range_tbl) do
     idx = n
-    if cursor_linenr > range[1] and cursor_linenr < range[2] + 1 then
+    if cursor_linenr > range[1] - 1 and cursor_linenr < range[2] + 1 then
       break
     end
   end
@@ -65,7 +65,7 @@ function utils.overwrite_selection(context, contents)
 end
 
 function utils.copy_suggestion_code(opts, suggestion)
-  local pattern = string.format("%s%%w*\n(.-)\n%s", opts.start_str, opts.end_str)
+  local pattern = string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
     LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
