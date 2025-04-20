@@ -11,7 +11,7 @@ function openai.StreamingHandler(chunk, ctx)
     ctx.line = ctx.line .. chunk
   else
     ctx.line = ctx.line .. chunk
-    ctx.line = F.trim_leading_whitespace(ctx.line)
+    ctx.line = F.TrimLeadingWhitespace(ctx.line)
     local start_idx = ctx.line:find("data: ", 1, true)
     local end_idx = ctx.line:find("}]", 1, true)
     local json_str = nil
