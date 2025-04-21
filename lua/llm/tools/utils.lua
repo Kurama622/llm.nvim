@@ -76,7 +76,7 @@ function utils.copy_suggestion_code(opts, suggestion)
 end
 
 function utils.new_diff(diff, opts, context, suggestion)
-  local pattern = string.format("%s%%w*\n(.-)\n%s", opts.start_str, opts.end_str)
+  local pattern = string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
     LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
