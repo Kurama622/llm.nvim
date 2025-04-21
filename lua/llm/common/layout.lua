@@ -24,8 +24,15 @@ local function set_item_hl(popup, hl)
   local count = vim.api.nvim_buf_line_count(popup.bufnr)
   vim.api.nvim_buf_clear_namespace(popup.bufnr, ns, 0, count)
 
-  vim.hl.range(popup.bufnr, ns, "LlmGrayLight", { 0, 0 }, { count, -1 }, {})
-  vim.hl.range(popup.bufnr, ns, hl, { idx - 1, 0 }, { idx - 1, -1 }, {})
+  if vim.version.lt(vim.version(), { 0, 11, 0 }) then
+    for i = 1, count do
+      vim.api.nvim_buf_add_highlight(popup.bufnr, ns, "LlmGrayLight", i, 0, -1)
+    end
+    vim.api.nvim_buf_add_highlight(popup.bufnr, ns, hl, idx - 1, 0, -1)
+  else
+    vim.hl.range(popup.bufnr, ns, "LlmGrayLight", { 0, 0 }, { count, -1 }, {})
+    vim.hl.range(popup.bufnr, ns, hl, { idx - 1, 0 }, { idx - 1, -1 }, {})
+  end
 end
 
 --- @param size1 {height: number, width: number}
