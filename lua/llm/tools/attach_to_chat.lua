@@ -109,7 +109,7 @@ function M.handler(_, _, _, _, _, opts)
     sess.NewSession()
   end
 
-  local bufnr_list = F.get_chat_ui_bufnr_list()
+  local bufnr_list = F.GetChatUiBufnrList()
   for _, ui_bufnr in ipairs(bufnr_list) do
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()

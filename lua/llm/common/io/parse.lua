@@ -153,7 +153,7 @@ function io_parse.GetOutput(opts)
       command = "curl",
       args = _args,
       on_stdout = vim.schedule_wrap(function(_, data)
-        local str = api.trim_leading_whitespace(data)
+        local str = api.TrimLeadingWhitespace(data)
         local prefix = str:sub(1, 1)
         if prefix ~= "{" then
           if prefix ~= "" then

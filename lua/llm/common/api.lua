@@ -78,7 +78,7 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
-function api.trim_leading_whitespace(str)
+function api.TrimLeadingWhitespace(str)
   if str == nil then
     return ""
   end
@@ -265,7 +265,7 @@ function api.GetVisualSelection(lines)
   return seletion
 end
 
-function api.make_inline_context(opts, bufnr, name)
+function api.MakeInlineContext(opts, bufnr, name)
   local lines, start_line, start_col, end_line, end_col
 
   local mode = opts.mode or vim.fn.mode()
@@ -308,7 +308,7 @@ end
 
 function api.GetAttach(opts)
   local bufnr = vim.api.nvim_get_current_buf()
-  local lines = api.make_inline_context(opts, bufnr, "attach_to_chat")
+  local lines = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
   api.VisMode2NorMode()
 
   if opts.is_codeblock and not vim.tbl_isempty(lines) then
@@ -329,7 +329,7 @@ function api.ClearAttach()
   state.input.attach_content = nil
 end
 
-function api.update_prompt(name)
+function api.UpdatePrompt(name)
   if state.summarize_suggestions.prompt and not state.summarize_suggestions.status then
     if state.session[name][1].role == "system" then
       state.session[name][1].content =
@@ -341,7 +341,7 @@ function api.update_prompt(name)
   end
 end
 
-function api.reset_prompt()
+function api.ResetPrompt()
   if state.summarize_suggestions.status then
     if state.session[state.session.filename][1].role == "system" then
       state.session[state.session.filename][1].content = conf.configs.prompt
@@ -354,7 +354,7 @@ end
 function api.ClearSummarizeSuggestions()
   state.summarize_suggestions.ctx = nil
   state.summarize_suggestions.pattern = nil
-  api.reset_prompt()
+  api.ResetPrompt()
   state.summarize_suggestions.status = false
 end
 
@@ -637,7 +637,7 @@ function api.ScrollWindow(winid, direction)
   end)
 end
 
-function api.get_chat_ui_bufnr_list()
+function api.GetChatUiBufnrList()
   if conf.configs.style == "float" then
     return { state.input.popup.bufnr, state.llm.popup.bufnr }
   else

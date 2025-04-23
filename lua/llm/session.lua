@@ -66,7 +66,7 @@ end
 
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts = opts or {}
-  local lines = F.make_inline_context(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
+  local lines = F.MakeInlineContext(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
   local content = F.GetVisualSelection(lines)
 
   if builtin_called then
@@ -107,7 +107,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       state.session[state.popwin.winid] = {}
     end
     table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
-    F.update_prompt(state.popwin.winid)
+    F.UpdatePrompt(state.popwin.winid)
 
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(opts._[k].mapping.mode, opts._[k].mapping.keys, function()
@@ -263,7 +263,7 @@ function M.NewSession()
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
-            F.update_prompt(state.session.filename)
+            F.UpdatePrompt(state.session.filename)
             if input ~= "" then
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
@@ -356,7 +356,7 @@ function M.NewSession()
                     end
                     state.input.popup:unmount()
                     state.input.popup = nil
-                    F.update_prompt(state.session.filename)
+                    F.UpdatePrompt(state.session.filename)
                     if input ~= "" then
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
