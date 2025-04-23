@@ -383,12 +383,12 @@ function M.NewSession()
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
-            _layout.history_preview()
+            F.HistoryPreview()
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Models" then
           if conf.configs.models then
             F.SetSplitKeyMapping(v.mode, v.key, function()
-              _layout.models_preview()
+              F.ModelsPreview()
             end, { buffer = bufnr, noremap = true, silent = true })
           end
         elseif k == "Output:Cancel" then

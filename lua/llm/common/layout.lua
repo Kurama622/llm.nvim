@@ -18,23 +18,6 @@ local function reformat_size(size)
   return size
 end
 
-local function set_item_hl(popup, hl)
-  local ns = vim.api.nvim_create_namespace("SeletedItemHl")
-  local idx = vim.api.nvim_win_get_cursor(popup.winid)[1]
-  local count = vim.api.nvim_buf_line_count(popup.bufnr)
-  vim.api.nvim_buf_clear_namespace(popup.bufnr, ns, 0, count)
-
-  if vim.version.lt(vim.version(), { 0, 11, 0 }) then
-    for i = 1, count do
-      vim.api.nvim_buf_add_highlight(popup.bufnr, ns, "LlmGrayLight", i, 0, -1)
-    end
-    vim.api.nvim_buf_add_highlight(popup.bufnr, ns, hl, idx - 1, 0, -1)
-  else
-    vim.hl.range(popup.bufnr, ns, "LlmGrayLight", { 0, 0 }, { count, -1 }, {})
-    vim.hl.range(popup.bufnr, ns, hl, { idx - 1, 0 }, { idx - 1, -1 }, {})
-  end
-end
-
 --- @param size1 {height: number, width: number}
 --- @param size2 {height: number, width: number}
 --- @return string|nil
@@ -107,9 +90,9 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     }, {
       lines = (function()
         local items = F.ListFilesInPath()
-        state.history.list = { Menu.item("current", { cmd = set_item_hl }) }
+        state.history.list = { Menu.item("current", { cmd = F.SetItemHl }) }
         for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item, { cmd = set_item_hl }))
+          table.insert(state.history.list, Menu.item(item, { cmd = F.SetItemHl }))
         end
         return state.history.list
       end)(),
@@ -161,7 +144,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         lines = (function()
           state.models.list = {}
           for idx, item in ipairs(conf.configs.models) do
-            local menu_item = Menu.item(item.name, { cmd = set_item_hl })
+            local menu_item = Menu.item(item.name, { cmd = F.SetItemHl })
             menu_item.idx = idx
             table.insert(state.models.list, menu_item)
           end
@@ -471,123 +454,6 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
       end
     end
   end
-end
-
-function _layout.history_preview(layout_opts, opts)
-  local layout = layout_opts or conf.configs.chat_ui_opts
-  opts = opts or conf.configs.chat_ui_opts.history.split
-  if not state.history.hl then
-    state.history.hl = opts.win_options.winhighlight:match(":(.-),")
-    opts.win_options.winhighlight = opts.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
-  end
-
-  if state.history.popup == nil then
-    state.history.popup = Menu({
-      enter = opts.enter,
-      focusable = opts.focusable,
-      zindex = opts.zindex,
-      border = opts.border,
-      win_options = opts.win_options,
-      relative = opts.relative or layout.relative,
-      position = layout.position,
-      size = opts.size,
-    }, {
-      lines = (function()
-        local items = F.ListFilesInPath()
-        state.history.list = { Menu.item("current", { cmd = set_item_hl }) }
-        for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item, { cmd = set_item_hl }))
-        end
-        return state.history.list
-      end)(),
-      max_width = opts.max_width,
-      keymap = {
-        focus_next = { "j", "<Down>", "<Tab>" },
-        focus_prev = { "k", "<Up>", "<S-Tab>" },
-        submit = { "<CR>", "<Space>" },
-      },
-      on_change = function(item)
-        item.cmd(state.history.popup, state.history.hl)
-        -- TODO: item index
-        if item.text == "current" then
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            state.session[item.text] = F.DeepCopy(conf.session.messages)
-          end
-          F.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
-        else
-          local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            local file = io.open(sess_file, "r")
-            if file then
-              local messages = vim.fn.json_decode(file:read())
-              state.session[item.text] = messages
-              file:close()
-            end
-          end
-          F.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
-        end
-      end,
-    })
-    state.history.popup:mount()
-    if state.history.index then
-      vim.api.nvim_win_set_cursor(state.history.popup.winid, { state.history.index, 0 })
-      local node = state.history.popup.tree:get_node(state.history.index)
-      state.history.popup._.on_change(node)
-    else
-      state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
-    end
-
-    state.history.popup:map("n", { "<cr>" }, function()
-      LOG:TRACE("history popup hide")
-      state.history.popup:hide()
-    end)
-
-    state.history.popup:map("n", { "<esc>" }, function()
-      local node = state.history.popup.tree:get_node(state.history.index)
-      state.history.popup._.on_change(node)
-      state.history.popup:unmount()
-      state.history.popup = nil
-    end)
-  else
-    LOG:TRACE("history popup show")
-    -- The relative winid needs to be adjusted when "relative = win",
-    if state.history.popup.border.win_config.win then
-      state.history.popup.border.win_config.win = state.llm.winid
-    end
-    state.history.popup:show()
-    state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
-  end
-end
-
-function _layout.models_preview(opts, name, on_choice)
-  opts = opts or conf.configs
-  name = name or "Chat"
-  on_choice = on_choice
-    or function(choice, idx)
-      if not choice then
-        return
-      else
-        LOG:INFO("Set the current model to " .. choice)
-      end
-      opts.url, opts.model, opts.api_type, opts.max_tokens, opts.fetch_key =
-        opts.models[idx].url,
-        opts.models[idx].model,
-        opts.models[idx].api_type,
-        opts.models[idx].max_tokens,
-        opts.models[idx].fetch_key
-    end
-  state.models[name] = { list = {} }
-  for _, item in ipairs(opts.models) do
-    table.insert(state.models[name].list, item.name)
-  end
-  vim.ui.select(state.models[name].list, {
-    prompt = "Models:",
-    format_item = function(item)
-      return item
-    end,
-  }, on_choice)
 end
 
 return _layout
