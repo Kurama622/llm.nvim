@@ -24,29 +24,6 @@
 > **The url used by the code completion tool and the url used by the chat task are usually two different ones.**
 
 
-1. You can use `autocmd` to enable the completion feature of llm.nvim.
-
-```lua
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  callback = function()
-    vim.api.nvim_command("LLMAppHandler Completion")
-  end,
-})
-```
-
-2. You can make the completion of llm.nvim take effect immediately by disabling lazy loading. (Completion AI tool requires setting `auto_trigger = true`)
-
-```lua
-{
-  "Kurama622/llm.nvim",
-  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-  lazy = false,
-  config = function()
-    ...
-  end,
-}
-```
-
 ## Settings
 
 ### virtual text
