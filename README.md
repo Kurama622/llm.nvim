@@ -264,7 +264,6 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
     - Chat UI
       - `Session:Toggle`: open/hide the Chat UI.
       - `Session:Close`: close the Chat UI.
-      - `Session:History`: open the history window.
       - `Session:Models`: open the model-list window.
   - *split style*
     - output window
@@ -272,6 +271,7 @@ For more details or examples, please refer to [Chat Configuration](examples/chat
       - `Output:Cancel`: Cancel diaglog response.
       - `Output:Resend`: Rerespond to the dialog.
       - `Session:History`: open session history.
+      - `Session:Models`: open the model-list window.
     - Chat UI
       - `Session:Toggle`: open/hide the Chat UI.
       - `Session:Close`: close the Chat UI.
@@ -881,7 +881,7 @@ Need to configure models:
     ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
     ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
 
-    -- split style
+    -- Applicable to AI tools with split style and UI interfaces
     ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
   },
 }

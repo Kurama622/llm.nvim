@@ -267,7 +267,6 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
     - 整个对话界面
       - `Session:Toggle`: 打开/隐藏对话界面
       - `Session:Close`: 关闭对话界面
-      - `Session:History`: 打开历史窗口.
       - `Session:Models`: 打开模型列表窗口.
   - *分割窗口风格下的快捷键*
     - 输出窗口
@@ -275,6 +274,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
       - `Output:Cancel`: 取消对话
       - `Output:Resend`: 重新回答
       - `Session:History`: 打开会话历史窗口
+      - `Session:Models`: 打开模型列表窗口.
     - 整个对话界面
       - `Session:Toggle`: 打开/隐藏对话界面
       - `Session:Close`: 关闭对话界面
@@ -882,7 +882,7 @@ export SILICONFLOW_TOKEN=xxxxxxx
     ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
     ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
 
-    -- split style
+    -- Applicable to AI tools with split style and UI interfaces
     ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
   },
 }
