@@ -13,7 +13,7 @@ function deepseek.parse(chunk, assistant_output)
   if success then
     return assistant_output
   else
-    LOG:ERROR(string.format("err: %s, chunk: %s", err, vim.inspect(chunk)))
+    LOG:ERROR("err:", err, "chunk:", chunk)
     return ""
   end
 end
@@ -72,12 +72,12 @@ function deepseek.request(opts)
         if success then
           assistant_output = deepseek.parse(result, assistant_output)
         else
-          LOG:ERROR("Error occurred:" .. result)
+          LOG:ERROR("Error occurred:", result)
         end
       end),
       on_exit = vim.schedule_wrap(function()
         if assistant_output and assistant_output ~= "" then
-          LOG:TRACE("Assistant output: " .. assistant_output)
+          LOG:TRACE("Assistant output:", assistant_output)
           state.completion.contents[i] = assistant_output
           if opts.exit_handler then
             if state.completion.frontend.name == "blink" then

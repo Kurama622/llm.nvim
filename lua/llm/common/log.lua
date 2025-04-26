@@ -6,33 +6,47 @@ function LOG:setup(enable_trace, log_level)
   self.plugin_name = "llm.nvim"
 end
 
-function LOG:DEBUG(msg)
+local function format_string(...)
+  local args = { ... }
+  for i, v in ipairs(args) do
+    if type(v) == "table" then
+      args[i] = vim.inspect(v)
+    elseif type(v) == "string" then
+      args[i] = v
+    else
+      args[i] = tostring(v)
+    end
+  end
+  return table.concat(args, " ")
+end
+
+function LOG:DEBUG(...)
   if self.log_level <= 0 then
-    vim.notify(msg, vim.log.levels.DEBUG, { title = self.plugin_name })
+    vim.notify(format_string(...), vim.log.levels.DEBUG, { title = self.plugin_name })
   end
 end
 
-function LOG:INFO(msg)
+function LOG:INFO(...)
   if self.log_level <= 1 then
-    vim.notify(msg, vim.log.levels.INFO, { title = self.plugin_name })
+    vim.notify(format_string(...), vim.log.levels.INFO, { title = self.plugin_name })
   end
 end
 
-function LOG:WARN(msg)
+function LOG:WARN(...)
   if self.log_level <= 2 then
-    vim.notify(msg, vim.log.levels.WARN, { title = self.plugin_name })
+    vim.notify(format_string(...), vim.log.levels.WARN, { title = self.plugin_name })
   end
 end
 
-function LOG:ERROR(msg)
+function LOG:ERROR(...)
   if self.log_level <= 3 then
-    vim.notify(msg, vim.log.levels.ERROR, { title = self.plugin_name })
+    vim.notify(format_string(...), vim.log.levels.ERROR, { title = self.plugin_name })
   end
 end
 
-function LOG:TRACE(msg)
+function LOG:TRACE(...)
   if self.enable_trace then
-    vim.notify(msg, vim.log.levels.TRACE, { title = self.plugin_name })
+    vim.notify(format_string(...), vim.log.levels.TRACE, { title = self.plugin_name })
   end
 end
 

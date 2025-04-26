@@ -24,7 +24,7 @@ function completion:init(opts)
       vim.api.nvim_set_keymap(opts.keymap.virtual_text.toggle.mode, opts.keymap.virtual_text.toggle.keys, "", {
         callback = function()
           local codeium_virt_opts = require("codeium.config").options.virtual_text
-          LOG:INFO("Enable codeium completion: " .. tostring(codeium_virt_opts.manual))
+          LOG:INFO("Enable codeium completion:", codeium_virt_opts.manual)
           codeium_virt_opts.manual = not codeium_virt_opts.manual
         end,
         noremap = true,

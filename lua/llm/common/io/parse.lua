@@ -165,7 +165,7 @@ function io_parse.GetOutput(opts)
         if success then
           ctx.assistant_output = parse(result)
         else
-          LOG:ERROR("Error occurred:" .. result)
+          LOG:ERROR("Error occurred:", result)
         end
       end),
       on_stderr = function(_, err)

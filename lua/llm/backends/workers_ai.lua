@@ -15,7 +15,7 @@ function workers_ai.StreamingHandler(chunk, ctx)
     local status, data = pcall(vim.fn.json_decode, json_str)
 
     if not status then
-      LOG:TRACE("json decode error: " .. json_str)
+      LOG:TRACE("json decode error:", json_str)
       return ctx.assistant_output
     end
 
@@ -31,15 +31,15 @@ function workers_ai.ParseHandler(chunk, ctx)
     if chunk and chunk.result then
       ctx.assistant_output = chunk.result.response
     else
-      error(vim.inspect(chunk))
+      LOG:ERROR(chunk)
     end
   end)
 
   if success then
     return ctx.assistant_output
   else
-    LOG:TRACE(vim.inspect(chunk))
-    LOG:ERROR("Error occurred:" .. err)
+    LOG:TRACE(chunk)
+    LOG:ERROR("Error occurred:", err)
     return ""
   end
 end

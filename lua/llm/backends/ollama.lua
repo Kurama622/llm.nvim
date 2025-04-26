@@ -13,7 +13,7 @@ function ollama.StreamingHandler(chunk, ctx)
     ctx.line = ctx.line .. chunk
     local status, data = pcall(vim.fn.json_decode, ctx.line)
     if not status or not data.message.content then
-      LOG:TRACE("json decode error: " .. data)
+      LOG:TRACE("json decode error:", data)
       return ctx.assistant_output
     end
     ctx.assistant_output = ctx.assistant_output .. data.message.content
@@ -28,15 +28,15 @@ function ollama.ParseHandler(chunk, ctx)
     if chunk and chunk.message then
       ctx.assistant_output = chunk.message.content
     else
-      error(vim.inspect(chunk))
+      LOG:ERROR(chunk)
     end
   end)
 
   if success then
     return ctx.assistant_output
   else
-    LOG:TRACE(vim.inspect(chunk))
-    LOG:ERROR("Error occurred:" .. err)
+    LOG:TRACE(chunk)
+    LOG:ERROR("Error occurred:", err)
     return ""
   end
 end

@@ -27,7 +27,7 @@ function glm.StreamingHandler(chunk, ctx)
         local status, data = pcall(vim.fn.json_decode, json_str)
 
         if not status or not data.choices[1].delta.content then
-          LOG:TRACE("json decode error: " .. json_str)
+          LOG:TRACE("json decode error:", json_str)
           break
         end
 
@@ -53,15 +53,15 @@ function glm.ParseHandler(chunk, ctx)
     if chunk and chunk.choices and chunk.choices[1] then
       ctx.assistant_output = chunk.choices[1].message.content
     else
-      error(vim.inspect(chunk))
+      LOG:ERROR(chunk)
     end
   end)
 
   if success then
     return ctx.assistant_output
   else
-    LOG:TRACE(vim.inspect(chunk))
-    LOG:ERROR("Error occurred:" .. err)
+    LOG:TRACE(chunk)
+    LOG:ERROR("Error occurred:", err)
     return ""
   end
 end

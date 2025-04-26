@@ -125,7 +125,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         end
       end,
       on_submit = function(item)
-        LOG:TRACE("Menu Submitted: " .. item.text)
+        LOG:TRACE("Menu Submitted:", item.text)
       end,
     })
 
@@ -166,7 +166,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
             conf.configs.models[item.idx].fetch_key
         end,
         on_submit = function(item)
-          LOG:TRACE("Menu Submitted: " .. item.text)
+          LOG:TRACE("Menu Submitted:", item.text)
         end,
       })
     end
