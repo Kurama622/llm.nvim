@@ -38,7 +38,7 @@ end
 
 function M.auto_trigger()
   for name in pairs(conf.configs.app_handler) do
-    if conf.configs.app_handler[name].opts and conf.configs.app_handler[name].opts.auto_trigger then
+    if conf.configs.app_handler[name].opts and conf.configs.app_handler[name].opts.auto_trigger ~= nil then
       M.LLMAppHandler(name)
     end
   end
