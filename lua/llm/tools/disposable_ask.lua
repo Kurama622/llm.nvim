@@ -151,6 +151,10 @@ function M.handler(_, _, _, _, prompt, opts)
     sess.LLMSelectedTextHandler(description, true, builtin_opts)
   end)
 
+  for _, f in pairs(options.hook) do
+    f(input_box.bufnr, options)
+  end
+
   input_box:map("n", "<esc>", function()
     input_box:unmount()
   end)
