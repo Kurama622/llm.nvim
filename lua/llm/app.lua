@@ -34,6 +34,18 @@ function M.LLMAppHandler(name)
     end)
 
     tool = vim.tbl_deep_extend("force", tool, conf.configs.app_handler[name] or {})
+
+    -- Restore the last selected model parameters
+    -- The tool has configured its own model.
+    if state.models[name] and state.models[name].selected then
+      tool.opts.url, tool.opts.model, tool.opts.api_type, tool.opts.max_tokens, tool.opts.fetch_key =
+        unpack(state.models[name].selected)
+    -- The tool did not specify its own model; instead, it uses the Chat model.
+    elseif tool.opts.url == nil and state.models.Chat and state.models.Chat.selected then
+      tool.opts.url, tool.opts.model, tool.opts.api_type, tool.opts.max_tokens, tool.opts.fetch_key =
+        unpack(state.models.Chat.selected)
+    end
+
     if tool.opts.models then
       F.ModelsPreview(tool.opts, name, function(choice, idx)
         if not choice then

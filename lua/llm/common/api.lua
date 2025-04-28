@@ -768,6 +768,13 @@ function api.ModelsPreview(opts, name, on_choice)
         _table.models[idx].api_type,
         _table.models[idx].max_tokens,
         _table.models[idx].fetch_key
+      state.models[name].selected = {
+        opts.url,
+        opts.model,
+        opts.api_type,
+        opts.max_tokens,
+        opts.fetch_key,
+      }
     end
   state.models[name] = { list = {} }
 
