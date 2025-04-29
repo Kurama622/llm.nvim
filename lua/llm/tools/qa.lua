@@ -164,6 +164,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
     end
   end
 
+  for _, f in pairs(options.hook) do
+    f(input_box.bufnr, options)
+  end
+
   -- Fix the vim.ui.select callback function not entering insert mode
   vim.defer_fn(function()
     vim.api.nvim_command("startinsert")
