@@ -18,7 +18,7 @@ function ollama.parse(chunk, assistant_output)
   else
     -- fix: The request will fail before the ollama model is loaded.
     if not string.find(chunk.error.message, "llm server loading model") then
-      LOG:ERROR(string.format("err: %s, chunk: %s", err, vim.inspect(chunk)))
+      LOG:ERROR("err:", err, "chunk:", chunk)
     end
     return ""
   end
@@ -73,12 +73,12 @@ function ollama.request(opts)
         if success then
           assistant_output = ollama.parse(result, assistant_output)
         else
-          LOG:ERROR("Error occurred:" .. result)
+          LOG:ERROR("Error occurred:", result)
         end
       end),
       on_exit = vim.schedule_wrap(function()
         if assistant_output and assistant_output ~= "" then
-          LOG:TRACE("Assistant output: " .. assistant_output)
+          LOG:TRACE("Assistant output:", assistant_output)
           state.completion.contents[i] = assistant_output
           if opts.exit_handler then
             if state.completion.frontend.name == "blink" then

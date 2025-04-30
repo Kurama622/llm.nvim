@@ -75,8 +75,8 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       if success then
         return ctx.assistant_output
       else
-        LOG:TRACE(vim.inspect(chunk))
-        LOG:ERROR("Error occurred:" .. err)
+        LOG:TRACE(chunk)
+        LOG:ERROR("Error occurred:", err)
         return ""
       end
     end
@@ -107,8 +107,8 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       if success then
         return ctx.assistant_output
       else
-        LOG:TRACE(vim.inspect(chunk))
-        LOG:ERROR("Error occurred:" .. err)
+        LOG:TRACE(chunk)
+        LOG:ERROR("Error occurred:", err)
         return ""
       end
     end

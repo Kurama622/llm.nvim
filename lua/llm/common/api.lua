@@ -760,7 +760,7 @@ function api.ModelsPreview(opts, name, on_choice)
       if not choice then
         return
       else
-        LOG:INFO("Set the current model to " .. choice)
+        LOG:INFO("Set the current model to", choice)
       end
       opts.url, opts.model, opts.api_type, opts.max_tokens, opts.fetch_key =
         _table.models[idx].url,

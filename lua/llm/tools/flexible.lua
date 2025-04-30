@@ -69,7 +69,7 @@ function M.handler(name, F, state, _, prompt, opts)
       if flexible_box then
         flexible_box:mount()
       else
-        LOG:ERROR(string.format([[Your model's output is "%s"]], output))
+        LOG:ERROR("Your model's output is:", output)
         return
       end
 
