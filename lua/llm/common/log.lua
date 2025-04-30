@@ -8,11 +8,16 @@ end
 
 local function format_string(...)
   local args = { ... }
-  for i, v in ipairs(args) do
+  local n = select("#", ...)
+
+  for i = 1, n do
+    local v = args[i]
     if type(v) == "table" then
       args[i] = vim.inspect(v)
     elseif type(v) == "string" then
       args[i] = v
+    elseif type(v) == "function" then
+      args[i] = "<" .. tostring(v) .. ">"
     else
       args[i] = tostring(v)
     end
