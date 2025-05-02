@@ -5,8 +5,12 @@ local api = require("llm.common.api")
 local backends = require("llm.backends")
 local job = require("plenary.job")
 local LOG = require("llm.common.log")
+local state = require("llm.state")
+local io_utils = require("llm.common.io.utils")
 
-local io_parse = {}
+local io_parse = {
+  required_params = {},
+}
 function io_parse.GetOutput(opts)
   local wait_box_opts = ui.wait_ui_opts()
   local wait_box = Popup(wait_box_opts)
@@ -23,65 +27,51 @@ function io_parse.GetOutput(opts)
   ui.show_spinner(waiting_state)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
+  local required_params = io_parse.required_params
 
-  local fetch_key = opts.fetch_key
-    or conf.configs.fetch_key
-    or (conf.configs.models and conf.configs.models[1].fetch_key or nil)
-  if fetch_key ~= nil then
-    LLM_KEY = fetch_key()
+  for _, key in pairs(state.model_params) do
+    if key ~= "streaming_handler" then
+      required_params[key] = io_utils.get_params_value(key, opts)
+    end
+  end
+
+  -- Non-streaming output disable thinking
+  required_params.enable_thinking = false
+
+  if required_params.fetch_key ~= nil then
+    LLM_KEY = required_params.fetch_key()
   end
   local authorization = "Authorization: Bearer " .. LLM_KEY
 
-  local url = opts.url or conf.configs.url or (conf.configs.models and conf.configs.models[1].url or nil)
-  local MODEL = opts.model or conf.configs.model or (conf.configs.models and conf.configs.models[1].model or nil)
-  local api_type = opts.api_type
-    or conf.configs.api_type
-    or (conf.configs.models and conf.configs.models[1].api_type or nil)
-  local parse_handler = opts.parse_handler
-    or conf.configs.parse_handler
-    or (conf.configs.models and conf.configs.models[1].parse_handler or nil)
-  local keep_alive = opts.keep_alive
-    or conf.configs.keep_alive
-    or (conf.configs.models and conf.configs.models[1].keep_alive or nil)
-  local temperatrue = opts.temperature
-    or conf.configs.temperature
-    or (conf.configs.models and conf.configs.models[1].temperatrue or nil)
-  local top_p = opts.top_p or conf.configs.top_p or (conf.configs.models and conf.configs.models[1].top_p or nil)
-  local max_tokens = opts.max_tokens
-    or conf.configs.max_tokens
-    or (conf.configs.models and conf.configs.models[1].max_tokens or nil)
-
   local body = {
     stream = false,
-    max_tokens = max_tokens,
     messages = opts.messages,
   }
 
-  if keep_alive then
-    body.keep_alive = keep_alive
-  end
-
-  if temperatrue then
-    body.temperature = temperatrue
-  end
-
-  if top_p then
-    body.top_p = top_p
+  local params = {
+    max_tokens = required_params.max_tokens,
+    keep_alive = required_params.keep_alive,
+    temperatrue = required_params.temperatrue,
+    top_p = required_params.top_p,
+    enable_thinking = required_params.enable_thinking,
+  }
+  for param_name, param_value in pairs(params) do
+    io_utils.add_request_body_params(body, param_name, param_value)
   end
 
   local ctx = {
     assistant_output = "",
   }
 
-  local parse = backends.get_parse_handler(parse_handler, api_type, conf.configs, ctx)
+  local parse = backends.get_parse_handler(required_params.parse_handler, required_params.api_type, conf.configs, ctx)
   local _args = nil
-  if url ~= nil then
-    body.model = MODEL
+  if required_params.url ~= nil then
+    body.model = required_params.model
 
     if opts.args == nil then
       _args = {
         "-s",
-        url,
+        required_params.url,
         "-N",
         "-X",
         "POST",
@@ -94,7 +84,7 @@ function io_parse.GetOutput(opts)
       }
     else
       local env = {
-        url = url,
+        url = required_params.url,
         LLM_KEY = LLM_KEY,
         body = body,
         authorization = authorization,
@@ -115,7 +105,7 @@ function io_parse.GetOutput(opts)
     if opts.args == nil then
       _args = {
         "-s",
-        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
+        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
         "-N",
         "-X",
         "POST",
@@ -129,7 +119,7 @@ function io_parse.GetOutput(opts)
     else
       local env = {
         ACCOUNT = ACCOUNT,
-        MODEL = MODEL,
+        model = required_params.model,
         LLM_KEY = LLM_KEY,
         body = body,
         authorization = authorization,

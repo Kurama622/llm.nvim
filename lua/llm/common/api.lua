@@ -751,6 +751,19 @@ function api.HistoryPreview(layout_opts, opts)
   end
 end
 
+function api.ResetModel(opts, _table, idx)
+  for _, key in pairs(state.model_params) do
+    opts[key] = _table.models[idx][key]
+  end
+end
+
+function api.SetModelInfo(opts, name)
+  state.models[name].selected = {}
+  for _, key in pairs(state.model_params) do
+    state.models[name].selected[key] = opts[key]
+  end
+end
+
 function api.ModelsPreview(opts, name, on_choice)
   opts = opts or conf.configs
   local _table = opts.models and opts or conf.configs
@@ -762,19 +775,8 @@ function api.ModelsPreview(opts, name, on_choice)
       else
         LOG:INFO("Set the current model to", choice)
       end
-      opts.url, opts.model, opts.api_type, opts.max_tokens, opts.fetch_key =
-        _table.models[idx].url,
-        _table.models[idx].model,
-        _table.models[idx].api_type,
-        _table.models[idx].max_tokens,
-        _table.models[idx].fetch_key
-      state.models[name].selected = {
-        opts.url,
-        opts.model,
-        opts.api_type,
-        opts.max_tokens,
-        opts.fetch_key,
-      }
+      api.ResetModel(opts, _table, idx)
+      api.SetModelInfo(opts, name)
     end
   state.models[name] = { list = {} }
 

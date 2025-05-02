@@ -1,5 +1,6 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local backend_utils = require("llm.backends.utils")
 local openai = {}
 
 function openai.StreamingHandler(chunk, ctx)
@@ -33,8 +34,19 @@ function openai.StreamingHandler(chunk, ctx)
         break
       end
 
-      ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
-      F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
+      -- add reasoning_content
+      if data.choices[1].delta.reasoning_content ~= vim.NIL and data.choices[1].delta.reasoning_content ~= nil then
+        backend_utils.add_think_mark(ctx)
+        ctx.assistant_output = ctx.assistant_output
+          .. backend_utils.format_think(data.choices[1].delta.reasoning_content)
+
+        F.WriteContent(ctx.bufnr, ctx.winid, backend_utils.format_think(data.choices[1].delta.reasoning_content))
+      end
+
+      if data.choices[1].delta.content ~= vim.NIL then
+        ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
+        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
+      end
 
       if end_idx + 2 > #ctx.line then
         ctx.line = ""

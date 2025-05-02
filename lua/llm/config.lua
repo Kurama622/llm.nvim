@@ -230,6 +230,8 @@ M.configs = {
   streaming_handler = nil,
   temperature = nil,
   top_p = nil,
+  enable_thinking = nil,
+  thinking_budget = nil,
   style = "float", -- right | left | above | below | float
   spinner = { text = { "-", "\\", "|", "/" }, hl = "Title" },
 

@@ -1,4 +1,6 @@
-local M = {}
+local M = {
+  required_params = {},
+}
 
 local conf = require("llm.config")
 local job = require("plenary.job")
@@ -6,16 +8,21 @@ local F = require("llm.common.api")
 local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
+local io_utils = require("llm.common.io.utils")
 
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
+  local required_params = M.required_params
 
-  local fetch_key = opts.fetch_key
-    or conf.configs.fetch_key
-    or (conf.configs.models and conf.configs.models[1].fetch_key or nil)
-  if fetch_key ~= nil then
-    LLM_KEY = fetch_key()
+  for _, key in pairs(state.model_params) do
+    if key ~= "parse_handler" then
+      required_params[key] = io_utils.get_params_value(key, opts)
+    end
+  end
+
+  if required_params.fetch_key ~= nil then
+    LLM_KEY = required_params.fetch_key()
   end
 
   local authorization = "Authorization: Bearer " .. LLM_KEY
@@ -24,41 +31,22 @@ function M.GetStreamingOutput(opts)
     authorization = ""
   end
 
-  local url = opts.url or conf.configs.url or (conf.configs.models and conf.configs.models[1].url or nil)
-  local MODEL = opts.model or conf.configs.model or (conf.configs.models and conf.configs.models[1].model or nil)
-  local api_type = opts.api_type
-    or conf.configs.api_type
-    or (conf.configs.models and conf.configs.models[1].api_type or nil)
-  local streaming_handler = opts.streaming_handler
-    or conf.configs.streaming_handler
-    or (conf.configs.models and conf.configs.models[1].streaming_handler or nil)
-  local keep_alive = opts.keep_alive
-    or conf.configs.keep_alive
-    or (conf.configs.models and conf.configs.models[1].keep_alive or nil)
-  local temperatrue = opts.temperature
-    or conf.configs.temperature
-    or (conf.configs.models and conf.configs.models[1].temperatrue or nil)
-  local top_p = opts.top_p or conf.configs.top_p or (conf.configs.models and conf.configs.models[1].top_p or nil)
-  local max_tokens = opts.max_tokens
-    or conf.configs.max_tokens
-    or (conf.configs.models and conf.configs.models[1].max_tokens or nil)
-
+  -- set request body params
   local body = {
     stream = true,
-    max_tokens = max_tokens,
     messages = opts.messages,
   }
 
-  if keep_alive then
-    body.keep_alive = keep_alive
-  end
-
-  if temperatrue then
-    body.temperature = temperatrue
-  end
-
-  if top_p then
-    body.top_p = top_p
+  local params = {
+    max_tokens = required_params.max_tokens,
+    keep_alive = required_params.keep_alive,
+    temperatrue = required_params.temperatrue,
+    top_p = required_params.top_p,
+    enable_thinking = required_params.enable_thinking,
+    thinking_budget = required_params.thinking_budget,
+  }
+  for param_name, param_value in pairs(params) do
+    io_utils.add_request_body_params(body, param_name, param_value)
   end
 
   local ctx = {
@@ -67,16 +55,17 @@ function M.GetStreamingOutput(opts)
     bufnr = opts.bufnr,
     winid = opts.winid,
   }
-  local stream_output = backends.get_streaming_handler(streaming_handler, api_type, conf.configs, ctx)
+  local stream_output =
+    backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
 
   local _args = nil
-  if url ~= nil then
-    body.model = MODEL
+  if required_params.url ~= nil then
+    body.model = required_params.model
 
     if opts.args == nil then
       _args = {
         "-s",
-        url,
+        required_params.url,
         "-N",
         "-X",
         "POST",
@@ -89,7 +78,7 @@ function M.GetStreamingOutput(opts)
       }
     else
       local env = {
-        url = url,
+        url = required_params.url,
         authorization = authorization,
         body = body,
       }
@@ -138,7 +127,7 @@ function M.GetStreamingOutput(opts)
     if opts.args == nil then
       _args = {
         "-s",
-        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, MODEL),
+        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
         "-N",
         "-X",
         "POST",
@@ -152,7 +141,7 @@ function M.GetStreamingOutput(opts)
     else
       local env = {
         ACCOUNT = ACCOUNT,
-        MODEL = MODEL,
+        model = required_params.model,
         authorization = authorization,
         body = body,
       }
@@ -186,7 +175,7 @@ function M.GetStreamingOutput(opts)
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
-      if api_type or streaming_handler then
+      if required_params.api_type or required_params.streaming_handler then
         ctx.assistant_output = stream_output(chunk)
       else
         stream_output(chunk)
@@ -215,6 +204,8 @@ function M.GetStreamingOutput(opts)
       if state.summarize_suggestions.ctx then
         setmetatable(state.summarize_suggestions, { __index = ctx })
       end
+
+      io_utils.reset_io_status()
     end),
   })
   worker.job:start()
