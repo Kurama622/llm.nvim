@@ -35,6 +35,10 @@ function io_parse.GetOutput(opts)
     end
   end
 
+  if required_params.api_type == "workers-ai" then
+    required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
+  end
+
   -- Non-streaming output disable thinking
   required_params.enable_thinking = false
 
@@ -103,6 +107,9 @@ function io_parse.GetOutput(opts)
     end
   else
     if opts.args == nil then
+      LOG:WARN(
+        "[Deprecated Usage] Please configure the url (Note: For cloudflare, you should use https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s"
+      )
       _args = {
         "-s",
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),

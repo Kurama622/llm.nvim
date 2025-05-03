@@ -29,6 +29,10 @@ function M.GetStreamingOutput(opts)
     end
   end
 
+  if required_params.api_type == "workers-ai" then
+    required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
+  end
+
   if required_params.fetch_key ~= nil then
     LLM_KEY = required_params.fetch_key()
   end
@@ -134,6 +138,9 @@ function M.GetStreamingOutput(opts)
     end
   else
     if opts.args == nil then
+      LOG:WARN(
+        "[Deprecated Usage] Please configure the url (Note: For cloudflare, you should use https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s"
+      )
       _args = {
         "-s",
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
