@@ -36,6 +36,14 @@ local function show_session()
     state.llm.winid = state.llm.popup.winid
     vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
     vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
+
+    -- The cursor moves to the location of the model.
+    local model_idx = F.IsValid(state.models.Chat) and state.models.Chat.selected._model_idx or nil
+    if F.IsValid(model_idx) then
+      vim.api.nvim_win_set_cursor(state.models.popup.winid, { model_idx, 0 })
+      local new_node = state.models.popup.tree:get_node(model_idx)
+      state.models.popup._.on_change(new_node)
+    end
   else
     local win_options = {
       split = conf.configs.style,
@@ -282,6 +290,8 @@ function M.NewSession()
           end, { noremap = true })
         elseif k == "Session:Toggle" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
+        elseif k == "Session:Hide" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif conf.configs.save_session and k == "Input:HistoryNext" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.MoveHistoryCursor(1)
@@ -381,6 +391,8 @@ function M.NewSession()
           F.SetSplitKeyMapping(v.mode, v.key, function()
             F.CloseLLM()
           end, { buffer = bufnr, noremap = true, silent = true })
+        elseif k == "Session:Hide" then
+          F.SetSplitKeyMapping(v.mode, v.key, ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             F.HistoryPreview()

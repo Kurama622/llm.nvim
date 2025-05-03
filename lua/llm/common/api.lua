@@ -774,11 +774,12 @@ function api.ResetModel(opts, _table, idx)
   end
 end
 
-function api.SetModelInfo(opts, name)
+function api.SetModelInfo(opts, name, idx)
   state.models[name].selected = {}
   for _, key in pairs(state.model_params) do
     state.models[name].selected[key] = opts[key]
   end
+  state.models[name].selected._model_idx = idx
 end
 
 function api.ModelsPreview(opts, name, on_choice)
@@ -793,7 +794,7 @@ function api.ModelsPreview(opts, name, on_choice)
         LOG:INFO("Set the current model to", choice)
       end
       api.ResetModel(opts, _table, idx)
-      api.SetModelInfo(opts, name)
+      api.SetModelInfo(opts, name, idx)
     end
   state.models[name] = { list = {} }
 

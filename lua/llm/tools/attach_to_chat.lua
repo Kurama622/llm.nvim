@@ -105,9 +105,7 @@ function M.handler(_, _, _, _, _, opts)
     end, bufnr)
   end
 
-  if conf.session.status == -1 then
-    sess.NewSession()
-  end
+  sess.NewSession()
 
   local bufnr_list = F.GetChatUiBufnrList()
   for _, ui_bufnr in ipairs(bufnr_list) do
