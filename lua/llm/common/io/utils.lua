@@ -13,7 +13,8 @@ function utils.add_request_body_params(body, key, val)
 end
 
 function utils.reset_io_status()
-  -- reset think header
-  state.think_mark.created = false
+  -- reset reason header
+  state.reason_range.is_begin = false
+  state.reason_range.is_end = false
 end
 return utils

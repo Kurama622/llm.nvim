@@ -80,7 +80,8 @@ M.summarize_suggestions = {
   status = false,
 }
 
-M.think_mark = {
-  created = false,
+M.reason_range = {
+  is_begin = false,
+  is_end = false,
 }
 return M

@@ -35,15 +35,13 @@ function openai.StreamingHandler(chunk, ctx)
       end
 
       -- add reasoning_content
-      if data.choices[1].delta.reasoning_content ~= vim.NIL and data.choices[1].delta.reasoning_content ~= nil then
-        backend_utils.add_think_mark(ctx)
-        ctx.assistant_output = ctx.assistant_output
-          .. backend_utils.format_think(data.choices[1].delta.reasoning_content)
+      if F.IsValid(data.choices[1].delta.reasoning_content) then
+        backend_utils.mark_reason_begin(ctx)
+        ctx.reasoning_content = ctx.reasoning_content .. data.choices[1].delta.reasoning_content
 
-        F.WriteContent(ctx.bufnr, ctx.winid, backend_utils.format_think(data.choices[1].delta.reasoning_content))
-      end
-
-      if data.choices[1].delta.content ~= vim.NIL then
+        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.reasoning_content)
+      elseif F.IsValid(data.choices[1].delta.content) then
+        backend_utils.mark_reason_end(ctx)
         ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end

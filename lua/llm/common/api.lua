@@ -79,6 +79,20 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
+function api.IsValid(v)
+  if type(v) == "table" then
+    return not vim.tbl_isempty(v)
+  elseif type(v) == "string" then
+    return v ~= ""
+  elseif type(v) == "number" then
+    return v ~= 0
+  elseif v == nil or vim.NIL then
+    return false
+  elseif type(v) == "boolean" then
+    return v
+  end
+end
+
 function api.TrimLeadingWhitespace(str)
   if str == nil then
     return ""
@@ -507,6 +521,9 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
     if msg.role == "system" then
     else
       api.SetRole(bufnr, winid, msg.role, detach)
+      if api.IsValid(msg._llm_reasoning_content) then
+        api.AppendChunkToBuffer(bufnr, winid, msg._llm_reasoning_content, detach)
+      end
       api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
       api.NewLine(bufnr, winid, detach)
     end

@@ -10,6 +10,14 @@ local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 
+local function gen_messages(ctx)
+  local msg = { role = "assistant", content = ctx.assistant_output }
+  if F.IsValid(ctx.reasoning_content) then
+    msg["_llm_reasoning_content"] = ctx.reasoning_content
+  end
+  return msg
+end
+
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
@@ -52,6 +60,7 @@ function M.GetStreamingOutput(opts)
   local ctx = {
     line = "",
     assistant_output = "",
+    reasoning_content = "",
     bufnr = opts.bufnr,
     winid = opts.winid,
   }
@@ -189,7 +198,7 @@ function M.GetStreamingOutput(opts)
       -- TODO: Add error handling
     end,
     on_exit = vim.schedule_wrap(function()
-      table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
+      table.insert(opts.messages, gen_messages(ctx))
       local newline_func = vim.schedule_wrap(function()
         F.NewLine(opts.bufnr, opts.winid)
       end)
