@@ -159,6 +159,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         on_change = function(item)
           item.cmd(state.models.popup, state.models.hl)
           F.ResetModel(conf.configs, conf.configs, item.idx)
+          F.SetModelInfo(conf.configs, "Chat", item.idx)
         end,
         on_submit = function(item)
           LOG:TRACE("Menu Submitted:", item.text)

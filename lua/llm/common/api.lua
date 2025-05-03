@@ -487,6 +487,14 @@ function api.ListFilesInPath()
   return json_file_list
 end
 
+function api.RepositionPopupCursor(popup, pos)
+  if api.IsValid(pos) then
+    vim.api.nvim_win_set_cursor(popup.winid, { pos, 0 })
+    local new_node = popup.tree:get_node(pos)
+    popup._.on_change(new_node)
+  end
+end
+
 function api.MoveHistoryCursor(offset)
   local pos = vim.api.nvim_win_get_cursor(state.history.popup.winid)
   local new_pos = pos[1] + offset
@@ -495,9 +503,7 @@ function api.MoveHistoryCursor(offset)
   elseif new_pos < 1 then
     new_pos = #state.history.list
   end
-  vim.api.nvim_win_set_cursor(state.history.popup.winid, { new_pos, 0 })
-  local new_node = state.history.popup.tree:get_node(new_pos)
-  state.history.popup._.on_change(new_node)
+  api.RepositionPopupCursor(state.history.popup, new_pos)
 end
 
 function api.MoveModelsCursor(offset)
@@ -508,9 +514,7 @@ function api.MoveModelsCursor(offset)
   elseif new_pos < 1 then
     new_pos = #state.models.list
   end
-  vim.api.nvim_win_set_cursor(state.models.popup.winid, { new_pos, 0 })
-  local new_node = state.models.popup.tree:get_node(new_pos)
-  state.models.popup._.on_change(new_node)
+  api.RepositionPopupCursor(state.models.popup, new_pos)
 end
 
 function api.RefreshLLMText(messages, bufnr, winid, detach)
@@ -792,9 +796,12 @@ function api.ModelsPreview(opts, name, on_choice)
         return
       else
         LOG:INFO("Set the current model to", choice)
+        api.ResetModel(opts, _table, idx)
+        api.SetModelInfo(opts, name, idx)
+        if state.models.popup and state.models.popup.winid then
+          api.RepositionPopupCursor(state.models.popup, idx)
+        end
       end
-      api.ResetModel(opts, _table, idx)
-      api.SetModelInfo(opts, name, idx)
     end
   state.models[name] = { list = {} }
 

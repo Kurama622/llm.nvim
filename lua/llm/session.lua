@@ -38,12 +38,11 @@ local function show_session()
     vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
 
     -- The cursor moves to the location of the model.
-    local model_idx = F.IsValid(state.models.Chat) and state.models.Chat.selected._model_idx or nil
-    if F.IsValid(model_idx) then
-      vim.api.nvim_win_set_cursor(state.models.popup.winid, { model_idx, 0 })
-      local new_node = state.models.popup.tree:get_node(model_idx)
-      state.models.popup._.on_change(new_node)
+    local model_idx = nil
+    if F.IsValid(state.models.Chat.selected) then
+      model_idx = state.models.Chat.selected._model_idx
     end
+    F.RepositionPopupCursor(state.models.popup, model_idx)
   else
     local win_options = {
       split = conf.configs.style,
@@ -221,7 +220,7 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
           end, { noremap = true })
-        elseif k == "Session:Toggle" then
+        elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif k == "Focus:Input" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
@@ -288,7 +287,7 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.CloseLLM()
           end, { noremap = true })
-        elseif k == "Session:Toggle" then
+        elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif k == "Session:Hide" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
@@ -379,13 +378,13 @@ function M.NewSession()
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     F.CloseLLM()
                   end, { noremap = true })
-                elseif name == "Session:Toggle" then
+                elseif name == "Session:Toggle" or k == "Session:Open" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, ToggleLLM, { noremap = true })
                 end
               end
             end
           end, { buffer = bufnr, noremap = true, silent = true })
-        elseif k == "Session:Toggle" then
+        elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetSplitKeyMapping(v.mode, v.key, ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Close" then
           F.SetSplitKeyMapping(v.mode, v.key, function()

@@ -55,7 +55,9 @@ M.completion = {
   set_autocmd = false,
 }
 
-M.models = {}
+M.models = {
+  Chat = {},
+}
 
 M.model_params = {
   "url",
