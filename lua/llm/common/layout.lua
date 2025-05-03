@@ -158,12 +158,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
         },
         on_change = function(item)
           item.cmd(state.models.popup, state.models.hl)
-          conf.configs.url, conf.configs.model, conf.configs.api_type, conf.configs.max_tokens, conf.configs.fetch_key =
-            conf.configs.models[item.idx].url,
-            conf.configs.models[item.idx].model,
-            conf.configs.models[item.idx].api_type,
-            conf.configs.models[item.idx].max_tokens,
-            conf.configs.models[item.idx].fetch_key
+          F.ResetModel(conf.configs, conf.configs, item.idx)
         end,
         on_submit = function(item)
           LOG:TRACE("Menu Submitted:", item.text)

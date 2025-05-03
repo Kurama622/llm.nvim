@@ -27,8 +27,6 @@ M.history = {
   foucs_item = nil,
 }
 
-M.models = {}
-
 M.other = {
   popup = nil,
 }
@@ -56,11 +54,34 @@ M.completion = {
   set_keymap = false,
   set_autocmd = false,
 }
+
+M.models = {}
+
+M.model_params = {
+  "url",
+  "model",
+  "api_type",
+  "fetch_key",
+  "streaming_handler",
+  "parse_handler",
+  "max_tokens",
+  "keep_alive",
+  "temperatrue",
+  "top_p",
+  "enable_thinking",
+  "thinking_budget",
+}
+
 M.summarize_suggestions = {
   --- @type nil | {start_str:string, end_str:string}
   pattern = nil,
   ctx = nil,
   prompt = nil,
   status = false,
+}
+
+M.reason_range = {
+  is_begin = false,
+  is_end = false,
 }
 return M

@@ -38,12 +38,15 @@ function M.LLMAppHandler(name)
     -- Restore the last selected model parameters
     -- The tool has configured its own model.
     if state.models[name] and state.models[name].selected then
-      tool.opts.url, tool.opts.model, tool.opts.api_type, tool.opts.max_tokens, tool.opts.fetch_key =
-        unpack(state.models[name].selected)
-    -- The tool did not specify its own model; instead, it uses the Chat model.
+      for _, key in pairs(state.model_params) do
+        tool.opts[key] = state.models[name].selected[key]
+      end
+
+      -- The tool did not specify its own model; instead, it uses the Chat model.
     elseif tool.opts.url == nil and state.models.Chat and state.models.Chat.selected then
-      tool.opts.url, tool.opts.model, tool.opts.api_type, tool.opts.max_tokens, tool.opts.fetch_key =
-        unpack(state.models.Chat.selected)
+      for _, key in pairs(state.model_params) do
+        tool.opts[key] = state.models.Chat.selected[key]
+      end
     end
 
     if tool.opts.models then
@@ -51,12 +54,8 @@ function M.LLMAppHandler(name)
         if not choice then
           return
         end
-        tool.opts.url, tool.opts.model, tool.opts.api_type, tool.opts.max_tokens, tool.opts.fetch_key =
-          tool.opts.models[idx].url,
-          tool.opts.models[idx].model,
-          tool.opts.models[idx].api_type,
-          tool.opts.models[idx].max_tokens,
-          tool.opts.models[idx].fetch_key
+        F.ResetModel(tool.opts, tool.opts, idx)
+        -- Each call requires selecting a model, so there is no need to record the selected model information.
 
         tool.handler(name, F, state, streaming, tool.prompt, tool.opts)
       end)
