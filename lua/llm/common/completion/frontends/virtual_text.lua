@@ -87,13 +87,13 @@ function virtual_text:update_preview()
     self.display_lines = vim.split(state.completion.contents[self.choice], "\n", { plain = true })
     local extmark = {
       id = self.extmark_id,
-      virt_text = { { self.display_lines[1], "Comment" } },
+      virt_text = { { self.display_lines[1], "LLMCodeSuggestion" } },
       virt_text_pos = "inline",
     }
     if #self.display_lines > 1 then
       extmark.virt_lines = {}
       for i = 2, #self.display_lines do
-        extmark.virt_lines[i - 1] = { { self.display_lines[i], "Comment" } }
+        extmark.virt_lines[i - 1] = { { self.display_lines[i], "LLMCodeSuggestion" } }
       end
     end
     self.cursor_col = vim.fn.col(".")

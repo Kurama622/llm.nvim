@@ -1,9 +1,9 @@
 ## Code Completions
 
 > [!NOTE]
-> For Codeium code completion, you need to set up dependencies:
+> For Codeium(Windsurf) code completion, you need to set up dependencies:
 >
-> `dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim", "Exafunction/codeium.nvim" }`,
+> `dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim", "Exafunction/windsurf.nvim" }`,
 <!-- mtoc-start -->
 
 * [Settings](#settings)
@@ -67,6 +67,7 @@ Completion AI tool requires setting `style = "blink.cmp"`
 ```lua
 {
     "saghen/blink.cmp",
+    dependencies = { "Kurama622/llm.nvim" },
     opts = {
       completion = {
         trigger = {
@@ -108,6 +109,7 @@ Completion AI tool requires setting `style = "nvim-cmp"`
 ```lua
 {
   "hrsh7th/nvim-cmp",
+  dependencies = { "Kurama622/llm.nvim" },
   optional = true,
   opts = function(_, opts)
     -- if you wish to use autocomplete
