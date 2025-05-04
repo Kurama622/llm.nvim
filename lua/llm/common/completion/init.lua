@@ -59,6 +59,7 @@ function completion:init(opts)
           module = "codeium.blink",
           enabled = true,
           score_offset = 10,
+          async = true,
         })
       else
         LOG:INFO("Please ensure that blink.cmp has been correctly installed.")
