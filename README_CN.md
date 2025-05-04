@@ -63,6 +63,7 @@
   * [不同解析函数的优先级](#不同解析函数的优先级)
   * [AI生成git commit信息的功能如何与lazygit集成在一起?](#ai生成git-commit信息的功能如何与lazygit集成在一起)
   * [如何切换模型](#如何切换模型)
+  * [如何显示模型的思考（推理）过程](#如何显示模型的思考推理过程)
 
 <!-- mtoc-end -->
 
@@ -885,6 +886,28 @@ export SILICONFLOW_TOKEN=xxxxxxx
     -- Applicable to AI tools with split style and UI interfaces
     ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
   },
+}
+```
+
+[⬆ 返回目录](#目录)
+
+### 如何显示模型的思考（推理）过程
+
+配置`enable_thinking`参数（`thinking_budget`参数可选配）
+
+```lua
+{
+  url = "https://api.siliconflow.cn/v1/chat/completions",
+  api_type = "openai",
+  max_tokens = 4096,
+  model = "Qwen/Qwen3-8B", -- think
+  fetch_key = function()
+    return vim.env.SILICONFLOW_TOKEN
+  end,
+  temperature = 0.3,
+  top_p = 0.7,
+  enable_thinking = true,
+  thinking_budget = 512,
 }
 ```
 [⬆ 返回目录](#目录)

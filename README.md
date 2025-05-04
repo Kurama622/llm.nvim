@@ -60,6 +60,7 @@
   * [Priority of different parse/streaming functions](#priority-of-different-parsestreaming-functions)
   * [How can the AI-generated git commit message feature be integrated with lazygit](#how-can-the-ai-generated-git-commit-message-feature-be-integrated-with-lazygit)
   * [How to switch models](#how-to-switch-models)
+  * [How to display the thinking (reasoning) contents](#how-to-display-the-thinking-reasoning-contents)
 
 <!-- mtoc-end -->
 
@@ -884,6 +885,27 @@ Need to configure models:
     -- Applicable to AI tools with split style and UI interfaces
     ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
   },
+}
+```
+[⬆ back to top](#contents)
+
+### How to display the thinking (reasoning) contents
+
+Configure `enable_thinking` (`thinking_budget` can be optionally configured)
+
+```lua
+{
+  url = "https://api.siliconflow.cn/v1/chat/completions",
+  api_type = "openai",
+  max_tokens = 4096,
+  model = "Qwen/Qwen3-8B", -- think
+  fetch_key = function()
+    return vim.env.SILICONFLOW_TOKEN
+  end,
+  temperature = 0.3,
+  top_p = 0.7,
+  enable_thinking = true,
+  thinking_budget = 512,
 }
 ```
 [⬆ back to top](#contents)
