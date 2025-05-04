@@ -88,6 +88,8 @@ Completion AI tool requires setting `style = "blink.cmp"`
       sources = {
         -- if you want to use auto-complete
         default = { "llm" },
+
+        ---@note Windsurf does not require the following configuration
         providers = {
           llm = {
             name = "llm",
@@ -97,6 +99,7 @@ Completion AI tool requires setting `style = "blink.cmp"`
             async = true,
           },
         },
+
       },
     },
   }
