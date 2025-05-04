@@ -27,15 +27,6 @@ function completion:init(opts)
       }
       require("codeium").setup(codeium_opts)
       pcall(vim.api.nvim_set_hl, 0, "CodeiumSuggestion", { link = "LLMCodeSuggestion", default = true })
-      vim.api.nvim_set_keymap(opts.keymap.virtual_text.toggle.mode, opts.keymap.virtual_text.toggle.keys, "", {
-        callback = function()
-          local codeium_virt_opts = require("codeium.config").options.virtual_text
-          LOG:INFO("Enable codeium completion:", codeium_virt_opts.manual)
-          codeium_virt_opts.manual = not codeium_virt_opts.manual
-        end,
-        noremap = true,
-        silent = true,
-      })
     elseif opts.style == "nvim-cmp" then
       local codeium_opts = {
         enable_cmp_source = true,
@@ -65,6 +56,14 @@ function completion:init(opts)
         LOG:INFO("Please ensure that blink.cmp has been correctly installed.")
       end
     end
+    vim.api.nvim_set_keymap(opts.keymap.toggle.mode, opts.keymap.toggle.keys, "", {
+      callback = function()
+        vim.api.nvim_command("Codeium Toggle")
+      end,
+      desc = "Toggle Windsurf (codeium) Completion",
+      noremap = true,
+      silent = true,
+    })
   else
     self.frontend = require("llm.common.completion.frontends")(opts)
 

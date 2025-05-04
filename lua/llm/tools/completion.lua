@@ -32,10 +32,10 @@ function M.handler(name, F, state, _, prompt, opts)
           mode = "i",
           keys = "<A-p>",
         },
-        toggle = {
-          mode = "n",
-          keys = "<leader>cp",
-        },
+      },
+      toggle = {
+        mode = "n",
+        keys = "<leader>cp",
       },
     },
   }

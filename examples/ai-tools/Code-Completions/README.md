@@ -7,9 +7,11 @@
 <!-- mtoc-start -->
 
 * [Settings](#settings)
-  * [virtual text](#virtual-text)
-  * [blink.cmp](#blinkcmp)
-  * [nvim-cmp](#nvim-cmp)
+  * [Toggle Completion](#toggle-completion)
+  * [Completion style](#completion-style)
+    * [virtual text](#virtual-text)
+    * [blink.cmp](#blinkcmp)
+    * [nvim-cmp](#nvim-cmp)
 * [UI(Icon)](#uiicon)
   * [blink.cmp](#blinkcmp-1)
   * [nvim-cmp](#nvim-cmp-1)
@@ -26,7 +28,24 @@
 
 ## Settings
 
-### virtual text
+### Toggle Completion
+
+```lua
+Completion = {
+  opts = {
+    keymap = {
+      toggle = {
+        mode = "n",
+        keys = "<leader>cp",
+      },
+    },
+  },
+}
+```
+
+### Completion style
+
+#### virtual text
 
 Completion AI tool requires setting `style = "virtual_text"`
 
@@ -48,17 +67,13 @@ Completion = {
           mode = "i",
           keys = "<A-p>",
         },
-        toggle = {
-          mode = "n",
-          keys = "<leader>cp",
-        },
       },
     },
   },
 }
 ```
 
-### blink.cmp
+#### blink.cmp
 
 Completion AI tool requires setting `style = "blink.cmp"`
 
@@ -105,7 +120,7 @@ Completion AI tool requires setting `style = "blink.cmp"`
   }
 ```
 
-### nvim-cmp
+#### nvim-cmp
 
 Completion AI tool requires setting `style = "nvim-cmp"`
 
