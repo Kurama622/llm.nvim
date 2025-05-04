@@ -69,8 +69,8 @@ function completion:init(opts)
 
     if opts.style == "virtual_text" then
       self.frontend:autocmd()
-      self.frontend:keymap()
     end
+    self.frontend:keymap()
   end
 end
 

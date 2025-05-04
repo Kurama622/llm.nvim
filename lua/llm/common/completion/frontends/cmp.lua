@@ -28,9 +28,36 @@ function ncmp:new()
   return source
 end
 
+function ncmp:keymap()
+  if state.completion.set_keymap then
+    return
+  end
+  local callbacks = {
+    toggle = function()
+      state.completion.enable = not state.completion.enable
+      if state.completion.enable then
+        LOG:INFO("Enable llm.nvim completion.")
+      else
+        LOG:INFO("Disable llm.nvim completion.")
+      end
+    end,
+  }
+  for name, km in pairs(self.opts.keymap) do
+    -- "virtual_text" is not needed
+    if name ~= "virtual_text" then
+      vim.api.nvim_set_keymap(km.mode, km.keys, "", {
+        callback = callbacks[name],
+        noremap = true,
+        silent = true,
+      })
+    end
+  end
+  state.completion.set_keymap = true
+end
+
 function ncmp:complete(ctx, callback)
   -- we want to always invoke completion when invoked manually
-  if not self.opts.auto_trigger and ctx.context.option.reason ~= "manual" then
+  if (not state.completion.enable) or (not self.opts.auto_trigger and ctx.context.option.reason ~= "manual") then
     callback()
     return
   end

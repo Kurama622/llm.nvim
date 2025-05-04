@@ -7,6 +7,35 @@ local blink = { name = "blink" }
 
 function blink:clear() end
 
+function blink:autocmd() end
+
+function blink:keymap()
+  if state.completion.set_keymap then
+    return
+  end
+  local callbacks = {
+    toggle = function()
+      state.completion.enable = not state.completion.enable
+      if state.completion.enable then
+        LOG:INFO("Enable llm.nvim completion.")
+      else
+        LOG:INFO("Disable llm.nvim completion.")
+      end
+    end,
+  }
+  for name, km in pairs(self.opts.keymap) do
+    -- "virtual_text" is not needed
+    if name ~= "virtual_text" then
+      vim.api.nvim_set_keymap(km.mode, km.keys, "", {
+        callback = callbacks[name],
+        noremap = true,
+        silent = true,
+      })
+    end
+  end
+  state.completion.set_keymap = true
+end
+
 function blink.get_trigger_characters()
   return { "@", ".", "(", "[", ":", "{", " " }
 end
@@ -19,7 +48,7 @@ function blink.new()
 end
 
 function blink:get_completions(ctx, callback)
-  if not self.opts.auto_trigger and ctx.trigger.kind ~= "manual" then
+  if (not state.completion.enable) or (not self.opts.auto_trigger and ctx.trigger.kind ~= "manual") then
     callback()
     return
   end
