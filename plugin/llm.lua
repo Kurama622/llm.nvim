@@ -20,6 +20,8 @@ local highlight = {
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE" },
 }
 
+local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })
+
 for k, v in pairs(highlight) do
   vim.api.nvim_set_hl(0, k, v)
 end
@@ -50,11 +52,13 @@ end, { nargs = 1 })
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "AutoTrigger",
+  group = llm_augroup,
   callback = app.auto_trigger,
 })
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "OpenLLM",
+  group = llm_augroup,
   callback = OpenLLM,
 })
 
