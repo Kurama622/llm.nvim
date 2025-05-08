@@ -131,7 +131,7 @@ function M.handler(_, _, _, _, prompt, opts)
   end
 
   local input_box = Popup(options)
-  local mode = vim.fn.mode()
+  local mode = options.mode or vim.fn.mode()
 
   input_box:mount()
 

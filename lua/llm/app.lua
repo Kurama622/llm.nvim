@@ -7,7 +7,7 @@ local streaming = require("llm.common.io.streaming").GetStreamingOutput
 
 local state = require("llm.state")
 
-function M.LLMAppHandler(name)
+function M.LLMAppHandler(name, arg_opts)
   if conf.configs.app_handler[name] ~= nil then
     local tool = {
       handler = nil,
@@ -15,6 +15,7 @@ function M.LLMAppHandler(name)
       --- @type nil | table
       opts = {
         hook = {},
+        mode = arg_opts.mode,
       },
     }
 
@@ -68,7 +69,7 @@ end
 function M.auto_trigger()
   for name in pairs(conf.configs.app_handler) do
     if conf.configs.app_handler[name].opts and conf.configs.app_handler[name].opts.auto_trigger ~= nil then
-      M.LLMAppHandler(name)
+      M.LLMAppHandler(name, {})
     end
   end
 end

@@ -47,7 +47,13 @@ vim.api.nvim_create_user_command("LLMSelectedTextHandler", function(args)
 end, { nargs = 1, range = true })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
-  app.LLMAppHandler(args.fargs[1])
+  local arg_opts = {}
+  if args.count == -1 then
+    arg_opts.mode = "n"
+  else
+    arg_opts.mode = "v"
+  end
+  app.LLMAppHandler(args.fargs[1], arg_opts)
 end, {
   nargs = 1,
   range = true,
