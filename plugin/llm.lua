@@ -43,12 +43,26 @@ vim.api.nvim_create_user_command("LLMSessionToggle", function()
 end, {})
 
 vim.api.nvim_create_user_command("LLMSelectedTextHandler", function(args)
-  require("llm.session").LLMSelectedTextHandler(args.fargs[1])
-end, { nargs = 1 })
+  require("llm.session").LLMSelectedTextHandler(args.fargs[1], false, { mode = "v" })
+end, { nargs = 1, range = true })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
-  app.LLMAppHandler(args.fargs[1])
-end, { nargs = 1 })
+  local arg_opts = {}
+  if args.count == -1 and args.range > 0 then
+    arg_opts.mode = "n"
+  else
+    arg_opts.mode = "v"
+  end
+  app.LLMAppHandler(args.fargs[1], arg_opts)
+end, {
+  nargs = 1,
+  range = true,
+  complete = function(arg_lead)
+    return vim.tbl_filter(function(item)
+      return item:find("^" .. vim.pesc(arg_lead))
+    end, vim.tbl_keys(conf.configs.app_handler))
+  end,
+})
 
 vim.api.nvim_create_autocmd("User", {
   pattern = "AutoTrigger",

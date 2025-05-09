@@ -87,7 +87,7 @@ function M.handler(_, _, _, _, _, opts)
     },
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
-  options.mode = vim.fn.mode()
+  options.mode = options.mode or vim.fn.mode()
   local bufnr = F.GetAttach(options)
   LOG:INFO("Attach successfully!")
 
