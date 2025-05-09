@@ -45,6 +45,13 @@ function ollama.request(opts)
     body["keep_alive"] = opts.keep_alive
   end
 
+  local LLM_KEY = vim.env.LLM_KEY or ""
+  if opts.fetch_key ~= nil then
+    LLM_KEY = opts.fetch_key()
+  end
+
+  local authorization = "Authorization: Bearer " .. LLM_KEY
+
   local _args = {
     "-L",
     "-s",
@@ -54,6 +61,8 @@ function ollama.request(opts)
     "POST",
     "-H",
     "Content-Type: application/json",
+    "-H",
+    authorization,
     "--max-time",
     opts.timeout,
     "-d",
