@@ -48,7 +48,7 @@ end, { nargs = 1, range = true })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
   local arg_opts = {}
-  if args.count == -1 then
+  if args.count == -1 and args.range > 0 then
     arg_opts.mode = "n"
   else
     arg_opts.mode = "v"
@@ -57,8 +57,10 @@ vim.api.nvim_create_user_command("LLMAppHandler", function(args)
 end, {
   nargs = 1,
   range = true,
-  complete = function()
-    return vim.tbl_keys(conf.configs.app_handler)
+  complete = function(arg_lead)
+    return vim.tbl_filter(function(item)
+      return item:find("^" .. vim.pesc(arg_lead))
+    end, vim.tbl_keys(conf.configs.app_handler))
   end,
 })
 
