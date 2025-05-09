@@ -44,6 +44,8 @@ function ollama.request(opts)
   if opts.keep_alive then
     body["keep_alive"] = opts.keep_alive
   end
+
+  local LLM_KEY = vim.env.LLM_KEY or ""
   if opts.fetch_key ~= nil then
     LLM_KEY = opts.fetch_key()
   end
