@@ -3,13 +3,21 @@ local conf = require("llm.config")
 local state = require("llm.state")
 
 function utils.get_params_value(key, opts)
-  return opts[key] or conf.configs[key] or (conf.configs.models and conf.configs.models[1][key] or nil)
+  local val = opts[key]
+
+  if val == nil then
+    val = conf.configs[key]
+  end
+
+  if val == nil and not vim.tbl_isempty(conf.configs.models) then
+    val = conf.configs.models[1][key]
+  end
+
+  return val
 end
 
 function utils.add_request_body_params(body, key, val)
-  if val then
-    body[key] = val
-  end
+  body[key] = val
 end
 
 function utils.reset_io_status()
