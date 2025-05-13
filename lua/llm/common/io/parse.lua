@@ -39,9 +39,6 @@ function io_parse.GetOutput(opts)
     required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
   end
 
-  -- Non-streaming output disable thinking
-  required_params.enable_thinking = false
-
   if required_params.fetch_key ~= nil then
     LLM_KEY = required_params.fetch_key()
   end
