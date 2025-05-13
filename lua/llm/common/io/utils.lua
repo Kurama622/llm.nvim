@@ -1,6 +1,7 @@
 local utils = {}
 local conf = require("llm.config")
 local state = require("llm.state")
+local F = require("llm.common.api")
 
 function utils.get_params_value(key, opts)
   local val = opts[key]
@@ -9,7 +10,7 @@ function utils.get_params_value(key, opts)
     val = conf.configs[key]
   end
 
-  if val == nil and not vim.tbl_isempty(conf.configs.models) then
+  if val == nil and F.IsValid(conf.configs.models) then
     val = conf.configs.models[1][key]
   end
 
