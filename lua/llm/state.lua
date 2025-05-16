@@ -72,6 +72,7 @@ M.model_params = {
   "top_p",
   "enable_thinking",
   "thinking_budget",
+  "timeout", -- for curl
 }
 
 M.summarize_suggestions = {

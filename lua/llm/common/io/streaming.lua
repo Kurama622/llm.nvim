@@ -57,6 +57,7 @@ function M.GetStreamingOutput(opts)
     enable_thinking = required_params.enable_thinking,
     thinking_budget = required_params.thinking_budget,
   }
+
   for param_name, param_value in pairs(params) do
     io_utils.add_request_body_params(body, param_name, param_value)
   end
@@ -78,6 +79,8 @@ function M.GetStreamingOutput(opts)
     if opts.args == nil then
       _args = {
         "-s",
+        "-m",
+        required_params.timeout,
         required_params.url,
         "-N",
         "-X",
@@ -143,6 +146,8 @@ function M.GetStreamingOutput(opts)
       )
       _args = {
         "-s",
+        "-m",
+        required_params.timeout,
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
         "-N",
         "-X",

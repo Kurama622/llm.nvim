@@ -56,6 +56,7 @@ function io_parse.GetOutput(opts)
     top_p = required_params.top_p,
     enable_thinking = required_params.enable_thinking,
   }
+
   for param_name, param_value in pairs(params) do
     io_utils.add_request_body_params(body, param_name, param_value)
   end
@@ -72,6 +73,8 @@ function io_parse.GetOutput(opts)
     if opts.args == nil then
       _args = {
         "-s",
+        "-m",
+        required_params.timeout,
         required_params.url,
         "-N",
         "-X",
@@ -109,6 +112,8 @@ function io_parse.GetOutput(opts)
       )
       _args = {
         "-s",
+        "-m",
+        required_params.timeout,
         string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
         "-N",
         "-X",
