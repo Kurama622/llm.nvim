@@ -157,8 +157,11 @@ end
 
 function openai.GetToolsRespond(chunk, msg)
   if F.IsValid(chunk) then
-    for _, item in ipairs(vim.json.decode(chunk).choices[1].message.tool_calls) do
-      table.insert(msg, item)
+    local tool_calls = vim.json.decode(chunk).choices[1].message.tool_calls
+    if F.IsValid(tool_calls) then
+      for _, item in ipairs(tool_calls) do
+        table.insert(msg, item)
+      end
     end
   end
 end
