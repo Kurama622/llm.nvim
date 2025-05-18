@@ -1,5 +1,7 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local job = require("plenary.job")
+local io_utils = require("llm.common.io.utils")
 local backend_utils = require("llm.backends.utils")
 local openai = {}
 
@@ -77,6 +79,87 @@ function openai.ParseHandler(chunk, ctx)
     LOG:TRACE(chunk)
     LOG:ERROR("Error occurred:", err)
     return ""
+  end
+end
+
+function openai.FunctionCalling(ctx, chunk, messages)
+  local msg = vim.json.decode(chunk).choices[1].message
+  if not F.IsValid(msg.tool_calls) then
+    return
+  end
+  local N = vim.tbl_count(msg.tool_calls)
+
+  for i = 1, N do
+    local name = msg.tool_calls[i]["function"].name
+    local id = msg.tool_calls[i].id
+
+    local params = vim.json.decode(msg.tool_calls[i]["function"].arguments)
+    local keys = vim.tbl_filter(function(item)
+      return item["function"].name == name
+    end, ctx.body.tools)[1]["function"].parameters.required
+
+    local p = {}
+
+    for _, k in pairs(keys) do
+      table.insert(p, params[k])
+    end
+    local fstring = string.dump(ctx.functions_tbl[name])
+    local tool_func = load(fstring)
+
+    if tool_func == nil then
+      LOG:ERROR("please configure your `functions_tbl`")
+      return
+    end
+    local res = tool_func(unpack(p))
+    table.insert(ctx.body.messages, msg)
+    table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
+  end
+  table.insert(ctx.args, vim.fn.json_encode(ctx.body))
+  job
+    :new({
+      command = "curl",
+      args = ctx.args,
+      on_stdout = vim.schedule_wrap(function(_, c)
+        if ctx.stream then
+          ctx.assistant_output = openai.StreamingHandler(c, ctx)
+        else
+          openai.ParseHandler(vim.fn.json_decode(c), ctx)
+        end
+      end),
+      on_exit = vim.schedule_wrap(function()
+        if ctx.callback then
+          ctx.callback()
+        end
+      end),
+    })
+    :start()
+end
+
+function openai.AppendToolsRespond(chunk, msg)
+  if chunk == "data: [DONE]" then
+    return
+  end
+  if F.IsValid(chunk) then
+    local tool_calls = vim.json.decode(chunk:sub(7)).choices[1].delta.tool_calls
+    if F.IsValid(tool_calls) then
+      if F.IsValid(tool_calls[1].id) then
+        table.insert(msg, { id = tool_calls[1].id, type = "function", ["function"] = { name = "", arguments = "" } })
+      end
+      if F.IsValid(tool_calls[1]["function"].name) then
+        msg[#msg]["function"].name = msg[#msg]["function"].name .. tool_calls[1]["function"].name
+      end
+      if F.IsValid(tool_calls[1]["function"].arguments) then
+        msg[#msg]["function"].arguments = msg[#msg]["function"].arguments .. tool_calls[1]["function"].arguments
+      end
+    end
+  end
+end
+
+function openai.GetToolsRespond(chunk, msg)
+  if F.IsValid(chunk) then
+    for _, item in ipairs(vim.json.decode(chunk).choices[1].message.tool_calls) do
+      table.insert(msg, item)
+    end
   end
 end
 return openai

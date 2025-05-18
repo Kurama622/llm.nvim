@@ -26,4 +26,13 @@ function utils.reset_io_status()
   state.reason_range.is_begin = false
   state.reason_range.is_end = false
 end
+
+function utils.gen_messages(ctx)
+  local msg = { role = "assistant", content = ctx.assistant_output }
+  if F.IsValid(ctx.reasoning_content) then
+    msg["_llm_reasoning_content"] = ctx.reasoning_content
+  end
+  return msg
+end
+
 return utils
