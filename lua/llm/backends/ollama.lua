@@ -79,10 +79,16 @@ function ollama.FunctionCalling(ctx, chunk, messages)
       command = "curl",
       args = ctx.args,
       on_stdout = vim.schedule_wrap(function(_, c)
-        ctx.assistant_output = ollama.StreamingHandler(c, ctx)
+        if ctx.stream then
+          ctx.assistant_output = ollama.StreamingHandler(c, ctx)
+        else
+          ctx.assistant_output = ollama.ParseHandler(vim.fn.json_decode(c), ctx)
+        end
       end),
       on_exit = vim.schedule_wrap(function()
-        table.insert(messages, io_utils.gen_messages(ctx))
+        if ctx.callback then
+          ctx.callback()
+        end
       end),
     })
     :start()
@@ -102,4 +108,11 @@ function ollama.AppendToolsRespond(chunk, msg)
   end
 end
 
+function ollama.GetToolsRespond(chunk, msg)
+  if F.IsValid(chunk) then
+    for _, item in ipairs(vim.json.decode(chunk).message.tool_calls) do
+      table.insert(msg, item)
+    end
+  end
+end
 return ollama
