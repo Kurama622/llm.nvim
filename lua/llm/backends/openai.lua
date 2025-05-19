@@ -1,7 +1,6 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
 local job = require("plenary.job")
-local io_utils = require("llm.common.io.utils")
 local backend_utils = require("llm.backends.utils")
 local openai = {}
 
@@ -65,6 +64,9 @@ function openai.StreamingHandler(chunk, ctx)
 end
 
 function openai.ParseHandler(chunk, ctx)
+  if type(chunk) == "string" then
+    chunk = vim.fn.json_encode(chunk)
+  end
   local success, err = pcall(function()
     if chunk and chunk.choices and chunk.choices[1] then
       ctx.assistant_output = chunk.choices[1].message.content
@@ -82,7 +84,7 @@ function openai.ParseHandler(chunk, ctx)
   end
 end
 
-function openai.FunctionCalling(ctx, chunk, messages)
+function openai.FunctionCalling(ctx, chunk)
   local msg = vim.json.decode(chunk).choices[1].message
   if not F.IsValid(msg.tool_calls) then
     return
@@ -123,7 +125,7 @@ function openai.FunctionCalling(ctx, chunk, messages)
         if ctx.stream then
           ctx.assistant_output = openai.StreamingHandler(c, ctx)
         else
-          openai.ParseHandler(vim.fn.json_decode(c), ctx)
+          openai.ParseHandler(c, ctx)
         end
       end),
       on_exit = vim.schedule_wrap(function()

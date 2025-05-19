@@ -28,6 +28,8 @@ local function exit_callback(opts, ctx, worker)
   end
 
   io_utils.reset_io_status()
+  -- reset tool_calls content
+  backends.msg_tool_calls_content = {}
 end
 
 function M.GetStreamingOutput(opts)
@@ -236,8 +238,7 @@ function M.GetStreamingOutput(opts)
           exit_callback(opts, ctx, worker)
         end
         backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-          vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)),
-          opts.messages
+          vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
         )
       else
         exit_callback(opts, ctx, worker)

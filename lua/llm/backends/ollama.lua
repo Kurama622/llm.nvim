@@ -26,6 +26,9 @@ function ollama.StreamingHandler(chunk, ctx)
 end
 
 function ollama.ParseHandler(chunk, ctx)
+  if type(chunk) == "string" then
+    chunk = vim.fn.json_encode(chunk)
+  end
   local success, err = pcall(function()
     if chunk and chunk.message then
       ctx.assistant_output = chunk.message.content
@@ -43,7 +46,7 @@ function ollama.ParseHandler(chunk, ctx)
   end
 end
 
-function ollama.FunctionCalling(ctx, chunk, messages)
+function ollama.FunctionCalling(ctx, chunk)
   local msg = vim.json.decode(chunk).message
   local N = vim.tbl_count(msg.tool_calls)
 
@@ -82,7 +85,7 @@ function ollama.FunctionCalling(ctx, chunk, messages)
         if ctx.stream then
           ctx.assistant_output = ollama.StreamingHandler(c, ctx)
         else
-          ctx.assistant_output = ollama.ParseHandler(vim.fn.json_decode(c), ctx)
+          ctx.assistant_output = ollama.ParseHandler(c, ctx)
         end
       end),
       on_exit = vim.schedule_wrap(function()

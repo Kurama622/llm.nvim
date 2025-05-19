@@ -138,38 +138,38 @@ end
 function backends.get_function_calling(api_type, configs, ctx)
   if api_type then
     if api_type == "workers-ai" then
-      return function(chunk, messages)
+      return function(chunk)
         LOG:ERROR("Workers_ai do not support function-calling.")
       end
     elseif api_type == "zhipu" then
-      return function(chunk, messages)
+      return function(chunk)
         LOG:ERROR("GLM do not support function-calling.")
       end
     elseif api_type == "openai" then
-      return function(chunk, messages)
-        return require("llm.backends.openai").FunctionCalling(ctx, chunk, messages)
+      return function(chunk)
+        return require("llm.backends.openai").FunctionCalling(ctx, chunk)
       end
     elseif api_type == "ollama" then
-      return function(chunk, messages)
-        return require("llm.backends.ollama").FunctionCalling(ctx, chunk, messages)
+      return function(chunk)
+        return require("llm.backends.ollama").FunctionCalling(ctx, chunk)
       end
     end
   elseif configs.api_type then
     if configs.api_type == "workers-ai" then
-      return function(chunk, messages)
+      return function(chunk)
         LOG:ERROR("Workers-ai do not support function-calling.")
       end
     elseif configs.api_type == "zhipu" then
-      return function(chunk, messages)
+      return function(chunk)
         LOG:ERROR("GLM do not support function-calling.")
       end
     elseif configs.api_type == "openai" then
-      return function(chunk, messages)
-        return require("llm.backends.openai").FunctionCalling(ctx, chunk, messages)
+      return function(chunk)
+        return require("llm.backends.openai").FunctionCalling(ctx, chunk)
       end
     elseif configs.api_type == "ollama" then
-      return function(chunk, messages)
-        return require("llm.backends.ollama").FunctionCalling(ctx, chunk, messages)
+      return function(chunk)
+        return require("llm.backends.ollama").FunctionCalling(ctx, chunk)
       end
     end
   end
