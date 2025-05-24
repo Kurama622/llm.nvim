@@ -7,10 +7,25 @@ local job = require("plenary.job")
 local LOG = require("llm.common.log")
 local state = require("llm.state")
 local io_utils = require("llm.common.io.utils")
+local F = require("llm.common.api")
 
 local io_parse = {
   required_params = {},
 }
+local function exit_callback(opts, ctx, waiting_state)
+  table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
+  waiting_state.box:unmount()
+  waiting_state.finish = true
+  if opts.exit_handler ~= nil then
+    local callback_func = vim.schedule_wrap(function()
+      opts.exit_handler(ctx.assistant_output)
+    end)
+    callback_func()
+  end
+  -- reset tool_calls content
+  backends.msg_tool_calls_content = {}
+end
+
 function io_parse.GetOutput(opts)
   local wait_box_opts = ui.wait_ui_opts()
   local wait_box = Popup(wait_box_opts)
@@ -47,6 +62,7 @@ function io_parse.GetOutput(opts)
   local body = {
     stream = false,
     messages = opts.messages,
+    tools = required_params.schema,
   }
 
   local params = {
@@ -63,6 +79,9 @@ function io_parse.GetOutput(opts)
 
   local ctx = {
     assistant_output = "",
+    body = body,
+    functions_tbl = required_params.functions_tbl,
+    stream = false,
   }
 
   local parse = backends.get_parse_handler(required_params.parse_handler, required_params.api_type, conf.configs, ctx)
@@ -146,6 +165,7 @@ function io_parse.GetOutput(opts)
       end
     end
   end
+  ctx.args = F.tbl_slice(_args, 1, -2)
 
   job
     :new({
@@ -166,6 +186,9 @@ function io_parse.GetOutput(opts)
         else
           LOG:ERROR("Error occurred:", result)
         end
+        if ctx.body.tools ~= nil then
+          backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
+        end
       end),
       on_stderr = function(_, err)
         if err ~= nil then
@@ -174,14 +197,15 @@ function io_parse.GetOutput(opts)
         -- TODO: Add error handling
       end,
       on_exit = vim.schedule_wrap(function()
-        table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
-        waiting_state.box:unmount()
-        waiting_state.finish = true
-        if opts.exit_handler ~= nil then
-          local callback_func = vim.schedule_wrap(function()
-            opts.exit_handler(ctx.assistant_output)
-          end)
-          callback_func()
+        if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
+          ctx.callback = function()
+            exit_callback(opts, ctx, waiting_state)
+          end
+          backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
+            vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
+          )
+        else
+          exit_callback(opts, ctx, waiting_state)
         end
       end),
     })

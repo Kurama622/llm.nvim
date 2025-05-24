@@ -10,12 +10,26 @@ local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 
-local function gen_messages(ctx)
-  local msg = { role = "assistant", content = ctx.assistant_output }
-  if F.IsValid(ctx.reasoning_content) then
-    msg["_llm_reasoning_content"] = ctx.reasoning_content
+local function exit_callback(opts, ctx, worker)
+  table.insert(opts.messages, io_utils.gen_messages(ctx))
+  local newline_func = vim.schedule_wrap(function()
+    F.NewLine(opts.bufnr, opts.winid)
+  end)
+  newline_func()
+  worker.job = nil
+  if opts.exit_handler ~= nil then
+    local callback_func = vim.schedule_wrap(function()
+      opts.exit_handler(ctx.assistant_output)
+    end)
+    callback_func()
   end
-  return msg
+  if state.summarize_suggestions.ctx then
+    setmetatable(state.summarize_suggestions, { __index = ctx })
+  end
+
+  io_utils.reset_io_status()
+  -- reset tool_calls content
+  backends.msg_tool_calls_content = {}
 end
 
 function M.GetStreamingOutput(opts)
@@ -47,6 +61,7 @@ function M.GetStreamingOutput(opts)
   local body = {
     stream = true,
     messages = opts.messages,
+    tools = required_params.schema,
   }
 
   local params = {
@@ -68,6 +83,9 @@ function M.GetStreamingOutput(opts)
     reasoning_content = "",
     bufnr = opts.bufnr,
     winid = opts.winid,
+    body = body,
+    functions_tbl = required_params.functions_tbl,
+    stream = true,
   }
   local stream_output =
     backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
@@ -191,6 +209,8 @@ function M.GetStreamingOutput(opts)
       end
     end
   end
+  ctx.args = F.tbl_slice(_args, 1, -2)
+
   local worker = { job = nil }
   worker.job = job:new({
     command = "curl",
@@ -201,6 +221,9 @@ function M.GetStreamingOutput(opts)
       else
         stream_output(chunk)
       end
+      if ctx.body.tools ~= nil then
+        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(chunk)
+      end
       -- TODO: Add stdout handling
     end),
     on_stderr = function(_, err)
@@ -210,23 +233,16 @@ function M.GetStreamingOutput(opts)
       -- TODO: Add error handling
     end,
     on_exit = vim.schedule_wrap(function()
-      table.insert(opts.messages, gen_messages(ctx))
-      local newline_func = vim.schedule_wrap(function()
-        F.NewLine(opts.bufnr, opts.winid)
-      end)
-      newline_func()
-      worker.job = nil
-      if opts.exit_handler ~= nil then
-        local callback_func = vim.schedule_wrap(function()
-          opts.exit_handler(ctx.assistant_output)
-        end)
-        callback_func()
+      if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
+        ctx.callback = function()
+          exit_callback(opts, ctx, worker)
+        end
+        backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
+          vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
+        )
+      else
+        exit_callback(opts, ctx, worker)
       end
-      if state.summarize_suggestions.ctx then
-        setmetatable(state.summarize_suggestions, { __index = ctx })
-      end
-
-      io_utils.reset_io_status()
     end),
   })
   worker.job:start()

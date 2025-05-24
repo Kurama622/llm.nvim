@@ -73,6 +73,8 @@ M.model_params = {
   "enable_thinking",
   "thinking_budget",
   "timeout", -- for curl
+  "schema",
+  "functions_tbl",
 }
 
 M.summarize_suggestions = {

@@ -55,6 +55,7 @@ function M.handler(_, _, _, _, prompt, opts)
   local options = {
     inline_assistant = false,
     language = "English",
+    timeout = 30,
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",

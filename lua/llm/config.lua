@@ -222,7 +222,7 @@ M.prefix = {
 -- default configs
 M.configs = {
   prompt = "",
-  timeout = 10,
+  timeout = 30,
   max_tokens = nil,
   model = nil,
   url = nil,
@@ -233,6 +233,8 @@ M.configs = {
   top_p = nil,
   enable_thinking = nil,
   thinking_budget = nil,
+  schema = nil,
+  functions_tbl = nil,
   style = "float", -- right | left | above | below | float
   spinner = { text = { "-", "\\", "|", "/" }, hl = "Title" },
 

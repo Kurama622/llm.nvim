@@ -522,8 +522,8 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
   winid = winid or state.llm.popup.winid
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
   for _, msg in ipairs(messages) do
-    if msg.role == "system" then
-    else
+    if msg.role == "system" or msg.role == "tool" then
+    elseif api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if api.IsValid(msg._llm_reasoning_content) then
         api.AppendChunkToBuffer(bufnr, winid, msg._llm_reasoning_content, detach)
@@ -818,6 +818,23 @@ function api.ModelsPreview(opts, name, on_choice)
       return item
     end,
   }, on_choice)
+end
+
+function api.tbl_slice(t, i, j)
+  local n = #t
+  i = i or 1
+  j = j or n
+  if i < 0 then
+    i = n + i + 1
+  end
+  if j < 0 then
+    j = n + j + 1
+  end
+  local sliced = {}
+  for k = i, j do
+    table.insert(sliced, t[k])
+  end
+  return sliced
 end
 
 return api
