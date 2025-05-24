@@ -49,6 +49,7 @@ function M.handler(_, _, _, _, _, opts)
     is_codeblock = false,
     inline_assistant = false,
     language = "English",
+    timeout = 30,
 
     display = {
       mapping = {

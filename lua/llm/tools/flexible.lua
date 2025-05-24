@@ -15,6 +15,7 @@ function M.handler(name, F, state, _, prompt, opts)
     exit_on_move = false,
     enter_flexible_window = true,
     apply_visual_selection = true,
+    timeout = 30,
     win_opts = {},
     accept = {
       mapping = {
