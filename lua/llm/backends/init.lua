@@ -136,43 +136,24 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
 end
 
 function backends.get_function_calling(api_type, configs, ctx)
-  if api_type then
-    if api_type == "workers-ai" then
-      return function(chunk)
+  local function handle_api_type(type)
+    local api_handlers = {
+      ["workers-ai"] = function(chunk)
         LOG:ERROR("Workers_ai do not support function-calling.")
-      end
-    elseif api_type == "zhipu" then
-      return function(chunk)
+      end,
+      ["zhipu"] = function(chunk)
         LOG:ERROR("GLM do not support function-calling.")
-      end
-    elseif api_type == "openai" then
-      return function(chunk)
+      end,
+      ["openai"] = function(chunk)
         return require("llm.backends.openai").FunctionCalling(ctx, chunk)
-      end
-    elseif api_type == "ollama" then
-      return function(chunk)
+      end,
+      ["ollama"] = function(chunk)
         return require("llm.backends.ollama").FunctionCalling(ctx, chunk)
-      end
-    end
-  elseif configs.api_type then
-    if configs.api_type == "workers-ai" then
-      return function(chunk)
-        LOG:ERROR("Workers-ai do not support function-calling.")
-      end
-    elseif configs.api_type == "zhipu" then
-      return function(chunk)
-        LOG:ERROR("GLM do not support function-calling.")
-      end
-    elseif configs.api_type == "openai" then
-      return function(chunk)
-        return require("llm.backends.openai").FunctionCalling(ctx, chunk)
-      end
-    elseif configs.api_type == "ollama" then
-      return function(chunk)
-        return require("llm.backends.ollama").FunctionCalling(ctx, chunk)
-      end
-    end
+      end,
+    }
+    return api_handlers[type] or nil
   end
+  return handle_api_type(api_type) or handle_api_type(configs.api_type)
 end
 
 function backends.get_tools_respond(api_type, configs, ctx)
