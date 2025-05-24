@@ -7,6 +7,8 @@ function LOG:setup(enable_trace, log_level)
 end
 
 local function format_string(...)
+  local info = debug.getinfo(3, "n")
+  local fn = info and info.name or "anonymous"
   local args = { ... }
   local n = select("#", ...)
 
@@ -22,7 +24,7 @@ local function format_string(...)
       args[i] = tostring(v)
     end
   end
-  return table.concat(args, " ")
+  return string.format("[%s] %s", fn, table.concat(args, " "))
 end
 
 function LOG:DEBUG(...)

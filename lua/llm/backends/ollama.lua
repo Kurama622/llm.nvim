@@ -27,7 +27,7 @@ end
 
 function ollama.ParseHandler(chunk, ctx)
   if type(chunk) == "string" then
-    chunk = vim.fn.json_encode(chunk)
+    chunk = vim.fn.json_decode(chunk)
   end
   local success, err = pcall(function()
     if chunk and chunk.message then
@@ -113,8 +113,11 @@ end
 
 function ollama.GetToolsRespond(chunk, msg)
   if F.IsValid(chunk) then
-    for _, item in ipairs(vim.json.decode(chunk).message.tool_calls) do
-      table.insert(msg, item)
+    local tool_calls = vim.json.decode(chunk).message.tool_calls
+    if F.IsValid(tool_calls) then
+      for _, item in ipairs(tool_calls) do
+        table.insert(msg, item)
+      end
     end
   end
 end

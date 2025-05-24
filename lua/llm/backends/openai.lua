@@ -65,7 +65,7 @@ end
 
 function openai.ParseHandler(chunk, ctx)
   if type(chunk) == "string" then
-    chunk = vim.fn.json_encode(chunk)
+    chunk = vim.fn.json_decode(chunk)
   end
   local success, err = pcall(function()
     if chunk and chunk.choices and chunk.choices[1] then
@@ -141,8 +141,9 @@ function openai.AppendToolsRespond(chunk, msg)
   if chunk == "data: [DONE]" then
     return
   end
-  if F.IsValid(chunk) then
-    local tool_calls = vim.json.decode(chunk:sub(7)).choices[1].delta.tool_calls
+  local chunk_json = F.IsValid(chunk) and vim.json.decode(chunk:sub(7)) or nil
+  if F.IsValid(chunk_json) and F.IsValid(chunk.choices) and F.IsValid(chunk.choices.delta) then
+    local tool_calls = chunk_json.choices[1].delta.tool_calls
     if F.IsValid(tool_calls) then
       if F.IsValid(tool_calls[1].id) then
         table.insert(msg, { id = tool_calls[1].id, type = "function", ["function"] = { name = "", arguments = "" } })
