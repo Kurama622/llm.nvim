@@ -6,12 +6,15 @@ local F = require("llm.common.api")
 function utils.get_params_value(key, opts)
   local val = opts[key]
 
-  if val == nil then
-    val = conf.configs[key]
-  end
+  -- opts already configured
+  if not F.IsValid(opts.url) then
+    if val == nil then
+      val = conf.configs[key]
+    end
 
-  if val == nil and F.IsValid(conf.configs.models) then
-    val = conf.configs.models[1][key]
+    if val == nil and F.IsValid(conf.configs.models) then
+      val = conf.configs.models[1][key]
+    end
   end
 
   return val
