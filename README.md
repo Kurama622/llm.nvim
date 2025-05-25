@@ -219,7 +219,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | ------------------ | -------                                                                                                                                                                                                    |
 | url                | Model entpoint                                                                                                                                                                                             |
 | model              | Model name                                                                                                                                                                                                 |
-| api_type           | Result parsing format                                                                                                                                                                                      |
+| api_type           | Result parsing format (`openai`, `zhipu`, `workers-ai`, `ollama`)                                                                                                                                                                                     |
 | timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                            |
 | fetch_key          | Function that returns the API key                                                                                                                                                                          |
 | max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                       |
@@ -248,7 +248,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | split       | Output:Cancel     | Cancel dialog response                                                                        | `[n] ctrl+c`             |
 | split       | Output:Resend     | Rerespond to the dialog                                                                       | `[n] ctrl+r`             |
 | float/split | Session:Toggle    | Toggle session                                                                                | `[n] <leader>ac`         |
-| float/split | Session:Close     | Close session                                                                                 | `n <esc>`                |
+| float/split | Session:Close     | Close session                                                                                 | `[n] <esc>`                |
 | float/split | Session:Models    | Open the model-list window                                                                    | `[n] ctrl+m`             |
 | split       | Session:History   | Open the history window (`j`: next, `k`: previous, `<cr>`: select, `<esc>`: close)            | `[n] ctrl+h`             |
 | float       | Focus:Input       | Jump from the output window to the input window                                               | -                        |
