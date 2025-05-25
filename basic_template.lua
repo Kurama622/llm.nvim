@@ -50,8 +50,6 @@ return {
         },
 
         ---------------------- set your app tools  ----------------------
-        -- You can choose to configure multiple models as needed.
-        -----------------------------------------------------------------
         app_handler = {
           OptimCompare = {
             handler = tools.action_handler,
