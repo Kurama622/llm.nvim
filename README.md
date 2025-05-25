@@ -41,6 +41,8 @@
     * [Websites of different AI platforms](#websites-of-different-ai-platforms)
   * [Minimal installation example](#minimal-installation-example)
 * [Configuration](#configuration)
+  * [Model Parameters](#model-parameters)
+  * [keymaps](#keymaps)
   * [Basic Configuration](#basic-configuration)
     * [Examples](#examples)
   * [Window Style Configuration](#window-style-configuration)
@@ -208,7 +210,58 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ## Configuration
 
+
+### Model Parameters
+
+> https://www.reddit.com/r/LocalLLaMA/comments/1dxut1u/is_my_understanding_of_temperature_top_p_max/
+
+| Parameter          | Description                                                                                                                                                                                                |
+| ------------------ | -------                                                                                                                                                                                                    |
+| url                | Model entpoint                                                                                                                                                                                             |
+| model              | Model name                                                                                                                                                                                                 |
+| api_type           | Result parsing format                                                                                                                                                                                      |
+| timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                            |
+| fetch_key          | Function that returns the API key                                                                                                                                                                          |
+| max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                       |
+| temperature        | From 0 to 1. The lower the number is, the more deterministic the response will be. The higher the number is the more creative the response will be, but moe likely to go off topic if it's too high        |
+| top_p              | A threshold(From 0 to 1). The higher the threshold is the more diverse and the less repetetive the response will be. (But it could also lead to less likely tokens which also means: off-topic responses.) |
+| enable_thinking    | Activate the model's deep thinking ability (The model itself needs to ensure this feature.)                                                                                                                |
+| thinking_budget    | The maximum length of the thinking process only takes effect when enable_thinking is true.                                                                                                                 |
+| schema             | Function-calling required function parameter description                                                                                                                                                   |
+| functions_tbl      | Function dict required for Function-calling                                                                                                                                                                |
+| keep_alive         | Maintain connection (usually for ollama)                                                                                                                                                                   |
+| streaming_handler  | Customize the parsing format of the streaming output                                                                                                                                                       |
+| parse_handler      | Customize the parsing format for non-streaming output                                                                                                                                                      |
+
+### keymaps
+
+| Style       | Keyname           | Description                                                                                   | Default: `[mode] keymap` |
+| -           | -                 | -                                                                                             | -                        |
+| float       | Input:Submit      | Submit your question                                                                          | `[i] ctrl+g`             |
+| float       | Input:Cancel      | Cancel dialog response                                                                        | `[i] ctrl+c`             |
+| float       | Input:Resend      | Rerespond to the dialog                                                                       | `[i] ctrl+r`             |
+| float       | Input:HistoryNext | Select the next session history                                                               | `[i] ctrl+j`             |
+| float       | Input:HistoryPrev | Select the previous session history                                                           | `[i] ctrl+k`             |
+| float       | Input:ModelsNext  | Select the next model                                                                         | `[i] ctrl+shift+j`       |
+| float       | Input:ModelsPrev  | Select the previous model                                                                     | `[i] ctrl+shift+k`       |
+| split       | Output:Ask        | Open the input box (In the normal mode of the input box, press Enter to submit your question) | `[n] i`                  |
+| split       | Output:Cancel     | Cancel dialog response                                                                        | `[n] ctrl+c`             |
+| split       | Output:Resend     | Rerespond to the dialog                                                                       | `[n] ctrl+r`             |
+| float/split | Session:Toggle    | Toggle session                                                                                | `[n] <leader>ac`         |
+| float/split | Session:Close     | Close session                                                                                 | `n <esc>`                |
+| float/split | Session:Models    | Open the model-list window                                                                    | `[n] ctrl+m`             |
+| split       | Session:History   | Open the history window (`j`: next, `k`: previous, `<cr>`: select, `<esc>`: close)            | `[n] ctrl+h`             |
+| float       | Focus:Input       | Jump from the output window to the input window                                               | -                        |
+| float       | Focus:Output      | Jump from the input window to the output window                                               | -                        |
+| float       | PageUp            | Output Window page up                                                                         | `[n/i] Ctrl+b`           |
+| float       | PageDown          | Output window page down                                                                       | `[n/i] Ctrl+f`           |
+| float       | HalfPageUp        | Output Window page up (half)                                                                  | `[n/i] Ctrl+u`           |
+| float       | HalfPageDown      | Output window page down (half)                                                                | `[n/i] Ctrl+d`           |
+| float       | JumpToTop         | Jump to the top (output window)                                                               | `[n] gg`                 |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                            | `[n] G`                  |
+
 ### Basic Configuration
+
 
 **Some commands you should know about**
 
