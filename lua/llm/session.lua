@@ -124,20 +124,16 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
         end
       end, state.popwin.bufnr)
     end
-    state.llm.worker = streaming.GetStreamingOutput({
+    local params = {
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
-      messages = state.session[state.popwin.winid],
-      url = opts._.url,
-      model = opts._.model,
-      fetch_key = opts._.fetch_key,
-      api_type = opts._.api_type,
-      streaming_handler = opts._.streaming_handler,
-      max_tokens = opts._.max_tokens,
-      temperatrue = opts._.temperatrue,
-      top_p = opts._.top_p,
-      keep_alive = opts._.keep_alive,
-    })
+      messages = state.session[state.popwin.winid],        
+    }
+
+    for _, key in pairs(state.model_params) do
+      params[key] = opts._[key]
+    end
+    state.llm.worker = streaming.GetStreamingOutput(params)
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
