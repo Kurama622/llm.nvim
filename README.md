@@ -41,6 +41,8 @@
     * [Websites of different AI platforms](#websites-of-different-ai-platforms)
   * [Minimal installation example](#minimal-installation-example)
 * [Configuration](#configuration)
+  * [Model Parameters](#model-parameters)
+  * [keymaps](#keymaps)
   * [Basic Configuration](#basic-configuration)
     * [Examples](#examples)
   * [Window Style Configuration](#window-style-configuration)
@@ -48,19 +50,12 @@
   * [Configuration of AI Tools](#configuration-of-ai-tools)
     * [Examples](#examples-2)
   * [Local LLM Configuration](#local-llm-configuration)
-* [Default Keyboard Shortcuts](#default-keyboard-shortcuts)
-  * [Window switch](#window-switch)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
   * [Special thanks](#special-thanks)
 * [Q&A](#qa)
   * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
-  * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
-  * [Priority of different parse/streaming functions](#priority-of-different-parsestreaming-functions)
-  * [How can the AI-generated git commit message feature be integrated with lazygit](#how-can-the-ai-generated-git-commit-message-feature-be-integrated-with-lazygit)
-  * [How to switch models](#how-to-switch-models)
-  * [How to display the thinking (reasoning) contents](#how-to-display-the-thinking-reasoning-contents)
 
 <!-- mtoc-end -->
 
@@ -208,7 +203,56 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ## Configuration
 
+
+### Model Parameters
+
+| Parameter          | Description                                                                                                                                                                                                | Value                                                                                                                                       |
+| ------------------ | -------                                                                                                                                                                                                    | -                                                                                                                                           |
+| url                | Model entpoint                                                                                                                                                                                             | String                                                                                                                                      |
+| model              | Model name                                                                                                                                                                                                 | String                                                                                                                                      |
+| api_type           | Result parsing format                                                                                                                                                                                      | `openai` \| `zhipu` \| `workers-ai` \| `ollama`                                                                                             |
+| timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                            | Number                                                                                                                                      |
+| fetch_key          | Function that returns the API key                                                                                                                                                                          | Function                                                                                                                                    |
+| max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                       | Number                                                                                                                                      |
+| temperature        | From 0 to 1. The lower the number is, the more deterministic the response will be. The higher the number is the more creative the response will be, but moe likely to go off topic if it's too high        | Number                                                                                                                                      |
+| top_p              | A threshold(From 0 to 1). The higher the threshold is the more diverse and the less repetetive the response will be. (But it could also lead to less likely tokens which also means: off-topic responses.) | Number                                                                                                                                      |
+| enable_thinking    | Activate the model's deep thinking ability (The model itself needs to ensure this feature.)                                                                                                                | Boolean                                                                                                                                     |
+| thinking_budget    | The maximum length of the thinking process only takes effect when enable_thinking is true.                                                                                                                 | Number                                                                                                                                      |
+| schema             | Function-calling required function parameter description                                                                                                                                                   | Table                                                                                                                                       |
+| functions_tbl      | Function dict required for Function-calling                                                                                                                                                                | Table                                                                                                                                       |
+| keep_alive         | Maintain connection (usually for ollama)                                                                                                                                                                   | see [keep_alive/OLLAMA_KEEP_ALIVE](https://github.com/ollama/ollama/blob/c02db93243353855b983db2a1562a02b57e66db1/docs/faq.md?plain=1#L214) |
+| streaming_handler  | Customize the parsing format of the streaming output                                                                                                                                                       | Function                                                                                                                                    |
+| parse_handler      | Customize the parsing format for non-streaming output                                                                                                                                                      | Function                                                                                                                                    |
+
+### keymaps
+
+| Style       | Keyname           | Description                                                                                   | Default: `[mode] keymap` | Window                                         |
+| -           | -                 | -                                                                                             | -                        | -                                              |
+| float       | Input:Submit      | Submit your question                                                                          | `[i] ctrl+g`             | Input                                          |
+| float       | Input:Cancel      | Cancel dialog response                                                                        | `[i] ctrl+c`             | Input                                          |
+| float       | Input:Resend      | Rerespond to the dialog                                                                       | `[i] ctrl+r`             | Input                                          |
+| float       | Input:HistoryNext | Select the next session history                                                               | `[i] ctrl+j`             | Input                                          |
+| float       | Input:HistoryPrev | Select the previous session history                                                           | `[i] ctrl+k`             | Input                                          |
+| float       | Input:ModelsNext  | Select the next model                                                                         | `[i] ctrl+shift+j`       | Input                                          |
+| float       | Input:ModelsPrev  | Select the previous model                                                                     | `[i] ctrl+shift+k`       | Input                                          |
+| split       | Output:Ask        | Open the input box (In the normal mode of the input box, press Enter to submit your question) | `[n] i`                  | Output                                         |
+| split       | Output:Cancel     | Cancel dialog response                                                                        | `[n] ctrl+c`             | Output                                         |
+| split       | Output:Resend     | Rerespond to the dialog                                                                       | `[n] ctrl+r`             | Output                                         |
+| float/split | Session:Toggle    | Toggle session                                                                                | `[n] <leader>ac`         | Input + Output                                 |
+| float/split | Session:Close     | Close session                                                                                 | `[n] <esc>`              | `float`: Input + Output <br> `split`: Output   |
+| float/split | Session:Models    | Open the model-list window                                                                    | `[n] ctrl+m`             | `float`: App input window <br> `split`: Output |
+| split       | Session:History   | Open the history window (`j`: next, `k`: previous, `<cr>`: select, `<esc>`: close)            | `[n] ctrl+h`             | Output                                         |
+| float       | Focus:Input       | Jump from the output window to the input window                                               | -                        | Output                                         |
+| float       | Focus:Output      | Jump from the input window to the output window                                               | -                        | Input                                          |
+| float       | PageUp            | Output Window page up                                                                         | `[n/i] Ctrl+b`           | Output                                         |
+| float       | PageDown          | Output window page down                                                                       | `[n/i] Ctrl+f`           | Output                                         |
+| float       | HalfPageUp        | Output Window page up (half)                                                                  | `[n/i] Ctrl+u`           | Output                                         |
+| float       | HalfPageDown      | Output window page down (half)                                                                | `[n/i] Ctrl+d`           | Output                                         |
+| float       | JumpToTop         | Jump to the top (output window)                                                               | `[n] gg`                 | Output                                         |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                            | `[n] G`                  | Output                                         |
+
 ### Basic Configuration
+
 
 **Some commands you should know about**
 
@@ -670,56 +714,6 @@ return {
 
 [⬆ back to top](#contents)
 
-## Default Keyboard Shortcuts
-
-- floating window
-
-| window       | key          | mode     | desc                                |
-| ------------ | ------------ | -------- | -----------------------             |
-| Input        | `ctrl+g`     | `i`      | Submit your question                |
-| Input        | `ctrl+c`     | `i`      | Cancel dialog response              |
-| Input        | `ctrl+r`     | `i`      | Rerespond to the dialog             |
-| Input        | `ctrl+j`     | `i`      | Select the next session history     |
-| Input        | `ctrl+k`     | `i`      | Select the previous session history |
-| Input        | `ctrl+shift+j`     | `i`      | Select the next model     |
-| Input        | `ctrl+shift+k`     | `i`      | Select the previous model |
-| Input        | `Ctrl+b`     | `n`/`i`  | Output Window page up               |
-| Input        | `Ctrl+f`     | `n`/`i`  | Output window page down             |
-| Input        | `Ctrl+u`     | `n`/`i`  | Output Window page up (half)        |
-| Input        | `Ctrl+d`     | `n`/`i`  | Output window page down (half)      |
-| Input        | `gg`         | `n`      | Jump to the top (output window)     |
-| Input        | `G`          | `n`      | Jump to the bottom (output window)  |
-| Output+Input | `<leader>ac` | `n`      | Toggle session                      |
-| Output+Input | `<esc>`      | `n`      | Close session                       |
-
-### Window switch
-
-> You can use `<C-w><C-w>` to switch windows, and if you find it ungraceful, you can also set your own shortcut key for window switching. (This feature has not set a default shortcut key)
-
-```lua
-    -- Switch from the output window to the input window.
-    ["Focus:Input"]       = { mode = "n", key = {"i", "<C-w>"} },
-    -- Switch from the input window to the output window.
-    ["Focus:Output"]      = { mode = { "n", "i" }, key = "<C-w>" },
-```
-
-- split window
-
-| window       | key          | mode     | desc                                 |
-| ------------ | ------------ | -------- | -----------------------              |
-| Input        | `<cr>`       | `n`      | Submit your question                 |
-| Output       | `i`          | `n`      | Open the input box                   |
-| Output       | `ctrl+c`     | `n`      | Cancel dialog response               |
-| Output       | `ctrl+r`     | `n`      | Rerespond to the dialog              |
-| Output       | `ctrl+h`     | `n`      | Open the history window              |
-| Output       | `ctrl+m`     | `n`      | Open the model-list window           |
-| Output+Input | `<leader>ac` | `n`      | Toggle session                       |
-| Output+Input | `<esc>`      | `n`      | Close session                        |
-| History      | `j`          | `n`      | Preview the next session history     |
-| History      | `k`          | `n`      | Preview the previous session history |
-| History      | `<cr>`       | `n`      | Enter the selected session           |
-| History      | `<esc>`      | `n`      | Close the history window             |
-
 ## TODO List
 
 [todo-list](https://github.com/Kurama622/llm.nvim/issues/44)
@@ -785,127 +779,3 @@ Use a custom request format
 
 [⬆ back to top](#contents)
 
-### Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.
-
-- Create a `.env` file specifically to store your various keys. Note: Do not upload this file to GitHub.
-
-```bash
-export GITHUB_TOKEN=xxxxxxx
-export DEEPSEEK_TOKEN=xxxxxxx
-export SILICONFLOW_TOKEN=xxxxxxx
-```
-
-- Load the `.env` file in `zshrc` or `bashrc`
-  ```bash
-  source ~/.config/zsh/.env
-
-  # Default to using the LLM provided by Github Models.
-  export LLM_KEY=$GITHUB_TOKEN
-  ```
-
-- Finally, switching keys is completed through `fetch_key`.
-  ```lua
-    fetch_key = function()
-      return vim.env.DEEPSEEK_TOKEN
-    end,
-  ```
-
-[⬆ back to top](#contents)
-
-### Priority of different parse/streaming functions
-
-  AI tool configuration's `streaming_handler` or `parse_handler` > AI tool configuration's `api_type` > Main configuration's `streaming_handler` or `parse_handler` > Main configuration's `api_type`
-
-[⬆ back to top](#contents)
-
-### How can the AI-generated git commit message feature be integrated with lazygit
-  ```lua
-  {
-    "kdheepak/lazygit.nvim",
-    lazy = true,
-    cmd = {
-      "LazyGit",
-      "LazyGitConfig",
-      "LazyGitCurrentFile",
-      "LazyGitFilter",
-      "LazyGitFilterCurrentFile",
-    },
-    -- optional for floating window border decoration
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
-    config = function()
-      vim.keymap.set("t", "<C-c>", function()
-        vim.api.nvim_win_close(vim.api.nvim_get_current_win(), true)
-        vim.api.nvim_command("LLMAppHandler CommitMsg")
-      end, { desc = "AI Commit Msg" })
-    end,
-  }
-  ```
-[⬆ back to top](#contents)
-
-### How to switch models
-
-Need to configure models:
-
-```lua
-{
-  "Kurama622/llm.nvim",
-  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
-  cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
-  config = function()
-    require("llm").setup({
-        -- set models list
-        models = {
-          {
-            name = "GithubModels",
-            url = "https://models.inference.ai.azure.com/chat/completions",
-            model = "gpt-4o-mini",
-            api_type = "openai"
-            fetch_key = function()
-              return "<your api key>"
-            end,
-            -- max_tokens = 4096,
-            -- temperature = 0.3,
-            -- top_p = 0.7,
-          },
-          {
-            name = "Model2",
-            -- ...
-          }
-        },
-    })
-  end,
-  keys = {
-    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-    -- float style
-    ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
-    ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
-
-    -- Applicable to AI tools with split style and UI interfaces
-    ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
-  },
-}
-```
-[⬆ back to top](#contents)
-
-### How to display the thinking (reasoning) contents
-
-Configure `enable_thinking` (`thinking_budget` can be optionally configured)
-
-```lua
-{
-  url = "https://api.siliconflow.cn/v1/chat/completions",
-  api_type = "openai",
-  max_tokens = 4096,
-  model = "Qwen/Qwen3-8B", -- think
-  fetch_key = function()
-    return vim.env.SILICONFLOW_TOKEN
-  end,
-  temperature = 0.3,
-  top_p = 0.7,
-  enable_thinking = true,
-  thinking_budget = 512,
-}
-```
-[⬆ back to top](#contents)
