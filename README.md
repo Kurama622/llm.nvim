@@ -45,6 +45,7 @@
   * [keymaps](#keymaps)
   * [Commands](#commands)
   * [UI](#ui)
+  * [Tool Configuration](#tool-configuration)
   * [Configuration of AI Tools](#configuration-of-ai-tools)
     * [Examples](#examples)
   * [Local LLM Configuration](#local-llm-configuration)
@@ -52,8 +53,6 @@
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
   * [Special thanks](#special-thanks)
-* [Q&A](#qa)
-  * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
 
 <!-- mtoc-end -->
 
@@ -201,7 +200,6 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ## Configuration
 
-
 ### Model Parameters
 
 | Parameter          | Description                                                                                                                                                                                                | Value                                                                                                                                       |
@@ -253,13 +251,17 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 | Cmd                      | Description                                                                              |
 | ---                      | -----                                                                                    |
-| `LLMSessionToggle`       | open/hide the Chat UI                                                                    |
-| `LLMSelectedTextHandler` | Handles the selected text, the way it is processed depends on the prompt words you input |
-| `LLMAppHandler`          | call AI tools                                                                            |
+| `LLMSessionToggle`       | Open/hide the Chat UI                                                                    |
+| `LLMSelectedTextHandler` | Handle the selected text, the way it is processed depends on the prompt words you input |
+| `LLMAppHandler`          | Call AI tools                                                                            |
 
 ### UI
 
 See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
+
+### Tool Configuration
+
+See [AI Tools Configuration](examples/ai-tools/)
 
 [⬆ back to top](#contents)
 
@@ -634,47 +636,4 @@ We would like to express our heartfelt gratitude to the contributors of the foll
 ### Special thanks
 
 [ACKNOWLEDGMENTS](./ACKNOWLEDGMENTS.md)
-
-
----
-
-## Q&A
-
-### The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.
-
-Use a custom request format
-
-- Basic Chat and some AI tools (using streaming output) with customized request format
-
-  Define the `args` parameter at the same level as the `prompt`.
-  ```lua
-  --[[ custom request args ]]
-  args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-  ```
-
-- AI tools (using non-streaming output) custom request format
-
-  Define args in `opts`
-  ```lua
-    WordTranslate = {
-      handler = tools.flexi_handler,
-      prompt = "Translate the following text to Chinese, please only return the translation",
-      opts = {
-        fetch_key = function()
-          return vim.env.GLM_KEY
-        end,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
-        api_type = "zhipu",
-        args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-        exit_on_move = true,
-        enter_flexible_window = false,
-      },
-    },
-  ```
-
-> [!NOTE]
-> You need to modify the args according to your actual situation.
-
-[⬆ back to top](#contents)
 
