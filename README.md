@@ -241,7 +241,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | float/split | Session:Toggle    | Toggle session                                                                                | `[n] <leader>ac`         | Input + Output                                 |
 | float/split | Session:Close     | Close session                                                                                 | `[n] <esc>`              | `float`: Input + Output<br>`split`: Output   |
 | float/split | Session:Models    | Open the model-list window                                                                    | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
-| split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous`<br>`<cr>`: select<br>`<esc>`: close)            | `[n] ctrl+h`             | Output                                         |
+| split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close)            | `[n] ctrl+h`             | Output                                         |
 | float       | Focus:Input       | Jump from the output window to the input window                                               | -                        | Output                                         |
 | float       | Focus:Output      | Jump from the input window to the output window                                               | -                        | Input                                          |
 | float       | PageUp            | Output Window page up                                                                         | `[n/i] Ctrl+b`           | Output                                         |
