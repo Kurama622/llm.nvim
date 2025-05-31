@@ -160,6 +160,10 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 #### Websites of different AI platforms
 
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
 | Platform               | Link to obtain api key                                                                                                      | Note                                                                                                                                                 |
 | -----------            | ----------                                                                                                                  | -------                                                                                                                                              |
 | Cloudflare             | [https://dash.cloudflare.com/](https://dash.cloudflare.com/)                                                                | You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models. |
@@ -170,6 +174,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | Deepseek               | [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)                                            |                                                                                                                                                      |
 | Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                                                      |
 | Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 200 free calls to GPT-4o-mini are available every day.                                                                                               |
+
+</details>
 
 **For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.**
 
@@ -228,6 +234,10 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ### keymaps
 
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
 | Style       | Keyname           | Description                                                                                   | Default: `[mode] keymap` | Window                                       |
 | -           | -                 | -                                                                                             | -                        | -                                            |
 | float       | Input:Submit      | Submit your question                                                                          | `[i] ctrl+g`             | Input                                        |
@@ -252,6 +262,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | float       | HalfPageDown      | Output window page down (half)                                                                | `[n/i] Ctrl+d`           | Output                                       |
 | float       | JumpToTop         | Jump to the top (output window)                                                               | `[n] gg`                 | Output                                       |
 | float       | JumpToBottom      | Jump to the bottom (output window)                                                            | `[n] G`                  | Output                                       |
+
+</details>
 
 ### Commands
 
