@@ -202,6 +202,10 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ### Model Parameters
 
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
 | Parameter          | Description                                                                                                                                                                                                | Value                                                                                                                                       |
 | ------------------ | -------                                                                                                                                                                                                    | -                                                                                                                                           |
 | url                | Model entpoint                                                                                                                                                                                             | String                                                                                                                                      |
@@ -219,6 +223,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | keep_alive         | Maintain connection (usually for ollama)                                                                                                                                                                   | see [keep_alive/OLLAMA_KEEP_ALIVE](https://github.com/ollama/ollama/blob/c02db93243353855b983db2a1562a02b57e66db1/docs/faq.md?plain=1#L214) |
 | streaming_handler  | Customize the parsing format of the streaming output                                                                                                                                                       | Function                                                                                                                                    |
 | parse_handler      | Customize the parsing format for non-streaming output                                                                                                                                                      | Function                                                                                                                                    |
+
+</details>
 
 ### keymaps
 
