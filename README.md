@@ -43,12 +43,10 @@
 * [Configuration](#configuration)
   * [Model Parameters](#model-parameters)
   * [keymaps](#keymaps)
-  * [Basic Configuration](#basic-configuration)
-    * [Examples](#examples)
-  * [Window Style Configuration](#window-style-configuration)
-    * [Examples](#examples-1)
+  * [Commands](#commands)
+  * [UI](#ui)
   * [Configuration of AI Tools](#configuration-of-ai-tools)
-    * [Examples](#examples-2)
+    * [Examples](#examples)
   * [Local LLM Configuration](#local-llm-configuration)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
@@ -210,7 +208,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | ------------------ | -------                                                                                                                                                                                                    | -                                                                                                                                           |
 | url                | Model entpoint                                                                                                                                                                                             | String                                                                                                                                      |
 | model              | Model name                                                                                                                                                                                                 | String                                                                                                                                      |
-| api_type           | Result parsing format                                                                                                                                                                                      |  `workers-ai` \| `zhipu`<br>`openai`\| `ollama`                                                                                             |
+| api_type           | Result parsing format                                                                                                                                                                                      |  `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`                                                                                             |
 | timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                            | Number                                                                                                                                      |
 | fetch_key          | Function that returns the API key                                                                                                                                                                          | Function                                                                                                                                    |
 | max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                       | Number                                                                                                                                      |
@@ -251,116 +249,17 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | float       | JumpToTop         | Jump to the top (output window)                                                               | `[n] gg`                 | Output                                       |
 | float       | JumpToBottom      | Jump to the bottom (output window)                                                            | `[n] G`                  | Output                                       |
 
-### Basic Configuration
+### Commands
 
+| Cmd                      | Description                                                                              |
+| ---                      | -----                                                                                    |
+| `LLMSessionToggle`       | open/hide the Chat UI                                                                    |
+| `LLMSelectedTextHandler` | Handles the selected text, the way it is processed depends on the prompt words you input |
+| `LLMAppHandler`          | call AI tools                                                                            |
 
-**Some commands you should know about**
+### UI
 
-- `LLMSessionToggle`: open/hide the Chat UI.
-- `LLMSelectedTextHandler`: Handles the selected text, the way it is processed depends on the prompt words you input.
-- `LLMAppHandler`: call AI tools.
-
-> If the URL is not configured, the default is to use Cloudflare.
-
-#### Examples
-
-For more details or examples, please refer to [Chat Configuration](examples/chat/).
-
-<details>
-<summary><b><i>Click here to see meanings of some configuration options</i></b></summary>
-<br/>
-
-- `prompt`: Model prompt.
-- `prefix`: Dialog role indicator.
-- `style`: Style of the Chat UI (float means floating window, others are split windows).
-- `url`: Model api url.
-- `model`: Model name.
-- `api_type`: The parsing format of the model output: `openai`, `zhipu`, `ollama`, `workers-ai`. The `openai` format is compatible with most models, but `ChatGLM` can only be parsed using the `zhipu` format, and `cloudflare` can only be parsed using the `workers-ai` format. If you use ollama to run the model, you can use `ollama`.
-- `fetch_key`: If you need to use models from different platforms simultaneously, you can configure `fetch_key` to ensure that different models use different API Keys. The usage is as follows:
-  ```lua
-  fetch_key = function() return "<your api key>" end
-  ```
-- `max_tokens`: Maximum output length of the model.
-- `save_session`: Whether to save session history.
-- `max_history`: Maximum number of saved sessions.
-- `history_path`: Path for saving session history.
-- `temperature`: The temperature of the model, controlling the randomness of the model's output.
-- `temperature`: The top_p of the model, controlling the randomness of the model's output.
-- `spinner`: The waiting animation of the model output (effective when non-streaming output).
-- `display`
-  - `diff`: Display style of diff (effective when optimizing code and showing diff, the style in the screenshot is mini_diff, which requires installation of [mini.diff](https://github.com/echasnovski/mini.diff)).
-
-- `keys`: Shortcut key settings for different windows, default values can be found in [Default Shortcuts](#default-shortcuts)
-  - *floating style*
-    - input window
-      - `Input:Cancel`: Cancel dialog response.
-      - `Input:Submit`: Submit your question.
-      - `Input:Resend`: Rerespond to the dialog.
-      - `Input:HistoryNext`: Select the next session history.
-      - `Input:HistoryPrev`: Select the previous session history.
-      - `Input:ModelsNext`: Select the next model.
-      - `Input:ModelsPrev`: Select the previous model.
-      - `PageUp`: Output Window page up
-      - `HalfPageUp`: Output Window page up (half)
-      - `PageDown`: Output window page down
-      - `HalfPageDown`: Output window page down (half)
-      - `JumpToTop`: Jump to the top (output window)
-      - `JumpToBottom`: Jump to the bottom (output window)
-    - Chat UI
-      - `Session:Toggle`: open/hide the Chat UI.
-      - `Session:Close`: close the Chat UI.
-      - `Session:Models`: open the model-list window.
-  - *split style*
-    - output window
-      - `Output:Ask`: Open input window.
-      - `Output:Cancel`: Cancel diaglog response.
-      - `Output:Resend`: Rerespond to the dialog.
-      - `Session:History`: open session history.
-      - `Session:Models`: open the model-list window.
-    - Chat UI
-      - `Session:Toggle`: open/hide the Chat UI.
-      - `Session:Close`: close the Chat UI.
-
-</details>
-
-If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
-
-
-[⬆ back to top](#contents)
-
-### Window Style Configuration
-
-If you want to further configure the style of the conversation interface, you can configure `chat_ui_opts` and `popwin_opts` separately.
- 
-<details>
-<summary><b><i>Click here to see how to configure the window style</i></b></summary>
-<br/>
-
-Their configuration options are the same:
-- `relative`:
-  - `editor`: The floating window relative to the current editor window.
-  - `cursor`: The floating window relative to the current cursor position.
-  - `win`: The floating window relative to the current window.
-
-- `position`: The position of the window.
-- `size`: The size of the window.
-- `enter`: Whether the window automatically gains focus.
-- `focusable`: Whether the window can gain focus.
-- `zindex`: The layer of the window.
-- `border`
-  - `style`: The style of the window border.
-  - `text`: The text of the window border.
-- `win_options`: The options of the window.
-  - `winblend`: The transparency of the window.
-  - `winhighlight`: The highlight of the window.
-
-</details>
-
-More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md).
-
-#### Examples
-
-For more details or examples, please refer to [UI Configuration](examples/ui/).
+See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 
 [⬆ back to top](#contents)
 
