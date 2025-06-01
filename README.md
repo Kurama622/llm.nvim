@@ -202,6 +202,9 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
   }
 ```
 
+**[Configure template](./basic_template.lua)**
+
+
 ## Configuration
 
 ### Commands
