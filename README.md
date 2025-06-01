@@ -41,11 +41,11 @@
     * [Websites of different AI platforms](#websites-of-different-ai-platforms)
   * [Minimal installation example](#minimal-installation-example)
 * [Configuration](#configuration)
+  * [Commands](#commands)
   * [Model Parameters](#model-parameters)
   * [keymaps](#keymaps)
-  * [Commands](#commands)
+  * [Tool](#tool)
   * [UI](#ui)
-  * [Tool Configuration](#tool-configuration)
   * [Local LLM Configuration](#local-llm-configuration)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
@@ -204,6 +204,14 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 ## Configuration
 
+### Commands
+
+| Cmd                      | Description                                                                              |
+| ---                      | -----                                                                                    |
+| `LLMSessionToggle`       | Open/hide the Chat UI                                                                    |
+| `LLMSelectedTextHandler` | Handle the selected text, the way it is processed depends on the prompt words you input |
+| `LLMAppHandler`          | Call AI tools                                                                            |
+
 ### Model Parameters
 
 <details>
@@ -263,19 +271,7 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 </details>
 
-### Commands
-
-| Cmd                      | Description                                                                              |
-| ---                      | -----                                                                                    |
-| `LLMSessionToggle`       | Open/hide the Chat UI                                                                    |
-| `LLMSelectedTextHandler` | Handle the selected text, the way it is processed depends on the prompt words you input |
-| `LLMAppHandler`          | Call AI tools                                                                            |
-
-### UI
-
-See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
-
-### Tool Configuration
+### Tool
 
 | Handler name           | Description                                                                                                                    |
 | --                     | --                                                                                                                             |
@@ -288,8 +284,13 @@ See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTan
 | completion_handler     | Code completion                                                                                                                |
 | curl_request_handler   | The simplest interaction between curl and LLM is generally used to query account balance or available model lists, etc.        |
 
+Each handler's parameters can be referred to [here](docs/tools).
+
 Examples can be seen [AI Tools Configuration](examples/ai-tools/)
 
+### UI
+
+See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 [⬆ back to top](#contents)
 
 ### Local LLM Configuration
