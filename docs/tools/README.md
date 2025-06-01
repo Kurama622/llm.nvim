@@ -1,3 +1,11 @@
+All AI tools can configure their own model parameters, in the same way as the [Chat's configuration](https://github.com/Kurama622/llm.nvim?tab=readme-ov-file#model-parameters).
+
+- **Dependency**
+
+```lua
+local tools = require("llm.tools")
+```
+
 <!-- mtoc-start -->
 
 * [side_by_side_handler](#side_by_side_handler)
@@ -11,14 +19,6 @@
 
 <!-- mtoc-end -->
 
-
-All AI tools can configure their own model parameters, in the same way as the [Chat's configuration](https://github.com/Kurama622/llm.nvim?tab=readme-ov-file#model-parameters).
-
-- **Dependency**
-
-```lua
-local tools = require("llm.tools")
-```
 
 ## side_by_side_handler
 
