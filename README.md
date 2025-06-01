@@ -46,8 +46,6 @@
   * [Commands](#commands)
   * [UI](#ui)
   * [Tool Configuration](#tool-configuration)
-  * [Configuration of AI Tools](#configuration-of-ai-tools)
-    * [Examples](#examples)
   * [Local LLM Configuration](#local-llm-configuration)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
@@ -238,30 +236,30 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 <summary><b><i>Expand the table.</i></b></summary>
 <br/>
 
-| Style       | Keyname           | Description                                                                                   | Default: `[mode] keymap` | Window                                       |
-| -           | -                 | -                                                                                             | -                        | -                                            |
-| float       | Input:Submit      | Submit your question                                                                          | `[i] ctrl+g`             | Input                                        |
-| float       | Input:Cancel      | Cancel dialog response                                                                        | `[i] ctrl+c`             | Input                                        |
-| float       | Input:Resend      | Rerespond to the dialog                                                                       | `[i] ctrl+r`             | Input                                        |
-| float       | Input:HistoryNext | Select the next session history                                                               | `[i] ctrl+j`             | Input                                        |
-| float       | Input:HistoryPrev | Select the previous session history                                                           | `[i] ctrl+k`             | Input                                        |
-| float       | Input:ModelsNext  | Select the next model                                                                         | `[i] ctrl+shift+j`       | Input                                        |
-| float       | Input:ModelsPrev  | Select the previous model                                                                     | `[i] ctrl+shift+k`       | Input                                        |
+| Style       | Keyname           | Description                                                                                     | Default: `[mode] keymap` | Window                                       |
+| -           | -                 | -                                                                                               | -                        | -                                            |
+| float       | Input:Submit      | Submit your question                                                                            | `[i] ctrl+g`             | Input                                        |
+| float       | Input:Cancel      | Cancel dialog response                                                                          | `[i] ctrl+c`             | Input                                        |
+| float       | Input:Resend      | Rerespond to the dialog                                                                         | `[i] ctrl+r`             | Input                                        |
+| float       | Input:HistoryNext | Select the next session history                                                                 | `[i] ctrl+j`             | Input                                        |
+| float       | Input:HistoryPrev | Select the previous session history                                                             | `[i] ctrl+k`             | Input                                        |
+| float       | Input:ModelsNext  | Select the next model                                                                           | `[i] ctrl+shift+j`       | Input                                        |
+| float       | Input:ModelsPrev  | Select the previous model                                                                       | `[i] ctrl+shift+k`       | Input                                        |
 | split       | Output:Ask        | Open the input box<br>In the normal mode of the input box, press Enter to submit your question) | `[n] i`                  | Output                                       |
-| split       | Output:Cancel     | Cancel dialog response                                                                        | `[n] ctrl+c`             | Output                                       |
-| split       | Output:Resend     | Rerespond to the dialog                                                                       | `[n] ctrl+r`             | Output                                       |
-| float/split | Session:Toggle    | Toggle session                                                                                | `[n] <leader>ac`         | Input+Output                               |
-| float/split | Session:Close     | Close session                                                                                 | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output   |
-| float/split | Session:Models    | Open the model-list window                                                                    | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
-| split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close     | `[n] ctrl+h`             | Output                                       |
-| float       | Focus:Input       | Jump from the output window to the input window                                               | -                        | Output                                       |
-| float       | Focus:Output      | Jump from the input window to the output window                                               | -                        | Input                                        |
-| float       | PageUp            | Output Window page up                                                                         | `[n/i] Ctrl+b`           | Output                                       |
-| float       | PageDown          | Output window page down                                                                       | `[n/i] Ctrl+f`           | Output                                       |
-| float       | HalfPageUp        | Output Window page up (half)                                                                  | `[n/i] Ctrl+u`           | Output                                       |
-| float       | HalfPageDown      | Output window page down (half)                                                                | `[n/i] Ctrl+d`           | Output                                       |
-| float       | JumpToTop         | Jump to the top (output window)                                                               | `[n] gg`                 | Output                                       |
-| float       | JumpToBottom      | Jump to the bottom (output window)                                                            | `[n] G`                  | Output                                       |
+| split       | Output:Cancel     | Cancel dialog response                                                                          | `[n] ctrl+c`             | Output                                       |
+| split       | Output:Resend     | Rerespond to the dialog                                                                         | `[n] ctrl+r`             | Output                                       |
+| float/split | Session:Toggle    | Toggle session                                                                                  | `[n] <leader>ac`         | Input+Output                                 |
+| float/split | Session:Close     | Close session                                                                                   | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:Models    | Open the model-list window                                                                      | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
+| split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close       | `[n] ctrl+h`             | Output                                       |
+| float       | Focus:Input       | Jump from the output window to the input window                                                 | -                        | Output                                       |
+| float       | Focus:Output      | Jump from the input window to the output window                                                 | -                        | Input                                        |
+| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Output                                       |
+| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Output                                       |
+| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Output                                       |
+| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Output                                       |
+| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Output                                       |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Output                                       |
 
 </details>
 
@@ -279,104 +277,18 @@ See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTan
 
 ### Tool Configuration
 
-See [AI Tools Configuration](examples/ai-tools/)
+| Handler name           | Description                                                                                                                    |
+| --                     | --                                                                                                                             |
+| side_by_side_handler   | Display results in two windows side by side                                                                                    |
+| action_handler         | Display results in the source file in the form of a diff                                                                       |
+| qa_handler             | AI for single-round dialogue                                                                                                   |
+| flexi_handler          | Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text)    |
+| disposable_ask_handler | Flexible questioning, you can choose a piece of code to ask about, or you can ask directly (the current buffer is the context) |
+| attach_to_chat_handler | Attach the selected content to the context and ask a question.                                                                 |
+| completion_handler     | Code completion                                                                                                                |
+| curl_request_handler   | The simplest interaction between curl and LLM is generally used to query account balance or available model lists, etc.        |
 
-[⬆ back to top](#contents)
-
-### Configuration of AI Tools
-
-Currently, llm.nvim provides some templates for AI tools, making it convenient for everyone to customize their own AI tools.
-
-All AI tools need to be defined in `app_handler`, presented in the form of a pair of `key-value` (`key` is the tool name and `value` is the configuration information of the tool).
-
-#### Examples
-
-For more details or examples, please refer to [AI Tools Configuration](examples/ai-tools/).
-
-<details>
-<summary><b><i>Click here to see how to configure AI tools</i></b></summary>
-<br/>
-
-For all AI tools, their configuration options are similar:
-
-- `handler`: Which template to use
-  - `side_by_side_handler`: Display results in two windows side by side
-  - `action_handler`: Display results in the source file in the form of a diff
-    - `Y`/`y`: Accept LLM suggested code
-    - `N`/`n`: Reject LLM suggested code
-    - `<ESC>`: Exit directly
-    - `I`/`i`: Input additional optimization conditions
-    - `<C-r>`: Optimize again directly
-  - `qa_handler`: AI for single-round dialogue
-  - `flexi_handler`: Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text)
-  - You can also customize functions
-- `prompt`: Prompt words for the AI tool
-- `opts`
-  - `spell`: Whether to have spell check
-  - `number`: Whether to display line numbers
-  - `wrap`: Whether to automatically wrap lines
-  - `linebreak`: Whether to allow line breaks in the middle of words
-  - `url`, `model`: The LLM used by this AI tool
-  - `api_type`: The type of parsing output by this AI tool
-  - `streaming_handler`: This AI tool uses a custom streaming parsing function
-  - `parse_handler`: This AI tool uses a custom parsing function
-  - `border`: Floating window border style
-  - `accept`
-    - `mapping`: The key mapping for accepting the output
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `Y`/`y`)
-    - `action`: The action for accepting the output, which is executed when accepting the output. (Default action: Copy the output)
-  - `reject`
-    - `mapping`: The key mapping for rejecting the output
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `N`/`n`)
-    - `action`: The action for rejecting the output, which is executed when rejecting the output. (Default action: None or close the window)
-  - `close`
-    - `mapping`: The key mapping for closing the AI tool
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `<ESC>`)
-    - `action`: The action for closing the AI tool. (Default action: Reject all output and close the window)
-
-Different templates also have some exclusive configuration items of their own.
-
-- You can also define in the `opts` of `qa_handler`:
-  - `component_width`: the width of the component
-  - `component_height`: the height of the component
-  - `query`
-      - `title`: the title of the component, which will be displayed in the center above the component
-      - `hl`: the highlight of the title
-  - `input_box_opts`: the window options for the input box (`size`, `win_options`)
-  - `preview_box_opts`: the window options for the preview box (`size`, `win_options`)
-
-- You can also define in the `opts` of `action_handler`:
-  - `language`: The language used for the output result (`English`/`Chinese`/`Japanese` etc.)
-  - `input`
-    - `relative`: The relative position of the split window (`editor`/`win`)
-    - `position`: The position of the split window (`top`/`left`/`right`/`bottom`)
-    - `size`: The proportion of the split window (default is 25%)
-    - `enter`: Whether to automatically enter the window
-  - `output`
-    - `relative`: Same as `input`
-    - `position`: Same as `input`
-    - `size`: Same as `input`
-    - `enter`: Same as `input`
-
-- In the `opts` of `side_by_side_handler`, you can also define:
-  - `left` Left window
-    - `title`: The title of the window
-    - `focusable`: Whether the window can gain focus
-    - `border`
-    - `win_options`
-  - `right` Right window
-    - `title`: The title of the window
-    - `focusable`: Whether the window can gain focus
-    - `border`
-    - `win_options`
-
-- In the `opts` of `flexi_handler`, you can also define:
-  - `exit_on_move`: Whether to close the flexible window when the cursor moves
-  - `enter_flexible_window`: Whether to automatically enter the window when the flexible window pops up
-  - `apply_visual_selection`: Whether to append the selected text content after the `prompt`
+Examples can be seen [AI Tools Configuration](examples/ai-tools/)
 
 [⬆ back to top](#contents)
 
