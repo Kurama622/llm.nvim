@@ -41,26 +41,16 @@
     * [Websites of different AI platforms](#websites-of-different-ai-platforms)
   * [Minimal installation example](#minimal-installation-example)
 * [Configuration](#configuration)
-  * [Basic Configuration](#basic-configuration)
-    * [Examples](#examples)
-  * [Window Style Configuration](#window-style-configuration)
-    * [Examples](#examples-1)
-  * [Configuration of AI Tools](#configuration-of-ai-tools)
-    * [Examples](#examples-2)
+  * [Commands](#commands)
+  * [Model Parameters](#model-parameters)
+  * [keymaps](#keymaps)
+  * [Tool](#tool)
+  * [UI](#ui)
   * [Local LLM Configuration](#local-llm-configuration)
-* [Default Keyboard Shortcuts](#default-keyboard-shortcuts)
-  * [Window switch](#window-switch)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
   * [Special thanks](#special-thanks)
-* [Q&A](#qa)
-  * [The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.](#the-format-of-curl-usage-in-windows-is-different-from-linux-and-the-default-request-format-of-llmnvim-may-cause-issues-under-windows)
-  * [Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.](#switching-between-multiple-llms-and-frequently-changing-the-value-of-llm_key-is-troublesome-and-i-dont-want-to-expose-my-key-in-neovims-configuration-file)
-  * [Priority of different parse/streaming functions](#priority-of-different-parsestreaming-functions)
-  * [How can the AI-generated git commit message feature be integrated with lazygit](#how-can-the-ai-generated-git-commit-message-feature-be-integrated-with-lazygit)
-  * [How to switch models](#how-to-switch-models)
-  * [How to display the thinking (reasoning) contents](#how-to-display-the-thinking-reasoning-contents)
 
 <!-- mtoc-end -->
 
@@ -168,6 +158,10 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 #### Websites of different AI platforms
 
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
 | Platform               | Link to obtain api key                                                                                                      | Note                                                                                                                                                 |
 | -----------            | ----------                                                                                                                  | -------                                                                                                                                              |
 | Cloudflare             | [https://dash.cloudflare.com/](https://dash.cloudflare.com/)                                                                | You can see all of Cloudflare's models [here](https://developers.cloudflare.com/workers-ai/models/), with the ones marked as beta being free models. |
@@ -178,6 +172,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | Deepseek               | [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)                                            |                                                                                                                                                      |
 | Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                                                      |
 | Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 200 free calls to GPT-4o-mini are available every day.                                                                                               |
+
+</details>
 
 **For local llms, Set `LLM_KEY` to `NONE` in your `zshrc` or `bashrc`.**
 
@@ -206,397 +202,98 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
   }
 ```
 
+**[Configure template](./basic_template.lua)**
+
+
 ## Configuration
 
-### Basic Configuration
+### Commands
 
-**Some commands you should know about**
+| Cmd                      | Description                                                                              |
+| ---                      | -----                                                                                    |
+| `LLMSessionToggle`       | Open/hide the Chat UI                                                                    |
+| `LLMSelectedTextHandler` | Handle the selected text, the way it is processed depends on the prompt words you input |
+| `LLMAppHandler`          | Call AI tools                                                                            |
 
-- `LLMSessionToggle`: open/hide the Chat UI.
-- `LLMSelectedTextHandler`: Handles the selected text, the way it is processed depends on the prompt words you input.
-- `LLMAppHandler`: call AI tools.
-
-> If the URL is not configured, the default is to use Cloudflare.
-
-#### Examples
-
-For more details or examples, please refer to [Chat Configuration](examples/chat/).
+### Model Parameters
 
 <details>
-<summary><b><i>Click here to see meanings of some configuration options</i></b></summary>
+<summary><b><i>Expand the table.</i></b></summary>
 <br/>
 
-- `prompt`: Model prompt.
-- `prefix`: Dialog role indicator.
-- `style`: Style of the Chat UI (float means floating window, others are split windows).
-- `url`: Model api url.
-- `model`: Model name.
-- `api_type`: The parsing format of the model output: `openai`, `zhipu`, `ollama`, `workers-ai`. The `openai` format is compatible with most models, but `ChatGLM` can only be parsed using the `zhipu` format, and `cloudflare` can only be parsed using the `workers-ai` format. If you use ollama to run the model, you can use `ollama`.
-- `fetch_key`: If you need to use models from different platforms simultaneously, you can configure `fetch_key` to ensure that different models use different API Keys. The usage is as follows:
-  ```lua
-  fetch_key = function() return "<your api key>" end
-  ```
-- `max_tokens`: Maximum output length of the model.
-- `save_session`: Whether to save session history.
-- `max_history`: Maximum number of saved sessions.
-- `history_path`: Path for saving session history.
-- `temperature`: The temperature of the model, controlling the randomness of the model's output.
-- `temperature`: The top_p of the model, controlling the randomness of the model's output.
-- `spinner`: The waiting animation of the model output (effective when non-streaming output).
-- `display`
-  - `diff`: Display style of diff (effective when optimizing code and showing diff, the style in the screenshot is mini_diff, which requires installation of [mini.diff](https://github.com/echasnovski/mini.diff)).
-
-- `keys`: Shortcut key settings for different windows, default values can be found in [Default Shortcuts](#default-shortcuts)
-  - *floating style*
-    - input window
-      - `Input:Cancel`: Cancel dialog response.
-      - `Input:Submit`: Submit your question.
-      - `Input:Resend`: Rerespond to the dialog.
-      - `Input:HistoryNext`: Select the next session history.
-      - `Input:HistoryPrev`: Select the previous session history.
-      - `Input:ModelsNext`: Select the next model.
-      - `Input:ModelsPrev`: Select the previous model.
-      - `PageUp`: Output Window page up
-      - `HalfPageUp`: Output Window page up (half)
-      - `PageDown`: Output window page down
-      - `HalfPageDown`: Output window page down (half)
-      - `JumpToTop`: Jump to the top (output window)
-      - `JumpToBottom`: Jump to the bottom (output window)
-    - Chat UI
-      - `Session:Toggle`: open/hide the Chat UI.
-      - `Session:Close`: close the Chat UI.
-      - `Session:Models`: open the model-list window.
-  - *split style*
-    - output window
-      - `Output:Ask`: Open input window.
-      - `Output:Cancel`: Cancel diaglog response.
-      - `Output:Resend`: Rerespond to the dialog.
-      - `Session:History`: open session history.
-      - `Session:Models`: open the model-list window.
-    - Chat UI
-      - `Session:Toggle`: open/hide the Chat UI.
-      - `Session:Close`: close the Chat UI.
+| Parameter          | Description                                                                                                                                                                                                | Value                                                                                                                                       |
+| ------------------ | -------                                                                                                                                                                                                    | -                                                                                                                                           |
+| url                | Model entpoint                                                                                                                                                                                             | String                                                                                                                                      |
+| model              | Model name                                                                                                                                                                                                 | String                                                                                                                                      |
+| api_type           | Result parsing format                                                                                                                                                                                      |  `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`                                                                                             |
+| timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                            | Number                                                                                                                                      |
+| fetch_key          | Function that returns the API key                                                                                                                                                                          | Function                                                                                                                                    |
+| max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                       | Number                                                                                                                                      |
+| temperature        | From 0 to 1.<br>The lower the number is, the more deterministic the response will be.<br>The higher the number is the more creative the response will be, but moe likely to go off topic if it's too high        | Number                                                                                                                                      |
+| top_p              | A threshold(From 0 to 1).<br>The higher the threshold is the more diverse and the less repetetive the response will be.<br>(But it could also lead to less likely tokens which also means: off-topic responses.) | Number                                                                                                                                      |
+| enable_thinking    | Activate the model's deep thinking ability (The model itself needs to ensure this feature.)                                                                                                                | Boolean                                                                                                                                     |
+| thinking_budget    | The maximum length of the thinking process only takes effect when enable_thinking is true.                                                                                                                 | Number                                                                                                                                      |
+| schema             | Function-calling required function parameter description                                                                                                                                                   | Table                                                                                                                                       |
+| functions_tbl      | Function dict required for Function-calling                                                                                                                                                                | Table                                                                                                                                       |
+| keep_alive         | Maintain connection (usually for ollama)                                                                                                                                                                   | see [keep_alive/OLLAMA_KEEP_ALIVE](https://github.com/ollama/ollama/blob/c02db93243353855b983db2a1562a02b57e66db1/docs/faq.md?plain=1#L214) |
+| streaming_handler  | Customize the parsing format of the streaming output                                                                                                                                                       | Function                                                                                                                                    |
+| parse_handler      | Customize the parsing format for non-streaming output                                                                                                                                                      | Function                                                                                                                                    |
 
 </details>
 
-If you use a local LLM (but not one running on ollama), you may need to define the streaming_handler (required), as well as the parse_handler (optional, used by only a few AI tools), for details see [Local LLM Configuration](#local-llm-configuration).
+### keymaps
 
-
-[⬆ back to top](#contents)
-
-### Window Style Configuration
-
-If you want to further configure the style of the conversation interface, you can configure `chat_ui_opts` and `popwin_opts` separately.
- 
 <details>
-<summary><b><i>Click here to see how to configure the window style</i></b></summary>
+<summary><b><i>Expand the table.</i></b></summary>
 <br/>
 
-Their configuration options are the same:
-- `relative`:
-  - `editor`: The floating window relative to the current editor window.
-  - `cursor`: The floating window relative to the current cursor position.
-  - `win`: The floating window relative to the current window.
-
-- `position`: The position of the window.
-- `size`: The size of the window.
-- `enter`: Whether the window automatically gains focus.
-- `focusable`: Whether the window can gain focus.
-- `zindex`: The layer of the window.
-- `border`
-  - `style`: The style of the window border.
-  - `text`: The text of the window border.
-- `win_options`: The options of the window.
-  - `winblend`: The transparency of the window.
-  - `winhighlight`: The highlight of the window.
+| Style       | Keyname           | Description                                                                                     | Default: `[mode] keymap` | Window                                       |
+| -           | -                 | -                                                                                               | -                        | -                                            |
+| float       | Input:Submit      | Submit your question                                                                            | `[i] ctrl+g`             | Input                                        |
+| float       | Input:Cancel      | Cancel dialog response                                                                          | `[i] ctrl+c`             | Input                                        |
+| float       | Input:Resend      | Rerespond to the dialog                                                                         | `[i] ctrl+r`             | Input                                        |
+| float       | Input:HistoryNext | Select the next session history                                                                 | `[i] ctrl+j`             | Input                                        |
+| float       | Input:HistoryPrev | Select the previous session history                                                             | `[i] ctrl+k`             | Input                                        |
+| float       | Input:ModelsNext  | Select the next model                                                                           | `[i] ctrl+shift+j`       | Input                                        |
+| float       | Input:ModelsPrev  | Select the previous model                                                                       | `[i] ctrl+shift+k`       | Input                                        |
+| split       | Output:Ask        | Open the input box<br>In the normal mode of the input box, press Enter to submit your question) | `[n] i`                  | Output                                       |
+| split       | Output:Cancel     | Cancel dialog response                                                                          | `[n] ctrl+c`             | Output                                       |
+| split       | Output:Resend     | Rerespond to the dialog                                                                         | `[n] ctrl+r`             | Output                                       |
+| float/split | Session:Toggle    | Toggle session                                                                                  | `[n] <leader>ac`         | Input+Output                                 |
+| float/split | Session:Close     | Close session                                                                                   | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:Models    | Open the model-list window                                                                      | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
+| split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close       | `[n] ctrl+h`             | Output                                       |
+| float       | Focus:Input       | Jump from the output window to the input window                                                 | -                        | Output                                       |
+| float       | Focus:Output      | Jump from the input window to the output window                                                 | -                        | Input                                        |
+| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Output                                       |
+| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Output                                       |
+| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Output                                       |
+| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Output                                       |
+| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Output                                       |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Output                                       |
 
 </details>
 
-More information can be found in [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md).
+### Tool
 
-#### Examples
+| Handler name           | Description                                                                                                                    |
+| --                     | --                                                                                                                             |
+| side_by_side_handler   | Display results in two windows side by side                                                                                    |
+| action_handler         | Display results in the source file in the form of a diff                                                                       |
+| qa_handler             | AI for single-round dialogue                                                                                                   |
+| flexi_handler          | Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text)    |
+| disposable_ask_handler | Flexible questioning, you can choose a piece of code to ask about, or you can ask directly (the current buffer is the context) |
+| attach_to_chat_handler | Attach the selected content to the context and ask a question.                                                                 |
+| completion_handler     | Code completion                                                                                                                |
+| curl_request_handler   | The simplest interaction between curl and LLM is generally used to query account balance or available model lists, etc.        |
 
-For more details or examples, please refer to [UI Configuration](examples/ui/).
+Each handler's parameters can be referred to [here](docs/tools).
 
-[⬆ back to top](#contents)
+Examples can be seen [AI Tools Configuration](examples/ai-tools/)
 
-### Configuration of AI Tools
+### UI
 
-Currently, llm.nvim provides some templates for AI tools, making it convenient for everyone to customize their own AI tools.
-
-All AI tools need to be defined in `app_handler`, presented in the form of a pair of `key-value` (`key` is the tool name and `value` is the configuration information of the tool).
-
-#### Examples
-
-For more details or examples, please refer to [AI Tools Configuration](examples/ai-tools/).
-
-<details>
-<summary><b><i>Click here to see how to configure AI tools</i></b></summary>
-<br/>
-
-For all AI tools, their configuration options are similar:
-
-- `handler`: Which template to use
-  - `side_by_side_handler`: Display results in two windows side by side
-  - `action_handler`: Display results in the source file in the form of a diff
-    - `Y`/`y`: Accept LLM suggested code
-    - `N`/`n`: Reject LLM suggested code
-    - `<ESC>`: Exit directly
-    - `I`/`i`: Input additional optimization conditions
-    - `<C-r>`: Optimize again directly
-  - `qa_handler`: AI for single-round dialogue
-  - `flexi_handler`: Results will be displayed in a flexible window (window size is automatically calculated based on the amount of output text)
-  - You can also customize functions
-- `prompt`: Prompt words for the AI tool
-- `opts`
-  - `spell`: Whether to have spell check
-  - `number`: Whether to display line numbers
-  - `wrap`: Whether to automatically wrap lines
-  - `linebreak`: Whether to allow line breaks in the middle of words
-  - `url`, `model`: The LLM used by this AI tool
-  - `api_type`: The type of parsing output by this AI tool
-  - `streaming_handler`: This AI tool uses a custom streaming parsing function
-  - `parse_handler`: This AI tool uses a custom parsing function
-  - `border`: Floating window border style
-  - `accept`
-    - `mapping`: The key mapping for accepting the output
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `Y`/`y`)
-    - `action`: The action for accepting the output, which is executed when accepting the output. (Default action: Copy the output)
-  - `reject`
-    - `mapping`: The key mapping for rejecting the output
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `N`/`n`)
-    - `action`: The action for rejecting the output, which is executed when rejecting the output. (Default action: None or close the window)
-  - `close`
-    - `mapping`: The key mapping for closing the AI tool
-      - `mode`: Vim mode (Default mode: `n`)
-      - `keys`: Your key mappings. (Default keys: `<ESC>`)
-    - `action`: The action for closing the AI tool. (Default action: Reject all output and close the window)
-
-Different templates also have some exclusive configuration items of their own.
-
-- You can also define in the `opts` of `qa_handler`:
-  - `component_width`: the width of the component
-  - `component_height`: the height of the component
-  - `query`
-      - `title`: the title of the component, which will be displayed in the center above the component
-      - `hl`: the highlight of the title
-  - `input_box_opts`: the window options for the input box (`size`, `win_options`)
-  - `preview_box_opts`: the window options for the preview box (`size`, `win_options`)
-
-- You can also define in the `opts` of `action_handler`:
-  - `language`: The language used for the output result (`English`/`Chinese`/`Japanese` etc.)
-  - `input`
-    - `relative`: The relative position of the split window (`editor`/`win`)
-    - `position`: The position of the split window (`top`/`left`/`right`/`bottom`)
-    - `size`: The proportion of the split window (default is 25%)
-    - `enter`: Whether to automatically enter the window
-  - `output`
-    - `relative`: Same as `input`
-    - `position`: Same as `input`
-    - `size`: Same as `input`
-    - `enter`: Same as `input`
-
-- In the `opts` of `side_by_side_handler`, you can also define:
-  - `left` Left window
-    - `title`: The title of the window
-    - `focusable`: Whether the window can gain focus
-    - `border`
-    - `win_options`
-  - `right` Right window
-    - `title`: The title of the window
-    - `focusable`: Whether the window can gain focus
-    - `border`
-    - `win_options`
-
-- In the `opts` of `flexi_handler`, you can also define:
-  - `exit_on_move`: Whether to close the flexible window when the cursor moves
-  - `enter_flexible_window`: Whether to automatically enter the window when the flexible window pops up
-  - `apply_visual_selection`: Whether to append the selected text content after the `prompt`
-
-My some AI tool configurations:
-~~~lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
-    config = function()
-      local tools = require("llm.common.tools")
-      require("llm").setup({
-        app_handler = {
-          OptimizeCode = {
-            handler = tools.side_by_side_handler,
-            -- opts = {
-            --   streaming_handler = local_llm_streaming_handler,
-            -- },
-          },
-          TestCode = {
-            handler = tools.side_by_side_handler,
-            prompt = [[ Write some test cases for the following code, only return the test cases.
-            Give the code content directly, do not use code blocks or other tags to wrap it. ]],
-            opts = {
-              right = {
-                title = " Test Cases ",
-              },
-            },
-          },
-          OptimCompare = {
-            handler = tools.action_handler,
-            opts = {
-              fetch_key = function()
-                return vim.env.GITHUB_TOKEN
-              end,
-              url = "https://models.inference.ai.azure.com/chat/completions",
-              model = "gpt-4o",
-              api_type = "openai",
-            },
-          },
-
-          Translate = {
-            handler = tools.qa_handler,
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-
-              component_width = "60%",
-              component_height = "50%",
-              query = {
-                title = " 󰊿 Trans ",
-                hl = { link = "Define" },
-              },
-              input_box_opts = {
-                size = "15%",
-                win_options = {
-                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-              },
-              preview_box_opts = {
-                size = "85%",
-                win_options = {
-                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-              },
-            },
-          },
-
-          -- check siliconflow's balance
-          UserInfo = {
-            handler = function()
-              local key = os.getenv("LLM_KEY")
-              local res = tools.curl_request_handler(
-                "https://api.siliconflow.cn/v1/user/info",
-                { "GET", "-H", string.format("'Authorization: Bearer %s'", key) }
-              )
-              if res ~= nil then
-                print("balance: " .. res.data.balance)
-              end
-            end,
-          },
-          WordTranslate = {
-            handler = tools.flexi_handler,
-            prompt = "Translate the following text to Chinese, please only return the translation",
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-              exit_on_move = true,
-              enter_flexible_window = false,
-            },
-          },
-          CodeExplain = {
-            handler = tools.flexi_handler,
-            prompt = "Explain the following code, please only return the explanation, and answer in Chinese",
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              enter_flexible_window = true,
-            },
-          },
-          CommitMsg = {
-            handler = tools.flexi_handler,
-            prompt = function()
-              -- Source: https://andrewian.dev/blog/ai-git-commits
-              return string.format([[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me:
-
-1. First line: conventional commit format (type: concise description) (remember to use semantic types like feat, fix, docs, style, refactor, perf, test, chore, etc.)
-2. Optional bullet points if more context helps:
-   - Keep the second line blank
-   - Keep them short and direct
-   - Focus on what changed
-   - Always be terse
-   - Don't overly explain
-   - Drop any fluffy or formal language
-
-Return ONLY the commit message - no introduction, no explanation, no quotes around it.
-
-Examples:
-feat: add user auth system
-
-- Add JWT tokens for API auth
-- Handle token refresh for long sessions
-
-fix: resolve memory leak in worker pool
-
-- Clean up idle connections
-- Add timeout for stale workers
-
-Simple change example:
-fix: typo in README.md
-
-Very important: Do not respond with any of the examples. Your message must be based off the diff that is about to be provided, with a little bit of styling informed by the recent commits you're about to see.
-
-Based on this format, generate appropriate commit messages. Respond with message only. DO NOT format the message in Markdown code blocks, DO NOT use backticks:
-
-```diff
-%s
-```
-]],
-                vim.fn.system("git diff --no-ext-diff --staged")
-              )
-            end,
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              enter_flexible_window = true,
-              apply_visual_selection = false,
-            },
-          },
-        },
-    })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ts", mode = "x", "<cmd>LLMAppHandler WordTranslate<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMAppHandler CodeExplain<cr>" },
-      { "<leader>at", mode = "n", "<cmd>LLMAppHandler Translate<cr>" },
-      { "<leader>tc", mode = "x", "<cmd>LLMAppHandler TestCode<cr>" },
-      { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimCompare<cr>" },
-      { "<leader>au", mode = "n", "<cmd>LLMAppHandler UserInfo<cr>" },
-      { "<leader>ag", mode = "n", "<cmd>LLMAppHandler CommitMsg<cr>" },
-      -- { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
-    },
-  },
-~~~
-
-</details>
-
+See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
 [⬆ back to top](#contents)
 
 ### Local LLM Configuration
@@ -670,56 +367,6 @@ return {
 
 [⬆ back to top](#contents)
 
-## Default Keyboard Shortcuts
-
-- floating window
-
-| window       | key          | mode     | desc                                |
-| ------------ | ------------ | -------- | -----------------------             |
-| Input        | `ctrl+g`     | `i`      | Submit your question                |
-| Input        | `ctrl+c`     | `i`      | Cancel dialog response              |
-| Input        | `ctrl+r`     | `i`      | Rerespond to the dialog             |
-| Input        | `ctrl+j`     | `i`      | Select the next session history     |
-| Input        | `ctrl+k`     | `i`      | Select the previous session history |
-| Input        | `ctrl+shift+j`     | `i`      | Select the next model     |
-| Input        | `ctrl+shift+k`     | `i`      | Select the previous model |
-| Input        | `Ctrl+b`     | `n`/`i`  | Output Window page up               |
-| Input        | `Ctrl+f`     | `n`/`i`  | Output window page down             |
-| Input        | `Ctrl+u`     | `n`/`i`  | Output Window page up (half)        |
-| Input        | `Ctrl+d`     | `n`/`i`  | Output window page down (half)      |
-| Input        | `gg`         | `n`      | Jump to the top (output window)     |
-| Input        | `G`          | `n`      | Jump to the bottom (output window)  |
-| Output+Input | `<leader>ac` | `n`      | Toggle session                      |
-| Output+Input | `<esc>`      | `n`      | Close session                       |
-
-### Window switch
-
-> You can use `<C-w><C-w>` to switch windows, and if you find it ungraceful, you can also set your own shortcut key for window switching. (This feature has not set a default shortcut key)
-
-```lua
-    -- Switch from the output window to the input window.
-    ["Focus:Input"]       = { mode = "n", key = {"i", "<C-w>"} },
-    -- Switch from the input window to the output window.
-    ["Focus:Output"]      = { mode = { "n", "i" }, key = "<C-w>" },
-```
-
-- split window
-
-| window       | key          | mode     | desc                                 |
-| ------------ | ------------ | -------- | -----------------------              |
-| Input        | `<cr>`       | `n`      | Submit your question                 |
-| Output       | `i`          | `n`      | Open the input box                   |
-| Output       | `ctrl+c`     | `n`      | Cancel dialog response               |
-| Output       | `ctrl+r`     | `n`      | Rerespond to the dialog              |
-| Output       | `ctrl+h`     | `n`      | Open the history window              |
-| Output       | `ctrl+m`     | `n`      | Open the model-list window           |
-| Output+Input | `<leader>ac` | `n`      | Toggle session                       |
-| Output+Input | `<esc>`      | `n`      | Close session                        |
-| History      | `j`          | `n`      | Preview the next session history     |
-| History      | `k`          | `n`      | Preview the previous session history |
-| History      | `<cr>`       | `n`      | Enter the selected session           |
-| History      | `<esc>`      | `n`      | Close the history window             |
-
 ## TODO List
 
 [todo-list](https://github.com/Kurama622/llm.nvim/issues/44)
@@ -742,170 +389,3 @@ We would like to express our heartfelt gratitude to the contributors of the foll
 
 [ACKNOWLEDGMENTS](./ACKNOWLEDGMENTS.md)
 
-
----
-
-## Q&A
-
-### The format of curl usage in Windows is different from Linux, and the default request format of llm.nvim may cause issues under Windows.
-
-Use a custom request format
-
-- Basic Chat and some AI tools (using streaming output) with customized request format
-
-  Define the `args` parameter at the same level as the `prompt`.
-  ```lua
-  --[[ custom request args ]]
-  args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-  ```
-
-- AI tools (using non-streaming output) custom request format
-
-  Define args in `opts`
-  ```lua
-    WordTranslate = {
-      handler = tools.flexi_handler,
-      prompt = "Translate the following text to Chinese, please only return the translation",
-      opts = {
-        fetch_key = function()
-          return vim.env.GLM_KEY
-        end,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
-        api_type = "zhipu",
-        args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-        exit_on_move = true,
-        enter_flexible_window = false,
-      },
-    },
-  ```
-
-> [!NOTE]
-> You need to modify the args according to your actual situation.
-
-[⬆ back to top](#contents)
-
-### Switching between multiple LLMs and frequently changing the value of LLM_KEY is troublesome, and I don't want to expose my key in Neovim's configuration file.
-
-- Create a `.env` file specifically to store your various keys. Note: Do not upload this file to GitHub.
-
-```bash
-export GITHUB_TOKEN=xxxxxxx
-export DEEPSEEK_TOKEN=xxxxxxx
-export SILICONFLOW_TOKEN=xxxxxxx
-```
-
-- Load the `.env` file in `zshrc` or `bashrc`
-  ```bash
-  source ~/.config/zsh/.env
-
-  # Default to using the LLM provided by Github Models.
-  export LLM_KEY=$GITHUB_TOKEN
-  ```
-
-- Finally, switching keys is completed through `fetch_key`.
-  ```lua
-    fetch_key = function()
-      return vim.env.DEEPSEEK_TOKEN
-    end,
-  ```
-
-[⬆ back to top](#contents)
-
-### Priority of different parse/streaming functions
-
-  AI tool configuration's `streaming_handler` or `parse_handler` > AI tool configuration's `api_type` > Main configuration's `streaming_handler` or `parse_handler` > Main configuration's `api_type`
-
-[⬆ back to top](#contents)
-
-### How can the AI-generated git commit message feature be integrated with lazygit
-  ```lua
-  {
-    "kdheepak/lazygit.nvim",
-    lazy = true,
-    cmd = {
-      "LazyGit",
-      "LazyGitConfig",
-      "LazyGitCurrentFile",
-      "LazyGitFilter",
-      "LazyGitFilterCurrentFile",
-    },
-    -- optional for floating window border decoration
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
-    config = function()
-      vim.keymap.set("t", "<C-c>", function()
-        vim.api.nvim_win_close(vim.api.nvim_get_current_win(), true)
-        vim.api.nvim_command("LLMAppHandler CommitMsg")
-      end, { desc = "AI Commit Msg" })
-    end,
-  }
-  ```
-[⬆ back to top](#contents)
-
-### How to switch models
-
-Need to configure models:
-
-```lua
-{
-  "Kurama622/llm.nvim",
-  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
-  cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
-  config = function()
-    require("llm").setup({
-        -- set models list
-        models = {
-          {
-            name = "GithubModels",
-            url = "https://models.inference.ai.azure.com/chat/completions",
-            model = "gpt-4o-mini",
-            api_type = "openai"
-            fetch_key = function()
-              return "<your api key>"
-            end,
-            -- max_tokens = 4096,
-            -- temperature = 0.3,
-            -- top_p = 0.7,
-          },
-          {
-            name = "Model2",
-            -- ...
-          }
-        },
-    })
-  end,
-  keys = {
-    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-    -- float style
-    ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
-    ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
-
-    -- Applicable to AI tools with split style and UI interfaces
-    ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
-  },
-}
-```
-[⬆ back to top](#contents)
-
-### How to display the thinking (reasoning) contents
-
-Configure `enable_thinking` (`thinking_budget` can be optionally configured)
-
-```lua
-{
-  url = "https://api.siliconflow.cn/v1/chat/completions",
-  api_type = "openai",
-  max_tokens = 4096,
-  model = "Qwen/Qwen3-8B", -- think
-  fetch_key = function()
-    return vim.env.SILICONFLOW_TOKEN
-  end,
-  temperature = 0.3,
-  top_p = 0.7,
-  enable_thinking = true,
-  thinking_budget = 512,
-}
-```
-[⬆ back to top](#contents)
