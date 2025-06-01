@@ -142,7 +142,7 @@ function openai.AppendToolsRespond(chunk, msg)
     return
   end
   local chunk_json = F.IsValid(chunk) and vim.json.decode(chunk:sub(7)) or nil
-  if F.IsValid(chunk_json) and F.IsValid(chunk.choices) and F.IsValid(chunk.choices.delta) then
+  if F.IsValid(chunk_json) and F.IsValid(chunk_json.choices) and F.IsValid(chunk_json.choices[1].delta) then
     local tool_calls = chunk_json.choices[1].delta.tool_calls
     if F.IsValid(tool_calls) then
       if F.IsValid(tool_calls[1].id) then
