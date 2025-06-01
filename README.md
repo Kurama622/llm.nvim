@@ -294,6 +294,7 @@ Examples can be seen [AI Tools Configuration](examples/ai-tools/)
 ### UI
 
 See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
+
 [⬆ back to top](#contents)
 
 ### Local LLM Configuration
