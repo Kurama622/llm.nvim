@@ -95,7 +95,7 @@ function openai.FunctionCalling(ctx, chunk)
     local name = msg.tool_calls[i]["function"].name
     local id = msg.tool_calls[i].id
 
-    local params = vim.json.decode(msg.tool_calls[i]["function"].arguments)
+    local params = vim.json.decode(backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments))
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name
     end, ctx.body.tools)[1]["function"].parameters.required
