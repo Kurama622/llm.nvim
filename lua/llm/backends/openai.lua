@@ -8,6 +8,12 @@ function openai.StreamingHandler(chunk, ctx)
   if chunk == "data: [DONE]" or not chunk then
     return ctx.assistant_output
   end
+
+  -- Gemini
+  if chunk:sub(1, 6) == "Tokens" then
+    return ctx.assistant_output
+  end
+
   local tail = chunk:sub(-1, -1)
   if tail:sub(1, 1) ~= "}" then
     ctx.line = ctx.line .. chunk
