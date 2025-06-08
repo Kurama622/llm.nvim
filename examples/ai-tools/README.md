@@ -13,6 +13,7 @@ You can place the configuration of the tools you need in the `app_handler`.
 - [Optimize-Code-and-Display-Diff](./Optimize-Code-and-Display-Diff/config.lua)
 - [Word-Translate](./Word-Translate/config.lua)
 - [Generate-Docstring](./Generate-Docstring/config.lua)
+- [Function-Calling](./Function-calling/README.md)
 - [Code-Completions](./Code-Completions)
 
 

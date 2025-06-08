@@ -95,7 +95,7 @@ function openai.FunctionCalling(ctx, chunk)
     local name = msg.tool_calls[i]["function"].name
     local id = msg.tool_calls[i].id
 
-    local params = vim.json.decode(msg.tool_calls[i]["function"].arguments)
+    local params = backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name
     end, ctx.body.tools)[1]["function"].parameters.required
@@ -105,14 +105,13 @@ function openai.FunctionCalling(ctx, chunk)
     for _, k in pairs(keys) do
       table.insert(p, params[k])
     end
-    local fstring = string.dump(ctx.functions_tbl[name])
-    local tool_func = load(fstring)
 
-    if tool_func == nil then
-      LOG:ERROR("please configure your `functions_tbl`")
+    if ctx.functions_tbl[name] == nil then
+      LOG:ERROR(string.format("please configure %s in `functions_tbl`", name))
       return
     end
-    local res = tool_func(unpack(p))
+
+    local res = ctx.functions_tbl[name](unpack(p))
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
