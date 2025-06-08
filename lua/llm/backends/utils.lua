@@ -1,3 +1,4 @@
+local LOG = require("llm.common.log")
 local utils = {}
 local state = require("llm.state")
 local F = require("llm.common.api")
@@ -33,7 +34,7 @@ local function remove_braces(str)
   return str:sub(2, #str - 1)
 end
 
-local function remove_colon(str)
+local function remove_quote(str)
   local i, j = 1, #str
   while str:sub(i, i) ~= '"' and i < #str do
     i = i + 1
@@ -65,6 +66,10 @@ local function get_item_value(s)
   local len = #s
   local j = len
 
+  if s:sub(j, j) ~= '"' then
+    return "", s
+  end
+
   while cnt < 2 do
     local c = s:sub(j, j)
     if c == '"' then
@@ -80,7 +85,7 @@ local function get_item_value(s)
     j = j - 1
   end
 
-  return serialization(remove_colon(s:sub(1, j))), s:sub(j + 1)
+  return serialization(remove_quote(s:sub(1, j))), s:sub(j + 1)
 end
 
 function utils.format_json_str(str)
@@ -89,6 +94,7 @@ function utils.format_json_str(str)
   for token in string.gmatch(str, "([^:]+)") do
     table.insert(list, token)
   end
+
   local res = "{"
   local num = #list
   local remainer = ""
@@ -96,7 +102,7 @@ function utils.format_json_str(str)
     if i == 1 then
       res = res .. list[i] .. ":"
     elseif i == num then
-      local s = remove_colon(remainer .. list[i])
+      local s = remove_quote(remainer .. list[i])
       res = res .. serialization(s)
       remainer = ""
     else
@@ -110,6 +116,8 @@ function utils.format_json_str(str)
     end
   end
   res = res .. "}"
-  return res
+
+  local params = vim.json.decode(res)
+  return params
 end
 return utils
