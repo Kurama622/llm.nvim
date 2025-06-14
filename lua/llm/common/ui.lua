@@ -1,6 +1,7 @@
 local Popup = require("nui.popup")
 local conf = require("llm.config")
 local LOG = require("llm.common.log")
+local F = require("llm.common.api")
 
 local ui = {}
 
@@ -265,7 +266,7 @@ function ui.show_spinner(waiting_state)
       end
 
       vim.api.nvim_buf_set_lines(waiting_state.bufnr, 0, -1, false, { spinner_frames[frame] })
-      vim.api.nvim_buf_add_highlight(waiting_state.bufnr, -1, spinner_hl, 0, 0, -1)
+      F.AddHighlight("spinner", waiting_state.bufnr, spinner_hl, 0, 0, 0, -1)
 
       frame = frame % #spinner_frames + 1
     end)

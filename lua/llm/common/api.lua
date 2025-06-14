@@ -144,6 +144,29 @@ function api.GetUserRequestArgs(args, env)
   end
 end
 
+--- @param namespace string|integer Namespace name or Namespace id
+--- @param bufnr integer
+--- @param hl string
+--- @param row_start integer
+--- @param col_start integer
+--- @param row_end integer
+--- @param col_end integer
+function api.AddHighlight(namespace, bufnr, hl, row_start, col_start, row_end, col_end)
+  local ns = -1
+
+  if type(namespace) == "string" then
+    ns = vim.api.nvim_create_namespace(namespace)
+  elseif type(namespace) == "number" then
+    ns = namespace
+  end
+
+  if vim.version.lt(vim.version(), { 0, 11, 0 }) then
+    vim.api.nvim_buf_add_highlight(bufnr, ns, hl, row_start, col_start, col_end)
+  else
+    vim.hl.range(bufnr, ns, hl, { row_start, col_start }, { row_end, col_end }, {})
+  end
+end
+
 function api.UpdateCursorPosition(bufnr, winid)
   if IsNotPopwin(winid) then
     winid = state.llm.winid
@@ -168,12 +191,13 @@ function api.AppendChunkToBuffer(bufnr, winid, chunk, detach)
     api.UpdateCursorPosition(bufnr, winid)
   end
   if state.cursor.has_prefix and IsNotPopwin(winid) then
-    vim.api.nvim_buf_add_highlight(
+    api.AddHighlight(
+      "role",
       bufnr,
-      -1,
       conf.prefix[state.cursor.role].hl,
       line_count - 1,
       0,
+      line_count - 1,
       #conf.prefix[state.cursor.role].text
     )
   end
@@ -673,15 +697,8 @@ function api.SetItemHl(popup, hl)
   local count = vim.api.nvim_buf_line_count(popup.bufnr)
   vim.api.nvim_buf_clear_namespace(popup.bufnr, ns, 0, count)
 
-  if vim.version.lt(vim.version(), { 0, 11, 0 }) then
-    for i = 1, count do
-      vim.api.nvim_buf_add_highlight(popup.bufnr, ns, "LlmGrayLight", i, 0, -1)
-    end
-    vim.api.nvim_buf_add_highlight(popup.bufnr, ns, hl, idx - 1, 0, -1)
-  else
-    vim.hl.range(popup.bufnr, ns, "LlmGrayLight", { 0, 0 }, { count, -1 }, {})
-    vim.hl.range(popup.bufnr, ns, hl, { idx - 1, 0 }, { idx - 1, -1 }, {})
-  end
+  api.AddHighlight(ns, popup.bufnr, "LlmGrayLight", 0, 0, count, -1)
+  api.AddHighlight(ns, popup.bufnr, hl, idx - 1, 0, idx - 1, -1)
 end
 
 function api.HistoryPreview(layout_opts, opts)
