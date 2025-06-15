@@ -33,6 +33,9 @@ function Diff.new(args)
     winnr = args.winnr,
   }, { __index = Diff })
   Diff.valid = true
+  if conf.configs.display.diff.disable_diagnostic then
+    vim.diagnostic.enable(false, { bufnr = args.bufnr })
+  end
   -- Set the diff properties
   vim.cmd("set diffopt=" .. table.concat(conf.configs.display.diff.opts, ","))
 
@@ -99,6 +102,9 @@ end
 ---@return nil
 function Diff:teardown()
   Diff.valid = false
+  if conf.configs.display.diff.disable_diagnostic then
+    vim.diagnostic.enable(true, { bufnr = self.bufnr })
+  end
   vim.cmd("diffoff")
   api.nvim_win_close(self.diff.win, false)
 end

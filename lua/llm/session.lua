@@ -127,7 +127,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     local params = {
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
-      messages = state.session[state.popwin.winid],        
+      messages = state.session[state.popwin.winid],
     }
 
     for _, key in pairs(state.model_params) do
