@@ -48,9 +48,7 @@ end, { nargs = 1, range = true })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
   local arg_opts = {}
-  if args.count == -1 and args.range > 0 then
-    arg_opts.mode = "n"
-  else
+  if args.count ~= -1 then
     arg_opts.mode = "v"
   end
   app.LLMAppHandler(args.fargs[1], arg_opts)
