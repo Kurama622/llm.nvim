@@ -54,6 +54,7 @@ function M.handler(_, _, _, _, prompt, opts)
 
   local options = {
     inline_assistant = false,
+    enable_buffer_context = true,
     language = "English",
     timeout = 30,
     win_options = {
@@ -144,6 +145,7 @@ function M.handler(_, _, _, _, prompt, opts)
     local builtin_opts = {
       prompt = prompt,
       inline_assistant = options.inline_assistant,
+      enable_buffer_context = options.enable_buffer_context,
       language = options.language,
       action = default_actions,
       _ = options,

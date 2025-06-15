@@ -7,6 +7,9 @@ Ask = {
     },
     title = " Ask ",
     inline_assistant = true,
+
+    -- Whether to use the current buffer as context without selecting any text (the tool is called in normal mode)
+    enable_buffer_context = true,
     language = "Chinese",
 
     -- [optinal] set your llm model
