@@ -261,6 +261,7 @@ M.configs = {
       layout = "vertical", -- vertical|horizontal split for default provider
       opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
       provider = "default", -- default|mini_diff
+      disable_diagnostic = false,
     },
   },
   -- stylua: ignore
