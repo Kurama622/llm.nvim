@@ -83,6 +83,7 @@ return {
             layout = "vertical", -- vertical|horizontal split for default provider
             opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
             provider = "mini_diff", -- default|mini_diff
+            disable_diagnostic = true, -- Whether to show diagnostic information when displaying diff
           },
         },
         app_handler = {

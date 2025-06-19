@@ -1,6 +1,8 @@
 ---Utilising the awesome:
 ---https://github.com/echasnovski/mini.diff
 
+local conf = require("llm.config")
+
 local ok, diff = pcall(require, "mini.diff")
 if not ok then
   return vim.notify(string.format("Failed to load mini.diff: %s", diff), vim.log.levels.ERROR)
@@ -25,6 +27,9 @@ function MiniDiff.new(args)
   }, { __index = MiniDiff })
 
   MiniDiff.valid = true
+  if conf.configs.display.diff.disable_diagnostic then
+    vim.diagnostic.enable(false, { bufnr = args.bufnr })
+  end
   -- Capture the current source before we disable it
   if vim.b.minidiff_summary then
     current_source = vim.b.minidiff_summary["source_name"]
@@ -54,6 +59,9 @@ end
 ---@return nil
 function MiniDiff:accept()
   vim.b[self.bufnr].minidiff_config = nil
+  if conf.configs.display.diff.disable_diagnostic then
+    vim.diagnostic.enable(true, { bufnr = self.bufnr })
+  end
   diff.disable(self.bufnr)
   MiniDiff.valid = false
 end
@@ -62,6 +70,9 @@ end
 ---@return nil
 function MiniDiff:reject()
   api.nvim_buf_set_lines(self.bufnr, 0, -1, true, self.contents)
+  if conf.configs.display.diff.disable_diagnostic then
+    vim.diagnostic.enable(true, { bufnr = self.bufnr })
+  end
 
   vim.b[self.bufnr].minidiff_config = nil
   diff.disable(self.bufnr)
