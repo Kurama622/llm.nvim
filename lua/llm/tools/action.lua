@@ -17,6 +17,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     start_str = "```",
     end_str = "```",
     only_display_diff = false,
+    enable_buffer_context = true,
     language = "English",
     templates = nil,
     url = nil,
@@ -93,7 +94,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   local winnr = vim.api.nvim_get_current_win()
   local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
-  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
+  local mode = options.mode or vim.fn.mode()
+  local lines, start_line, start_col, end_line, end_col =
+    F.GetVisualSelectionRange(bufnr, mode, options.enable_buffer_context)
   local source_content = F.GetVisualSelection(lines)
 
   F.VisMode2NorMode()
