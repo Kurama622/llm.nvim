@@ -801,7 +801,7 @@ end
 function api.ResetModel(opts, _table, idx)
   for _, key in pairs(state.model_params) do
     local val = _table.models[idx][key]
-    if val == nil then
+    if key == "timeout" and val == nil then
       val = conf.configs[key]
     end
     opts[key] = val

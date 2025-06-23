@@ -68,7 +68,7 @@ M.model_params = {
   "parse_handler",
   "max_tokens",
   "keep_alive",
-  "temperatrue",
+  "temperature",
   "top_p",
   "enable_thinking",
   "thinking_budget",
