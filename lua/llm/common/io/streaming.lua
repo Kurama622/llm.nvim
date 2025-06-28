@@ -226,12 +226,12 @@ function M.GetStreamingOutput(opts)
       end
       -- TODO: Add stdout handling
     end),
-    on_stderr = function(_, err)
+    on_stderr = vim.schedule_wrap(function(_, err)
       if err ~= nil then
         LOG:ERROR(err)
       end
       -- TODO: Add error handling
-    end,
+    end),
     on_exit = vim.schedule_wrap(function()
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
