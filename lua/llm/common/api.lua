@@ -707,7 +707,7 @@ function api.SetItemHl(popup, hl)
   vim.api.nvim_buf_clear_namespace(popup.bufnr, ns, 0, count)
 
   api.AddHighlight(ns, popup.bufnr, "LlmGrayLight", 0, 0, count, -1)
-  api.AddHighlight(ns, popup.bufnr, hl, idx - 1, 0, idx - 1, -1)
+  api.AddHighlight(ns, popup.bufnr, "LlmSelection", idx - 1, 0, idx - 1, -1)
 end
 
 function api.HistoryPreview(layout_opts, opts)
