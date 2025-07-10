@@ -28,12 +28,14 @@ function M.handler(name, F, state, streaming, prompt, opts)
     },
     input_box_opts = {
       size = "15%",
+      border = "rounded",
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     },
     preview_box_opts = {
       size = "85%",
+      border = "rounded",
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
@@ -68,7 +70,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local input_box = Popup({
     enter = true,
     border = {
-      style = ui.seamless("rounded", "top"),
+      style = ui.seamless(options.input_box_opts.border, "top"),
       text = {
         top = NuiText(options.query.title, "LLMQuery"),
         top_align = "center",
@@ -80,7 +82,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local preview_box = Popup({
     focusable = true,
     border = {
-      style = ui.seamless("rounded", "bottom"),
+      style = ui.seamless(options.preview_box_opts.border, "bottom"),
       text = { top = "", top_align = "center" },
     },
     win_options = options.preview_box_opts.win_options,

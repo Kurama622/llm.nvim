@@ -172,12 +172,14 @@ local tools = require("llm.tools")
 
     input_box_opts = {
       size = "15%",
+      border = "rounded",
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     },
     preview_box_opts = {
       size = "85%",
+	  border = "rounded",
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
