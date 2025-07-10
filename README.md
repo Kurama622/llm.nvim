@@ -11,7 +11,7 @@
 > [!IMPORTANT]
 > A free large language model(LLM) plugin that allows you to interact with LLM in Neovim.
 >
-> 1. Supports any LLM, such as GPT, GLM, Kimi, deepseek or local LLMs (such as ollama).
+> 1. Supports any LLM, such as GPT, GLM, Kimi, DeepSeek, Gemini, Qwen or local LLMs (such as ollama).
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
@@ -46,7 +46,7 @@
   * [keymaps](#keymaps)
   * [Tool](#tool)
   * [UI](#ui)
-  * [Local LLM Configuration](#local-llm-configuration)
+  * [Custom parsing function](#custom-parsing-function)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
@@ -297,9 +297,9 @@ See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTan
 
 [⬆ back to top](#contents)
 
-### Local LLM Configuration
+### Custom parsing function
 
-Local LLMs require custom parsing functions; for streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
+For streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
  
 Below is an example of `ollama` running `llama3.2:1b`.
 
