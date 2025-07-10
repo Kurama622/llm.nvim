@@ -5,19 +5,19 @@ local app = require("llm.app")
 local F = require("llm.common.api")
 
 local highlight = {
-  LlmBlueNormal = { fg = "#65bcff", bg = "NONE" },
-  LlmBlueLight = { fg = "#b0e2ff", bg = "NONE" },
-  LlmRedNormal = { fg = "#ff7eb9", bg = "NONE" },
-  LlmRedLight = { fg = "#fca7ea", bg = "NONE" },
-  LlmGreenNormal = { fg = "#4fd6be", bg = "NONE" },
-  LlmGreenLight = { fg = "#b8db87", bg = "NONE" },
-  LlmYellowNormal = { fg = "#ff966c", bg = "NONE" },
-  LlmYellowLight = { fg = "#f9e2af", bg = "NONE" },
-  LlmGrayNormal = { fg = "#828bb8", bg = "NONE" },
-  LlmGrayLight = { fg = "#9c9c9c", bg = "NONE" },
-  LlmPurpleNormal = { fg = "#c099ff", bg = "NONE" },
-  LlmPurpleLight = { fg = "#ee82ee", bg = "NONE" },
-  LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE" },
+  LlmBlueNormal = { fg = "#65bcff", bg = "NONE", default = true },
+  LlmBlueLight = { fg = "#b0e2ff", bg = "NONE", default = true },
+  LlmRedNormal = { fg = "#ff7eb9", bg = "NONE", default = true },
+  LlmRedLight = { fg = "#fca7ea", bg = "NONE", default = true },
+  LlmGreenNormal = { fg = "#4fd6be", bg = "NONE", default = true },
+  LlmGreenLight = { fg = "#b8db87", bg = "NONE", default = true },
+  LlmYellowNormal = { fg = "#ff966c", bg = "NONE", default = true },
+  LlmYellowLight = { fg = "#f9e2af", bg = "NONE", default = true },
+  LlmGrayNormal = { fg = "#828bb8", bg = "NONE", default = true },
+  LlmGrayLight = { fg = "#9c9c9c", bg = "NONE", default = true },
+  LlmPurpleNormal = { fg = "#c099ff", bg = "NONE", default = true },
+  LlmPurpleLight = { fg = "#ee82ee", bg = "NONE", default = true },
+  LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE", default = true },
 }
 
 local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })

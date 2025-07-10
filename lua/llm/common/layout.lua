@@ -80,6 +80,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     if not state.history.hl then
       state.history.hl = other.win_options.winhighlight:match(":(.-),")
       other.win_options.winhighlight = other.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+      F.FormatHl(state.history.hl, "history")
     end
     state.history.popup = Menu({
       enter = other.enter,
@@ -133,6 +134,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
       if not state.models.hl then
         state.models.hl = models.win_options.winhighlight:match(":(.-),")
         models.win_options.winhighlight = models.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+        F.FormatHl(state.models.hl, "models")
       end
       state.models.popup = Menu({
         enter = models.enter,

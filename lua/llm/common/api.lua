@@ -710,6 +710,15 @@ function api.SetItemHl(popup, hl)
   api.AddHighlight(ns, popup.bufnr, hl, idx - 1, 0, idx - 1, -1)
 end
 
+---@param hl string
+---@param win_name string
+function api.FormatHl(hl, win_name)
+  local bg = vim.api.nvim_get_hl(0, { name = "CursorLine" }).bg
+  local fg = vim.api.nvim_get_hl(0, { name = hl }).fg
+  state[win_name].hl = ("Llm%sSelected"):format(string.gsub(win_name, "^%a", string.upper))
+  vim.api.nvim_set_hl(0, state[win_name].hl, { fg = fg, bg = bg })
+end
+
 function api.HistoryPreview(layout_opts, opts)
   local layout = layout_opts or conf.configs.chat_ui_opts
   opts = opts or conf.configs.chat_ui_opts.history.split
