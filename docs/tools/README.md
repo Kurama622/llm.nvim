@@ -172,14 +172,21 @@ local tools = require("llm.tools")
 
     input_box_opts = {
       size = "15%",
-      border = "rounded",
+      border = {
+        style = "rounded",
+        text = {
+          top = " 󰊿 Trans "
+        },
+      },
       win_options = {
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:Define",
       },
     },
     preview_box_opts = {
       size = "85%",
-	  border = "rounded",
+      border = {
+        style = "rounded",
+      },
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },

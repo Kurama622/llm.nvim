@@ -2,7 +2,6 @@ local LOG = require("llm.common.log")
 local Popup = require("nui.popup")
 local ui = require("llm.common.ui")
 local conf = require("llm.config")
-local NuiText = require("nui.text")
 local Layout = require("nui.layout")
 local M = {}
 
@@ -27,15 +26,23 @@ function M.handler(name, F, state, streaming, prompt, opts)
       hl = { link = "Define" },
     },
     input_box_opts = {
+      enter = true,
       size = "15%",
-      border = "rounded",
+      border = {
+        style = "rounded",
+        text = { top_align = "center" },
+      },
       win_options = {
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:LLMQuery",
       },
     },
     preview_box_opts = {
+      focusable = true,
       size = "85%",
-      border = "rounded",
+      border = {
+        style = "rounded",
+        text = { top = "", top_align = "center" },
+      },
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
@@ -65,28 +72,27 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
   options = vim.tbl_deep_extend("force", options, opts or {})
   options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+
+  options.input_box_opts.border = vim.tbl_deep_extend("keep", options.input_box_opts.border, {
+    text = {
+      top = options.query.title,
+    },
+  })
+  options.input_box_opts.border.style = ui.seamless(options.input_box_opts.border.style, "top")
+
+  options.preview_box_opts.border = vim.tbl_deep_extend("force", options.preview_box_opts.border, {
+    style = ui.seamless(options.preview_box_opts.border.style, "bottom"),
+  })
+
   vim.api.nvim_set_hl(0, "LLMQuery", options.query.hl)
 
-  local input_box = Popup({
-    enter = true,
-    border = {
-      style = ui.seamless(options.input_box_opts.border, "top"),
-      text = {
-        top = NuiText(options.query.title, "LLMQuery"),
-        top_align = "center",
-      },
-    },
-    win_options = options.input_box_opts.win_options,
-  })
+  local input_box = Popup(F.table_filter(function(key)
+    return key ~= "size"
+  end, options.input_box_opts))
 
-  local preview_box = Popup({
-    focusable = true,
-    border = {
-      style = ui.seamless(options.preview_box_opts.border, "bottom"),
-      text = { top = "", top_align = "center" },
-    },
-    win_options = options.preview_box_opts.win_options,
-  })
+  local preview_box = Popup(F.table_filter(function(key)
+    return key ~= "size"
+  end, options.preview_box_opts))
 
   local layout = F.CreateLayout(
     options.component_width,

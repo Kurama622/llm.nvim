@@ -872,4 +872,17 @@ function api.tbl_slice(t, i, j)
   return sliced
 end
 
+---@param func function or callable table, with signature func(value, key)
+---@param t table
+function api.table_filter(func, t)
+  vim.validate({ func = { func, "c" }, t = { t, "t" } })
+
+  local rettab = {}
+  for key, entry in pairs(t) do
+    if func(key, entry) then
+      rettab[key] = entry
+    end
+  end
+  return rettab
+end
 return api
