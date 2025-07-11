@@ -161,23 +161,27 @@ local tools = require("llm.tools")
     wrap = true,
     linebreak = false,
 
-    query = {
-      title = " 󰊿 Trans ",
-      hl = { link = "Define" },
-    },
-
     -- The overall size setting of input + preview windows
     component_width = "60%",
     component_height = "55%",
 
     input_box_opts = {
       size = "15%",
+      border = {
+        style = "rounded",
+        text = {
+          top = " 󰊿 Trans "
+        },
+      },
       win_options = {
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:Define",
       },
     },
     preview_box_opts = {
       size = "85%",
+      border = {
+        style = "rounded",
+      },
       win_options = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
