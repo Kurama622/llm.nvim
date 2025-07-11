@@ -161,11 +161,6 @@ local tools = require("llm.tools")
     wrap = true,
     linebreak = false,
 
-    query = {
-      title = " 󰊿 Trans ",
-      hl = { link = "Define" },
-    },
-
     -- The overall size setting of input + preview windows
     component_width = "60%",
     component_height = "55%",

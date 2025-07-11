@@ -872,7 +872,7 @@ function api.tbl_slice(t, i, j)
   return sliced
 end
 
----@param func function or callable table, with signature func(value, key)
+---@param func function or callable table, with signature func(key, value)
 ---@param t table
 function api.table_filter(func, t)
   vim.validate({ func = { func, "c" }, t = { t, "t" } })
