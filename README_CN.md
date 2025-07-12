@@ -11,7 +11,7 @@
 > [!IMPORTANT]
 > 免费的大语言模型插件，让你在Neovim中与大模型交互
 >
-> 1. 支持任意一款大模型，比如gpt，glm，kimi、deepseek或者本地运行的大模型(比如ollama)
+> 1. 支持任意一款大模型，比如GPT，GLM，Kimi、DeepSeek、Gemini、Qwen或者本地运行的大模型(比如ollama)
 >
 > 2. 支持定义属于你自己的AI工具，且不同工具可以使用不同的模型
 >
@@ -44,26 +44,16 @@
     * [不同AI平台的官网](#不同ai平台的官网)
   * [最小安装示例](#最小安装示例)
 * [配置](#配置)
-  * [基本配置](#基本配置)
-    * [示例](#示例)
-  * [窗口风格配置](#窗口风格配置)
-    * [示例](#示例-1)
-  * [AI工具的配置](#ai工具的配置)
-    * [示例](#示例-2)
-  * [本地运行大模型](#本地运行大模型)
-* [默认快捷键](#默认快捷键)
-  * [窗口切换](#窗口切换)
+  * [Commands](#commands)
+  * [模型参数](#模型参数)
+  * [快捷键](#快捷键)
+  * [工具](#工具)
+  * [UI](#ui)
+  * [自定义解析函数](#自定义解析函数)
 * [待办](#待办)
 * [作者的配置文件](#作者的配置文件)
 * [致谢](#致谢)
   * [特别鸣谢](#特别鸣谢)
-* [常见问题](#常见问题)
-  * [windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题](#windows的curl使用格式与linux不一样llmnvim默认的请求格式windows下会有问题)
-  * [多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key](#多个大模型切换频繁更改llm_key的值很麻烦而且我不想在neovim的配置文件中暴露我的key)
-  * [不同解析函数的优先级](#不同解析函数的优先级)
-  * [AI生成git commit信息的功能如何与lazygit集成在一起?](#ai生成git-commit信息的功能如何与lazygit集成在一起)
-  * [如何切换模型](#如何切换模型)
-  * [如何显示模型的思考（推理）过程](#如何显示模型的思考推理过程)
 
 <!-- mtoc-end -->
 
@@ -172,6 +162,10 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 
 #### 不同AI平台的官网
 
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
 | 平台                   | 获取API Key的链接                                                                                                           | 备注                                                                                                                    |
 | -----------            | ----------                                                                                                                  | -------                                                                                                                 |
 | Cloudflare             | [https://dash.cloudflare.com/](https://dash.cloudflare.com/)                                                                | 你可以在[这里](https://developers.cloudflare.com/workers-ai/models/)看到cloudflare的所有模型, 其中标注beta的是免费模型. |
@@ -182,6 +176,8 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | Deepseek               | [https://platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys)                                            |                                                                                                                         |
 | Openrouter             | [https://openrouter.ai/](https://openrouter.ai/)                                                                            |                                                                                                                         |
 | Chatanywhere           | [https://api.chatanywhere.org/v1/oauth/free/render](https://api.chatanywhere.org/v1/oauth/free/render)                      | 每天200次免费调用GPT-4o-mini.                                                                                           |
+
+</details>
 
 **对于本地大模型, 在`zshrc` or `bashrc`中设置 `LLM_KEY` 为 `NONE`.**
 
@@ -210,400 +206,121 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
   }
 ```
 
-## 配置
-### 基本配置
+- Mini.deps
 
-**一些你应该知道的命令**
+```lua
+require("mini.deps").setup()
+MiniDeps.add({
+        source = "Kurama622/llm.nvim",
+        depends = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+        cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+})
 
-- `LLMSessionToggle`: 打开/隐藏对话界面
-- `LLMSelectedTextHandler`: 对选中的文本进行处理，如何处理取决于你传入什么提示词
-- `LLMAppHandler`: 调用AI工具
-
-> 如果url没有被配置，默认使用Cloudflare
-
-#### 示例
-
-对于更多细节和示例，请查看[Chat Configuration](examples/chat/).
-
-<details>
-<summary><b><i>点击查看配置项的含义</i></b></summary>
-<br/>
-
-- `prompt`: 模型的提示词
-- `prefix`: 对话角色的标志
-- `style`: 对话窗口的样式(float即浮动窗口，其他均为分割窗口)
-- `url`: 模型的API地址
-- `model`: 模型的名称
-- `api_type`: 模型输出的解析格式: `openai`, `zhipu`, `ollama`, `workers-ai`. `openai`的格式可以兼容大部分的模型，但`ChatGLM`只能用`zhipu`的格式去解析，`cloudflare`只能用`workers-ai`去解析。如果你使用ollama来运行模型，你可以配置`ollama`。
-- `fetch_key`: 如果你需要同时使用不同平台的模型，可以通过配置`fetch_key`来保证不同模型使用不同的API Key，用法如下：
-  ```lua
-  fetch_key = function() return "<your api key>" end
-  ```
-- `max_tokens`: 模型的最大输出长度
-- `save_session`: 是否保存会话历史
-- `max_history`: 最多保存多少个会话
-- `history_path`: 会话历史的保存路径
-- `temperature`: 模型的temperature, 控制模型输出的随机性
-- `top_p`: 模型的top_p, 控制模型输出的随机性
-- `spinner`: 模型输出的等待动画 (非流式输出时生效)
-- `display`
-  - `diff`: diff的显示风格（优化代码并显示diff时生效, 截图中的风格为mini_diff, 需要安装[mini.diff](https://github.com/echasnovski/mini.diff)）
-
-- `keys`: 不同窗口的快捷键设置，默认值见[默认快捷键](#默认快捷键)
-  - *浮动窗口风格下的快捷键*
-    - 输入窗口
-      - `Input:Cancel`: 取消对话
-      - `Input:Submit`: 提交问题
-      - `Input:Resend`: 重新回答
-      - `Input:HistoryNext`: 切换到下一个会话历史
-      - `Input:HistoryPrev`: 切换到上一个会话历史
-      - `Input:ModelsNext`: 切换到下一个模型
-      - `Input:ModelsPrev`: 切换到上一个模型
-      - `PageUp`: 输出窗口向上翻页
-      - `HalfPageUp`: 输出窗口向上翻页(半页)
-      - `PageDown`: 输出窗口向下翻页
-      - `HalfPageDown`: 输出窗口向下翻页(半页)
-      - `JumpToTop`: 定位到输出窗口的顶部
-      - `JumpToBottom`: 定位到输出窗口的底部
-    - 整个对话界面
-      - `Session:Toggle`: 打开/隐藏对话界面
-      - `Session:Close`: 关闭对话界面
-      - `Session:Models`: 打开模型列表窗口.
-  - *分割窗口风格下的快捷键*
-    - 输出窗口
-      - `Output:Ask`: 打开输入窗口
-      - `Output:Cancel`: 取消对话
-      - `Output:Resend`: 重新回答
-      - `Session:History`: 打开会话历史窗口
-      - `Session:Models`: 打开模型列表窗口.
-    - 整个对话界面
-      - `Session:Toggle`: 打开/隐藏对话界面
-      - `Session:Close`: 关闭对话界面
-
-</details>
-
-如果你使用本地运行的大模型（但不是用ollama运行的），你可能需要定义streaming_handler（必须），以及parse_handler（非必需，只有个别AI工具会用到），具体见[本地运行大模型](#本地运行大模型)
-
-[⬆ 返回目录](#目录)
-
-### 窗口风格配置
-
-如果你想进一步配置对话界面的样式，你可以分别对`chat_ui_opts`和`popwin_opts`进行配置。
-
-<details>
-<summary><b><i>点击查看如何配置窗口风格</i></b></summary>
-<br/>
-
-它们的配置项都是相同的：
-- `relative`:
-  - `editor`: 该浮动窗口相对于当前编辑器窗口
-  - `cursor`: 该浮动窗口相对于当前光标位置
-  - `win` : 该浮动窗口相对于当前窗口
-
-- `position`: 窗口的位置
-- `size`: 窗口的大小
-- `enter`: 窗口是否自动获得焦点
-- `focusable`: 窗口是否可以获得焦点
-- `zindex`: 窗口的层级
-- `border` 
-  - `style`: 窗口的边框样式
-  - `text`: 窗口的边框文本
-- `win_options`: 窗口的选项
- - `winblend`: 窗口的透明度
- - `winhighlight`: 窗口的高亮
-
-</details>
-
-更多信息可以查阅[nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
-
-#### 示例
-
-对于更多细节和示例，请查看[UI Configuration](examples/ui/).
-
-[⬆ 返回目录](#目录)
-
-### AI工具的配置
-
-目前llm.nvim提供了一些AI工具的模板，方便大家去自定义自己的AI工具
-
-所有的AI工具都需要定义在`app_handler`中，以一对`key-value`的形式呈现，`key`为工具名称，`value`为工具的配置信息
-
-#### 示例
-
-对于更多细节和示例，请查看[AI Tools Configuration](examples/ai-tools/).
-
-<details>
-<summary><b><i>点击查看如何配置AI工具</i></b></summary>
-<br/>
-
-对于所有的AI工具，它们的配置项都是基本类似的:
-
-- `handler`: 使用哪个模板
-  - `side_by_side_handler`: 两个窗口并排展示结果
-  - `action_handler`: 在源文件中以diff的形式展示结果
-    - `Y`/`y`: 接受LLM建议代码
-    - `N`/`n`: 拒绝LLM建议代码
-    - `<ESC>`: 直接退出
-    - `I/i`: 输入优化的补充条件
-    - `<C-r>`: 直接重新优化
-  - `qa_handler`: 单轮对话的AI
-  - `flexi_handler`: 结果会展示在弹性窗口中 ( 根据输出文本的内容多少自动计算窗口大小 )
-  - 你也可以自定义函数
-- `prompt`: AI工具的提示词
-- `opts`
-  - `spell`: 是否有拼写检查
-  - `number`: 是否显示行号
-  - `wrap`: 是否自动换行
-  - `linebreak`: 是否允许从单词中间换行
-  - `url`、`model`: 该AI工具使用哪个大模型
-  - `api_type`: 该AI工具输出的解析类型
-  - `streaming_handler`: 该AI工具使用自定义的流解析函数
-  - `parse_handler`: 该AI工具使用自定义的解析函数
-  - `border`：浮动窗口的边框样式
-  - `accept`
-    - `mapping`: 接受AI输出的按键映射
-      - `mode`: 映射对应的vim模式, 默认为`n`
-      - `keys`: 你的按键, 默认为`Y`/`y`
-    - `action`: 接受AI输出时执行的函数，默认是复制到剪贴板
-  - `reject`
-    - `mapping`: 拒绝AI输出的按键映射
-      - `mode`: 映射对应的vim模式, 默认为`n`
-      - `keys`: 你的按键, 默认为`N`/`n`
-    - `action`: 拒绝AI输出时执行的函数，默认是什么也不做或者关闭AI工具窗口
-  - `close`
-    - `mapping`: 关闭AI工具的按键映射
-      - `mode`: 映射对应的vim模式, 默认为`n`
-      - `keys`: 你的按键, 默认为`<ESC>`
-    - `action`: 关闭AI工具，默认是拒绝所有AI输出并关闭AI工具窗口
-
-**不同模板还有一些属于自己的专属配置项**
-
-- `qa_handler`的`opts`中你还可以定义：
-  - `component_width`: 组件的宽度
-  - `component_height`: 组件的高度
-  - `query`
-      - `title`: 组件的标题，会显示在组件上方居中处
-      - `hl` : 标题的高亮
-  - `input_box_opts`: 输入框的窗口选项（`size`, `win_options`）
-  - `preview_box_opts`: 预览框的窗口选项（`size`, `win_options`）
-
-- `action_handler`的`opts`中你还可以定义:
-  - `language`: 输出结果使用的语言（`English`/`Chinese`/`Japanese`等）
-  - `input`
-    - `relative`: 分割窗口的相对位置（`editor`/`win`）
-    - `position`: 分割窗口的位置（`top`/`left`/`right`/`bottom`）
-    - `size`: 分割窗口的比例（默认是25%）
-    - `enter`: 是否自动进入窗口
-  - `output`
-    - `relative`: 同`input`
-    - `position`: 同`input`
-    - `size`: 同`input`
-    - `enter`: 同`input`
-
-- `side_by_side_handler`的`opts`中你还可以定义:
-  - `left` 左窗口
-    - `title`: 窗口的标题
-    - `focusable`: 是否允许窗口获得焦点
-    - `border`
-    - `win_options`
-  - `right` 右窗口
-    - `title`: 窗口的标题
-    - `focusable`: 是否允许窗口获得焦点
-    - `border`
-    - `win_options`
-
-- `flexi_handler`的`opts`中你还可以定义:
-  - `exit_on_move`: 是否在光标移动时关闭弹性窗口
-  - `enter_flexible_window`: 是否在弹性窗口弹出时自动进入窗口
-  - `apply_visual_selection`: 是否要在`prompt`后追加选中的文本内容
-
-我的一些AI工具配置:
-~~~lua
-  {
-    "Kurama622/llm.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
-    cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
-    config = function()
-      local tools = require("llm.common.tools")
-      require("llm").setup({
-        app_handler = {
-          OptimizeCode = {
-            handler = tools.side_by_side_handler,
-            -- opts = {
-            --   streaming_handler = local_llm_streaming_handler,
-            -- },
-          },
-          TestCode = {
-            handler = tools.side_by_side_handler,
-            prompt = [[ Write some test cases for the following code, only return the test cases.
-            Give the code content directly, do not use code blocks or other tags to wrap it. ]],
-            opts = {
-              right = {
-                title = " Test Cases ",
-              },
-            },
-          },
-          OptimCompare = {
-            handler = tools.action_handler,
-            opts = {
-              fetch_key = function()
-                return vim.env.GITHUB_TOKEN
-              end,
-              url = "https://models.inference.ai.azure.com/chat/completions",
-              model = "gpt-4o",
-              api_type = "openai",
-            },
-          },
-
-          Translate = {
-            handler = tools.qa_handler,
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-
-              component_width = "60%",
-              component_height = "50%",
-              query = {
-                title = " 󰊿 Trans ",
-                hl = { link = "Define" },
-              },
-              input_box_opts = {
-                size = "15%",
-                win_options = {
-                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-              },
-              preview_box_opts = {
-                size = "85%",
-                win_options = {
-                  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-                },
-              },
-            },
-          },
-
-          -- check siliconflow's balance
-          UserInfo = {
-            handler = function()
-              local key = os.getenv("LLM_KEY")
-              local res = tools.curl_request_handler(
-                "https://api.siliconflow.cn/v1/user/info",
-                { "GET", "-H", string.format("'Authorization: Bearer %s'", key) }
-              )
-              if res ~= nil then
-                print("balance: " .. res.data.balance)
-              end
-            end,
-          },
-          WordTranslate = {
-            handler = tools.flexi_handler,
-            prompt = "Translate the following text to Chinese, please only return the translation",
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-              exit_on_move = true,
-              enter_flexible_window = false,
-            },
-          },
-          CodeExplain = {
-            handler = tools.flexi_handler,
-            prompt = "Explain the following code, please only return the explanation, and answer in Chinese",
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              enter_flexible_window = true,
-            },
-          },
-          CommitMsg = {
-            handler = tools.flexi_handler,
-            prompt = function()
-              -- Source: https://andrewian.dev/blog/ai-git-commits
-              return string.format([[You are an expert at following the Conventional Commit specification. Given the git diff listed below, please generate a commit message for me:
-
-1. First line: conventional commit format (type: concise description) (remember to use semantic types like feat, fix, docs, style, refactor, perf, test, chore, etc.)
-2. Optional bullet points if more context helps:
-   - Keep the second line blank
-   - Keep them short and direct
-   - Focus on what changed
-   - Always be terse
-   - Don't overly explain
-   - Drop any fluffy or formal language
-
-Return ONLY the commit message - no introduction, no explanation, no quotes around it.
-
-Examples:
-feat: add user auth system
-
-- Add JWT tokens for API auth
-- Handle token refresh for long sessions
-
-fix: resolve memory leak in worker pool
-
-- Clean up idle connections
-- Add timeout for stale workers
-
-Simple change example:
-fix: typo in README.md
-
-Very important: Do not respond with any of the examples. Your message must be based off the diff that is about to be provided, with a little bit of styling informed by the recent commits you're about to see.
-
-Based on this format, generate appropriate commit messages. Respond with message only. DO NOT format the message in Markdown code blocks, DO NOT use backticks:
-
-```diff
-%s
+require("llm").setup({
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o-mini",
+        api_type = "openai"
+})
 ```
-]],
-                vim.fn.system("git diff --no-ext-diff --staged")
-              )
-            end,
-            opts = {
-              fetch_key = function()
-                return vim.env.GLM_KEY
-              end,
-              url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-              model = "glm-4-flash",
-              api_type = "zhipu",
-              enter_flexible_window = true,
-              apply_visual_selection = false,
-            },
-          },
-        },
-    })
-    end,
-    keys = {
-      { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ts", mode = "x", "<cmd>LLMAppHandler WordTranslate<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMAppHandler CodeExplain<cr>" },
-      { "<leader>at", mode = "n", "<cmd>LLMAppHandler Translate<cr>" },
-      { "<leader>tc", mode = "x", "<cmd>LLMAppHandler TestCode<cr>" },
-      { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimCompare<cr>" },
-      { "<leader>au", mode = "n", "<cmd>LLMAppHandler UserInfo<cr>" },
-      { "<leader>ag", mode = "n", "<cmd>LLMAppHandler CommitMsg<cr>" },
-      -- { "<leader>ao", mode = "x", "<cmd>LLMAppHandler OptimizeCode<cr>" },
-    },
-  },
-~~~
+
+**[配置模板](./basic_template.lua)**
+
+## 配置
+
+### Commands
+
+| Cmd                      | Description                                  |
+| ---                      | -----                                        |
+| `LLMSessionToggle`       | 打开/隐藏聊天界面                            |
+| `LLMSelectedTextHandler` | 处理所选文本，其处理方式取决于您输入的提示词 |
+| `LLMAppHandler`          | 调用AI工具                                   |
+
+### 模型参数
+
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
+| Parameter          | Description                                                                              | Value                                                                                                                                       |
+| ------------------ | -------                                                                                  | -                                                                                                                                           |
+| url                | 请求地址                                                                                 | String                                                                                                                                      |
+| model              | 模型名                                                                                   | String                                                                                                                                      |
+| api_type           | 输出解析格式                                                                             | `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`                                                                                            |
+| timeout            | 响应最大超时时间 (单位: 秒)                                                              | Number                                                                                                                                      |
+| fetch_key          | 返回API KEY的函数                                                                        | Function                                                                                                                                    |
+| max_tokens         | 响应的最大token数                                                                        | Number                                                                                                                                      |
+| temperature        | 取值范围0到1。值越小，回复越贴近主题; 值越大，回复越发散，但太高的值也容易使回复偏离主题 | Number                                                                                                                                      |
+| top_p              | 取值范围0到1。值越高，回复越多样化，重复性越低。(也越容易产生偏离主题的回复)             | Number                                                                                                                                      |
+| enable_thinking    | 启用thinking功能 (模型本身需要支持thinking)                                              | Boolean                                                                                                                                     |
+| thinking_budget    | 思考过程的最大token长度 (仅在 `enable_thinking` 为真时生效)                              | Number                                                                                                                                      |
+| schema             | Function-calling 所需的函数参数描述                                                      | Table                                                                                                                                       |
+| functions_tbl      | Function-calling 所需的函数字典                                                          | Table                                                                                                                                       |
+| keep_alive         | 保持连接 (一般用于ollama)                                                                | see [keep_alive/OLLAMA_KEEP_ALIVE](https://github.com/ollama/ollama/blob/c02db93243353855b983db2a1562a02b57e66db1/docs/faq.md?plain=1#L214) |
+| streaming_handler  | 自定义流式输出的解析格式                                                                 | Function                                                                                                                                    |
+| parse_handler      | 自定义非流式输出的解析格式                                                               | Function                                                                                                                                    |
 
 </details>
 
+
+### 快捷键
+
+<details>
+<summary><b><i>Expand the table.</i></b></summary>
+<br/>
+
+| Style       | Keyname           | Description                                                 | Default: `[mode] keymap` | Window                                       |
+| -           | -                 | -                                                           | -                        | -                                            |
+| float       | Input:Submit      | 提交问题                                                    | `[i] ctrl+g`             | Input                                        |
+| float       | Input:Cancel      | 中止对话请求                                                | `[i] ctrl+c`             | Input                                        |
+| float       | Input:Resend      | 重新请求                                                    | `[i] ctrl+r`             | Input                                        |
+| float       | Input:HistoryNext | 选择下一个历史会话                                          | `[i] ctrl+j`             | Input                                        |
+| float       | Input:HistoryPrev | 选择上一个历史会话                                          | `[i] ctrl+k`             | Input                                        |
+| float       | Input:ModelsNext  | 选择下一个模型                                              | `[i] ctrl+shift+j`       | Input                                        |
+| float       | Input:ModelsPrev  | 选择上一个模型                                              | `[i] ctrl+shift+k`       | Input                                        |
+| split       | Output:Ask        | 打开输入窗口。normal 模式下, 按回车提交问题                 | `[n] i`                  | Output                                       |
+| split       | Output:Cancel     | 中止对话请求                                                | `[n] ctrl+c`             | Output                                       |
+| split       | Output:Resend     | 重新请求                                                    | `[n] ctrl+r`             | Output                                       |
+| float/split | Session:Toggle    | 打开/隐藏聊天界面                                           | `[n] <leader>ac`         | Input+Output                                 |
+| float/split | Session:Close     | 关闭聊天界面                                                | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:Models    | 打开模型列表窗口                                            | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
+| split       | Session:History   | 打开会话历史窗口: `j`/`k`移动, `<cr>` 确认选择, `<esc>`关闭 | `[n] ctrl+h`             | Output                                       |
+| float       | Focus:Input       | 从输出窗口切换到输入窗口                                    | -                        | Output                                       |
+| float       | Focus:Output      | 从输入窗口切换到输出窗口                                    | -                        | Input                                        |
+| float       | PageUp            | 输出窗口向上翻页                                            | `[n/i] Ctrl+b`           | Input                                        |
+| float       | PageDown          | 输出窗口向下翻页                                            | `[n/i] Ctrl+f`           | Input                                        |
+| float       | HalfPageUp        | 输出窗口向上翻半页                                          | `[n/i] Ctrl+u`           | Input                                        |
+| float       | HalfPageDown      | 输出窗口向下翻半页                                          | `[n/i] Ctrl+d`           | Input                                        |
+| float       | JumpToTop         | 定位到输出窗口顶部                                          | `[n] gg`                 | Input                                        |
+| float       | JumpToBottom      | 定位到输出窗口低部                                          | `[n] G`                  | Input                                        |
+
+</details>
+
+### 工具
+
+| Handler name           | Description                                                                |
+| --                     | --                                                                         |
+| side_by_side_handler   | 用两个并排的窗口来展示结果                                                 |
+| action_handler         | 在原文件中展示AI建议代码和原代码的diff                                     |
+| qa_handler             | 单轮对话的问答                                                             |
+| flexi_handler          | 结果将在一个弹性窗口中显示（窗口大小根据输出文本的量自动计算）             |
+| disposable_ask_handler | 灵活的提问，您可以选择一段代码进行提问，或者直接提问（当前缓冲区是上下文） |
+| attach_to_chat_handler | 将选择的文本附加到Chat会话的上下文                                         |
+| completion_handler     | 代码补全                                                                   |
+| curl_request_handler   | 与LLM之间最简单的交互通常用于查询账户余额或可用的模型列表等                |
+
+每个handler的具体参数参考[docs/tools](docs/tools).
+
+示例： [AI 工具配置](examples/ai-tools/)
+
+### UI
+
+参考 [UI 配置](examples/ui/) 和 [nui/popup](https://github.com/MunifTanjim/nui.nvim/blob/main/lua/nui/popup/README.md)
+
 [⬆ 返回目录](#目录)
 
-### 本地运行大模型
+### 自定义解析函数
 
-本地大模型需要自定义解析函数，对于流式输出，我们使用自定义的`streaming_handler`；对于一次性返回输出结果的AI工具，我们使用自定义的`parse_handler`
+对于流式输出，我们使用自定义的`streaming_handler`；对于一次性返回输出结果的AI工具，我们使用自定义的`parse_handler`
 
 下面是`ollama`运行`llama3.2:1b`的样例
 
@@ -671,56 +388,6 @@ return {
 
 [⬆ 返回目录](#目录)
 
-## 默认快捷键
-
-- 浮动窗口风格下的快捷键
-
-| 窗口         | 按键           | 模式     | 描述                    |
-| ------------ | ------------   | -------- | ----------------------- |
-| Input        | `ctrl+g`       | `i`      | 提交你的问题            |
-| Input        | `ctrl+c`       | `i`      | 取消本轮对话            |
-| Input        | `ctrl+r`       | `i`      | 重新发起本轮对话        |
-| Input        | `ctrl+j`       | `i`      | 切换到下一个会话历史    |
-| Input        | `ctrl+k`       | `i`      | 切换到上一个会话历史    |
-| Input        | `ctrl+shift+j` | `i`      | 切换到下一个模型        |
-| Input        | `ctrl+shift+k` | `i`      | 切换到上一个模型        |
-| Input        | `Ctrl+b`       | `n`/`i`  | 输出窗口向上翻页        |
-| Input        | `Ctrl+f`       | `n`/`i`  | 输出窗口向下翻页        |
-| Input        | `Ctrl+u`       | `n`/`i`  | 输出窗口向上翻页(半页)  |
-| Input        | `Ctrl+d`       | `n`/`i`  | 输出窗口向下翻页(半页)  |
-| Input        | `gg`           | `n`      | 定位到输出窗口的顶部    |
-| Input        | `G`            | `n`      | 定位到输出窗口的底部    |
-| Output+Input | `<leader>ac`   | `n`      | 打开/隐藏对话界面       |
-| Output+Input | `<esc>`        | `n`      | 关闭对话界面            |
-
-### 窗口切换
-
-> 你可以使用 `<C-w><C-w>` 来切换窗口，如果你觉得这种方式不方便，你可以设置你自己的快捷键来切换窗口 (该特性没有默认快捷键)。
-
-```lua
-    -- Switch from the output window to the input window.
-    ["Focus:Input"]       = { mode = "n", key = {"i", "<C-w>"} },
-    -- Switch from the input window to the output window.
-    ["Focus:Output"]      = { mode = { "n", "i" }, key = "<C-w>" },
-```
-
-- 分割窗口风格下的快捷键
-
-| 窗口         | 按键         | 模式     | 描述                    |
-| ------------ | ------------ | -------- | ----------------------- |
-| Input        | `<cr>`       | `n`      | 提交你的问题            |
-| Output       | `i`          | `n`      | 打开输入窗口            |
-| Output       | `ctrl+c`     | `n`      | 取消本轮对话            |
-| Output       | `ctrl+r`     | `n`      | 重新发起本轮对话        |
-| Output       | `ctrl+h`     | `n`      | 打开会话历史窗口        |
-| Output       | `ctrl+m`     | `n`      | 打开模型列表窗口        |
-| Output+Input | `<leader>ac` | `n`      | 打开/隐藏对话界面       |
-| Output+Input | `<esc>`      | `n`      | 关闭对话界面            |
-| History      | `j`          | `n`      | 预览下一个会话历史      |
-| History      | `k`          | `n`      | 预览上一个会话历史      |
-| History      | `<cr>`       | `n`      | 进入选择的会话          |
-| History      | `<esc>`      | `n`      | 关闭会话历史窗口        |
-
 ## 待办
 
 [todo-list](https://github.com/Kurama622/llm.nvim/issues/44)
@@ -742,172 +409,3 @@ return {
 ### 特别鸣谢
 
 [ACKNOWLEDGMENTS](./ACKNOWLEDGMENTS.md)
----
-
-## 常见问题
-
-### windows的curl使用格式与linux不一样，llm.nvim默认的请求格式，windows下会有问题
-
-使用自定义请求格式
-
-- 基础对话功能以及部分AI工具（使用流式输出）自定义请求格式
-
-  定义args参数，与prompt同层级
-  ```lua
-  --[[ custom request args ]]
-  args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-  ```
-
-- AI工具（使用非流式输出）自定义请求格式
-
-  在`opts`中定义args
-  ```lua
-    WordTranslate = {
-      handler = tools.flexi_handler,
-      prompt = "Translate the following text to Chinese, please only return the translation",
-      opts = {
-        fetch_key = function()
-          return vim.env.GLM_KEY
-        end,
-        url = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-        model = "glm-4-flash",
-        api_type = "zhipu",
-        args = [[return {url, "-N", "-X", "POST", "-H", "Content-Type: application/json", "-H", authorization, "-d", vim.fn.json_encode(body)}]],
-        exit_on_move = true,
-        enter_flexible_window = false,
-      },
-    },
-  ```
-
-> [!NOTE]
-> 需要根据你的实际情况去修改args
-
-[⬆ 返回目录](#目录)
-
-### 多个大模型切换，频繁更改LLM_KEY的值很麻烦，而且我不想在Neovim的配置文件中暴露我的Key
-
-- 创建一个`.env`文件，专门保存你的各种Key。注意：此文件不要上传Github
-
-```bash
-export GITHUB_TOKEN=xxxxxxx
-export DEEPSEEK_TOKEN=xxxxxxx
-export SILICONFLOW_TOKEN=xxxxxxx
-```
-
-- 在zshrc或者bashrc中加载`.env`
-  ```bash
-  source ~/.config/zsh/.env
-
-  # 默认使用Github Models
-  export LLM_KEY=$GITHUB_TOKEN
-  ```
-
-- 最后在llm.nvim配置文件中，通过`fetch_key`完成Key的切换
-  ```lua
-    fetch_key = function()
-      return vim.env.DEEPSEEK_TOKEN
-    end,
-  ```
-
-[⬆ 返回目录](#目录)
-
-### 不同解析函数的优先级
-
-  AI工具配置的`streaming_handler`或者`parse_handler` > AI工具配置的`api_type` > 主配置的`streaming_handler`或者`parse_handler` > 主配置的`api_type`
-
-[⬆ 返回目录](#目录)
-
-### AI生成git commit信息的功能如何与lazygit集成在一起?
-
-  ```lua
-    {
-      "kdheepak/lazygit.nvim",
-      lazy = true,
-      cmd = {
-        "LazyGit",
-        "LazyGitConfig",
-        "LazyGitCurrentFile",
-        "LazyGitFilter",
-        "LazyGitFilterCurrentFile",
-      },
-      -- optional for floating window border decoration
-      dependencies = {
-        "nvim-lua/plenary.nvim",
-      },
-      config = function()
-        vim.keymap.set("t", "<C-c>", function()
-          vim.api.nvim_win_close(vim.api.nvim_get_current_win(), true)
-          vim.api.nvim_command("LLMAppHandler CommitMsg")
-        end, { desc = "AI Commit Msg" })
-      end,
-    }
-  ```
-
-[⬆ 返回目录](#目录)
-
-### 如何切换模型
-
-需要配置`models`:
-
-```lua
-{
-  "Kurama622/llm.nvim",
-  dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim"},
-  cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
-  config = function()
-    require("llm").setup({
-        -- set models list
-        models = {
-          {
-            name = "GithubModels",
-            url = "https://models.inference.ai.azure.com/chat/completions",
-            model = "gpt-4o-mini",
-            api_type = "openai"
-            fetch_key = function()
-              return "<your api key>"
-            end,
-            -- max_tokens = 4096,
-            -- temperature = 0.3,
-            -- top_p = 0.7,
-          },
-          {
-            name = "Model2",
-            -- ...
-          }
-        },
-    })
-  end,
-  keys = {
-    { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-    -- float style
-    ["Input:ModelsNext"]  = { mode = {"n", "i"}, key = "<C-S-J>" },
-    ["Input:ModelsPrev"]  = { mode = {"n", "i"}, key = "<C-S-K>" },
-
-    -- Applicable to AI tools with split style and UI interfaces
-    ["Session:Models"]     = { mode = "n", key = {"<C-m>"} },
-  },
-}
-```
-
-[⬆ 返回目录](#目录)
-
-### 如何显示模型的思考（推理）过程
-
-配置`enable_thinking`参数（`thinking_budget`参数可选配）
-
-```lua
-{
-  url = "https://api.siliconflow.cn/v1/chat/completions",
-  api_type = "openai",
-  max_tokens = 4096,
-  model = "Qwen/Qwen3-8B", -- think
-  fetch_key = function()
-    return vim.env.SILICONFLOW_TOKEN
-  end,
-  temperature = 0.3,
-  top_p = 0.7,
-  enable_thinking = true,
-  thinking_budget = 512,
-}
-```
-[⬆ 返回目录](#目录)

@@ -11,7 +11,7 @@
 > [!IMPORTANT]
 > A free large language model(LLM) plugin that allows you to interact with LLM in Neovim.
 >
-> 1. Supports any LLM, such as GPT, GLM, Kimi, deepseek or local LLMs (such as ollama).
+> 1. Supports any LLM, such as GPT, GLM, Kimi, DeepSeek, Gemini, Qwen or local LLMs (such as ollama).
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
 > 3. Most importantly, you can use free models provided by any platform (such as `Cloudflare`, `GitHub models`, `SiliconFlow`, `openrouter` or other platforms).
 
@@ -46,7 +46,7 @@
   * [keymaps](#keymaps)
   * [Tool](#tool)
   * [UI](#ui)
-  * [Local LLM Configuration](#local-llm-configuration)
+  * [Custom parsing function](#custom-parsing-function)
 * [TODO List](#todo-list)
 * [Author's configuration](#authors-configuration)
 * [Acknowledgments](#acknowledgments)
@@ -202,6 +202,23 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
   }
 ```
 
+- Mini.deps
+
+```lua
+require("mini.deps").setup()
+MiniDeps.add({
+        source = "Kurama622/llm.nvim",
+        depends = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+        cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+})
+
+require("llm").setup({
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o-mini",
+        api_type = "openai"
+})
+```
+
 **[Configure template](./basic_template.lua)**
 
 
@@ -265,12 +282,12 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close       | `[n] ctrl+h`             | Output                                       |
 | float       | Focus:Input       | Jump from the output window to the input window                                                 | -                        | Output                                       |
 | float       | Focus:Output      | Jump from the input window to the output window                                                 | -                        | Input                                        |
-| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Output                                       |
-| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Output                                       |
-| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Output                                       |
-| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Output                                       |
-| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Output                                       |
-| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Output                                       |
+| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Input                                        |
+| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Input                                        |
+| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Input                                        |
+| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Input                                        |
+| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Input                                        |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Input                                        |
 
 </details>
 
@@ -297,9 +314,9 @@ See [UI Configuration](examples/ui/) and [nui/popup](https://github.com/MunifTan
 
 [⬆ back to top](#contents)
 
-### Local LLM Configuration
+### Custom parsing function
 
-Local LLMs require custom parsing functions; for streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
+For streaming output, we use our custom `streaming_handler`; for AI tools that return output results in one go, we use our custom `parse_handler`.
  
 Below is an example of `ollama` running `llama3.2:1b`.
 
