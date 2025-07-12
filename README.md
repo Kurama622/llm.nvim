@@ -202,6 +202,23 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
   }
 ```
 
+- Mini.deps
+
+```lua
+require("mini.deps").setup()
+MiniDeps.add({
+        source = "Kurama622/llm.nvim",
+        depends = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
+        cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
+})
+
+require("llm").setup({
+        url = "https://models.inference.ai.azure.com/chat/completions",
+        model = "gpt-4o-mini",
+        api_type = "openai"
+})
+```
+
 **[Configure template](./basic_template.lua)**
 
 
@@ -265,12 +282,12 @@ export ACCOUNT=<Your ACCOUNT> # just for cloudflare
 | split       | Session:History   | Open the history window<br>`j`: next<br>`k`: previous<br>`<cr>`: select<br>`<esc>`: close       | `[n] ctrl+h`             | Output                                       |
 | float       | Focus:Input       | Jump from the output window to the input window                                                 | -                        | Output                                       |
 | float       | Focus:Output      | Jump from the input window to the output window                                                 | -                        | Input                                        |
-| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Output                                       |
-| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Output                                       |
-| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Output                                       |
-| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Output                                       |
-| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Output                                       |
-| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Output                                       |
+| float       | PageUp            | Output Window page up                                                                           | `[n/i] Ctrl+b`           | Input                                        |
+| float       | PageDown          | Output window page down                                                                         | `[n/i] Ctrl+f`           | Input                                        |
+| float       | HalfPageUp        | Output Window page up (half)                                                                    | `[n/i] Ctrl+u`           | Input                                        |
+| float       | HalfPageDown      | Output window page down (half)                                                                  | `[n/i] Ctrl+d`           | Input                                        |
+| float       | JumpToTop         | Jump to the top (output window)                                                                 | `[n] gg`                 | Input                                        |
+| float       | JumpToBottom      | Jump to the bottom (output window)                                                              | `[n] G`                  | Input                                        |
 
 </details>
 
