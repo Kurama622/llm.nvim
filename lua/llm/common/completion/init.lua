@@ -7,6 +7,7 @@ function completion.set_suggestion_hl()
 end
 
 function completion:init(opts)
+  LOG:INFO("-------completion init------")
   self.opts = opts
   self.backend = require("llm.common.completion.backends")(opts)
   self.set_suggestion_hl()
@@ -45,13 +46,17 @@ function completion:init(opts)
       require("codeium").setup(codeium_opts)
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
-        blink.add_provider("llm", {
+        local add_provider = blink.add_source_provider or blink.add_provider
+        add_provider("llm", {
           name = "llm",
           module = "codeium.blink",
           enabled = true,
           score_offset = 10,
           async = true,
         })
+        -- pcall(function()
+        --   blink.add_filetype_source("*", "llm")
+        -- end)
       else
         LOG:INFO("Please ensure that blink.cmp has been correctly installed.")
       end

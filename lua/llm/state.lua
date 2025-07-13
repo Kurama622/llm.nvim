@@ -89,4 +89,6 @@ M.reason_range = {
   is_begin = false,
   is_end = false,
 }
+
+M.enabled_cmds = {}
 return M

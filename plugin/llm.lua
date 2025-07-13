@@ -28,7 +28,7 @@ end
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker = streaming.GetStreamingOutput({
+  streaming.GetStreamingOutput({
     bufnr = state.llm.bufnr,
     winid = state.llm.winid,
     messages = state.session[state.session.filename],
@@ -87,4 +87,21 @@ vim.api.nvim_create_autocmd("VimResized", {
   end,
 })
 
+-- Setup completion for blink.cmp and cmp
+local has_cmp, cmp = pcall(require, "cmp")
+local has_blink, blink = pcall(require, "blink.cmp")
+if has_blink then
+  pcall(function()
+    local add_provider = blink.add_source_provider or blink.add_provider
+    add_provider("llm", {
+      name = "LLM",
+      module = "llm.common.completion.frontends.blink",
+      enabled = true,
+      score_offset = 10,
+    })
+  end)
+  pcall(function()
+    blink.add_filetype_source("llm", "llm")
+  end)
+end
 vim.treesitter.language.register("markdown", "llm")

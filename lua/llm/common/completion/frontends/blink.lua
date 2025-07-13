@@ -2,6 +2,8 @@
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local utils = require("llm.common.completion.utils")
+local cmds = require("llm.common.cmds")
+local F = require("llm.common.api")
 
 local blink = { name = "blink" }
 
@@ -47,8 +49,53 @@ function blink.new()
   return source
 end
 
+function blink:execute(ctx, item, callback, default_implementation)
+  if item.kind_name == "llm.cmds" then
+    table.insert(
+      state.enabled_cmds,
+      F.table_filter(function(key, _)
+        return key == "label" or key == "kind_name" or key == "callback"
+      end, item)
+    )
+  end
+  default_implementation()
+  callback()
+end
+
 function blink:get_completions(ctx, callback)
-  if (not state.completion.enable) or (not self.opts.auto_trigger and ctx.trigger.kind ~= "manual") then
+  local trigger_char = ctx.trigger.character or ctx.line:sub(ctx.bounds.start_col - 1, ctx.bounds.start_col - 1)
+
+  if vim.bo.ft == "llm" and trigger_char == "@" then
+    callback({
+      context = ctx,
+      is_incomplete_forward = false,
+      is_incomplete_backward = false,
+      items = vim
+        .iter(cmds)
+        :map(function(item)
+          return {
+            label = item.label,
+            documentation = {
+              kind = "markdown",
+              value = item.detail,
+            },
+            insertText = item.label,
+            insertTextFormat = vim.lsp.protocol.CompletionItemKind.Text,
+            kind = vim.lsp.protocol.CompletionItemKind.Text,
+            kind_name = "llm.cmds",
+            callback = item.callback,
+          }
+        end)
+        :totable(),
+    })
+  end
+
+  if
+    not state.completion.enable
+    or not vim.tbl_contains(ctx.providers, "llm")
+    or self.opts == nil
+    or (not self.opts.auto_trigger and ctx.trigger.kind ~= "manual")
+  then
     callback()
     return
   end
