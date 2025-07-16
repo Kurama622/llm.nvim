@@ -421,6 +421,8 @@ function api.CloseLLM()
     vim.wait(200, function() end)
     state.llm.worker.job = nil
   end
+
+  state.enabled_cmds = {}
   -- float
   if state.layout.popup then
     state.layout.popup:unmount()

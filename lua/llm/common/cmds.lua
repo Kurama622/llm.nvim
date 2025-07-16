@@ -7,7 +7,7 @@ local cmds = {
   {
     label = "web_search",
     detail = "Web Search",
-    callback = function(web_search_conf, msg, opts, cjob)
+    callback = function(web_search_conf, msg, opts, chat_job)
       local body = web_search_conf.params
       body.query = msg[#msg].content
 
@@ -76,8 +76,8 @@ local cmds = {
         end),
       })
 
-      job.chain(j, cjob)
       LOG:INFO("start web search ...")
+      job.chain(j, chat_job)
     end,
   },
   { label = "cmdtest", detail = "Test Cmds", callback = function() end },
