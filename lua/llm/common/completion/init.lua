@@ -7,7 +7,6 @@ function completion.set_suggestion_hl()
 end
 
 function completion:init(opts)
-  LOG:INFO("-------completion init------")
   self.opts = opts
   self.backend = require("llm.common.completion.backends")(opts)
   self.set_suggestion_hl()
@@ -54,9 +53,6 @@ function completion:init(opts)
           score_offset = 10,
           async = true,
         })
-        -- pcall(function()
-        --   blink.add_filetype_source("*", "llm")
-        -- end)
       else
         LOG:INFO("Please ensure that blink.cmp has been correctly installed.")
       end

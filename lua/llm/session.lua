@@ -133,13 +133,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     for _, key in pairs(state.model_params) do
       params[key] = opts._[key]
     end
-    streaming.GetStreamingOutput(params)
+    state.llm.worker = streaming.GetStreamingOutput(params)
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
       { role = "user", content = content },
     }
-    streaming.GetStreamingOutput({
+    state.llm.worker = streaming.GetStreamingOutput({
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
       messages = state.session[state.popwin.winid],
@@ -266,7 +266,6 @@ function M.NewSession()
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
-            LOG:INFO("submit")
             F.UpdatePrompt(state.session.filename)
             if input ~= "" then
               table.insert(state.session[state.session.filename], { role = "user", content = input })
