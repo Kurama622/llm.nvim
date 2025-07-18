@@ -21,7 +21,7 @@ local function init(opts)
       local cond = opts.filetypes[vim.bo.ft] == nil and opts.default_filetype_enabled or opts.filetypes[vim.bo.ft]
       if cond then
         LOG:TRACE("llm.nvim completion style: nvim-cmp")
-        local ncmp = require("llm.common.completion.frontends.cmp")
+        local ncmp = require("llm.common.completion.frontends.cmp.text")
         state.completion.frontend = ncmp
         state.completion.frontend.opts = opts
         require("cmp").register_source("llm", ncmp:new())

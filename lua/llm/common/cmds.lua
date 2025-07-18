@@ -80,6 +80,5 @@ local cmds = {
       job.chain(j, chat_job)
     end,
   },
-  { label = "cmdtest", detail = "Test Cmds", callback = function() end },
 }
 return cmds

@@ -103,5 +103,13 @@ if has_blink then
   pcall(function()
     blink.add_filetype_source("llm", "llm")
   end)
+elseif has_cmp and not has_blink then
+  cmp.register_source("llm_cmds", require("llm.common.completion.frontends.cmp.cmds").new())
+  cmp.setup.filetype("llm", {
+    enabled = true,
+    sources = vim.list_extend({
+      { name = "llm_cmds" },
+    }, cmp.get_config().sources),
+  })
 end
 vim.treesitter.language.register("markdown", "llm")
