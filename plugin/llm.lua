@@ -3,6 +3,7 @@ local conf = require("llm.config")
 local streaming = require("llm.common.io.streaming")
 local app = require("llm.app")
 local F = require("llm.common.api")
+local cmds = require("llm.common.cmds")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE", default = true },
@@ -18,6 +19,7 @@ local highlight = {
   LlmPurpleNormal = { fg = "#c099ff", bg = "NONE", default = true },
   LlmPurpleLight = { fg = "#ee82ee", bg = "NONE", default = true },
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE", default = true },
+  LlmCmds = { link = "Special", default = true },
 }
 
 local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })
@@ -85,6 +87,22 @@ vim.api.nvim_create_autocmd("VimResized", {
       })
     end
   end,
+})
+
+-- Setup syntax highlighting for all llm buffer
+local group = "llm.syntax"
+vim.api.nvim_create_augroup(group, { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "llm",
+  group = group,
+  callback = vim.schedule_wrap(function(args)
+    local bufnr = args.buf
+    for _, item in ipairs(cmds) do
+      vim.api.nvim_buf_call(bufnr, function()
+        vim.cmd.syntax('match LlmCmds "@' .. item.label .. '"')
+      end)
+    end
+  end),
 })
 
 -- Setup completion for blink.cmp and cmp

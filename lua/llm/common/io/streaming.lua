@@ -9,6 +9,7 @@ local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
+local ui = require("llm.common.ui")
 
 local function exit_callback(opts, ctx, worker)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
@@ -218,6 +219,7 @@ function M.GetStreamingOutput(opts)
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
+      ui.clear_spinner_extmark(opts)
       if required_params.api_type or required_params.streaming_handler then
         ctx.assistant_output = stream_output(chunk)
       else
@@ -248,6 +250,7 @@ function M.GetStreamingOutput(opts)
     end),
   })
 
+  ui.display_spinner_extmark(opts)
   if F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do
       opts.enable_cmds_idx = idx

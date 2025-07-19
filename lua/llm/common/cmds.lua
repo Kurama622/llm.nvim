@@ -2,11 +2,12 @@ local job = require("plenary.job")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local ui = require("llm.common.ui")
 
 local cmds = {
   {
     label = "web_search",
-    detail = "Web Search",
+    detail = "Search the web for information",
     callback = function(web_search_conf, msg, opts, chat_job)
       local body = web_search_conf.params
       body.query = msg[#msg].content
@@ -26,6 +27,7 @@ local cmds = {
           vim.json.encode(body),
         },
         on_stdout = vim.schedule_wrap(function(_, data)
+          ui.clear_spinner_extmark(opts)
           -- LOG:INFO("start web search ...")
         end),
         on_stderr = vim.schedule_wrap(function(_, err)
@@ -44,24 +46,10 @@ local cmds = {
           end
           F.WriteContent(opts.bufnr, opts.winid, "\n")
           if search_response.answer then
-            -- table.insert(msg, {
-            --   role = "user",
-            --   content = "\nPlease answer the question based on the provided web search results:\n"
-            --     .. search_response.answer,
-            -- })
             msg[#msg].content = msg[#msg].content:gsub("@web_search", "")
               .. "\nPlease answer the question based on the provided web search results.\n\n---\nSearch results:\n"
               .. search_response.answer
           else
-            -- local search_content = "\nPlease answer the question based on the provided web search results:\n"
-            -- for idx, item in ipairs(reference) do
-            --   search_content = search_content .. idx .. ". " .. item.content .. "\n"
-            -- end
-            -- table.insert(msg, {
-            --   role = "user",
-            --   content = search_content,
-            -- })
-
             msg[#msg].content = msg[#msg].content:gsub("@web_search", "")
               .. "\nPlease answer the question based on the provided web search results:\n\n---\nSearch results:\n"
             for idx, item in ipairs(reference) do

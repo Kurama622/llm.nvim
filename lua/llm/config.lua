@@ -38,6 +38,9 @@ M._.chat_ui_opts = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
+      buf_options = {
+        filetype = "llm",
+      },
       size = { height = "15%", width = "100%" },
       order = 3,
     },
@@ -60,6 +63,9 @@ M._.chat_ui_opts = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
+      buf_options = {
+        filetype = "llm",
+      },
       size = { height = "10%", width = "80%" },
     },
   },
@@ -78,6 +84,9 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      buf_options = {
+        filetype = "llm",
       },
       size = { height = "85%", width = "80%" },
       order = 1,
@@ -188,6 +197,9 @@ M._.popwin_opts = {
   win_options = {
     winblend = 0,
     winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+  },
+  buf_options = {
+    filetype = "llm",
   },
   move = {
     left = {

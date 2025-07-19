@@ -204,6 +204,8 @@ function api.AppendChunkToBuffer(bufnr, winid, chunk, detach)
   if state.cursor.pos ~= vim.api.nvim_buf_line_count(bufnr) then
     state.cursor.has_prefix = false
   end
+  -- Fix the issue of markdown rendering in the LLM output window not being timely.
+  vim.api.nvim_exec_autocmds("TextChanged", { buffer = bufnr })
 end
 
 function api.SetRole(bufnr, winid, role, detach)
@@ -502,7 +504,12 @@ end
 
 function api.ListFilesInPath()
   local path = conf.configs.history_path
-  local json_file_list = vim.split(vim.fn.glob(path .. "/*.json"), "\n")
+  local json_file_list = vim
+    .iter(vim.split(vim.fn.glob(path .. "/*.json"), "\n"))
+    :filter(function(item)
+      return item ~= ""
+    end)
+    :totable()
 
   for i = 1, #json_file_list do
     json_file_list[i] = vim.fs.basename(json_file_list[i])

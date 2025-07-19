@@ -100,7 +100,6 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       state.popwin.row = state.popwin.row + v.distance
     end,
   }
-  vim.api.nvim_set_option_value("filetype", "llm", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
   vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
   vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
@@ -186,7 +185,6 @@ function M.NewSession()
     if conf.configs.style == "float" then
       _layout.chat_ui()
       state.layout.popup:mount()
-      vim.api.nvim_set_option_value("filetype", "llm", { buf = state.input.popup.bufnr })
       vim.api.nvim_set_current_win(state.input.popup.winid)
       vim.api.nvim_command("startinsert")
       bufnr = state.llm.popup.bufnr
@@ -339,10 +337,10 @@ function M.NewSession()
                 zindex = conf.configs.chat_ui_opts.input.split.zindex,
                 border = conf.configs.chat_ui_opts.input.split.border,
                 win_options = conf.configs.chat_ui_opts.input.split.win_options,
+                buf_options = conf.configs.chat_ui_opts.input.split.buf_options,
                 size = conf.configs.chat_ui_opts.input.split.size,
               })
               state.input.popup:mount()
-              vim.api.nvim_set_option_value("filetype", "llm", { buf = state.input.popup.bufnr })
               vim.api.nvim_set_current_win(state.input.popup.winid)
               vim.api.nvim_command("startinsert")
 

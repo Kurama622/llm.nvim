@@ -5,6 +5,8 @@ local F = require("llm.common.api")
 
 local ui = {}
 
+local llm_spinner_ns = vim.api.nvim_create_namespace("llm_spinner_extmark")
+
 -- Reference: https://github.com/SmiteshP/nvim-navbuddy/blob/master/lua/nvim-navbuddy/ui.lua
 -- Author: @SmiteshP
 -- Updated by @Kurama622
@@ -271,5 +273,43 @@ function ui.show_spinner(waiting_state)
       frame = frame % #spinner_frames + 1
     end)
   )
+end
+
+function ui.display_spinner_extmark(opts)
+  local spinner_frames = conf.configs.spinner.text
+  local spinner_hl = conf.configs.spinner.hl
+  local frame = 1
+  opts.spinner_status = true
+
+  local timer = vim.loop.new_timer()
+  timer:start(
+    0,
+    100,
+    vim.schedule_wrap(function()
+      if opts.spinner_id ~= nil then
+        vim.api.nvim_buf_del_extmark(opts.bufnr, llm_spinner_ns, opts.spinner_id)
+      end
+      opts.spinner_id =
+        vim.api.nvim_buf_set_extmark(opts.bufnr, llm_spinner_ns, vim.api.nvim_buf_line_count(opts.bufnr) - 1, 0, {
+          virt_text = { { spinner_frames[frame], spinner_hl } },
+          virt_text_pos = "eol",
+        })
+      if not opts.spinner_status then
+        timer:stop()
+        return
+      end
+
+      frame = frame % #spinner_frames + 1
+    end)
+  )
+end
+
+function ui.clear_spinner_extmark(opts)
+  if opts.spinner_status then
+    opts.spinner_status = false
+    if opts.spinner_id ~= nil then
+      vim.api.nvim_buf_del_extmark(opts.bufnr, llm_spinner_ns, opts.spinner_id)
+    end
+  end
 end
 return ui
