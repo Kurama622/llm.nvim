@@ -13,6 +13,10 @@ function cmp_cmds:get_trigger_characters()
   return { "@" }
 end
 
+function cmp_cmds:get_keyword_pattern()
+  return "^$"
+end
+
 ---Execute selected item
 ---@param item table The selected item from the completion menu
 ---@param callback function
