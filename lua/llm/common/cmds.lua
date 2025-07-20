@@ -12,6 +12,13 @@ local cmds = {
       local body = web_search_conf.params
       body.query = msg[#msg].content:gsub("@web_search", "")
 
+      local fetch_key = ""
+      if type(web_search_conf.fetch_key) == "function" then
+        fetch_key = web_search_conf.fetch_key()
+      elseif type(web_search_conf.fetch_key) == "string" then
+        fetch_key = web_search_conf.fetch_key
+      end
+
       local j = job:new({
         command = "curl",
         args = {
@@ -22,7 +29,7 @@ local cmds = {
           "-H",
           "Content-Type: application/json",
           "-H",
-          "Authorization: Bearer " .. web_search_conf.fetch_key,
+          "Authorization: Bearer " .. fetch_key,
           "-d",
           vim.json.encode(body),
         },

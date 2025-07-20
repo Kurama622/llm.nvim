@@ -49,7 +49,13 @@ function M.GetStreamingOutput(opts)
   end
 
   if required_params.fetch_key ~= nil then
-    LLM_KEY = required_params.fetch_key()
+    if type(required_params.fetch_key) == "function" then
+      LLM_KEY = required_params.fetch_key()
+    elseif type(required_params.fetch_key) == "string" then
+      LLM_KEY = required_params.fetch_key
+    else
+      LOG:ERROR("fetch_key must be a string or function type")
+    end
   end
 
   local authorization = "Authorization: Bearer " .. LLM_KEY
