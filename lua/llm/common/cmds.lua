@@ -10,7 +10,7 @@ local cmds = {
     detail = "Search the web for information",
     callback = function(web_search_conf, msg, opts, chat_job)
       local body = web_search_conf.params
-      body.query = msg[#msg].content
+      body.query = msg[#msg].content:gsub("@web_search", "")
 
       local j = job:new({
         command = "curl",
@@ -46,11 +46,11 @@ local cmds = {
           end
           F.WriteContent(opts.bufnr, opts.winid, "\n")
           if search_response.answer then
-            msg[#msg].content = msg[#msg].content:gsub("@web_search", "")
+            msg[#msg].content = body.query
               .. "\nPlease answer the question based on the provided web search results.\n\n---\nSearch results:\n"
               .. search_response.answer
           else
-            msg[#msg].content = msg[#msg].content:gsub("@web_search", "")
+            msg[#msg].content = body.query
               .. "\nPlease answer the question based on the provided web search results:\n\n---\nSearch results:\n"
             for idx, item in ipairs(reference) do
               msg[#msg].content = msg[#msg].content .. idx .. ". " .. item.content .. "\n"
@@ -59,12 +59,12 @@ local cmds = {
           -- update plenary job args
           opts.body.messages = msg
           opts.args[#opts.args] = vim.json.encode(opts.body)
-          LOG:INFO("Finish web search!")
+          LOG:INFO("Finish search!")
           table.remove(state.enabled_cmds, opts.enabled_cmds_idx)
         end),
       })
 
-      LOG:INFO("start web search ...")
+      LOG:INFO("start search: " .. body.query)
       job.chain(j, chat_job)
     end,
   },
