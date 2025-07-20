@@ -9,7 +9,7 @@
 ---
 
 > [!IMPORTANT]
-> A free large language model(LLM) plugin that allows you to interact with LLM in Neovim.
+> A large language model(LLM) plugin that allows you to interact with LLM in Neovim.
 >
 > 1. Supports any LLM, such as GPT, GLM, Kimi, DeepSeek, Gemini, Qwen or local LLMs (such as ollama).
 > 2. Allows you to define your own AI tools, with different tools able to use different models.
@@ -35,6 +35,7 @@
   * [AI Translation](#ai-translation)
   * [Generate Git Commit Message](#generate-git-commit-message)
   * [Generate Doc String](#generate-doc-string)
+  * [Web Search](#web-search)
 * [Installation](#installation)
   * [Dependencies](#dependencies)
   * [Preconditions](#preconditions)
@@ -136,6 +137,8 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="560">
 </p>
+
+### [Web Search](./docs/cmds/README.md#web_search)
 
 [⬆ back to top](#contents)
 
@@ -244,7 +247,7 @@ require("llm").setup({
 | model              | Model name                                                                                                                                                                                                       | String                                                                                                                                      |
 | api_type           | Result parsing format                                                                                                                                                                                            | `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`                                                                                            |
 | timeout            | The maximum timeout for a response (in seconds)                                                                                                                                                                  | Number                                                                                                                                      |
-| fetch_key          | API key string or Function that returns the API key                                                                                                                                                              | Function\|String                                                                                                                            |
+| fetch_key          | API key string or Function that returns the API key                                                                                                                                                              | Function \| String                                                                                                                            |
 | max_tokens         | Limits the number of tokens generated in a response.                                                                                                                                                             | Number                                                                                                                                      |
 | temperature        | From 0 to 1.<br>The lower the number is, the more deterministic the response will be.<br>The higher the number is the more creative the response will be, but moe likely to go off topic if it's too high        | Number                                                                                                                                      |
 | top_p              | A threshold(From 0 to 1).<br>The higher the threshold is the more diverse and the less repetetive the response will be.<br>(But it could also lead to less likely tokens which also means: off-topic responses.) | Number                                                                                                                                      |

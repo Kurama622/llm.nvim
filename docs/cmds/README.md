@@ -21,7 +21,6 @@ Tavily: https://www.tavily.com
 ```lua
 {
   "Kurama622/llm.nvim",
-  -- dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
   dependencies = { "nvim-lua/plenary.nvim", "Kurama622/nui.nvim", "Kurama622/windsurf.nvim" },
   cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
   config = function()
