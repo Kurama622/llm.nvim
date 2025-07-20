@@ -28,7 +28,7 @@ local function exit_callback(opts, ctx, worker)
     setmetatable(state.summarize_suggestions, { __index = ctx })
   end
 
-  io_utils.reset_io_status()
+  io_utils.reset_io_status(opts)
   -- reset tool_calls content
   backends.msg_tool_calls_content = {}
 end
@@ -36,6 +36,8 @@ end
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
+
+  state.args_template = opts.args
   local required_params = M.required_params
 
   for _, key in pairs(state.model_params) do

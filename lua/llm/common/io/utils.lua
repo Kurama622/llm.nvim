@@ -24,10 +24,11 @@ function utils.add_request_body_params(body, key, val)
   body[key] = val
 end
 
-function utils.reset_io_status()
+function utils.reset_io_status(opts)
   -- reset reason header
   state.reason_range.is_begin = false
   state.reason_range.is_end = false
+  opts.args = state.args_template
 end
 
 function utils.gen_messages(ctx)
