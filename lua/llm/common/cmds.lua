@@ -44,7 +44,10 @@ local cmds = {
           -- TODO: Add error handling
         end),
         on_exit = vim.schedule_wrap(function(j)
-          local search_response = vim.json.decode(j:result()[1])
+          local status, search_response = pcall(vim.json.decode, j:result()[1])
+          if not status then
+            return
+          end
           local reference = search_response.results
 
           F.WriteContent(opts.bufnr, opts.winid, "\n> [!CITE] References\n")
@@ -67,12 +70,18 @@ local cmds = {
           opts.body.messages = msg
           opts.args[#opts.args] = vim.json.encode(opts.body)
           LOG:INFO("Finish search!")
+
+          state.llm.worker.jobs.web_search = nil
           table.remove(state.enabled_cmds, opts.enabled_cmds_idx)
+          local name = opts._name or "chat"
+          chat_job:start()
+          state.llm.worker.jobs[name] = chat_job
         end),
       })
 
       LOG:INFO("start search: " .. body.query)
-      job.chain(j, chat_job)
+      j:start()
+      state.llm.worker.jobs.web_search = j
     end,
   },
 }

@@ -14,6 +14,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local source_content = F.GetVisualSelection()
 
   local options = {
+    _name = "side_by_side",
     left = {
       title = " Source ",
       focusable = false,
@@ -90,14 +91,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
   options.winid = preview_box.winid
 
   state.popwin = preview_box
-  local worker = streaming(options)
+  streaming(options)
 
-  preview_box:map("n", "<C-c>", function()
-    if worker.job then
-      worker.job:shutdown()
-      worker.job = nil
-    end
-  end)
+  preview_box:map("n", "<C-c>", F.CancelLLM)
 
   local default_actions = {
     accept = function()
@@ -110,12 +106,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   for _, v in ipairs({ source_box, preview_box }) do
     for _, k in ipairs({ "accept", "reject", "close" }) do
       v:map(options[k].mapping.mode, options[k].mapping.keys, function()
-        if worker.job then
-          worker.job:shutdown()
-          LOG:INFO("Suspend output...")
-          vim.wait(200, function() end)
-          worker.job = nil
-        end
+        F.CancelLLM()
         if options[k].action ~= nil then
           options[k].action()
         else

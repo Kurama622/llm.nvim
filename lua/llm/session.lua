@@ -124,6 +124,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       end, state.popwin.bufnr)
     end
     local params = {
+      _name = opts._._name,
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
       messages = state.session[state.popwin.winid],
@@ -132,13 +133,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     for _, key in pairs(state.model_params) do
       params[key] = opts._[key]
     end
-    state.llm.worker = streaming.GetStreamingOutput(params)
+    streaming.GetStreamingOutput(params)
   else
     state.session[state.popwin.winid] = {
       { role = "system", content = description },
       { role = "user", content = content },
     }
-    state.llm.worker = streaming.GetStreamingOutput({
+    streaming.GetStreamingOutput({
       bufnr = state.popwin.bufnr,
       winid = state.popwin.winid,
       messages = state.session[state.popwin.winid],
@@ -157,13 +158,8 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
       F.SetFloatKeyMapping(state.popwin, v.mode, v.key, function()
-        if state.llm.worker.job then
-          state.llm.worker.job:shutdown()
-          LOG:INFO("Suspend output...")
-          vim.wait(200, function() end)
-          state.llm.worker.job = nil
-          vim.api.nvim_command("doautocmd BufEnter")
-        end
+        F.CancelLLM()
+        vim.api.nvim_command("doautocmd BufEnter")
         state.session[state.popwin.winid] = nil
         state.popwin:unmount()
       end, { noremap = true })

@@ -10,7 +10,7 @@ M.llm = {
   popup = nil,
   bufnr = nil,
   winid = nil,
-  worker = { job = nil },
+  worker = { jobs = {} },
 }
 
 M.input = {

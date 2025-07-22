@@ -30,7 +30,7 @@ end
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker = streaming.GetStreamingOutput({
+  streaming.GetStreamingOutput({
     bufnr = state.llm.bufnr,
     winid = state.llm.winid,
     messages = state.session[state.session.filename],

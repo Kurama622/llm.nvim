@@ -11,13 +11,14 @@ local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 local ui = require("llm.common.ui")
 
-local function exit_callback(opts, ctx, worker)
+local function exit_callback(opts, ctx)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
   local newline_func = vim.schedule_wrap(function()
     F.NewLine(opts.bufnr, opts.winid)
   end)
   newline_func()
-  worker.job = nil
+  local name = opts._name or "chat"
+  state.llm.worker.jobs[name] = nil
   if opts.exit_handler ~= nil then
     local callback_func = vim.schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
@@ -222,8 +223,7 @@ function M.GetStreamingOutput(opts)
 
   opts.body = body
   opts.args = _args
-  local worker = { job = nil }
-  worker.job = job:new({
+  local j = job:new({
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
@@ -247,13 +247,13 @@ function M.GetStreamingOutput(opts)
     on_exit = vim.schedule_wrap(function()
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
-          exit_callback(opts, ctx, worker)
+          exit_callback(opts, ctx)
         end
         backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
           vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
         )
       else
-        exit_callback(opts, ctx, worker)
+        exit_callback(opts, ctx)
       end
     end),
   })
@@ -262,12 +262,13 @@ function M.GetStreamingOutput(opts)
   if F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do
       opts.enable_cmds_idx = idx
-      cmd.callback(conf.configs.web_search, opts.messages, opts, worker.job)
+      cmd.callback(conf.configs.web_search, opts.messages, opts, j)
     end
   else
-    worker.job:start()
+    local name = opts._name or "chat"
+    j:start()
+    state.llm.worker.jobs[name] = j
   end
-  return worker
 end
 
 return M
