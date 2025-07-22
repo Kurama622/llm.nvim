@@ -9,14 +9,16 @@ local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
+local ui = require("llm.common.ui")
 
-local function exit_callback(opts, ctx, worker)
+local function exit_callback(opts, ctx)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
   local newline_func = vim.schedule_wrap(function()
     F.NewLine(opts.bufnr, opts.winid)
   end)
   newline_func()
-  worker.job = nil
+  local name = opts._name or "chat"
+  state.llm.worker.jobs[name] = nil
   if opts.exit_handler ~= nil then
     local callback_func = vim.schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
@@ -27,7 +29,7 @@ local function exit_callback(opts, ctx, worker)
     setmetatable(state.summarize_suggestions, { __index = ctx })
   end
 
-  io_utils.reset_io_status()
+  io_utils.reset_io_status(opts)
   -- reset tool_calls content
   backends.msg_tool_calls_content = {}
 end
@@ -35,6 +37,8 @@ end
 function M.GetStreamingOutput(opts)
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
+
+  state.args_template = opts.args
   local required_params = M.required_params
 
   for _, key in pairs(state.model_params) do
@@ -48,7 +52,13 @@ function M.GetStreamingOutput(opts)
   end
 
   if required_params.fetch_key ~= nil then
-    LLM_KEY = required_params.fetch_key()
+    if type(required_params.fetch_key) == "function" then
+      LLM_KEY = required_params.fetch_key()
+    elseif type(required_params.fetch_key) == "string" then
+      LLM_KEY = required_params.fetch_key
+    else
+      LOG:ERROR("fetch_key must be a string or function type")
+    end
   end
 
   local authorization = "Authorization: Bearer " .. LLM_KEY
@@ -211,11 +221,13 @@ function M.GetStreamingOutput(opts)
   end
   ctx.args = F.tbl_slice(_args, 1, -2)
 
-  local worker = { job = nil }
-  worker.job = job:new({
+  opts.body = body
+  opts.args = _args
+  local j = job:new({
     command = "curl",
     args = _args,
     on_stdout = vim.schedule_wrap(function(_, chunk)
+      ui.clear_spinner_extmark(opts)
       if required_params.api_type or required_params.streaming_handler then
         ctx.assistant_output = stream_output(chunk)
       else
@@ -235,19 +247,28 @@ function M.GetStreamingOutput(opts)
     on_exit = vim.schedule_wrap(function()
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
-          exit_callback(opts, ctx, worker)
+          exit_callback(opts, ctx)
         end
         backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
           vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
         )
       else
-        exit_callback(opts, ctx, worker)
+        exit_callback(opts, ctx)
       end
     end),
   })
-  worker.job:start()
 
-  return worker
+  ui.display_spinner_extmark(opts)
+  if F.IsValid(state.enabled_cmds) then
+    for idx, cmd in ipairs(state.enabled_cmds) do
+      opts.enable_cmds_idx = idx
+      cmd.callback(conf.configs.web_search, opts.messages, opts, j)
+    end
+  else
+    local name = opts._name or "chat"
+    j:start()
+    state.llm.worker.jobs[name] = j
+  end
 end
 
 return M

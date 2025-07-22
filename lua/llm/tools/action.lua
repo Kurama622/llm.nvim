@@ -13,6 +13,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   end
 
   local options = {
+    _name = "Action",
     separator = "─",
     start_str = "```",
     end_str = "```",
@@ -184,15 +185,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
         signcolumn = options.input.signcolumn,
       },
     })
-    local worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+    utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
 
-    preview_box:map("n", "<C-c>", function()
-      if worker.job then
-        worker.job:shutdown()
-        LOG:INFO("Suspend output...")
-        worker.job = nil
-      end
-    end)
+    preview_box:map("n", "<C-c>", F.CancelLLM)
 
     default_actions = {
       accept = function()
@@ -206,11 +201,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
         end
       end,
       close = function()
-        if worker.job then
-          worker.job:shutdown()
-          LOG:INFO("Suspend output...")
-          worker.job = nil
-        end
+        F.CancelLLM()
         if diff and diff.valid then
           diff:reject()
         end
@@ -243,7 +234,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
         table.remove(state.app.session[name], #state.app.session[name])
         state.app.session[name][1].content = state.app.session[name][1].content .. "\n" .. table.concat(contents, "\n")
         vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
-        worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+        utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
       end)
     end)
 
@@ -252,7 +243,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
         diff:reject()
       end
       table.remove(state.app.session[name], #state.app.session[name])
-      worker = utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+      utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
     end)
   end
 

@@ -60,6 +60,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     zindex = input.zindex,
     border = input.border,
     win_options = input.win_options,
+    buf_options = input.buf_options,
   })
   state.llm.popup = Popup({
     enter = output.enter,
@@ -67,6 +68,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
     zindex = output.zindex,
     border = output.border,
     win_options = output.win_options,
+    buf_options = output.buf_options,
   })
   if popup_other_opts then
     state.other.popup = Popup({

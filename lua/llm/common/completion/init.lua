@@ -45,7 +45,8 @@ function completion:init(opts)
       require("codeium").setup(codeium_opts)
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
-        blink.add_provider("llm", {
+        local add_provider = blink.add_source_provider or blink.add_provider
+        add_provider("llm", {
           name = "llm",
           module = "codeium.blink",
           enabled = true,

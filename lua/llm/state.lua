@@ -10,7 +10,7 @@ M.llm = {
   popup = nil,
   bufnr = nil,
   winid = nil,
-  worker = { job = nil },
+  worker = { jobs = {} },
 }
 
 M.input = {
@@ -89,4 +89,6 @@ M.reason_range = {
   is_begin = false,
   is_end = false,
 }
+
+M.enabled_cmds = {}
 return M

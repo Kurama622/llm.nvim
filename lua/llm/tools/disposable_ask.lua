@@ -53,6 +53,7 @@ function M.handler(_, _, _, _, prompt, opts)
   end
 
   local options = {
+    _name = "Ask",
     inline_assistant = false,
     enable_buffer_context = true,
     language = "English",

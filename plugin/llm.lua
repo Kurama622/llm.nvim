@@ -3,6 +3,7 @@ local conf = require("llm.config")
 local streaming = require("llm.common.io.streaming")
 local app = require("llm.app")
 local F = require("llm.common.api")
+local cmds = require("llm.common.cmds")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE", default = true },
@@ -18,6 +19,7 @@ local highlight = {
   LlmPurpleNormal = { fg = "#c099ff", bg = "NONE", default = true },
   LlmPurpleLight = { fg = "#ee82ee", bg = "NONE", default = true },
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE", default = true },
+  LlmCmds = { link = "Special", default = true },
 }
 
 local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })
@@ -28,7 +30,7 @@ end
 
 local function OpenLLM()
   F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
-  state.llm.worker = streaming.GetStreamingOutput({
+  streaming.GetStreamingOutput({
     bufnr = state.llm.bufnr,
     winid = state.llm.winid,
     messages = state.session[state.session.filename],
@@ -87,4 +89,45 @@ vim.api.nvim_create_autocmd("VimResized", {
   end,
 })
 
+-- Setup syntax highlighting for all llm buffer
+local group = "llm.syntax"
+vim.api.nvim_create_augroup(group, { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "llm",
+  group = group,
+  callback = vim.schedule_wrap(function(args)
+    local bufnr = args.buf
+    for _, item in ipairs(cmds) do
+      vim.api.nvim_buf_call(bufnr, function()
+        vim.cmd.syntax('match LlmCmds "@' .. item.label .. '"')
+      end)
+    end
+  end),
+})
+
+-- Setup completion for blink.cmp and cmp
+local has_cmp, cmp = pcall(require, "cmp")
+local has_blink, blink = pcall(require, "blink.cmp")
+if has_blink then
+  pcall(function()
+    local add_provider = blink.add_source_provider or blink.add_provider
+    add_provider("llm", {
+      name = "LLM",
+      module = "llm.common.completion.frontends.blink",
+      enabled = true,
+      score_offset = 10,
+    })
+  end)
+  pcall(function()
+    blink.add_filetype_source("llm", "llm")
+  end)
+elseif has_cmp and not has_blink then
+  cmp.register_source("llm_cmds", require("llm.common.completion.frontends.cmp.cmds").new())
+  cmp.setup.filetype("llm", {
+    enabled = true,
+    sources = vim.list_extend({
+      { name = "llm_cmds" },
+    }, cmp.get_config().sources),
+  })
+end
 vim.treesitter.language.register("markdown", "llm")

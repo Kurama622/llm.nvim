@@ -106,6 +106,6 @@ function utils.single_turn_dialogue(preview_box, streaming, options, context, di
   options.exit_handler = function(ostr)
     utils.new_diff(diff, options, context, ostr)
   end
-  return streaming(options)
+  streaming(options)
 end
 return utils

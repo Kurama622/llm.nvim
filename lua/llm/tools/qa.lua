@@ -13,6 +13,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   end
 
   local options = {
+    _name = "QA",
     buftype = "nofile",
     spell = false,
     number = false,
@@ -114,8 +115,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
     linebreak = options.linebreak,
   })
 
-  local worker = { job = nil }
-
   input_box:map("n", "<enter>", function()
     -- clear preview_box content [optional]
     vim.api.nvim_buf_set_lines(preview_box.bufnr, 0, -1, false, {})
@@ -134,7 +133,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       options.bufnr = preview_box.bufnr
       options.winid = preview_box.winid
       options.messages = state.app.session[name]
-      worker = streaming(options)
+      streaming(options)
     end
   end)
 
@@ -157,12 +156,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   for _, v in ipairs({ input_box, preview_box }) do
     for _, k in ipairs({ "accept", "reject", "close" }) do
       v:map(options[k].mapping.mode, options[k].mapping.keys, function()
-        if worker.job then
-          worker.job:shutdown()
-          LOG:INFO("Suspend output...")
-          vim.wait(200, function() end)
-          worker.job = nil
-        end
+        F.CancelLLM()
         if options[k].action ~= nil then
           options[k].action()
         else

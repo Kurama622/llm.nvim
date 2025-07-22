@@ -9,7 +9,7 @@
 ---
 
 > [!IMPORTANT]
-> 免费的大语言模型插件，让你在Neovim中与大模型交互
+> 大语言模型插件，让你在Neovim中与大模型交互
 >
 > 1. 支持任意一款大模型，比如GPT，GLM，Kimi、DeepSeek、Gemini、Qwen或者本地运行的大模型(比如ollama)
 >
@@ -38,6 +38,7 @@
   * [AI翻译](#ai翻译)
   * [生成git commit信息](#生成git-commit信息)
   * [生成docstring](#生成docstring)
+  * [联网搜索](#联网搜索)
 * [安装](#安装)
   * [依赖](#依赖)
   * [准备工作](#准备工作)
@@ -139,6 +140,8 @@
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="560">
 </p>
+
+### [联网搜索](./docs/cmds/README.md#web_search)
 
 [⬆ 返回目录](#目录)
 
@@ -247,7 +250,7 @@ require("llm").setup({
 | model              | 模型名                                                                                   | String                                                                                                                                      |
 | api_type           | 输出解析格式                                                                             | `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`                                                                                            |
 | timeout            | 响应最大超时时间 (单位: 秒)                                                              | Number                                                                                                                                      |
-| fetch_key          | 返回API KEY的函数                                                                        | Function                                                                                                                                    |
+| fetch_key          | API KEY或者返回API KEY的函数                                                             | Function \| String                                                                                                                            |
 | max_tokens         | 响应的最大token数                                                                        | Number                                                                                                                                      |
 | temperature        | 取值范围0到1。值越小，回复越贴近主题; 值越大，回复越发散，但太高的值也容易使回复偏离主题 | Number                                                                                                                                      |
 | top_p              | 取值范围0到1。值越高，回复越多样化，重复性越低。(也越容易产生偏离主题的回复)             | Number                                                                                                                                      |
