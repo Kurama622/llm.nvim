@@ -138,17 +138,17 @@ end
 function backends.get_function_calling(api_type, configs, ctx)
   local function handle_api_type(type)
     local api_handlers = {
-      ["workers-ai"] = function(chunk)
+      ["workers-ai"] = function(t)
         LOG:ERROR("Workers_ai do not support function-calling.")
       end,
-      ["zhipu"] = function(chunk)
+      ["zhipu"] = function(t)
         LOG:ERROR("GLM do not support function-calling.")
       end,
-      ["openai"] = function(chunk)
-        return require("llm.backends.openai").FunctionCalling(ctx, chunk)
+      ["openai"] = function(t)
+        return require("llm.backends.openai").FunctionCalling(ctx, t)
       end,
-      ["ollama"] = function(chunk)
-        return require("llm.backends.ollama").FunctionCalling(ctx, chunk)
+      ["ollama"] = function(t)
+        return require("llm.backends.ollama").FunctionCalling(ctx, t)
       end,
     }
     return api_handlers[type] or nil
