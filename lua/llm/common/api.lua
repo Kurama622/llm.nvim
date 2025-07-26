@@ -892,4 +892,13 @@ function api.table_filter(func, t)
   end
   return rettab
 end
+
+function api.pcall(fn, res, default_value)
+  local status, ret = pcall(fn, res)
+  if status then
+    return ret
+  end
+  LOG:ERROR("Illegal JSON string", res)
+  return default_value
+end
 return api

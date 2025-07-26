@@ -117,7 +117,31 @@ function utils.format_json_str(str)
   end
   res = res .. "}"
 
-  local params = vim.json.decode(res)
-  return params
+  return F.pcall(vim.json.decode, res, "{}")
+end
+
+function utils.decode_escaped_string(s)
+  if not F.IsValid(s) then
+    return nil
+  end
+  return (
+    s:gsub("\\(.)", function(c)
+      if c == "n" then
+        return "\n"
+      elseif c == "r" then
+        return "\r"
+      elseif c == "t" then
+        return "\t"
+      elseif c == "\\" then
+        return "\\"
+      elseif c == '"' then
+        return '"'
+      elseif c == "'" then
+        return "'"
+      else
+        return c
+      end
+    end)
+  )
 end
 return utils

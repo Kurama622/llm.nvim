@@ -209,7 +209,7 @@ function io_parse.GetOutput(opts)
             exit_callback(opts, ctx, waiting_state)
           end
           backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-            vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
+            backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
           )
         else
           exit_callback(opts, ctx, waiting_state)

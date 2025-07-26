@@ -233,9 +233,6 @@ function M.GetStreamingOutput(opts)
       else
         stream_output(chunk)
       end
-      if ctx.body.tools ~= nil then
-        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(chunk)
-      end
       -- TODO: Add stdout handling
     end),
     on_stderr = vim.schedule_wrap(function(_, err)
@@ -244,13 +241,14 @@ function M.GetStreamingOutput(opts)
       end
       -- TODO: Add error handling
     end),
-    on_exit = vim.schedule_wrap(function()
-      if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
+    on_exit = vim.schedule_wrap(function(j)
+      if ctx.body.tools ~= nil then
+        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(j:result())
         ctx.callback = function()
           exit_callback(opts, ctx)
         end
         backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-          vim.fn.json_encode(backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx))
+          backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
         )
       else
         exit_callback(opts, ctx)
