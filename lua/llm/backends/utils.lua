@@ -134,10 +134,6 @@ function utils.decode_escaped_string(s)
         return "\t"
       elseif c == "\\" then
         return "\\"
-      elseif c == '"' then
-        return '"'
-      elseif c == "'" then
-        return "'"
       else
         return c
       end
