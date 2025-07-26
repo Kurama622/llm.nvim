@@ -46,14 +46,18 @@ function ollama.ParseHandler(chunk, ctx)
   end
 end
 
-function ollama.FunctionCalling(ctx, chunk)
-  local msg = vim.json.decode(chunk).message
+function ollama.FunctionCalling(ctx, t)
+  local msg = t.message
+  if not F.IsValid(msg.tool_calls) then
+    return
+  end
   local N = vim.tbl_count(msg.tool_calls)
 
   for i = 1, N do
     local name = msg.tool_calls[i]["function"].name
     local id = msg.tool_calls[i].id
 
+    -- ollama: arguments is table
     local params = msg.tool_calls[i]["function"].arguments
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name

@@ -31,10 +31,6 @@ BashRunner = {
     },
     functions_tbl = {
       CodeRunner = function(code)
-        -- Replace '\\n' that are not enclosed in quotes
-        code = code:gsub("([^\"'])\\n", "%1\n")
-        code = code:gsub("\\n([^\"'])", "\n%1")
-
         local filepath = "/tmp/script.sh"
 
         -- Print the code suggested by llm

@@ -90,8 +90,8 @@ function openai.ParseHandler(chunk, ctx)
   end
 end
 
-function openai.FunctionCalling(ctx, chunk)
-  local msg = vim.json.decode(chunk).choices[1].message
+function openai.FunctionCalling(ctx, t)
+  local msg = t.choices[1].message
   if not F.IsValid(msg.tool_calls) then
     return
   end
@@ -101,6 +101,8 @@ function openai.FunctionCalling(ctx, chunk)
     local name = msg.tool_calls[i]["function"].name
     local id = msg.tool_calls[i].id
 
+    -- openai: arguments is string
+    -- format_json_str: Tool_calls arguments may contain excessive quotation marks, causing JSON parsing to fail.
     local params = backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name
@@ -109,7 +111,7 @@ function openai.FunctionCalling(ctx, chunk)
     local p = {}
 
     for _, k in pairs(keys) do
-      table.insert(p, params[k])
+      table.insert(p, backend_utils.decode_escaped_string(params[k]))
     end
 
     if ctx.functions_tbl[name] == nil then
@@ -142,22 +144,24 @@ function openai.FunctionCalling(ctx, chunk)
     :start()
 end
 
-function openai.AppendToolsRespond(chunk, msg)
-  if chunk == "data: [DONE]" then
-    return
-  end
-  local chunk_json = F.IsValid(chunk) and vim.json.decode(chunk:sub(7)) or nil
-  if F.IsValid(chunk_json) and F.IsValid(chunk_json.choices) and F.IsValid(chunk_json.choices[1].delta) then
-    local tool_calls = chunk_json.choices[1].delta.tool_calls
-    if F.IsValid(tool_calls) then
-      if F.IsValid(tool_calls[1].id) then
-        table.insert(msg, { id = tool_calls[1].id, type = "function", ["function"] = { name = "", arguments = "" } })
-      end
-      if F.IsValid(tool_calls[1]["function"].name) then
-        msg[#msg]["function"].name = msg[#msg]["function"].name .. tool_calls[1]["function"].name
-      end
-      if F.IsValid(tool_calls[1]["function"].arguments) then
-        msg[#msg]["function"].arguments = msg[#msg]["function"].arguments .. tool_calls[1]["function"].arguments
+function openai.AppendToolsRespond(results, msg)
+  local fc_type = "function"
+  for _, fc_respond_str in pairs(results) do
+    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(7))
+    if status then
+      if
+        F.IsValid(fc_respond.choices)
+        and F.IsValid(fc_respond.choices[1].delta)
+        and F.IsValid(fc_respond.choices[1].delta.tool_calls)
+      then
+        -- LOG:INFO(fc_respond.choices[1].delta.tool_calls[1])
+        if F.IsValid(fc_respond.choices[1].delta.tool_calls[1].id) then
+          table.insert(msg, fc_respond.choices[1].delta.tool_calls[1])
+          fc_type = fc_respond.choices[1].delta.tool_calls[1].type
+        else
+          msg[#msg][fc_type].arguments = msg[#msg][fc_type].arguments
+            .. fc_respond.choices[1].delta.tool_calls[1][fc_type].arguments
+        end
       end
     end
   end
