@@ -139,6 +139,9 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 </p>
 
 ### [Web Search](./docs/cmds/README.md#web_search)
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="560">
+</p>
 
 [⬆ back to top](#contents)
 

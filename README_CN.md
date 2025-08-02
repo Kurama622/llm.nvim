@@ -142,6 +142,9 @@
 </p>
 
 ### [联网搜索](./docs/cmds/README.md#web_search)
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="560">
+</p>
 
 [⬆ 返回目录](#目录)
 
