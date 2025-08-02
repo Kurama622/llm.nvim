@@ -10,6 +10,10 @@ function ncmp.get_trigger_characters()
   return { "@", ".", "(", "[", ":", "{", " " }
 end
 
+function ncmp:is_available()
+  return self.opts.filetypes[vim.bo.filetype] ~= false
+end
+
 function ncmp:new()
   function ncmp.get_keyword_pattern()
     -- NOTE: Don't trigger the completion by any keywords (use a pattern that

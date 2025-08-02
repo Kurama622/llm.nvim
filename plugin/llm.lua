@@ -96,6 +96,9 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "llm",
   group = group,
   callback = vim.schedule_wrap(function(args)
+    if vim.bo.ft ~= "llm" then
+      return
+    end
     local bufnr = args.buf
     for _, item in ipairs(cmds) do
       vim.api.nvim_buf_call(bufnr, function()
@@ -126,7 +129,7 @@ elseif has_cmp and not has_blink then
   cmp.setup.filetype("llm", {
     enabled = true,
     sources = vim.list_extend({
-      { name = "llm_cmds" },
+      { name = "llm_cmds", group_index = 1 },
     }, cmp.get_config().sources),
   })
 end

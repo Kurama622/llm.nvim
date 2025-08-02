@@ -104,10 +104,17 @@ Completion AI tool requires setting `style = "blink.cmp"`
         -- if you want to use auto-complete
         default = { "llm" },
 
+        per_filetype = {
+          -- optionally inherit from the `default` sources
+          -- e.g. set completion for llm buffer
+          -- llm = { inherit_defaults = true, "path" }, -- enable: "llm", "llm_cmds", "path"
+          llm = { inherit_defaults = false },   -- enbale: "llm_cmds"
+        },
+
         ---@note Windsurf does not require the following configuration
         providers = {
           llm = {
-            name = "llm",
+            name = "LLM",
             module = "llm.common.completion.frontends.blink",
             timeout_ms = 10000,
             score_offset = 100,
