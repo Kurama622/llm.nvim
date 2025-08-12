@@ -21,7 +21,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     linebreak = false,
     component_width = "60%",
     component_height = "55%",
-    timeout = 30,
+    timeout = 120,
     query = {
       title = " 󰊿 Trans ",
       hl = { link = "Define" },

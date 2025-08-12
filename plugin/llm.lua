@@ -114,15 +114,15 @@ local has_blink, blink = pcall(require, "blink.cmp")
 if has_blink then
   pcall(function()
     local add_provider = blink.add_source_provider or blink.add_provider
-    add_provider("llm", {
-      name = "LLM",
+    add_provider("llm_cmds", {
+      name = "LLM_CMDS",
       module = "llm.common.completion.frontends.blink",
       enabled = true,
       score_offset = 10,
     })
   end)
   pcall(function()
-    blink.add_filetype_source("llm", "llm")
+    blink.add_filetype_source("llm", "llm_cmds")
   end)
 elseif has_cmp and not has_blink then
   cmp.register_source("llm_cmds", require("llm.common.completion.frontends.cmp.cmds").new())

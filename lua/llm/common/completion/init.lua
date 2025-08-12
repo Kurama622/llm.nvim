@@ -47,7 +47,7 @@ function completion:init(opts)
       if has_blink then
         local add_provider = blink.add_source_provider or blink.add_provider
         add_provider("llm", {
-          name = "llm",
+          name = "LLM",
           module = "codeium.blink",
           enabled = true,
           score_offset = 10,

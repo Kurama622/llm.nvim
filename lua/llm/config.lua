@@ -234,7 +234,7 @@ M.prefix = {
 -- default configs
 M.configs = {
   prompt = "",
-  timeout = 30,
+  timeout = 120,
   max_tokens = nil,
   model = nil,
   url = nil,

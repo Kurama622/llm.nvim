@@ -29,7 +29,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     number = true,
     wrap = true,
     linebreak = false,
-    timeout = 30,
+    timeout = 120,
     accept = {
       mapping = {
         mode = "n",

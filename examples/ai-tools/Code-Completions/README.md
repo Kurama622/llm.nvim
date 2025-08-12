@@ -1,4 +1,7 @@
-## Code Completions
+## Code Completions [dev]
+
+> 本功能是应用户要求而开发的，本人并不使用该功能，所以该功能可能并不完善
+> This feature is developed in response to user requests, and I do not use this feature myself, so it may not be perfect.
 
 > [!NOTE]
 > For Codeium(Windsurf) code completion, you need to set up dependencies:

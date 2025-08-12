@@ -57,7 +57,7 @@ function M.handler(_, _, _, _, prompt, opts)
     inline_assistant = false,
     enable_buffer_context = true,
     language = "English",
-    timeout = 30,
+    timeout = 120,
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",

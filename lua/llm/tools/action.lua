@@ -28,7 +28,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     parse_handler = nil,
     stdout_handler = nil,
     stderr_handler = nil,
-    timeout = 30,
+    timeout = 120,
     input = {
       buftype = "nofile",
       relative = "win",
