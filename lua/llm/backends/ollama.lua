@@ -19,7 +19,6 @@ function ollama.StreamingHandler(chunk, ctx)
       LOG:TRACE("json decode error:", data)
       return ctx.assistant_output
     end
-    ctx.assistant_output = ctx.assistant_output .. data.message.content
 
     -- add reasoning_content
     if F.IsValid(data.message.thinking) then
