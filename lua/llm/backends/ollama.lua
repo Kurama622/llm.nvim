@@ -29,7 +29,6 @@ function ollama.StreamingHandler(chunk, ctx)
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.thinking)
     else
       backend_utils.mark_reason_end(ctx, true)
-      ctx.assistant_output = ctx.assistant_output .. data.message.content
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
     end
     ctx.line = ""
