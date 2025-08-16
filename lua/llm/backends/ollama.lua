@@ -2,6 +2,7 @@ local LOG = require("llm.common.log")
 local job = require("plenary.job")
 local F = require("llm.common.api")
 local io_utils = require("llm.common.io.utils")
+local backend_utils = require("llm.backends.utils")
 local ollama = {}
 
 function ollama.StreamingHandler(chunk, ctx)
@@ -19,7 +20,18 @@ function ollama.StreamingHandler(chunk, ctx)
       return ctx.assistant_output
     end
     ctx.assistant_output = ctx.assistant_output .. data.message.content
-    F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
+
+    -- add reasoning_content
+    if F.IsValid(data.message.thinking) then
+      backend_utils.mark_reason_begin(ctx)
+      ctx.reasoning_content = ctx.reasoning_content .. data.message.thinking
+
+      F.WriteContent(ctx.bufnr, ctx.winid, data.message.thinking)
+    elseif not F.IsValid(data.message.thinking) then
+      backend_utils.mark_reason_end(ctx)
+      ctx.assistant_output = ctx.assistant_output .. data.message.content
+      F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
+    end
     ctx.line = ""
   end
   return ctx.assistant_output

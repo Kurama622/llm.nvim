@@ -20,8 +20,18 @@ function utils.get_params_value(key, opts)
   return val
 end
 
-function utils.add_request_body_params(body, key, val)
-  body[key] = val
+function utils.add_request_body_params(body, key, val, api_type)
+  if api_type == "ollama" then
+    if key == "temperature" or key == "top_p" then
+      body.options[key] = val
+    elseif key == "enable_thinking" then
+      body.think = val
+    else
+      body[key] = val
+    end
+  else
+    body[key] = val
+  end
 end
 
 function utils.reset_io_status(opts)

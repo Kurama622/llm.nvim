@@ -72,16 +72,20 @@ function io_parse.GetOutput(opts)
     tools = required_params.schema,
   }
 
+  if required_params.api_type == "ollama" then
+    body.options = {}
+  end
+
   local params = {
     max_tokens = required_params.max_tokens,
     keep_alive = required_params.keep_alive,
-    temperatrue = required_params.temperatrue,
+    temperature = required_params.temperature,
     top_p = required_params.top_p,
     enable_thinking = required_params.enable_thinking,
   }
 
   for param_name, param_value in pairs(params) do
-    io_utils.add_request_body_params(body, param_name, param_value)
+    io_utils.add_request_body_params(body, param_name, param_value, required_params.api_type)
   end
 
   local ctx = {
