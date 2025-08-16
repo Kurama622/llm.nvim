@@ -70,6 +70,7 @@ When given a task:
 - Translate any input I provide into English
 - You should ONLY FOCUS ON TRANSLATING THE TEXT without performing any other tasks.
 - RETURN ONLY THE TRANSLATED RESULT.]],
+  images = [[Please summarize the content of the image.]],
   attach_to_chat = summarize_suggestions_prompt,
   disposable_ask = summarize_suggestions_prompt,
 }

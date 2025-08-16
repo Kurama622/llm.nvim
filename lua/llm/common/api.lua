@@ -901,4 +901,55 @@ function api.pcall(fn, res, default_value)
   LOG:ERROR("Illegal JSON string", res)
   return default_value
 end
+
+function api.base64_images_encode(path)
+  local handle = io.popen("base64 " .. path)
+  if not handle then
+    return ""
+  end
+  local result = handle:read("*a")
+  handle:close()
+  return result
+end
+
+function api.Picker(cmd, ui, callback)
+  local ui_tbl = vim.api.nvim_list_uis()[1]
+  local width = math.floor(ui_tbl.width * 0.6)
+  local height = math.floor(ui_tbl.height * 0.6)
+  local row = math.floor((ui_tbl.height - height) / 2)
+  local col = math.floor((ui_tbl.width - width) / 2)
+  local default_ui = {
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    relative = "editor",
+    border = "rounded",
+  }
+  ui = vim.tbl_deep_extend("force", default_ui, ui)
+
+  local bufnr = vim.api.nvim_create_buf(false, true) -- nofile, scratch
+  local winid = vim.api.nvim_open_win(bufnr, true, {
+    relative = ui.relative,
+    width = ui.width,
+    height = ui.height,
+    row = ui.row,
+    col = ui.col,
+    style = "minimal",
+    border = ui.border,
+  })
+  vim.fn.jobstart(cmd, {
+    on_exit = function()
+      local path = vim.fn.getline(1)
+      vim.api.nvim_win_close(winid, true)
+      if vim.uv.fs_stat(path) then
+        if type(callback) == "function" then
+          callback(path)
+        end
+      end
+    end,
+    term = true,
+  })
+  vim.cmd.startinsert()
+end
 return api
