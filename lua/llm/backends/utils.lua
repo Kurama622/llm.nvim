@@ -3,18 +3,24 @@ local utils = {}
 local state = require("llm.state")
 local F = require("llm.common.api")
 
-function utils.mark_reason_begin(ctx)
+function utils.mark_reason_begin(ctx, append_line_break)
   if not state.reason_range.is_begin then
     ctx.reasoning_content = ctx.reasoning_content .. "\n> [!NOTE] reason\n"
     F.WriteContent(ctx.bufnr, ctx.winid, "\n> [!NOTE] reason\n")
+    if append_line_break then
+      F.WriteContent(ctx.bufnr, ctx.winid, "\n")
+    end
     state.reason_range.is_begin = true
   end
 end
 
-function utils.mark_reason_end(ctx)
+function utils.mark_reason_end(ctx, append_line_break)
   if state.reason_range.is_begin and not state.reason_range.is_end then
     ctx.reasoning_content = ctx.reasoning_content .. "\n> [!NOTE] reason\n"
     F.WriteContent(ctx.bufnr, ctx.winid, "\n> [!NOTE] reason\n")
+    if append_line_break then
+      F.WriteContent(ctx.bufnr, ctx.winid, "\n")
+    end
     state.reason_range.is_end = true
   end
 end
