@@ -27,7 +27,7 @@ function ollama.StreamingHandler(chunk, ctx)
       ctx.reasoning_content = ctx.reasoning_content .. data.message.thinking
 
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.thinking)
-    elseif not F.IsValid(data.message.thinking) then
+    else
       backend_utils.mark_reason_end(ctx)
       ctx.assistant_output = ctx.assistant_output .. data.message.content
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
