@@ -23,12 +23,12 @@ function ollama.StreamingHandler(chunk, ctx)
 
     -- add reasoning_content
     if F.IsValid(data.message.thinking) then
-      backend_utils.mark_reason_begin(ctx)
+      backend_utils.mark_reason_begin(ctx, true)
       ctx.reasoning_content = ctx.reasoning_content .. data.message.thinking
 
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.thinking)
     else
-      backend_utils.mark_reason_end(ctx)
+      backend_utils.mark_reason_end(ctx, true)
       ctx.assistant_output = ctx.assistant_output .. data.message.content
       F.WriteContent(ctx.bufnr, ctx.winid, data.message.content)
     end
