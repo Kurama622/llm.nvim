@@ -36,7 +36,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     component_height = "55%",
     timeout = 120,
     query = {
-      title = " image path ",
+      title = " Image Path ",
       hl = { link = "Define" },
     },
     input_box_opts = {
