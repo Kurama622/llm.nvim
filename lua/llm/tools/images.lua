@@ -5,6 +5,16 @@ local conf = require("llm.config")
 local Layout = require("nui.layout")
 local M = {}
 
+local function get_images_format(paths)
+  local path_tbl = vim.split(paths, "\n")
+  local res = {}
+  for _, path in pairs(path_tbl) do
+    local tbl = vim.split(path, "%.")
+    table.insert(res, tbl[#tbl])
+  end
+  return res
+end
+
 function M.handler(name, F, state, streaming, prompt, opts)
   if prompt == nil then
     prompt = require("llm.tools.prompts").images
@@ -35,6 +45,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
     component_width = "60%",
     component_height = "55%",
     timeout = 120,
+    use_base64 = true,
+    detail = "auto",
     query = {
       title = " Image Path ",
       hl = { link = "Define" },
@@ -154,9 +166,16 @@ function M.handler(name, F, state, streaming, prompt, opts)
     -- clear input_box content
     vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
     if input ~= "" then
-      state.app.session[name] = {
-        { role = "user", content = prompt, images = F.base64_images_encode(input) },
-      }
+      options.format = get_images_format(input)
+      if options.use_base64 then
+        state.app.session[name] = {
+          { role = "user", content = prompt, images = F.base64_images_encode(input) },
+        }
+      else
+        state.app.session[name] = {
+          { role = "user", content = prompt, images = vim.split(input, "\n") },
+        }
+      end
       state.popwin = preview_box
       options.bufnr = preview_box.bufnr
       options.winid = preview_box.winid
