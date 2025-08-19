@@ -902,14 +902,17 @@ function api.pcall(fn, res, default_value)
   return default_value
 end
 
-function api.base64_images_encode(path)
-  local handle = io.popen("base64 " .. path)
-  if not handle then
-    return ""
+function api.base64_images_encode(paths)
+  local res = {}
+  local path_tbl = vim.split(paths, "\n")
+  for _, path in pairs(path_tbl) do
+    local handle = io.popen("base64 " .. path)
+    if handle then
+      table.insert(res, handle:read("*a"))
+      handle:close()
+    end
   end
-  local result = handle:read("*a")
-  handle:close()
-  return result
+  return res
 end
 
 function api.Picker(cmd, ui, callback)

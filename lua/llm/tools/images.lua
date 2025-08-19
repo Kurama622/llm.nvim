@@ -138,7 +138,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
       border = options.border,
     }, function(item)
       if item then
-        vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, { item })
+        local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+        vim.api.nvim_buf_set_lines(input_box.bufnr, start_pos - 1, -1, false, { item })
       end
     end)
   end)
@@ -154,7 +155,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
     if input ~= "" then
       state.app.session[name] = {
-        { role = "user", content = prompt, images = { F.base64_images_encode(input) } },
+        { role = "user", content = prompt, images = F.base64_images_encode(input) },
       }
       state.popwin = preview_box
       options.bufnr = preview_box.bufnr
