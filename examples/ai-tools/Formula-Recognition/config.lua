@@ -9,5 +9,7 @@ FormulaRecognition = {
     picker = {
       cmd = "find ~/Pictures/ -type f | fzf",
     },
+    use_base64 = true,  -- for siliconflow api
+    detail = "low", -- for siliconflow api
   },
 },
