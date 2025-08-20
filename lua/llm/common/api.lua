@@ -946,6 +946,7 @@ function api.Picker(cmd, ui, callback)
       local path = vim.fn.getline(1)
       vim.api.nvim_win_close(winid, true)
       if vim.uv.fs_stat(path) then
+        path = string.gsub(path, " ", "\\ ")
         if type(callback) == "function" then
           callback(path)
         end
