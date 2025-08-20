@@ -8,6 +8,11 @@ FormulaRecognition = {
     api_type = "ollama",
     picker = {
       cmd = "find ~/Pictures/ -type f | fzf",
+      -- keymap
+      mapping = {
+        mode = "i",
+        keys = "<C-f>",
+      },
     },
     use_base64 = true,  -- for siliconflow api
     detail = "low", -- for siliconflow api
