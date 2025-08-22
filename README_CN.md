@@ -36,6 +36,7 @@
   * [优化代码](#优化代码)
   * [生成测试用例](#生成测试用例)
   * [AI翻译](#ai翻译)
+  * [图像识别](#图像识别)
   * [生成git commit信息](#生成git-commit信息)
   * [生成docstring](#生成docstring)
   * [联网搜索](#联网搜索)
@@ -129,6 +130,11 @@
 ### [AI翻译](./examples/ai-tools/AI-Translate/config.lua)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
+</p>
+
+### [图像识别](./examples/ai-tools/Formula-Recognition/README.md)
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-trans" width="560">
 </p>
 
 ### [生成git commit信息](./examples/ai-tools/AI-Commit-Messages/config.lua)
