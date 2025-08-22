@@ -134,7 +134,7 @@
 
 ### [图像识别](./examples/ai-tools/Formula-Recognition/README.md)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-trans" width="560">
+  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-images" width="560">
 </p>
 
 ### [生成git commit信息](./examples/ai-tools/AI-Commit-Messages/config.lua)

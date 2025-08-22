@@ -131,7 +131,7 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 
 ### [Image Recognition](./examples/ai-tools/Formula-Recognition/README.md)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-trans" width="560">
+  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-images" width="560">
 </p>
 
 ### [Generate Git Commit Message](./examples/ai-tools/AI-Commit-Messages/config.lua)
