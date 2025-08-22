@@ -11,6 +11,7 @@ local tools = require("llm.tools")
 * [side_by_side_handler](#side_by_side_handler)
 * [action_handler](#action_handler)
 * [qa_handler](#qa_handler)
+* [images_handler](#images_handler)
 * [flexi_handler](#flexi_handler)
 * [disposable_ask_handler](#disposable_ask_handler)
 * [attach_to_chat_handler](#attach_to_chat_handler)
@@ -161,6 +162,84 @@ local tools = require("llm.tools")
     wrap = true,
     linebreak = false,
 
+    -- The overall size setting of input + preview windows
+    component_width = "60%",
+    component_height = "55%",
+
+    input_box_opts = {
+      size = "15%",
+      border = {
+        style = "rounded",
+        text = {
+          top = " 󰊿 Trans "
+        },
+      },
+      win_options = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:Define",
+      },
+    },
+    preview_box_opts = {
+      size = "85%",
+      border = {
+        style = "rounded",
+      },
+      win_options = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+    },
+    accept = {
+      mapping = {
+        mode = "n",
+        keys = { "Y", "y" },
+      },
+      action = nil,
+    },
+    reject = {
+      mapping = {
+        mode = "n",
+        keys = { "N", "n" },
+      },
+      action = nil,
+    },
+    close = {
+      mapping = {
+        mode = "n",
+        keys = { "<esc>" },
+      },
+      action = nil,
+    },
+  },
+}
+```
+## images_handler
+```lua
+["Tool Name"] = {
+  handler = tools.images_handler,
+  prompt = "xxxxxxxx",
+  opts = {
+    ---------------------------------------
+    -- [Optional] set your model parameters
+    timeout = 30,
+    ---------------------------------------
+    buftype = "nofile",
+    spell = false,
+    number = false,
+    wrap = true,
+    linebreak = false,
+
+    picker = {
+      cmd = "fzf",
+      height = nil,
+      width = nil,
+      row = nil,
+      col = nil,
+      relative = nil,
+      border = nil,
+      mapping = {
+        mode = "i",
+        keys = "<C-f>",
+      },
+    },
     -- The overall size setting of input + preview windows
     component_width = "60%",
     component_height = "55%",
