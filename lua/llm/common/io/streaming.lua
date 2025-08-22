@@ -47,10 +47,6 @@ function M.GetStreamingOutput(opts)
     end
   end
 
-  if required_params.api_type == "workers-ai" then
-    required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
-  end
-
   if required_params.fetch_key ~= nil then
     if type(required_params.fetch_key) == "function" then
       LLM_KEY = required_params.fetch_key()
@@ -74,8 +70,26 @@ function M.GetStreamingOutput(opts)
     tools = required_params.schema,
   }
 
-  if required_params.api_type == "ollama" then
+  if required_params.api_type == "workers-ai" then
+    required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
+  elseif required_params.api_type == "ollama" then
     body.options = {}
+  elseif required_params.api_type == "openai" then
+    for _, msg in pairs(body.messages) do
+      if msg.role == "user" and F.IsValid(msg.images) then
+        local msg_content = msg.content
+        msg.content = {}
+        for i, image in pairs(msg.images) do
+          local format = opts.format[i] or "jpeg"
+          table.insert(msg.content, {
+            ["type"] = "image_url",
+            image_url = { url = "data:image/" .. format .. ";base64," .. image, detail = opts.detail },
+          })
+        end
+        msg.images = nil
+        table.insert(msg.content, { ["type"] = "text", text = msg_content })
+      end
+    end
   end
 
   local params = {
