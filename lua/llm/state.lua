@@ -39,7 +39,7 @@ M.session = {
   filename = nil,
 }
 
-M.popwin = nil
+M.popwin_list = {}
 
 M.app = {
   session = {},
@@ -83,6 +83,7 @@ M.summarize_suggestions = {
   ctx = nil,
   prompt = nil,
   status = false,
+  cnt = 0,
 }
 
 M.reason_range = {

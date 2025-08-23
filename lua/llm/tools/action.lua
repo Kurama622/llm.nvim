@@ -165,7 +165,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
     preview_box:mount()
 
-    state.popwin = preview_box
+    state.popwin_list[preview_box.winid] = preview_box
 
     local input_box = Split({
       relative = options.input.relative,

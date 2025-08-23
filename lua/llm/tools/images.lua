@@ -186,7 +186,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
           { role = "user", content = prompt, images = vim.split(input, "\n") },
         }
       end
-      state.popwin = preview_box
+      state.popwin_list[preview_box.winid] = preview_box
       options.bufnr = preview_box.bufnr
       options.winid = preview_box.winid
       options.messages = state.app.session[name]

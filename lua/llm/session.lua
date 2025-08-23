@@ -82,38 +82,39 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     conf.configs.popwin_opts.border.text.top = conf.configs.popwin_opts.border.text.top_user
   end
 
-  state.popwin = Popup(conf.configs.popwin_opts)
-  state.popwin:mount()
+  local popwin = Popup(conf.configs.popwin_opts)
+  popwin:mount()
 
-  state.popwin.row, state.popwin.col = unpack(vim.api.nvim_win_get_position(0))
+  state.popwin_list[popwin.winid] = popwin
+  state.popwin_list[popwin.winid].row, state.popwin_list[popwin.winid].col = unpack(vim.api.nvim_win_get_position(0))
   local update_cursor_pos = {
-    left = function(v)
-      state.popwin.col = state.popwin.col - v.distance
+    left = function(winid, v)
+      state.popwin_list[winid].col = state.popwin_list[winid].col - v.distance
     end,
-    right = function(v)
-      state.popwin.col = state.popwin.col + v.distance
+    right = function(winid, v)
+      state.popwin_list[winid].col = state.popwin_list[winid].col + v.distance
     end,
-    up = function(v)
-      state.popwin.row = state.popwin.row - v.distance
+    up = function(winid, v)
+      state.popwin_list[winid].row = state.popwin_list[winid].row - v.distance
     end,
-    down = function(v)
-      state.popwin.row = state.popwin.row + v.distance
+    down = function(winid, v)
+      state.popwin_list[winid].row = state.popwin_list[winid].row + v.distance
     end,
   }
-  vim.api.nvim_set_option_value("buftype", "nofile", { buf = state.popwin.bufnr })
-  vim.api.nvim_set_option_value("spell", false, { win = state.popwin.winid })
-  vim.api.nvim_set_option_value("wrap", true, { win = state.popwin.winid })
-  vim.api.nvim_set_option_value("linebreak", false, { win = state.popwin.winid })
+  vim.api.nvim_set_option_value("buftype", "nofile", { buf = popwin.bufnr })
+  vim.api.nvim_set_option_value("spell", false, { win = popwin.winid })
+  vim.api.nvim_set_option_value("wrap", true, { win = popwin.winid })
+  vim.api.nvim_set_option_value("linebreak", false, { win = popwin.winid })
   if builtin_called then
     if opts.prompt then
-      state.session[state.popwin.winid] = {
+      state.session[popwin.winid] = {
         { role = "system", content = opts.prompt },
       }
     else
-      state.session[state.popwin.winid] = {}
+      state.session[popwin.winid] = {}
     end
-    table.insert(state.session[state.popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
-    F.UpdatePrompt(state.popwin.winid)
+    table.insert(state.session[popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
+    F.UpdatePrompt(popwin.winid)
 
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(opts._[k].mapping.mode, opts._[k].mapping.keys, function()
@@ -121,13 +122,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
         if opts._[k].action ~= nil then
           opts._[k].action()
         end
-      end, state.popwin.bufnr)
+      end, popwin.bufnr)
     end
     local params = {
       _name = opts._._name,
-      bufnr = state.popwin.bufnr,
-      winid = state.popwin.winid,
-      messages = state.session[state.popwin.winid],
+      bufnr = popwin.bufnr,
+      winid = popwin.winid,
+      messages = state.session[popwin.winid],
     }
 
     for _, key in pairs(state.model_params) do
@@ -135,36 +136,49 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     end
     streaming.GetStreamingOutput(params)
   else
-    state.session[state.popwin.winid] = {
+    state.session[popwin.winid] = {
       { role = "system", content = description },
       { role = "user", content = content },
     }
     streaming.GetStreamingOutput({
-      bufnr = state.popwin.bufnr,
-      winid = state.popwin.winid,
-      messages = state.session[state.popwin.winid],
+      bufnr = popwin.bufnr,
+      winid = popwin.winid,
+      messages = state.session[popwin.winid],
     })
   end
 
   for k, v in pairs(conf.configs.popwin_opts.move) do
-    F.SetFloatKeyMapping(state.popwin, v.mode, v.keys, function()
-      update_cursor_pos[k](v)
-      state.popwin:update_layout({
+    F.SetFloatKeyMapping(popwin, v.mode, v.keys, function()
+      local winid = vim.api.nvim_get_current_win()
+
+      update_cursor_pos[k](winid, v)
+
+      local win_conf = vim.api.nvim_win_get_config(winid)
+      state.popwin_list[winid]:update_layout({
         relative = "editor",
-        position = { row = state.popwin.row, col = state.popwin.col },
+        position = {
+          row = state.popwin_list[winid].row,
+          col = state.popwin_list[winid].col,
+        },
+        size = {
+          height = win_conf.height,
+          width = win_conf.width,
+        },
       })
     end)
   end
   for k, v in pairs(conf.configs.keys) do
     if k == "Session:Close" then
-      F.SetFloatKeyMapping(state.popwin, v.mode, v.key, function()
+      F.SetFloatKeyMapping(popwin, v.mode, v.key, function()
         F.CancelLLM()
         vim.api.nvim_command("doautocmd BufEnter")
-        state.session[state.popwin.winid] = nil
-        state.popwin:unmount()
+        local winid = vim.api.nvim_get_current_win()
+        state.popwin_list[winid]:unmount()
+        state.popwin_list[winid] = nil
+        state.session[winid] = nil
       end, { noremap = true })
     elseif k == "Output:Cancel" then
-      F.SetFloatKeyMapping(state.popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
+      F.SetFloatKeyMapping(popwin, v.mode, v.key, F.CancelLLM, { noremap = true, silent = true })
     end
   end
 end
