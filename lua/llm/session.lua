@@ -153,11 +153,16 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
 
       update_cursor_pos[k](winid, v)
 
+      local win_conf = vim.api.nvim_win_get_config(winid)
       state.popwin_list[winid]:update_layout({
         relative = "editor",
         position = {
           row = state.popwin_list[winid].row,
           col = state.popwin_list[winid].col,
+        },
+        size = {
+          height = win_conf.height,
+          width = win_conf.width,
         },
       })
     end)
