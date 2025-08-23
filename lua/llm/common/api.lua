@@ -9,7 +9,7 @@ local Menu = require("nui.menu")
 local LOG = require("llm.common.log")
 
 local function IsNotPopwin(winid)
-  return state.popwin == nil or winid ~= state.popwin.winid
+  return not vim.tbl_contains(vim.tbl_keys(state.popwin_list), winid)
 end
 
 local function escape_string(str)
@@ -346,6 +346,7 @@ function api.MakeInlineContext(opts, bufnr, name)
       end_col = end_col,
     }
     state.summarize_suggestions.ctx = context
+    state.summarize_suggestions.cnt = state.summarize_suggestions.cnt + 1
     state.summarize_suggestions.pattern = {
       -- start_str = "<!%-%-suggestion%-%->\n```",
       -- end_str = "```\n<!%-%-/suggestion%-%->",
@@ -405,10 +406,15 @@ function api.ResetPrompt()
 end
 
 function api.ClearSummarizeSuggestions()
-  state.summarize_suggestions.ctx = nil
-  state.summarize_suggestions.pattern = nil
-  api.ResetPrompt()
-  state.summarize_suggestions.status = false
+  if state.summarize_suggestions.cnt == 1 then
+    state.summarize_suggestions.cnt = state.summarize_suggestions.cnt - 1
+    state.summarize_suggestions.ctx = nil
+    state.summarize_suggestions.pattern = nil
+    api.ResetPrompt()
+    state.summarize_suggestions.status = false
+  elseif state.summarize_suggestions.cnt > 1 then
+    state.summarize_suggestions.cnt = state.summarize_suggestions.cnt - 1
+  end
 end
 
 function api.CancelLLM()
@@ -418,6 +424,7 @@ function api.CancelLLM()
     state.llm.worker.jobs[key] = nil
   end
   state.enabled_cmds = {}
+  api.ClearSummarizeSuggestions()
 end
 
 function api.CloseLLM()

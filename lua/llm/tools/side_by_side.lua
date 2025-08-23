@@ -79,7 +79,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     linebreak = options.linebreak,
   })
 
-  state.popwin = source_box
+  state.popwin_list[source_box.winid] = source_box
   F.WriteContent(source_box.bufnr, source_box.winid, source_content)
 
   state.app["session"][name] = {
@@ -90,7 +90,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   options.bufnr = preview_box.bufnr
   options.winid = preview_box.winid
 
-  state.popwin = preview_box
+  state.popwin_list[preview_box.winid] = preview_box
   streaming(options)
 
   preview_box:map("n", "<C-c>", F.CancelLLM)
@@ -112,6 +112,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
         else
           default_actions[k]()
         end
+        state.popwin_list[source_box.winid] = nil
+        state.popwin_list[preview_box.winid] = nil
         layout:unmount()
       end)
     end

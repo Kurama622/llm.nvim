@@ -19,7 +19,10 @@ function M.handler(_, _, _, _, prompt, opts)
         __index = state.summarize_suggestions,
       })
       utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
-      state.popwin:unmount()
+      local winid = vim.api.nvim_get_current_win()
+      state.popwin_list[winid]:unmount()
+      state.popwin_list[winid] = nil
+      state.session[winid] = nil
       F.ClearSummarizeSuggestions()
     end,
     copy_suggestion_code = function()
@@ -27,8 +30,11 @@ function M.handler(_, _, _, _, prompt, opts)
       setmetatable(display_opts, {
         __index = state.summarize_suggestions,
       })
-      utils.copy_suggestion_code(display_opts.pattern, display_opts.assistant_output)
-      state.popwin:unmount()
+      utils.copy_suggestion_code(display_opts.pattern, table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, true), "\n"))
+      local winid = vim.api.nvim_get_current_win()
+      state.popwin_list[winid]:unmount()
+      state.popwin_list[winid] = nil
+      state.session[winid] = nil
       F.ClearSummarizeSuggestions()
     end,
     accept = function()
