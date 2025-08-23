@@ -88,6 +88,12 @@ function io_parse.GetOutput(opts)
     io_utils.add_request_body_params(body, param_name, param_value, required_params.api_type)
   end
 
+  if required_params.api_type == "ollama" then
+    if not F.IsValid(body.options) then
+      body.options = nil
+    end
+  end
+
   local ctx = {
     assistant_output = "",
     body = body,
