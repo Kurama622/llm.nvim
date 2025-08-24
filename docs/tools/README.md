@@ -249,7 +249,7 @@ local tools = require("llm.tools")
       border = {
         style = "rounded",
         text = {
-          top = " 󰊿 Trans "
+          top = " Image Path "
         },
       },
       win_options = {

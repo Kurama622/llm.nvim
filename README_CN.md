@@ -19,6 +19,8 @@
 
 > [!NOTE]
 > 不同大模型的配置(比如**ollama**, **deepseek**)、 界面的配置、以及AI工具的配置(包括**代码补全**) 请先查阅 [examples](examples). 这里有你想知道的大部分内容。在使用插件之前，应该确保你的`LLM_KEY`是有效的，并且该环境变量已经生效。
+>
+> [wiki](https://github.com/Kurama622/llm.nvim/wiki)和[docs](./docs/)也可能对你有用。
 
 > 用户QQ群：1037412539
 
@@ -320,7 +322,7 @@ require("llm").setup({
 | completion_handler     | 代码补全                                                                   |
 | curl_request_handler   | 与LLM之间最简单的交互通常用于查询账户余额或可用的模型列表等                |
 
-每个handler的具体参数参考[docs/tools](docs/tools).
+**每个handler的具体参数参考[docs/tools](docs/tools).**
 
 示例： [AI 工具配置](examples/ai-tools/)
 

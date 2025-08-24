@@ -17,6 +17,8 @@
 
 > [!NOTE]
 > The configurations of different LLMs (such as **ollama**, **deepseek**), UI configurations, and AI tools (including **code completion**) should be checked in the [examples](examples) first. Here you will find most of the information you want to know. Additionally, before using the plugin, you should ensure that your `LLM_KEY` is **valid** and that the environment variable is in effect.
+>
+> Additionally, you should also take a look at [wiki](https://github.com/Kurama622/llm.nvim/wiki) and [docs](./docs/).
 
 
 
@@ -316,7 +318,7 @@ require("llm").setup({
 | completion_handler     | Code completion                                                                                                                |
 | curl_request_handler   | The simplest interaction between curl and LLM is generally used to query account balance or available model lists, etc.        |
 
-Each handler's parameters can be referred to [here](docs/tools).
+**Each handler's parameters can be referred to [here](docs/tools).**
 
 Examples can be seen [AI Tools Configuration](examples/ai-tools/)
 

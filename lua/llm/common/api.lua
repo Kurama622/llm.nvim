@@ -948,6 +948,8 @@ function api.Picker(cmd, ui, callback)
     style = "minimal",
     border = ui.border,
   })
+
+  vim.api.nvim_set_option_value("filetype", "LlmPicker", { buf = bufnr })
   vim.fn.jobstart(cmd, {
     on_exit = function()
       local path = vim.fn.getline(1)
