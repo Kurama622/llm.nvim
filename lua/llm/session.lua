@@ -417,8 +417,8 @@ function M.NewSession()
     end
 
     filename = os.date("/tmp/%Y%m%d-%H%M%S") .. ".llm"
-    vim.api.nvim_set_option_value("filetype", "llm", { buf = bufnr })
-    vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
+    vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr })
+    vim.api.nvim_set_option_value("buftype", "", { buf = bufnr })
     vim.api.nvim_buf_set_name(bufnr, filename)
     vim.api.nvim_set_option_value("spell", false, { win = winid })
     vim.api.nvim_set_option_value("wrap", true, { win = winid })
