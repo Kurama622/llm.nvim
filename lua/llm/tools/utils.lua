@@ -53,6 +53,10 @@ function utils.overwrite_selection(context, contents)
     context.start_col = context.start_col - 1
   end
 
+  if context.end_col > 0 then
+    context.end_col = context.end_col - 1
+  end
+
   vim.api.nvim_buf_set_text(
     context.bufnr,
     context.start_line - 1,
