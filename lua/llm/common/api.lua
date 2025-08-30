@@ -5,8 +5,8 @@ local state = require("llm.state")
 local conf = require("llm.config")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
-local Menu = require("nui.menu")
 local LOG = require("llm.common.log")
+local fio = require("llm.common.file_io")
 
 local function IsNotPopwin(winid)
   return not vim.tbl_contains(vim.tbl_keys(state.popwin_list), winid)
@@ -733,92 +733,22 @@ function api.FormatHl(hl, win_name)
   vim.api.nvim_set_hl(0, state[win_name].hl, { fg = fg, bg = bg })
 end
 
-function api.HistoryPreview(layout_opts, opts)
-  local layout = layout_opts or conf.configs.chat_ui_opts
-  opts = opts or conf.configs.chat_ui_opts.history.split
-  if not state.history.hl then
-    state.history.hl = opts.win_options.winhighlight:match(":(.-),")
-    opts.win_options.winhighlight = opts.win_options.winhighlight:gsub(":(.-),", ":LlmGrayLight,")
+function api.HistoryPreview()
+  api.ListFilesInPath() -- Clear extra session files
+  local opts, picker_cfg = conf.configs.chat_ui_opts.history.split, {}
+  if opts then
+    picker_cfg.relative = opts.relative
+    picker_cfg.layout = opts.layout
+    picker_cfg.win_options = opts.win_options
+    picker_cfg.buf_options = opts.buf_options
+    picker_cfg.size = opts.size
+    picker_cfg.position = opts.position
+    picker_cfg.select = opts.select
+    picker_cfg.preview = opts.preview
   end
-
-  if state.history.popup == nil then
-    state.history.popup = Menu({
-      enter = opts.enter,
-      focusable = opts.focusable,
-      zindex = opts.zindex,
-      border = opts.border,
-      win_options = opts.win_options,
-      relative = opts.relative or layout.relative,
-      position = layout.position,
-      size = opts.size,
-    }, {
-      lines = (function()
-        local items = api.ListFilesInPath()
-        state.history.list = { Menu.item("current", { cmd = api.SetItemHl }) }
-        for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item, { cmd = api.SetItemHl }))
-        end
-        return state.history.list
-      end)(),
-      max_width = opts.max_width,
-      keymap = {
-        focus_next = { "j", "<Down>", "<Tab>" },
-        focus_prev = { "k", "<Up>", "<S-Tab>" },
-        submit = { "<CR>", "<Space>" },
-      },
-      on_change = function(item)
-        item.cmd(state.history.popup, state.history.hl)
-        -- TODO: item index
-        if item.text == "current" then
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            state.session[item.text] = api.DeepCopy(conf.session.messages)
-          end
-          api.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
-        else
-          local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            local file = io.open(sess_file, "r")
-            if file then
-              local messages = vim.fn.json_decode(file:read())
-              state.session[item.text] = messages
-              file:close()
-            end
-          end
-          api.RefreshLLMText(state.session[item.text], state.llm.bufnr, state.llm.winid, true)
-        end
-      end,
-    })
-    state.history.popup:mount()
-    if state.history.index then
-      vim.api.nvim_win_set_cursor(state.history.popup.winid, { state.history.index, 0 })
-      local node = state.history.popup.tree:get_node(state.history.index)
-      state.history.popup._.on_change(node)
-    else
-      state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
-    end
-
-    state.history.popup:map("n", { "<cr>" }, function()
-      LOG:TRACE("history popup hide")
-      state.history.popup:hide()
-    end)
-
-    state.history.popup:map("n", { "<esc>" }, function()
-      local node = state.history.popup.tree:get_node(state.history.index)
-      state.history.popup._.on_change(node)
-      state.history.popup:unmount()
-      state.history.popup = nil
-    end)
-  else
-    LOG:TRACE("history popup show")
-    -- The relative winid needs to be adjusted when "relative = win",
-    if state.history.popup.border.win_config.win then
-      state.history.popup.border.win_config.win = state.llm.winid
-    end
-    state.history.popup:show()
-    state.history.index = vim.api.nvim_win_get_cursor(state.history.popup.winid)[1]
-  end
+  api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
+    api.RefreshLLMText(state.session[item], state.llm.bufnr, state.llm.winid, false)
+  end, true)
 end
 
 function api.ResetModel(opts, _table, idx)
@@ -922,43 +852,141 @@ function api.base64_images_encode(paths)
   return res
 end
 
-function api.Picker(cmd, ui, callback)
-  local ui_tbl = vim.api.nvim_list_uis()[1]
-  local width = math.floor(ui_tbl.width * 0.6)
-  local height = math.floor(ui_tbl.height * 0.6)
-  local row = math.floor((ui_tbl.height - height) / 2)
-  local col = math.floor((ui_tbl.width - width) / 2)
+function api.Picker(cmd, ui, callback, force_preview)
+  fio.CreateDir("/tmp/")
+  local focus_file = "/tmp/llm-fzf-focus-file"
+  local position = "50%"
+  local size = "60%"
+
   local default_ui = {
-    width = width,
-    height = height,
-    row = row,
-    col = col,
+    position = position,
+    size = size,
     relative = "editor",
-    border = "rounded",
+    layout = {
+      dir = "row",
+      radio = {
+        select = "40%",
+        preview = "60%",
+      },
+    },
+    select = {
+      border = {
+        style = "rounded",
+        text = {
+          top = " Files ",
+          top_align = "center",
+        },
+      },
+      buf_options = { filetype = "llm-picker" },
+    },
+    preview = {
+      border = {
+        style = "rounded",
+        text = {
+          top = " Contents ",
+          top_align = "center",
+        },
+      },
+      buf_options = { filetype = "llm" },
+    },
   }
   ui = vim.tbl_deep_extend("force", default_ui, ui)
 
-  local bufnr = vim.api.nvim_create_buf(false, true) -- nofile, scratch
-  local winid = vim.api.nvim_open_win(bufnr, true, {
+  local select_popup = Popup({
     relative = ui.relative,
-    width = ui.width,
-    height = ui.height,
-    row = ui.row,
-    col = ui.col,
-    style = "minimal",
-    border = ui.border,
+    position = ui.position,
+    size = ui.size,
+    enter = true,
+    focusable = true,
+    zindex = 50,
+    border = ui.select.border,
+    win_options = ui.select.win_options,
+    buf_options = ui.select.buf_options,
   })
+  local preview_popup = nil
+  if force_preview then
+    preview_popup = Popup({
+      enter = false,
+      focusable = true,
+      zindex = 50,
+      border = ui.preview.border,
+      buf_options = ui.preview.buf_options,
+      win_options = ui.preview.win_options,
+    })
 
-  vim.api.nvim_set_option_value("filetype", "LlmPicker", { buf = bufnr })
+    Layout(
+      {
+        relative = ui.relative,
+        position = ui.position,
+        size = ui.size,
+      },
+      Layout.Box({
+        Layout.Box(select_popup, { size = ui.layout.radio.select }),
+        Layout.Box(preview_popup, { size = ui.layout.radio.preview }),
+      }, { dir = ui.layout.dir })
+    ):mount()
+  else
+    select_popup:mount()
+  end
+
+  cmd = cmd
+    .. " --no-preview"
+    .. " --bind='focus:execute(echo {} >"
+    .. focus_file
+    .. "._COPYING_ "
+    .. "&& mv "
+    .. focus_file
+    .. "._COPYING_ "
+    .. focus_file
+    .. ")'"
+
+  local filename, filename_abspath = nil, nil
   vim.fn.jobstart(cmd, {
-    on_exit = function()
-      local path = vim.fn.getline(1)
-      vim.api.nvim_win_close(winid, true)
-      if vim.uv.fs_stat(path) then
-        path = string.gsub(path, " ", "\\ ")
-        if type(callback) == "function" then
-          callback(path)
+    on_stdout = function()
+      local fp = io.open(focus_file, "r")
+      if fp then
+        filename = fp:read()
+        fp:close()
+        vim.fn.delete(focus_file)
+      end
+      if force_preview then
+        if filename then
+          filename_abspath = conf.configs.history_path .. "/" .. filename
+          fp = io.open(filename_abspath, "r")
+          if fp then
+            local messages = vim.fn.json_decode(fp:read())
+            state.session.filename = filename
+            state.session[filename] = messages
+            fp:close()
+            api.RefreshLLMText(messages, preview_popup.bufnr, preview_popup.winid, true)
+          end
         end
+      end
+    end,
+    on_exit = function()
+      local selected = vim.fn.getline(1)
+      vim.api.nvim_win_close(select_popup.winid, true)
+
+      if selected ~= "" then
+        local fzf_item = nil
+        if force_preview then
+          if vim.uv.fs_stat(filename_abspath) then
+            fzf_item = filename_abspath
+          end
+        else
+          if vim.uv.fs_stat(filename) then
+            filename = string.gsub(filename, " ", "\\ ")
+            fzf_item = filename
+          end
+        end
+        if fzf_item then
+          if type(callback) == "function" then
+            callback(filename)
+          end
+        end
+      end
+      if force_preview then
+        vim.api.nvim_set_current_win(state.llm.winid)
       end
     end,
     term = true,

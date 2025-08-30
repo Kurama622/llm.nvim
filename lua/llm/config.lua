@@ -1,4 +1,5 @@
 local M = {}
+local fio = require("llm.common.file_io")
 local luv = vim.loop
 
 local function get_win_width()
@@ -113,22 +114,22 @@ M._.chat_ui_opts = {
       order = 2,
     },
     split = {
-      zindex = 50,
-      enter = true,
-      focusable = true,
-      max_width = 20,
-      border = {
-        style = "rounded",
-        text = {
-          top = " History ",
-          top_align = "center",
-        },
-      },
+      cmd = "fzf --cycle",
+      position = "50%",
       win_options = {
         winblend = 0,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
-      size = { height = "30%", width = "30%" },
+      select = {
+        border = {
+          style = "rounded",
+          text = {
+            top = " History ",
+            top_align = "center",
+          },
+        },
+      },
+      size = "60%",
       order = 1,
     },
   },
@@ -324,12 +325,7 @@ function M.setup(opts)
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
   if M.configs.save_session then
-    local dir = io.open(M.configs.history_path, "rb")
-    if dir then
-      dir:close()
-    else
-      vim.fn.mkdir(M.configs.history_path, "p")
-    end
+    fio.CreateDir(M.configs.history_path)
   end
 
   M._.chat_ui_opts = M.configs.chat_ui_opts

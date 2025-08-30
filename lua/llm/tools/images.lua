@@ -25,12 +25,19 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local options = {
     picker = {
       cmd = "fzf",
-      height = nil,
-      width = nil,
-      row = nil,
-      col = nil,
-      relative = nil,
-      border = nil,
+      position = "50%",
+      size = "60%",
+      relative = "editor",
+      select = {
+        border = {
+          style = "rounded",
+          text = {
+            top = " Files ",
+            top_align = "center",
+          },
+        },
+      },
+
       mapping = {
         mode = "i",
         keys = "<C-f>",
@@ -151,12 +158,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
       end)
     else
       F.Picker(options.picker.cmd, {
-        width = options.picker.width,
-        height = options.picker.height,
-        row = options.picker.row,
-        col = options.picker.col,
+        size = options.picker.size,
+        position = options.picker.position,
         relative = options.picker.relative,
-        border = options.picker.border,
+        select = options.picker.select,
       }, function(item)
         if item then
           local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)

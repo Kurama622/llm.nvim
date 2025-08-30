@@ -282,30 +282,30 @@ require("llm").setup({
 <summary><b><i>Expand the table.</i></b></summary>
 <br/>
 
-| Style       | Keyname           | Description                                                 | Default: `[mode] keymap` | Window                                       |
-| -           | -                 | -                                                           | -                        | -                                            |
-| float       | Input:Submit      | 提交问题                                                    | `[i] ctrl+g`             | Input                                        |
-| float       | Input:Cancel      | 中止对话请求                                                | `[i] ctrl+c`             | Input                                        |
-| float       | Input:Resend      | 重新请求                                                    | `[i] ctrl+r`             | Input                                        |
-| float       | Input:HistoryNext | 选择下一个历史会话                                          | `[i] ctrl+j`             | Input                                        |
-| float       | Input:HistoryPrev | 选择上一个历史会话                                          | `[i] ctrl+k`             | Input                                        |
-| float       | Input:ModelsNext  | 选择下一个模型                                              | `[i] ctrl+shift+j`       | Input                                        |
-| float       | Input:ModelsPrev  | 选择上一个模型                                              | `[i] ctrl+shift+k`       | Input                                        |
-| split       | Output:Ask        | 打开输入窗口。normal 模式下, 按回车提交问题                 | `[n] i`                  | Output                                       |
-| split       | Output:Cancel     | 中止对话请求                                                | `[n] ctrl+c`             | Output                                       |
-| split       | Output:Resend     | 重新请求                                                    | `[n] ctrl+r`             | Output                                       |
-| float/split | Session:Toggle    | 打开/隐藏聊天界面                                           | `[n] <leader>ac`         | Input+Output                                 |
-| float/split | Session:Close     | 关闭聊天界面                                                | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
-| float/split | Session:Models    | 打开模型列表窗口                                            | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
-| split       | Session:History   | 打开会话历史窗口: `j`/`k`移动, `<cr>` 确认选择, `<esc>`关闭 | `[n] ctrl+h`             | Output                                       |
-| float       | Focus:Input       | 从输出窗口切换到输入窗口                                    | -                        | Output                                       |
-| float       | Focus:Output      | 从输入窗口切换到输出窗口                                    | -                        | Input                                        |
-| float       | PageUp            | 输出窗口向上翻页                                            | `[n/i] Ctrl+b`           | Input                                        |
-| float       | PageDown          | 输出窗口向下翻页                                            | `[n/i] Ctrl+f`           | Input                                        |
-| float       | HalfPageUp        | 输出窗口向上翻半页                                          | `[n/i] Ctrl+u`           | Input                                        |
-| float       | HalfPageDown      | 输出窗口向下翻半页                                          | `[n/i] Ctrl+d`           | Input                                        |
-| float       | JumpToTop         | 定位到输出窗口顶部                                          | `[n] gg`                 | Input                                        |
-| float       | JumpToBottom      | 定位到输出窗口低部                                          | `[n] G`                  | Input                                        |
+| Style       | Keyname           | Description                                                       | Default: `[mode] keymap` | Window                                       |
+| -           | -                 | -                                                                 | -                        | -                                            |
+| float       | Input:Submit      | 提交问题                                                          | `[i] ctrl+g`             | Input                                        |
+| float       | Input:Cancel      | 中止对话请求                                                      | `[i] ctrl+c`             | Input                                        |
+| float       | Input:Resend      | 重新请求                                                          | `[i] ctrl+r`             | Input                                        |
+| float       | Input:HistoryNext | 选择下一个历史会话                                                | `[i] ctrl+j`             | Input                                        |
+| float       | Input:HistoryPrev | 选择上一个历史会话                                                | `[i] ctrl+k`             | Input                                        |
+| float       | Input:ModelsNext  | 选择下一个模型                                                    | `[i] ctrl+shift+j`       | Input                                        |
+| float       | Input:ModelsPrev  | 选择上一个模型                                                    | `[i] ctrl+shift+k`       | Input                                        |
+| split       | Output:Ask        | 打开输入窗口。normal 模式下, 按回车提交问题                       | `[n] i`                  | Output                                       |
+| split       | Output:Cancel     | 中止对话请求                                                      | `[n] ctrl+c`             | Output                                       |
+| split       | Output:Resend     | 重新请求                                                          | `[n] ctrl+r`             | Output                                       |
+| float/split | Session:Toggle    | 打开/隐藏聊天界面                                                 | `[n] <leader>ac`         | Input+Output                                 |
+| float/split | Session:Close     | 关闭聊天界面                                                      | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:Models    | 打开模型列表窗口                                                  | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
+| split       | Session:History   | 打开会话历史窗口: 移动遵循fzf的配置, `<cr>` 确认选择, `<esc>`关闭 | `[n] ctrl+h`             | Output                                       |
+| float       | Focus:Input       | 从输出窗口切换到输入窗口                                          | -                        | Output                                       |
+| float       | Focus:Output      | 从输入窗口切换到输出窗口                                          | -                        | Input                                        |
+| float       | PageUp            | 输出窗口向上翻页                                                  | `[n/i] Ctrl+b`           | Input                                        |
+| float       | PageDown          | 输出窗口向下翻页                                                  | `[n/i] Ctrl+f`           | Input                                        |
+| float       | HalfPageUp        | 输出窗口向上翻半页                                                | `[n/i] Ctrl+u`           | Input                                        |
+| float       | HalfPageDown      | 输出窗口向下翻半页                                                | `[n/i] Ctrl+d`           | Input                                        |
+| float       | JumpToTop         | 定位到输出窗口顶部                                                | `[n] gg`                 | Input                                        |
+| float       | JumpToBottom      | 定位到输出窗口低部                                                | `[n] G`                  | Input                                        |
 
 </details>
 
