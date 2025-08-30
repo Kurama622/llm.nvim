@@ -747,7 +747,7 @@ function api.HistoryPreview()
     picker_cfg.select = opts.select
     picker_cfg.preview = opts.preview
   end
-  api.Picker("cd " .. conf.configs.history_path .. "; fzf ", picker_cfg, function(item)
+  api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
     api.RefreshLLMText(state.session[item], state.llm.bufnr, state.llm.winid, false)
   end, true)
 end

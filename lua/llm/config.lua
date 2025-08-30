@@ -114,6 +114,7 @@ M._.chat_ui_opts = {
       order = 2,
     },
     split = {
+      cmd = "fzf --cycle",
       position = "50%",
       win_options = {
         winblend = 0,
