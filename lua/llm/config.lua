@@ -114,22 +114,21 @@ M._.chat_ui_opts = {
       order = 2,
     },
     split = {
-      zindex = 50,
-      enter = true,
-      focusable = true,
-      max_width = 20,
-      border = {
-        style = "rounded",
-        text = {
-          top = " History ",
-          top_align = "center",
-        },
-      },
+      position = "50%",
       win_options = {
         winblend = 0,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
-      size = { height = "30%", width = "30%" },
+      select = {
+        border = {
+          style = "rounded",
+          text = {
+            top = " History ",
+            top_align = "center",
+          },
+        },
+      },
+      size = "60%",
       order = 1,
     },
   },

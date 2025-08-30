@@ -744,6 +744,8 @@ function api.HistoryPreview()
     picker_cfg.buf_options = opts.buf_options
     picker_cfg.size = opts.size
     picker_cfg.position = opts.position
+    picker_cfg.select = opts.select
+    picker_cfg.preview = opts.preview
   end
   api.Picker("cd " .. conf.configs.history_path .. "; fzf ", picker_cfg, function(item)
     api.RefreshLLMText(state.session[item], state.llm.bufnr, state.llm.winid, false)
@@ -854,17 +856,12 @@ end
 function api.Picker(cmd, ui, callback, force_preview)
   fio.CreateDir("/tmp/")
   local focus_file = "/tmp/llm-fzf-focus-file"
-  local ui_tbl = vim.api.nvim_list_uis()[1]
-  local width = math.floor(ui_tbl.width * 0.6)
-  local height = math.floor(ui_tbl.height * 0.6)
   local position = "50%"
+  local size = "60%"
 
   local default_ui = {
     position = position,
-    size = {
-      width = width,
-      height = height,
-    },
+    size = size,
     relative = "editor",
     layout = {
       dir = "row",
