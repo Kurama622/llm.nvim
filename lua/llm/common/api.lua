@@ -5,7 +5,6 @@ local state = require("llm.state")
 local conf = require("llm.config")
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
-local Menu = require("nui.menu")
 local LOG = require("llm.common.log")
 local fio = require("llm.common.file_io")
 
