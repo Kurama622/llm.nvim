@@ -30,7 +30,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       relative = "editor",
       select = {
         border = {
-          style = "single",
+          style = "rounded",
           text = {
             top = " Files ",
             top_align = "center",

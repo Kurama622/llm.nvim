@@ -229,12 +229,18 @@ local tools = require("llm.tools")
 
     picker = {
       cmd = "fzf",
-      height = nil,
-      width = nil,
-      row = nil,
-      col = nil,
-      relative = nil,
-      border = nil,
+      position = "50%",
+      size = "60%",
+      relative = "editor",
+      select = {
+        border = {
+          style = "rounded",
+          text = {
+            top = " Files ",
+            top_align = "center",
+          },
+        },
+      },
       mapping = {
         mode = "i",
         keys = "<C-f>",
