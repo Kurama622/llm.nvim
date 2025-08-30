@@ -68,23 +68,23 @@
 [模型配置](./examples/chat/) | [界面配置](./examples/ui/)
 
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="560">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="800">
 </p>
 
 ### [代码补全](./examples/ai-tools/Code-Completions/)
   - **虚拟文本**
   <p align= "center">
-    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="560">
+    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
   </p>
 
   - **blink.cmp 或 nvim-cmp**
   <p align= "center">
-    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="560">
+    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
   </p>
 
 ### [快速翻译](./examples/ai-tools/Word-Translate/config.lua)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="560">
+  <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="800">
 </p>
 
 ### 解释代码
@@ -92,7 +92,7 @@
 [流式输出](./examples/chat/deepseek/config.lua#L52) | [非流式输出](./examples/ai-tools/Code-Explain/config.lua)
 
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="560">
+  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-explain-code-compress.png" alt="llm-explain-code" width="800">
 </p>
 
 ### [随机提问](./examples/ai-tools/Ask/config.lua)
@@ -102,7 +102,7 @@
 你可以配置 [inline_assistant](./examples/ai-tools/Ask/config.lua) 来决定是否展示diff (默认按'd'展示)
 
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/e3300e1f-dbd2-4978-bd60-ddf9106257cb" alt="llm-ask" width="560">
+  <img src="https://github.com/user-attachments/assets/e3300e1f-dbd2-4978-bd60-ddf9106257cb" alt="llm-ask" width="800">
 </p>
 
 ### [给对话附加上下文](./examples/ai-tools/Attach-To-Chat/config.lua)
@@ -110,48 +110,48 @@
 你可以配置 [inline_assistant](./examples/ai-tools/Ask/config.lua) 来决定是否展示diff (默认按'd'展示)
 
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/33ba7517-6cf1-4e52-b6b4-27e6a4fb1148" alt="llm-attach" width="560">
+  <img src="https://github.com/user-attachments/assets/33ba7517-6cf1-4e52-b6b4-27e6a4fb1148" alt="llm-attach" width="800">
 </p>
 
 ### 优化代码
   - [**并排展示**](./examples/ai-tools/Optimize-Code/config.lua)
   <p align= "center">
-    <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="560">
+    <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-optimize-code-compress.png" alt="llm-optimize-code" width="800">
   </p>
 
   - [**以diff的形式展示**](./examples/ai-tools/Optimize-Code-and-Display-Diff/config.lua)
   <p align= "center">
-    <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="560">
+    <img src="https://github.com/user-attachments/assets/35c105b3-a2a9-4a6c-887c-cb20b77b3264" alt="llm-optimize-compare-action" width="800">
   </p>
 
 ### [生成测试用例](./examples/ai-tools/Generate-Test-Cases/config.lua)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/b288e3c9-7d25-40cb-8645-14dacb571529" alt="test-case" width="560">
+  <img src="https://github.com/user-attachments/assets/b288e3c9-7d25-40cb-8645-14dacb571529" alt="test-case" width="800">
 </p>
 
 ### [AI翻译](./examples/ai-tools/AI-Translate/config.lua)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="560">
+  <img src="https://github.com/user-attachments/assets/ff90b1b4-3c2c-40e6-9321-4bab134710ec" alt="llm-trans" width="800">
 </p>
 
 ### [图像识别](./examples/ai-tools/Formula-Recognition/README.md)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-images" width="560">
+  <img src="https://github.com/user-attachments/assets/95edeacf-feca-4dfe-bb75-02538a62c83e" alt="llm-images" width="800">
 </p>
 
 ### [生成git commit信息](./examples/ai-tools/AI-Commit-Messages/config.lua)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/261b21c5-0df0-48c2-916b-07f5ce0c981d" alt="llm-git-commit-msg" width="560">
+  <img src="https://github.com/user-attachments/assets/261b21c5-0df0-48c2-916b-07f5ce0c981d" alt="llm-git-commit-msg" width="800">
 </p>
 
 ### [生成docstring](./examples/ai-tools/Generate-Docstring/config.lua)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="560">
+  <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="800">
 </p>
 
 ### [联网搜索](./docs/cmds/README.md#web_search)
 <p align= "center">
-  <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="560">
+  <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
 </p>
 
 [⬆ 返回目录](#目录)
