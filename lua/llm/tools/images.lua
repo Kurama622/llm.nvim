@@ -30,7 +30,16 @@ function M.handler(name, F, state, streaming, prompt, opts)
       row = nil,
       col = nil,
       relative = nil,
-      border = nil,
+      select = {
+        border = {
+          style = "single",
+          text = {
+            top = " Files ",
+            top_align = "center",
+          },
+        },
+      },
+
       mapping = {
         mode = "i",
         keys = "<C-f>",
@@ -156,7 +165,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
         row = options.picker.row,
         col = options.picker.col,
         relative = options.picker.relative,
-        border = options.picker.border,
+        select = options.picker.select,
       }, function(item)
         if item then
           local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)

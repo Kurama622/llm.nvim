@@ -1,4 +1,5 @@
 local M = {}
+local fio = require("llm.common.file_io")
 local luv = vim.loop
 
 local function get_win_width()
@@ -324,12 +325,7 @@ function M.setup(opts)
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
   if M.configs.save_session then
-    local dir = io.open(M.configs.history_path, "rb")
-    if dir then
-      dir:close()
-    else
-      vim.fn.mkdir(M.configs.history_path, "p")
-    end
+    fio.CreateDir(M.configs.history_path)
   end
 
   M._.chat_ui_opts = M.configs.chat_ui_opts
