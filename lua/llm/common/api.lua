@@ -735,8 +735,17 @@ function api.FormatHl(hl, win_name)
 end
 
 function api.HistoryPreview()
-  api.ListFilesInPath()
-  api.Picker("cd " .. conf.configs.history_path .. "; fzf ", {}, function(item)
+  api.ListFilesInPath() -- Clear extra session files
+  local opts, picker_cfg = conf.configs.chat_ui_opts.history.split, {}
+  if opts then
+    picker_cfg.relative = opts.relative
+    picker_cfg.layout = opts.layout
+    picker_cfg.win_options = opts.win_options
+    picker_cfg.buf_options = opts.buf_options
+    picker_cfg.size = opts.size
+    picker_cfg.position = opts.position
+  end
+  api.Picker("cd " .. conf.configs.history_path .. "; fzf ", picker_cfg, function(item)
     api.RefreshLLMText(state.session[item], state.llm.bufnr, state.llm.winid, false)
   end, true)
 end
@@ -844,19 +853,26 @@ end
 
 function api.Picker(cmd, ui, callback, force_preview)
   fio.CreateDir("/tmp/")
-  local preview_file = "/tmp/llm-fzf-focus-file"
+  local focus_file = "/tmp/llm-fzf-focus-file"
   local ui_tbl = vim.api.nvim_list_uis()[1]
   local width = math.floor(ui_tbl.width * 0.6)
   local height = math.floor(ui_tbl.height * 0.6)
-  local row = math.floor((ui_tbl.height - height) / 2)
-  local col = math.floor((ui_tbl.width - width) / 2)
+  local position = "50%"
+
   local default_ui = {
-    width = width,
-    height = height,
-    row = row,
-    col = col,
+    position = position,
+    size = {
+      width = width,
+      height = height,
+    },
     relative = "editor",
-    dir = "row",
+    layout = {
+      dir = "row",
+      radio = {
+        select = "40%",
+        preview = "60%",
+      },
+    },
     select = {
       border = {
         style = "rounded",
@@ -882,8 +898,8 @@ function api.Picker(cmd, ui, callback, force_preview)
 
   local select_popup = Popup({
     relative = ui.relative,
-    position = { row = ui.row, col = ui.col },
-    size = { height = ui.height, width = ui.width },
+    position = ui.position,
+    size = ui.size,
     enter = true,
     focusable = true,
     zindex = 50,
@@ -898,20 +914,20 @@ function api.Picker(cmd, ui, callback, force_preview)
       focusable = true,
       zindex = 50,
       border = ui.preview.border,
-      win_options = ui.preview.win_options,
       buf_options = ui.preview.buf_options,
+      win_options = ui.preview.win_options,
     })
 
     Layout(
       {
         relative = ui.relative,
-        position = { row = ui.row, col = ui.col },
-        size = { height = ui.height, width = ui.width },
+        position = ui.position,
+        size = ui.size,
       },
       Layout.Box({
-        Layout.Box(select_popup, { size = "40%" }),
-        Layout.Box(preview_popup, { size = "60%" }),
-      }, { dir = ui.dir })
+        Layout.Box(select_popup, { size = ui.layout.radio.select }),
+        Layout.Box(preview_popup, { size = ui.layout.radio.preview }),
+      }, { dir = ui.layout.dir })
     ):mount()
   else
     select_popup:mount()
@@ -920,22 +936,22 @@ function api.Picker(cmd, ui, callback, force_preview)
   cmd = cmd
     .. " --no-preview"
     .. " --bind='focus:execute(echo {} >"
-    .. preview_file
+    .. focus_file
     .. "._COPYING_ "
     .. "&& mv "
-    .. preview_file
+    .. focus_file
     .. "._COPYING_ "
-    .. preview_file
+    .. focus_file
     .. ")'"
 
   local filename, filename_abspath = nil, nil
   vim.fn.jobstart(cmd, {
     on_stdout = function()
-      local fp = io.open(preview_file, "r")
+      local fp = io.open(focus_file, "r")
       if fp then
         filename = fp:read()
         fp:close()
-        vim.fn.delete(preview_file)
+        vim.fn.delete(focus_file)
       end
       if force_preview then
         if filename then
@@ -952,10 +968,10 @@ function api.Picker(cmd, ui, callback, force_preview)
       end
     end,
     on_exit = function()
-      local path = vim.fn.getline(1)
+      local selected = vim.fn.getline(1)
       vim.api.nvim_win_close(select_popup.winid, true)
 
-      if path ~= "" then
+      if selected ~= "" then
         local fzf_item = nil
         if force_preview then
           if vim.uv.fs_stat(filename_abspath) then

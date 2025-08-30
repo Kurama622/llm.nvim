@@ -25,11 +25,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local options = {
     picker = {
       cmd = "fzf",
-      height = nil,
-      width = nil,
-      row = nil,
-      col = nil,
-      relative = nil,
+      position = "50%",
+      size = "60%",
+      relative = "editor",
       select = {
         border = {
           style = "single",
@@ -160,10 +158,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
       end)
     else
       F.Picker(options.picker.cmd, {
-        width = options.picker.width,
-        height = options.picker.height,
-        row = options.picker.row,
-        col = options.picker.col,
+        size = options.picker.size,
+        position = options.picker.position,
         relative = options.picker.relative,
         select = options.picker.select,
       }, function(item)
