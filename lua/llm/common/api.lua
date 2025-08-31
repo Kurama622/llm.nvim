@@ -930,7 +930,7 @@ function api.Picker(cmd, ui, callback, force_preview)
 
   cmd = cmd
     .. " --no-preview"
-    .. " --bind='focus:execute(echo {} >"
+    .. " --bind='focus:execute(echo -E {} >"
     .. focus_file
     .. "._COPYING_ "
     .. "&& mv "
