@@ -8,18 +8,16 @@ local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 local _layout = require("llm.common.layout")
 local utils = require("llm.tools.utils")
+local Split = require("nui.split")
 
 local function hide_session()
   if state.layout.popup then
     state.layout.popup:hide()
-    conf.session.status = 0
   else
-    local success, _ = pcall(vim.api.nvim_win_close, state.llm.winid, true)
-    if not success then
-      LOG:WARN("Single window does not need to be hidden.")
-    end
-    if state.input.popup then
-      state.input.popup:hide()
+    for _, comp in ipairs({ state.llm, state.input }) do
+      if comp.popup then
+        comp.popup:hide()
+      end
     end
   end
   conf.session.status = 0
@@ -33,9 +31,8 @@ end
 local function show_session()
   if state.layout.popup then
     state.layout.popup:show()
-    state.llm.winid = state.llm.popup.winid
-    vim.api.nvim_set_option_value("spell", false, { win = state.llm.winid })
-    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.winid })
+    vim.api.nvim_set_option_value("spell", false, { win = state.llm.popup.winid })
+    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.popup.winid })
 
     -- The cursor moves to the location of the model.
     local model_idx = nil
@@ -44,14 +41,15 @@ local function show_session()
     end
     F.RepositionPopupCursor(state.models.popup, model_idx)
   else
-    local win_options = {
-      split = conf.configs.style,
-    }
-    state.llm.winid = vim.api.nvim_open_win(state.llm.bufnr, true, win_options)
+    if state.llm.popup then
+      state.llm.popup:show()
+      vim.api.nvim_set_option_value("spell", false, { win = state.llm.popup.winid })
+      vim.api.nvim_set_option_value("wrap", true, { win = state.llm.popup.winid })
+    end
     if state.input.popup then
       -- The relative winid needs to be adjusted when "relative = win",
       if state.input.popup.border.win_config.win then
-        state.input.popup.border.win_config.win = state.llm.winid
+        state.input.popup.border.win_config.win = state.llm.popup.winid
       end
       state.input.popup:show()
     end
@@ -61,7 +59,7 @@ end
 
 local function ToggleLLM()
   if conf.session.status == 1 then
-    if vim.api.nvim_win_is_valid(state.llm.winid) then
+    if vim.api.nvim_win_is_valid(state.llm.popup.winid) then
       hide_session()
     else
       new_session()
@@ -324,11 +322,25 @@ function M.NewSession()
       ---                 SPLIT STYLE
       -----------------------------------------------------
       if filename ~= "" or vim.bo.modifiable == false then
-        bufnr = vim.api.nvim_create_buf(false, true)
-        local win_options = {
-          split = conf.configs.style,
+        state.llm.popup = Split({
+          relative = "editor",
+          position = conf.configs.style,
+          size = conf.configs.chat_ui_opts.output.split.size,
+          enter = true,
+        })
+        state.llm.popup:mount()
+        winid = state.llm.popup.winid
+        bufnr = state.llm.popup.bufnr
+      else
+        state.llm.popup = {
+          winid = winid,
+          bufnr = bufnr,
+          unmount = function()
+            vim.api.nvim_win_close(winid, true)
+          end,
+          hide = function() end,
+          show = function() end,
         }
-        winid = vim.api.nvim_open_win(bufnr, true, win_options)
       end
 
       -- set keymaps
@@ -423,15 +435,12 @@ function M.NewSession()
     vim.api.nvim_set_option_value("spell", false, { win = winid })
     vim.api.nvim_set_option_value("wrap", true, { win = winid })
     vim.api.nvim_set_option_value("linebreak", false, { win = winid })
-
-    state.llm.bufnr = bufnr
-    state.llm.winid = winid
   else
     ToggleLLM()
   end
 
   -- copy suggestion code
-  local bufnr_list = { state.llm.bufnr }
+  local bufnr_list = { state.llm.popup.bufnr }
   if state.input.popup then
     table.insert(bufnr_list, state.input.popup.bufnr)
   end
@@ -442,7 +451,7 @@ function M.NewSession()
           utils.copy_suggestion_code({
             start_str = "```",
             end_str = "```",
-          }, table.concat(vim.api.nvim_buf_get_lines(state.llm.bufnr, 0, -1, false), "\n"))
+          }, table.concat(vim.api.nvim_buf_get_lines(state.llm.popup.bufnr, 0, -1, false), "\n"))
           LOG:INFO("Copy successful!")
         end,
       })

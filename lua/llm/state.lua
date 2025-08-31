@@ -8,15 +8,11 @@ M.cursor = {
 
 M.llm = {
   popup = nil,
-  bufnr = nil,
-  winid = nil,
   worker = { jobs = {} },
 }
 
 M.input = {
   popup = nil,
-  bufnr = nil,
-  winid = nil,
   attach_content = nil,
 }
 

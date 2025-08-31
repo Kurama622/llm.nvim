@@ -92,6 +92,9 @@ M._.chat_ui_opts = {
       size = { height = "85%", width = "80%" },
       order = 1,
     },
+    split = {
+      size = "40%",
+    },
   },
   history = {
     float = {

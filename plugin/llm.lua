@@ -29,10 +29,10 @@ for k, v in pairs(highlight) do
 end
 
 local function OpenLLM()
-  F.SetRole(state.llm.bufnr, state.llm.winid, "assistant")
+  F.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, "assistant")
   streaming.GetStreamingOutput({
-    bufnr = state.llm.bufnr,
-    winid = state.llm.winid,
+    bufnr = state.llm.popup.bufnr,
+    winid = state.llm.popup.winid,
     messages = state.session[state.session.filename],
     fetch_key = conf.configs.fetch_key,
     args = conf.configs.args,

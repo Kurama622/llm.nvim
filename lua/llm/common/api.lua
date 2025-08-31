@@ -169,7 +169,7 @@ end
 
 function api.UpdateCursorPosition(bufnr, winid)
   if IsNotPopwin(winid) then
-    winid = state.llm.winid
+    winid = state.llm.popup.winid
   end
   local buffer_line_count = vim.api.nvim_buf_line_count(bufnr)
   vim.api.nvim_win_set_cursor(winid, { buffer_line_count, 0 })
@@ -450,11 +450,9 @@ function api.CloseLLM()
       return
     else
       LOG:TRACE("Close Split window")
-      pcall(vim.api.nvim_win_close, state.llm.winid, true)
-      vim.api.nvim_buf_delete(state.llm.bufnr, { force = true })
-      if state.history.popup then
-        state.history.popup:unmount()
-        state.history.popup = nil
+      if state.llm.popup then
+        state.llm.popup:unmount()
+        state.llm.popup = nil
       end
       api.ClearAttach()
       api.ClearSummarizeSuggestions()
@@ -710,7 +708,7 @@ function api.GetChatUiBufnrList()
   if conf.configs.style == "float" then
     return { state.input.popup.bufnr, state.llm.popup.bufnr }
   else
-    return { state.llm.bufnr }
+    return { state.llm.popup.bufnr }
   end
 end
 
@@ -747,7 +745,7 @@ function api.HistoryPreview()
     picker_cfg.preview = opts.preview
   end
   api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
-    api.RefreshLLMText(state.session[item], state.llm.bufnr, state.llm.winid, false)
+    api.RefreshLLMText(state.session[item], state.llm.popup.bufnr, state.llm.popup.winid, false)
   end, true)
 end
 
@@ -857,6 +855,7 @@ function api.Picker(cmd, ui, callback, force_preview)
   local focus_file = "/tmp/llm-fzf-focus-file"
   local position = "50%"
   local size = "60%"
+  local previous_session_name = state.session.filename
 
   local default_ui = {
     position = position,
@@ -984,9 +983,14 @@ function api.Picker(cmd, ui, callback, force_preview)
             callback(filename)
           end
         end
+      else
+        if force_preview then
+          -- Reset the current session name
+          state.session.filename = state.session[previous_session_name] and previous_session_name or nil
+        end
       end
-      if force_preview then
-        vim.api.nvim_set_current_win(state.llm.winid)
+      if force_preview and state.llm.popup then
+        vim.api.nvim_set_current_win(state.llm.popup.winid)
       end
     end,
     term = true,
