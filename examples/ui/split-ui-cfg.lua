@@ -1,4 +1,3 @@
-local Text = require("nui.text")
 return {
   {
     "Kurama622/llm.nvim",
@@ -10,70 +9,42 @@ return {
           user = { text = "  ", hl = "Title" },
           assistant = { text = "  ", hl = "Added" },
         },
+        style = "right", -- right | left | top | bottom
         chat_ui_opts = {
-          relative = "editor",
-          position = "50%",
-          size = {
-            width = "80%",
-            height = "80%",
-          },
-          win_options = {
-            winblend = 0,
-            winhighlight = "Normal:String,FloatBorder:Float",
-          },
           input = {
-            float = {
-              border = {
-                text = {
-                  top = Text("  Enter Your Question ", "LlmYellowNormal"),
-                  top_align = "center",
-                },
-              },
-              win_options = {
-                winblend = 0,
-                winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
-              },
-              size = { height = "10%", width = "80%" },
-              order = 2,
-            },
-            -- for split style
             split = {
-              relative = "editor",
+              relative = "win",
               position = {
                 row = "80%",
                 col = "50%",
               },
               border = {
                 text = {
-                  top = Text("  Enter Your Question ", "LlmYellowNormal"),
+                  top = "  Enter Your Question ",
                   top_align = "center",
                 },
               },
               win_options = {
                 winblend = 0,
-                winhighlight = "Normal:String,FloatBorder:LlmYellowLight",
+                winhighlight = "Normal:String,FloatBorder:LlmYellowLight,FloatTitle:LlmYellowNormal",
               },
-              size = { height = "10%", width = "80%" },
+              size = { height = 2, width = "80%" },
             },
           },
           output = {
-            float = {
-              size = { height = "90%", width = "80%" },
-              order = 1,
-              win_options = {
-                winblend = 0,
-                winhighlight = "Normal:Normal,FloatBorder:Title",
-              },
+            split = {
+              size = "40%",
             },
           },
           history = {
-            float = {
-              size = { height = "100%", width = "20%" },
-              win_options = {
-                winblend = 0,
-                winhighlight = "Normal:LlmBlueNormal,FloatBorder:Title",
-              },
-              order = 3,
+            split = {
+              size = "60%",
+            },
+          },
+          models = {
+            split = {
+              relative = "win",
+              size = { height = "30%", width = "60%" },
             },
           },
         },

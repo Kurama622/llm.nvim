@@ -30,7 +30,6 @@
 
 * [截图](#截图)
   * [聊天界面](#聊天界面)
-  * [代码补全](#代码补全)
   * [快速翻译](#快速翻译)
   * [解释代码](#解释代码)
   * [随机提问](#随机提问)
@@ -42,6 +41,7 @@
   * [生成git commit信息](#生成git-commit信息)
   * [生成docstring](#生成docstring)
   * [联网搜索](#联网搜索)
+  * [代码补全](#代码补全)
 * [安装](#安装)
   * [依赖](#依赖)
   * [准备工作](#准备工作)
@@ -67,20 +67,15 @@
 
 [模型配置](./examples/chat/) | [界面配置](./examples/ui/)
 
+- 浮动风格
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="800">
+  <img src="https://github.com/user-attachments/assets/f488f87a-fc65-49ea-9574-29721b224adb" alt="llm-float-ui" width="800">
 </p>
 
-### [代码补全](./examples/ai-tools/Code-Completions/)
-  - **虚拟文本**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
-  </p>
-
-  - **blink.cmp 或 nvim-cmp**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
-  </p>
+- 分屏风格
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/1225fc3c-c975-4f9b-b6ed-17dae10709a1" alt="llm-split-ui" width="800">
+</p>
 
 ### [快速翻译](./examples/ai-tools/Word-Translate/config.lua)
 <p align= "center">
@@ -153,6 +148,17 @@
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
 </p>
+
+### [代码补全](./examples/ai-tools/Code-Completions/)
+  - **虚拟文本**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
+  </p>
+
+  - **blink.cmp 或 nvim-cmp**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
+  </p>
 
 [⬆ 返回目录](#目录)
 

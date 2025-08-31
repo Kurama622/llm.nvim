@@ -27,7 +27,6 @@
 
 * [Screenshots](#screenshots)
   * [Chat](#chat)
-  * [Code Completions](#code-completions)
   * [Quick Translation](#quick-translation)
   * [Explain Code](#explain-code)
   * [Ask](#ask)
@@ -39,6 +38,7 @@
   * [Generate Git Commit Message](#generate-git-commit-message)
   * [Generate Doc String](#generate-doc-string)
   * [Web Search](#web-search)
+  * [Code Completions](#code-completions)
 * [Installation](#installation)
   * [Dependencies](#dependencies)
   * [Preconditions](#preconditions)
@@ -64,20 +64,15 @@
 
 [models](./examples/chat/) | [UI](./examples/ui/)
 
+- Float-UI
 <p align= "center">
-  <img src="https://github.com/Kurama622/screenshot/blob/master/llm/llm-chat-compress.png" alt="llm-chat" width="800">
+  <img src="https://github.com/user-attachments/assets/f488f87a-fc65-49ea-9574-29721b224adb" alt="llm-float-ui" width="800">
 </p>
 
-### [Code Completions](./examples/ai-tools/Code-Completions/)
-  - **virtual text**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
-  </p>
-
-  - **blink.cmp or nvim-cmp**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
-  </p>
+- Split-UI
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/1225fc3c-c975-4f9b-b6ed-17dae10709a1" alt="llm-split-ui" width="800">
+</p>
 
 ### [Quick Translation](./examples/ai-tools/Word-Translate/config.lua)
 <p align= "center">
@@ -150,6 +145,17 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
 </p>
+
+### [Code Completions](./examples/ai-tools/Code-Completions/)
+  - **virtual text**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
+  </p>
+
+  - **blink.cmp or nvim-cmp**
+  <p align= "center">
+    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
+  </p>
 
 [⬆ back to top](#contents)
 
