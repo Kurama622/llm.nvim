@@ -25,6 +25,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local options = {
     picker = {
       cmd = "fzf",
+      enable_fzf_focus_print = true,
       position = "50%",
       size = "60%",
       relative = "editor",

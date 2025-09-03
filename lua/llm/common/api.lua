@@ -451,7 +451,9 @@ function api.CloseLLM()
     else
       LOG:TRACE("Close Split window")
       if state.llm.popup then
-        state.llm.popup:unmount()
+        pcall(function()
+          state.llm.popup:unmount()
+        end)
         state.llm.popup = nil
       end
       api.ClearAttach()
@@ -745,7 +747,13 @@ function api.HistoryPreview()
     picker_cfg.preview = opts.preview
   end
   api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
-    api.RefreshLLMText(state.session[item], state.llm.popup.bufnr, state.llm.popup.winid, false)
+    api.RefreshLLMText(
+      state.session[item],
+      state.llm.popup.bufnr,
+      state.llm.popup.winid,
+      false,
+      picker_cfg.enable_fzf_focus_print
+    )
   end, true)
 end
 
@@ -850,7 +858,7 @@ function api.base64_images_encode(paths)
   return res
 end
 
-function api.Picker(cmd, ui, callback, force_preview)
+function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
   fio.CreateDir("/tmp/")
   local focus_file = "/tmp/llm-fzf-focus-file"
   local position = "50%"
@@ -928,9 +936,12 @@ function api.Picker(cmd, ui, callback, force_preview)
     select_popup:mount()
   end
 
+  local execute = enable_fzf_focus_print and "execute" or "execute-silent"
   cmd = cmd
     .. " --no-preview"
-    .. " --bind='focus:execute(echo -E {} >"
+    .. " --bind='focus:"
+    .. execute
+    .. "(echo -E {} >"
     .. focus_file
     .. "._COPYING_ "
     .. "&& mv "

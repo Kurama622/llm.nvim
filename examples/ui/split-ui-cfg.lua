@@ -38,6 +38,9 @@ return {
           },
           history = {
             split = {
+              -- Default: true.
+              -- If the window flickers when the cursor moves on macOS, you can set enable_fzf_focus_print = false.
+              enable_fzf_focus_print = true,
               size = "60%",
             },
           },

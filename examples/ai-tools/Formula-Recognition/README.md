@@ -25,6 +25,7 @@ FormulaRecognition = {
            find ~/Pictures/ -name '*jpeg' -o -name '*png' | xargs -d '\n' ls -t | fzf --no-preview
       ]]
       cmd = "fd . ~/Pictures/ | xargs -d '\n' ls -t | fzf --no-preview",
+      enable_fzf_focus_print = true, -- Default: true. If the window flickers when the cursor moves on macOS, you can set enable_fzf_focus_print = false.
       -- keymap
       mapping = {
         mode = "i",

@@ -118,6 +118,7 @@ M._.chat_ui_opts = {
     },
     split = {
       cmd = "fzf --cycle",
+      enable_fzf_focus_print = true,
       position = "50%",
       win_options = {
         winblend = 0,
