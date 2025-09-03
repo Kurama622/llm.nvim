@@ -164,6 +164,7 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 ### Dependencies
 
 - `curl`
+- `fzf >= 0.37.0`: Optional. Split style preview of session history and image recognition tool image selection depends on fzf(The author's development environment is 0.39.0)
 
 ### Preconditions
 
