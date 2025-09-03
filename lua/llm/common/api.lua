@@ -747,14 +747,8 @@ function api.HistoryPreview()
     picker_cfg.preview = opts.preview
   end
   api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
-    api.RefreshLLMText(
-      state.session[item],
-      state.llm.popup.bufnr,
-      state.llm.popup.winid,
-      false,
-      picker_cfg.enable_fzf_focus_print
-    )
-  end, true)
+    api.RefreshLLMText(state.session[item], state.llm.popup.bufnr, state.llm.popup.winid, false)
+  end, true, opts.enable_fzf_focus_print)
 end
 
 function api.ResetModel(opts, _table, idx)
