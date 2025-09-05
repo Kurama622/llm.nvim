@@ -4,7 +4,10 @@ TestCode = {
 Give the code content directly, do not use code blocks or other tags to wrap it. ]],
   opts = {
     right = {
-      title = " Test Cases ",
+      border = {
+        style = "rounded",
+        text = { top = " Test Cases ", top_align = "center" },
+      },
     },
   },
 },

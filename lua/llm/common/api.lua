@@ -613,16 +613,6 @@ function api.RemoveTextLines(bufnr, start_linenr, end_linenr)
   vim.api.nvim_buf_set_lines(bufnr, start_linenr, end_linenr, false, {})
 end
 
-function api.CreatePopup(text, focusable, opts)
-  local options = {
-    focusable = focusable,
-    border = { style = "rounded", text = { top = text, top_align = "center" } },
-  }
-  options = vim.tbl_deep_extend("force", options, opts or {})
-
-  return Popup(options)
-end
-
 function api.CreateLayout(_width, _height, boxes, opts)
   local options = {
     relative = "editor",
@@ -634,17 +624,6 @@ function api.CreateLayout(_width, _height, boxes, opts)
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
   return Layout(options, boxes)
-end
-
-function api.SetBoxOpts(box_list, opts)
-  for i, v in ipairs(box_list) do
-    vim.api.nvim_set_option_value("filetype", opts.filetype[i], { buf = v.bufnr })
-    vim.api.nvim_set_option_value("buftype", opts.buftype, { buf = v.bufnr })
-    vim.api.nvim_set_option_value("spell", opts.spell, { win = v.winid })
-    vim.api.nvim_set_option_value("wrap", opts.wrap, { win = v.winid })
-    vim.api.nvim_set_option_value("linebreak", opts.linebreak, { win = v.winid })
-    vim.api.nvim_set_option_value("number", opts.number, { win = v.winid })
-  end
 end
 
 --- Refer: https://github.com/ibhagwan/fzf-lua/blob/main/lua/fzf-lua/utils.lua

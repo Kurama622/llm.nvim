@@ -31,8 +31,6 @@ end
 local function show_session()
   if state.layout.popup then
     state.layout.popup:show()
-    vim.api.nvim_set_option_value("spell", false, { win = state.llm.popup.winid })
-    vim.api.nvim_set_option_value("wrap", true, { win = state.llm.popup.winid })
 
     -- The cursor moves to the location of the model.
     local model_idx = nil
@@ -43,8 +41,6 @@ local function show_session()
   else
     if state.llm.popup then
       state.llm.popup:show()
-      vim.api.nvim_set_option_value("spell", false, { win = state.llm.popup.winid })
-      vim.api.nvim_set_option_value("wrap", true, { win = state.llm.popup.winid })
     end
     if state.input.popup then
       -- The relative winid needs to be adjusted when "relative = win",
@@ -99,10 +95,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
       state.popwin_list[winid].row = state.popwin_list[winid].row + v.distance
     end,
   }
-  vim.api.nvim_set_option_value("buftype", "nofile", { buf = popwin.bufnr })
-  vim.api.nvim_set_option_value("spell", false, { win = popwin.winid })
-  vim.api.nvim_set_option_value("wrap", true, { win = popwin.winid })
-  vim.api.nvim_set_option_value("linebreak", false, { win = popwin.winid })
+
   if builtin_called then
     if opts.prompt then
       state.session[popwin.winid] = {
@@ -327,6 +320,8 @@ function M.NewSession()
           position = conf.configs.style,
           size = conf.configs.chat_ui_opts.output.split.size,
           enter = true,
+          win_options = conf.configs.chat_ui_opts.output.split.win_options,
+          buf_options = conf.configs.chat_ui_opts.output.split.buf_options,
         })
         state.llm.popup:mount()
         winid = state.llm.popup.winid
@@ -429,12 +424,7 @@ function M.NewSession()
     end
 
     filename = os.date("/tmp/%Y%m%d-%H%M%S") .. ".llm"
-    vim.api.nvim_set_option_value("filetype", "llm", { buf = bufnr })
-    vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
     vim.api.nvim_buf_set_name(bufnr, filename)
-    vim.api.nvim_set_option_value("spell", false, { win = winid })
-    vim.api.nvim_set_option_value("wrap", true, { win = winid })
-    vim.api.nvim_set_option_value("linebreak", false, { win = winid })
   else
     ToggleLLM()
   end

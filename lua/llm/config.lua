@@ -85,6 +85,8 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        spell = false,
+        wrap = true,
       },
       buf_options = {
         filetype = "llm",
@@ -94,6 +96,15 @@ M._.chat_ui_opts = {
     },
     split = {
       size = "40%",
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
+      win_options = {
+        spell = false,
+        wrap = true,
+        linebreak = false,
+      },
     },
   },
   history = {
@@ -202,9 +213,13 @@ M._.popwin_opts = {
   win_options = {
     winblend = 0,
     winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+    spell = false,
+    linebreak = false,
+    wrap = true,
   },
   buf_options = {
     filetype = "llm",
+    buftype = "nofile",
   },
   move = {
     left = {
@@ -252,7 +267,7 @@ M.configs = {
   thinking_budget = nil,
   schema = nil,
   functions_tbl = nil,
-  style = "float", -- right | left | above | below | float
+  style = "float", -- right | left | top | bottom | float
   spinner = { text = { "-", "\\", "|", "/" }, hl = "Title" },
 
   prefix = {

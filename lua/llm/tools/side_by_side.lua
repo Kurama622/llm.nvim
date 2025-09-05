@@ -1,6 +1,7 @@
 local M = {}
 local Layout = require("nui.layout")
 local conf = require("llm.config")
+local Popup = require("nui.popup")
 local LOG = require("llm.common.log")
 
 function M.handler(name, F, state, streaming, prompt, opts)
@@ -16,19 +17,40 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local options = {
     _name = "side_by_side",
     left = {
-      title = " Source ",
       focusable = false,
+      border = {
+        style = "rounded",
+        text = { top = " Source ", top_align = "center" },
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = ft,
+      },
+      win_options = {
+        spell = false,
+        number = true,
+        wrap = true,
+        linebreak = false,
+      },
     },
     right = {
-      title = " Preview ",
       focusable = true,
+      border = {
+        style = "rounded",
+        text = { top = " Preview ", top_align = "center" },
+      },
       enter = true,
+      buf_options = {
+        buftype = "nofile",
+        filetype = ft,
+      },
+      win_options = {
+        spell = false,
+        number = true,
+        wrap = true,
+        linebreak = false,
+      },
     },
-    buftype = "nofile",
-    spell = false,
-    number = true,
-    wrap = true,
-    linebreak = false,
     timeout = 120,
     accept = {
       mapping = {
@@ -56,8 +78,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
   options = vim.tbl_deep_extend("force", options, opts or {})
   options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
 
-  local source_box = F.CreatePopup(options.left.title, false, options.left)
-  local preview_box = F.CreatePopup(options.right.title, true, options.right)
+  local source_box = Popup(options.left)
+  local preview_box = Popup(options.right)
 
   local layout = F.CreateLayout(
     "80%",
@@ -69,15 +91,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
   )
 
   layout:mount()
-
-  F.SetBoxOpts({ source_box, preview_box }, {
-    filetype = { ft, ft },
-    buftype = options.buftype,
-    spell = options.spell,
-    number = options.number,
-    wrap = options.wrap,
-    linebreak = options.linebreak,
-  })
 
   state.popwin_list[source_box.winid] = source_box
   F.WriteContent(source_box.bufnr, source_box.winid, source_content)
