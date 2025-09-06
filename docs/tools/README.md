@@ -438,6 +438,9 @@ local tools = require("llm.tools")
       action = nil,
     },
 
+    buf_options = {
+      filetype = "llm",
+    },
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
