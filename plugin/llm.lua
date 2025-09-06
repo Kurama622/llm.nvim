@@ -86,6 +86,9 @@ vim.api.nvim_create_autocmd("VimResized", {
         size = conf.configs.chat_ui_opts.size,
       })
     end
+    if state.history.popup ~= nil then
+      state.history.popup._.update()
+    end
   end,
 })
 

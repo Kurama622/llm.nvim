@@ -124,7 +124,10 @@ M._.chat_ui_opts = {
         },
       },
       win_options = {
+        signcolumn = "no",
+        number = false,
         winblend = 0,
+        cursorline = true,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "85%", width = "20%" },

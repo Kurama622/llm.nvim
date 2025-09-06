@@ -427,6 +427,36 @@ function api.CancelLLM()
   api.ClearSummarizeSuggestions()
 end
 
+function api.SaveSession()
+  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
+    local filename = nil
+    if state.session.filename ~= "current" then
+      filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
+    else
+      local _filename = display_sub(
+        state.session[state.session.filename][2].content,
+        1,
+        conf.configs.max_history_name_length
+      ):gsub(".", {
+        ["["] = "\\[",
+        ["]"] = "\\]",
+        ["/"] = "%",
+        ["\n"] = " ",
+        ["\r"] = " ",
+      })
+
+      filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
+    end
+    local file = io.open(filename, "w")
+    if file then
+      file:write(vim.fn.json_encode(state.session[state.session.filename]))
+      file:close()
+    end
+    state.session[filename] = nil
+  end
+  state.session = { filename = nil }
+end
+
 function api.CloseLLM()
   api.CancelLLM()
 
@@ -462,33 +492,7 @@ function api.CloseLLM()
       conf.session.status = -1
     end
   end
-
-  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
-    local filename = nil
-    if state.session.filename ~= "current" then
-      filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
-    else
-      local _filename = display_sub(
-        state.session[state.session.filename][2].content,
-        1,
-        conf.configs.max_history_name_length
-      ):gsub(".", {
-        ["["] = "\\[",
-        ["]"] = "\\]",
-        ["/"] = "%",
-        ["\n"] = " ",
-        ["\r"] = " ",
-      })
-
-      filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
-    end
-    local file = io.open(filename, "w")
-    if file then
-      file:write(vim.fn.json_encode(state.session[state.session.filename]))
-      file:close()
-    end
-  end
-  state.session = { filename = nil }
+  api.SaveSession()
 end
 
 function api.ResendLLM()

@@ -1,7 +1,11 @@
 local Layout = require("nui.layout")
 local Popup = require("nui.popup")
 local Menu = require("nui.menu")
+local nui_utils = require("nui.utils")
+local Tree = require("nui.tree")
+local defaults = require("nui.utils").defaults
 local conf = require("llm.config")
+local NuiLine = require("nui.line")
 local state = require("llm.state")
 local F = require("llm.common.api")
 local LOG = require("llm.common.log")
@@ -84,53 +88,87 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
       other.win_options.winhighlight = other.win_options.winhighlight:gsub("Normal:(.-),", "Normal:LlmGrayLight,")
       F.FormatHl(state.history.hl, "history")
     end
-    state.history.popup = Menu({
+    state.history.popup = Popup({
       enter = other.enter,
       focusable = other.focusable,
       zindex = other.zindex,
       border = other.border,
       win_options = other.win_options,
-    }, {
-      lines = (function()
-        local items = F.ListFilesInPath()
-        state.history.list = { Menu.item("current", { cmd = F.SetItemHl }) }
-        for _, item in ipairs(items) do
-          table.insert(state.history.list, Menu.item(item, { cmd = F.SetItemHl }))
-        end
-        return state.history.list
-      end)(),
-      max_width = other.max_width,
-      keymap = {
-        focus_next = { "j", "<Down>", "<Tab>" },
-        focus_prev = { "k", "<Up>", "<S-Tab>" },
-        submit = { "<CR>", "<Space>" },
-      },
-      on_change = function(item)
-        item.cmd(state.history.popup, state.history.hl)
-        if item.text == "current" then
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            state.session[item.text] = F.DeepCopy(conf.session.messages)
-          end
-          F.RefreshLLMText(state.session[item.text])
-        else
-          local sess_file = string.format("%s/%s", conf.configs.history_path, item.text)
-          state.session.filename = item.text
-          if not state.session[item.text] then
-            local file = io.open(sess_file, "r")
-            if file then
-              local messages = vim.fn.json_decode(file:read())
-              state.session[item.text] = messages
-              file:close()
-            end
-          end
-          F.RefreshLLMText(state.session[item.text])
-        end
+    })
+    state.history.list = {}
+
+    state.history.popup.tree = Tree({
+      bufnr = state.history.popup.bufnr,
+      nodes = state.history.list,
+
+      get_node_id = function(node)
+        return node.id
       end,
-      on_submit = function(item)
-        LOG:TRACE("Menu Submitted:", item.text)
+
+      prepare_node = function(node)
+        if not node.text then
+          error("missing node.text")
+        end
+        local texts = node.text
+
+        if type(node.text) ~= "table" or node.text.content then
+          texts = { node.text }
+        end
+
+        local lines = {}
+        for _, text in ipairs(texts) do
+          local line = NuiLine()
+          line:append(text)
+          table.insert(lines, line)
+        end
+        return lines
       end,
     })
+
+    state.history.popup.tree:render()
+
+    state.history.popup._.update = function()
+      local width = vim.api.nvim_win_get_width(state.history.popup.winid)
+      state.history.list = { Tree.Node({ text = "current", _text = "current", id = 1 }) }
+      for i, item in ipairs(F.ListFilesInPath()) do
+        table.insert(
+          state.history.list,
+          Tree.Node({ text = nui_utils._.truncate_text(item, width), _text = item, id = i + 1 })
+        )
+      end
+      state.history.popup.tree:set_nodes(defaults(state.history.list, {}))
+      state.history.popup.tree:render()
+      vim.api.nvim_win_set_cursor(state.history.popup.winid, { 1, 0 })
+      state.history.popup._.on_change(state.history.popup.tree:get_node(1))
+    end
+
+    state.history.popup._.render = function()
+      state.history.popup._.update()
+    end
+
+    state.history.popup._.on_change = function(item)
+      F.SetItemHl(state.history.popup, state.history.hl)
+      local text = item._text
+      if text == "current" then
+        state.session.filename = text
+        if not state.session[text] then
+          state.session[text] = F.DeepCopy(conf.session.messages)
+        end
+        F.RefreshLLMText(state.session[text])
+      else
+        local sess_file = string.format("%s/%s", conf.configs.history_path, text)
+        state.session.filename = text
+        if not state.session[text] then
+          local file = io.open(sess_file, "r")
+          if file then
+            local messages = vim.fn.json_decode(file:read())
+            state.session[text] = messages
+            file:close()
+          end
+        end
+        F.RefreshLLMText(state.session[text])
+      end
+    end
 
     if conf.configs.models then
       if not state.models.hl then
