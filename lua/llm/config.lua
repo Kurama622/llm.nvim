@@ -101,6 +101,9 @@ M._.chat_ui_opts = {
         buftype = "nofile",
       },
       win_options = {
+        number = false,
+        relativenumber = false,
+        signcolumn = "no",
         spell = false,
         wrap = true,
         linebreak = false,
