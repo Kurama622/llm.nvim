@@ -33,19 +33,40 @@ local tools = require("llm.tools")
     timeout = 30,
     ---------------------------------------
     left = {
-      title = " Source ",
       focusable = false,
+      border = {
+        style = "rounded",
+        text = { top = " Source ", top_align = "center" },
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = ft,
+      },
+      win_options = {
+        spell = false,
+        number = true,
+        wrap = true,
+        linebreak = false,
+      },
     },
     right = {
-      title = " Preview ",
       focusable = true,
+      border = {
+        style = "rounded",
+        text = { top = " Preview ", top_align = "center" },
+      },
       enter = true,
+      buf_options = {
+        buftype = "nofile",
+        filetype = ft,
+      },
+      win_options = {
+        spell = false,
+        number = true,
+        wrap = true,
+        linebreak = false,
+      },
     },
-    buftype = "nofile",
-    spell = false,
-    number = true,
-    wrap = true,
-    linebreak = false,
     accept = {
       mapping = {
         mode = "n",
@@ -94,31 +115,40 @@ local tools = require("llm.tools")
 
     -- Press "i" to open the input window, resubmit your request
     input = {
-      buftype = "nofile",
       relative = "win",
       position = "bottom",
       size = "25%",
       enter = true,
-      spell = false,
-      number = false,
-      relativenumber = false,
-      wrap = true,
-      linebreak = false,
-      signcolumn = "no",
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
+      win_options = {
+        spell = false,
+        number = false,
+        relativenumber = false,
+        wrap = true,
+        linebreak = false,
+        signcolumn = "no",
+      },
     },
-
     output = {
-      buftype = "nofile",
       relative = "editor",
       position = "right",
       size = "25%",
       enter = true,
-      spell = false,
-      number = false,
-      relativenumber = false,
-      wrap = true,
-      linebreak = false,
-      signcolumn = "no",
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
+      win_options = {
+        spell = false,
+        number = false,
+        relativenumber = false,
+        wrap = true,
+        linebreak = false,
+        signcolumn = "no",
+      },
     },
     accept = {
       mapping = {
@@ -156,34 +186,52 @@ local tools = require("llm.tools")
     -- [Optional] set your model parameters
     timeout = 30,
     ---------------------------------------
-    buftype = "nofile",
-    spell = false,
-    number = false,
-    wrap = true,
-    linebreak = false,
-
     -- The overall size setting of input + preview windows
     component_width = "60%",
     component_height = "55%",
 
     input_box_opts = {
+      enter = true,
       size = "15%",
       border = {
         style = "rounded",
         text = {
-          top = " 󰊿 Trans "
+          top = " 󰊿 Trans ",
+          top_align = "center",
         },
       },
+      border = {
+        style = "rounded",
+        text = { top_align = "center" },
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
+      },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:Define",
       },
     },
     preview_box_opts = {
+      focusable = true,
       size = "85%",
       border = {
         style = "rounded",
+        text = { top = "", top_align = "center" },
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
       },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     },
@@ -221,12 +269,6 @@ local tools = require("llm.tools")
     -- [Optional] set your model parameters
     timeout = 30,
     ---------------------------------------
-    buftype = "nofile",
-    spell = false,
-    number = false,
-    wrap = true,
-    linebreak = false,
-
     picker = {
       cmd = "fzf",
       position = "50%",
@@ -251,23 +293,43 @@ local tools = require("llm.tools")
     component_height = "55%",
 
     input_box_opts = {
+      enter = true,
       size = "15%",
       border = {
         style = "rounded",
         text = {
-          top = " Image Path "
+          top = " Image Path ",
+          top_align = "center",
         },
       },
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:Define",
       },
     },
     preview_box_opts = {
+      focusable = true,
       size = "85%",
       border = {
         style = "rounded",
+        text = { top = "", top_align = "center" },
+      },
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
       },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     },
@@ -307,12 +369,6 @@ local tools = require("llm.tools")
     -- [Optional] set your model parameters
     timeout = 30,
     ---------------------------------------
-    buftype = "nofile",
-    spell = false,
-    number = false,
-    wrap = true,
-    linebreak = false,
-
     -- The window closes when the cursor moves.
     exit_on_move = false,
     -- When the result pops up, automatically focus on the result preview window.
@@ -321,7 +377,18 @@ local tools = require("llm.tools")
     -- Whether to use the selected content as the context for the language model
     -- For the feature of generating AI Commit Messages, this option should be set to false.
     apply_visual_selection = true,
-    win_opts = {},
+    win_opts = {
+      win_options = {
+        spell = false,
+        wrap = true,
+        number = false,
+        linebreak = false,
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
+      },
+    },
     accept = {
       mapping = {
         mode = "n",
@@ -371,6 +438,9 @@ local tools = require("llm.tools")
       action = nil,
     },
 
+    buf_options = {
+      filetype = "llm",
+    },
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",

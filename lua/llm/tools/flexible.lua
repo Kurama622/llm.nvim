@@ -7,16 +7,22 @@ local M = {}
 
 function M.handler(name, F, state, _, prompt, opts)
   local options = {
-    buftype = "nofile",
-    spell = false,
-    number = false,
-    wrap = true,
-    linebreak = false,
     exit_on_move = false,
     enter_flexible_window = true,
     apply_visual_selection = true,
     timeout = 30,
-    win_opts = {},
+    win_opts = {
+      win_options = {
+        spell = false,
+        wrap = true,
+        number = false,
+        linebreak = false,
+      },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
+      },
+    },
     accept = {
       mapping = {
         mode = "n",
@@ -92,15 +98,6 @@ function M.handler(name, F, state, _, prompt, opts)
           flexible_box:unmount()
         end)
       end
-
-      F.SetBoxOpts({ flexible_box }, {
-        filetype = { "llm" },
-        buftype = options.buftype,
-        spell = options.spell,
-        number = options.number,
-        wrap = options.wrap,
-        linebreak = options.linebreak,
-      })
     end
   end
 

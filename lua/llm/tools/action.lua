@@ -30,30 +30,40 @@ function M.handler(name, F, state, streaming, prompt, opts)
     stderr_handler = nil,
     timeout = 120,
     input = {
-      buftype = "nofile",
       relative = "win",
       position = "bottom",
       size = "25%",
       enter = true,
-      spell = false,
-      number = false,
-      relativenumber = false,
-      wrap = true,
-      linebreak = false,
-      signcolumn = "no",
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
+      win_options = {
+        spell = false,
+        number = false,
+        relativenumber = false,
+        wrap = true,
+        linebreak = false,
+        signcolumn = "no",
+      },
     },
     output = {
-      buftype = "nofile",
       relative = "editor",
       position = "right",
       size = "25%",
       enter = true,
-      spell = false,
-      number = false,
-      relativenumber = false,
-      wrap = true,
-      linebreak = false,
-      signcolumn = "no",
+      buf_options = {
+        filetype = "llm",
+        buftype = "nofile",
+      },
+      win_options = {
+        spell = false,
+        number = false,
+        relativenumber = false,
+        wrap = true,
+        linebreak = false,
+        signcolumn = "no",
+      },
     },
     accept = {
       mapping = {
@@ -149,18 +159,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
       position = options.output.position,
       size = options.output.size,
       enter = options.output.enter,
-      buf_options = {
-        filetype = "llm",
-        buftype = options.output.buftype,
-      },
-      win_options = {
-        spell = options.output.spell,
-        number = options.output.number,
-        relativenumber = options.output.relativenumber,
-        wrap = options.output.wrap,
-        linebreak = options.output.linebreak,
-        signcolumn = options.output.signcolumn,
-      },
+      buf_options = options.output.buf_options,
+      win_options = options.output.win_options,
     })
 
     preview_box:mount()
@@ -172,18 +172,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
       position = options.input.position,
       size = options.input.size,
       enter = options.input.enter,
-      buf_options = {
-        filetype = "llm",
-        buftype = options.input.buftype,
-      },
-      win_options = {
-        spell = options.input.spell,
-        number = options.input.number,
-        relativenumber = options.input.relativenumber,
-        wrap = options.input.wrap,
-        linebreak = options.input.linebreak,
-        signcolumn = options.input.signcolumn,
-      },
+      buf_options = options.input.buf_options,
+      win_options = options.input.win_options,
     })
     utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
 

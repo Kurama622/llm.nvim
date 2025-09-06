@@ -14,11 +14,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
   local options = {
     _name = "QA",
-    buftype = "nofile",
-    spell = false,
-    number = false,
-    wrap = true,
-    linebreak = false,
     component_width = "60%",
     component_height = "55%",
     timeout = 120,
@@ -33,7 +28,15 @@ function M.handler(name, F, state, streaming, prompt, opts)
         style = "rounded",
         text = { top_align = "center" },
       },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
+      },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder,FloatTitle:LLMQuery",
       },
     },
@@ -44,7 +47,15 @@ function M.handler(name, F, state, streaming, prompt, opts)
         style = "rounded",
         text = { top = "", top_align = "center" },
       },
+      buf_options = {
+        buftype = "nofile",
+        filetype = "llm",
+      },
       win_options = {
+        spell = false,
+        number = false,
+        wrap = true,
+        linebreak = false,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     },
@@ -105,15 +116,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
   )
 
   layout:mount()
-
-  F.SetBoxOpts({ input_box, preview_box }, {
-    filetype = { "llm", "llm" },
-    buftype = options.buftype,
-    spell = options.spell,
-    number = options.number,
-    wrap = options.wrap,
-    linebreak = options.linebreak,
-  })
 
   input_box:map("n", "<enter>", function()
     -- clear preview_box content [optional]

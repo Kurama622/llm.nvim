@@ -64,6 +64,9 @@ function M.handler(_, _, _, _, prompt, opts)
     enable_buffer_context = true,
     language = "English",
     timeout = 120,
+    buf_options = {
+      filetype = "llm",
+    },
     win_options = {
       winblend = 0,
       winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
@@ -125,18 +128,20 @@ function M.handler(_, _, _, _, prompt, opts)
 
   -- set diff keymapping
   local bufnr = vim.api.nvim_get_current_buf()
-  for _, k in ipairs({ "accept", "reject", "close" }) do
-    utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
-      default_actions[k]()
-      if options[k].action ~= nil then
-        options[k].action()
-      end
-      if k == "close" then
-        for _, kk in ipairs({ "accept", "reject", "close" }) do
-          utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
+  if vim.api.nvim_get_option_value("buftype", { buf = bufnr }) ~= "nofile" then
+    for _, k in ipairs({ "accept", "reject", "close" }) do
+      utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
+        default_actions[k]()
+        if options[k].action ~= nil then
+          options[k].action()
         end
-      end
-    end, bufnr)
+        if k == "close" then
+          for _, kk in ipairs({ "accept", "reject", "close" }) do
+            utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
+          end
+        end
+      end, bufnr)
+    end
   end
 
   local input_box = Popup(options)
@@ -144,7 +149,6 @@ function M.handler(_, _, _, _, prompt, opts)
 
   input_box:mount()
 
-  vim.api.nvim_set_option_value("filetype", "llm", { buf = input_box.bufnr })
   vim.api.nvim_command("startinsert")
   input_box:map("n", "<cr>", function()
     local description = table.concat(vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true), "\n")
