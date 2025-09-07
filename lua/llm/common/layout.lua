@@ -3,7 +3,6 @@ local Popup = require("nui.popup")
 local Menu = require("nui.menu")
 local nui_utils = require("nui.utils")
 local Tree = require("nui.tree")
-local defaults = require("nui.utils").defaults
 local conf = require("llm.config")
 local NuiLine = require("nui.line")
 local state = require("llm.state")
@@ -136,7 +135,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
           Tree.Node({ text = nui_utils._.truncate_text(item, width), _text = item, id = i + 1 })
         )
       end
-      state.history.popup.tree:set_nodes(defaults(state.history.list, {}))
+      state.history.popup.tree:set_nodes(nui_utils.defaults(state.history.list, {}))
       state.history.popup.tree:render()
       vim.api.nvim_win_set_cursor(state.history.popup.winid, { 1, 0 })
       state.history.popup._.on_change(state.history.popup.tree:get_node(1))
