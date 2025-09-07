@@ -326,6 +326,7 @@ M.configs = {
     ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
     ["Session:Close"]  = { mode = "n", key = "<esc>" },
     ["Session:History"]  = { mode = "n", key = "<C-h>" },
+    ["Session:New"]  = { mode = "n", key = "<C-n>" },
     ["Session:Models"]  = { mode = "n", key = "<C-m>" },
 
     -- Scroll

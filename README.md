@@ -299,6 +299,7 @@ require("llm").setup({
 | split       | Output:Resend     | Rerespond to the dialog                                                                         | `[n] ctrl+r`             | Output                                       |
 | float/split | Session:Toggle    | Toggle session                                                                                  | `[n] <leader>ac`         | Input+Output                                 |
 | float/split | Session:Close     | Close session                                                                                   | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:New       | Create a new session                                                                            | `[n] <C-n>`              | `float`: Input+Output<br>`split`: Output     |
 | float/split | Session:Models    | Open the model-list window                                                                      | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
 | split       | Session:History   | Open the history window<br>move: same as fzf configuration <br>`<cr>`: select<br>`<esc>`: close | `[n] ctrl+h`             | Output                                       |
 | float       | Focus:Input       | Jump from the output window to the input window                                                 | -                        | Output                                       |

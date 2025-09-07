@@ -190,7 +190,9 @@ function M.NewSession()
     if conf.configs.style == "float" then
       _layout.chat_ui()
       state.layout.popup:mount()
-      state.history.popup._.render()
+      if conf.configs.save_session then
+        state.history.popup._.render()
+      end
       vim.api.nvim_set_current_win(state.input.popup.winid)
       vim.api.nvim_command("startinsert")
       bufnr = state.llm.popup.bufnr
@@ -217,7 +219,9 @@ function M.NewSession()
         elseif k == "Session:New" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.SaveSession()
-            state.history.popup._.update()
+            if conf.configs.save_session then
+              state.history.popup._.update()
+            end
             vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
             vim.api.nvim_set_current_win(state.input.popup.winid)
             vim.api.nvim_feedkeys("A", "n", false)
@@ -272,6 +276,7 @@ function M.NewSession()
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
             F.UpdatePrompt(state.session.filename)
             if input ~= "" then
+              table.insert(state.session.changed, state.session.filename)
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
               F.AppendChunkToBuffer(bufnr, winid, input)
@@ -292,7 +297,9 @@ function M.NewSession()
         elseif k == "Session:New" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.SaveSession()
-            state.history.popup._.update()
+            if conf.configs.save_session then
+              state.history.popup._.update()
+            end
             vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
             vim.api.nvim_feedkeys("A", "n", false)
           end, { noremap = true, silent = true })
@@ -396,6 +403,7 @@ function M.NewSession()
                     state.input.popup = nil
                     F.UpdatePrompt(state.session.filename)
                     if input ~= "" then
+                      table.insert(state.session.changed, state.session.filename)
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
                       F.AppendChunkToBuffer(bufnr, winid, input)

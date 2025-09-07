@@ -32,6 +32,7 @@ M.layout = {
 }
 
 M.session = {
+  changed = {},
   filename = nil,
 }
 
