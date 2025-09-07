@@ -76,8 +76,17 @@ vim.api.nvim_create_autocmd("User", {
   callback = OpenLLM,
 })
 
+vim.api.nvim_create_autocmd("VimLeave", {
+  group = vim.api.nvim_create_augroup("llm_exit", { clear = true }),
+  callback = function()
+    if state.layout.popup ~= nil or state.llm.popup ~= nil then
+      F.SaveSession()
+    end
+  end,
+})
+
 vim.api.nvim_create_autocmd("VimResized", {
-  group = vim.api.nvim_create_augroup("refresh_layout", { clear = true }),
+  group = vim.api.nvim_create_augroup("llm_refresh_layout", { clear = true }),
   callback = function()
     if state.layout.popup ~= nil then
       state.layout.popup:update({
@@ -85,6 +94,9 @@ vim.api.nvim_create_autocmd("VimResized", {
         position = conf.configs.chat_ui_opts.position,
         size = conf.configs.chat_ui_opts.size,
       })
+    end
+    if state.history.popup ~= nil then
+      state.history.popup._.update()
     end
   end,
 })

@@ -124,7 +124,10 @@ M._.chat_ui_opts = {
         },
       },
       win_options = {
+        signcolumn = "no",
+        number = false,
         winblend = 0,
+        cursorline = true,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
       },
       size = { height = "85%", width = "20%" },
@@ -323,6 +326,7 @@ M.configs = {
     ["Session:Toggle"] = { mode = "n", key = "<leader>ac" },
     ["Session:Close"]  = { mode = "n", key = "<esc>" },
     ["Session:History"]  = { mode = "n", key = "<C-h>" },
+    ["Session:New"]  = { mode = "n", key = "<C-n>" },
     ["Session:Models"]  = { mode = "n", key = "<C-m>" },
 
     -- Scroll

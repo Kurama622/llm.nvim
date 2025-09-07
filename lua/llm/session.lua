@@ -47,7 +47,10 @@ local function show_session()
       if state.input.popup.border.win_config.win then
         state.input.popup.border.win_config.win = state.llm.popup.winid
       end
-      state.input.popup:show()
+      -- manual_hidden: Input popup is hidden separately.
+      if not state.input.popup.manual_hidden then
+        state.input.popup:show()
+      end
     end
   end
   conf.session.status = 1
@@ -187,6 +190,9 @@ function M.NewSession()
     if conf.configs.style == "float" then
       _layout.chat_ui()
       state.layout.popup:mount()
+      if conf.configs.save_session then
+        state.history.popup._.render()
+      end
       vim.api.nvim_set_current_win(state.input.popup.winid)
       vim.api.nvim_command("startinsert")
       bufnr = state.llm.popup.bufnr
@@ -202,14 +208,6 @@ function M.NewSession()
 
       F.RefreshLLMText(state.session[state.session.filename])
 
-      if conf.configs.save_session then
-        local unmap_list = { "<Esc>", "<C-c>", "<CR>", "<Space>" }
-        for _, v in ipairs(unmap_list) do
-          state.history.popup:unmap("n", v)
-        end
-        state.history.popup = state.history.popup
-      end
-
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Session:Close" then
@@ -218,10 +216,20 @@ function M.NewSession()
           end, { noremap = true })
         elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
+        elseif k == "Session:New" then
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
+            F.SaveSession()
+            if conf.configs.save_session then
+              state.history.popup._.update()
+            end
+            vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
+            vim.api.nvim_set_current_win(state.input.popup.winid)
+            vim.api.nvim_feedkeys("A", "n", false)
+          end, { noremap = true, silent = true })
         elseif k == "Focus:Input" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             vim.api.nvim_set_current_win(state.input.popup.winid)
-            vim.api.nvim_command("startinsert")
+            vim.api.nvim_feedkeys("A", "n", false)
           end, { noremap = true })
         elseif k == "PageUp" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
@@ -268,6 +276,7 @@ function M.NewSession()
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
             F.UpdatePrompt(state.session.filename)
             if input ~= "" then
+              table.insert(state.session.changed, state.session.filename)
               table.insert(state.session[state.session.filename], { role = "user", content = input })
               F.SetRole(bufnr, winid, "user")
               F.AppendChunkToBuffer(bufnr, winid, input)
@@ -285,6 +294,15 @@ function M.NewSession()
           end, { noremap = true })
         elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
+        elseif k == "Session:New" then
+          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
+            F.SaveSession()
+            if conf.configs.save_session then
+              state.history.popup._.update()
+            end
+            vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
+            vim.api.nvim_feedkeys("A", "n", false)
+          end, { noremap = true, silent = true })
         elseif k == "Session:Hide" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif conf.configs.save_session and k == "Input:HistoryNext" then
@@ -344,8 +362,14 @@ function M.NewSession()
         if k == "Output:Ask" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             if state.input.popup then
-              vim.api.nvim_set_current_win(state.input.popup.winid)
-              vim.api.nvim_command("startinsert")
+              if state.input.popup.manual_hidden then
+                state.input.popup:show()
+                state.input.popup.manual_hidden = nil
+                vim.api.nvim_feedkeys("A", "n", false)
+              else
+                vim.api.nvim_set_current_win(state.input.popup.winid)
+                vim.api.nvim_feedkeys("A", "n", false)
+              end
             else
               state.input.popup = Popup({
                 relative = conf.configs.chat_ui_opts.input.split.relative or conf.configs.chat_ui_opts.relative,
@@ -379,12 +403,18 @@ function M.NewSession()
                     state.input.popup = nil
                     F.UpdatePrompt(state.session.filename)
                     if input ~= "" then
+                      table.insert(state.session.changed, state.session.filename)
                       table.insert(state.session[state.session.filename], { role = "user", content = input })
                       F.SetRole(bufnr, winid, "user")
                       F.AppendChunkToBuffer(bufnr, winid, input)
                       F.NewLine(bufnr, winid)
                       vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                     end
+                  end, { noremap = true })
+                elseif name == "Session:Hide" then
+                  F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
+                    state.input.popup:hide()
+                    state.input.popup.manual_hidden = true
                   end, { noremap = true })
                 elseif name == "Session:Close" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
@@ -404,6 +434,11 @@ function M.NewSession()
           end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:Hide" then
           F.SetSplitKeyMapping(v.mode, v.key, ToggleLLM, { buffer = bufnr, noremap = true, silent = true })
+        elseif k == "Session:New" then
+          F.SetSplitKeyMapping(v.mode, v.key, function()
+            F.SaveSession()
+            vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+          end, { buffer = bufnr, noremap = true, silent = true })
         elseif k == "Session:History" then
           F.SetSplitKeyMapping(v.mode, v.key, function()
             F.HistoryPreview()
@@ -424,8 +459,7 @@ function M.NewSession()
       conf.session.status = 1
     end
 
-    filename = os.date("/tmp/%Y%m%d-%H%M%S") .. ".llm"
-    vim.api.nvim_buf_set_name(bufnr, filename)
+    vim.api.nvim_buf_set_name(bufnr, "[llm-session]")
   else
     ToggleLLM()
   end

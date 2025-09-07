@@ -427,6 +427,35 @@ function api.CancelLLM()
   api.ClearSummarizeSuggestions()
 end
 
+function api.SaveSession()
+  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
+    for _, changed_file in ipairs(state.session.changed) do
+      local filename = nil
+      if changed_file ~= "current" then
+        filename = string.format("%s/%s", conf.configs.history_path, changed_file)
+      else
+        local _filename =
+          display_sub(state.session[changed_file][2].content, 1, conf.configs.max_history_name_length):gsub(".", {
+            ["["] = "\\[",
+            ["]"] = "\\]",
+            ["/"] = "%",
+            ["\n"] = " ",
+            ["\r"] = " ",
+          })
+
+        filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
+      end
+      local file = io.open(filename, "w")
+      if file then
+        file:write(vim.fn.json_encode(state.session[changed_file]))
+        file:close()
+      end
+      state.session[filename] = nil
+    end
+  end
+  state.session = { filename = nil, changed = {} }
+end
+
 function api.CloseLLM()
   api.CancelLLM()
 
@@ -462,36 +491,11 @@ function api.CloseLLM()
       conf.session.status = -1
     end
   end
-
-  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
-    local filename = nil
-    if state.session.filename ~= "current" then
-      filename = string.format("%s/%s", conf.configs.history_path, state.session.filename)
-    else
-      local _filename = display_sub(
-        state.session[state.session.filename][2].content,
-        1,
-        conf.configs.max_history_name_length
-      ):gsub(".", {
-        ["["] = "\\[",
-        ["]"] = "\\]",
-        ["/"] = "%",
-        ["\n"] = " ",
-        ["\r"] = " ",
-      })
-
-      filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
-    end
-    local file = io.open(filename, "w")
-    if file then
-      file:write(vim.fn.json_encode(state.session[state.session.filename]))
-      file:close()
-    end
-  end
-  state.session = { filename = nil }
+  api.SaveSession()
 end
 
 function api.ResendLLM()
+  table.insert(state.session.changed, state.session.filename)
   state.session[state.session.filename][#state.session[state.session.filename]] = nil
   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
 end
@@ -934,15 +938,17 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
       end
       if force_preview then
         if filename then
+          state.session.filename = filename
           filename_abspath = conf.configs.history_path .. "/" .. filename
-          fp = io.open(filename_abspath, "r")
-          if fp then
-            local messages = vim.fn.json_decode(fp:read())
-            state.session.filename = filename
-            state.session[filename] = messages
-            fp:close()
-            api.RefreshLLMText(messages, preview_popup.bufnr, preview_popup.winid, true)
+          if not state.session[filename] then
+            fp = io.open(filename_abspath, "r")
+            if fp then
+              local messages = vim.fn.json_decode(fp:read())
+              state.session[filename] = messages
+              fp:close()
+            end
           end
+          api.RefreshLLMText(state.session[filename], preview_popup.bufnr, preview_popup.winid, true)
         end
       end
     end,

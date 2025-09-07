@@ -303,6 +303,7 @@ require("llm").setup({
 | split       | Output:Resend     | 重新请求                                                          | `[n] ctrl+r`             | Output                                       |
 | float/split | Session:Toggle    | 打开/隐藏聊天界面                                                 | `[n] <leader>ac`         | Input+Output                                 |
 | float/split | Session:Close     | 关闭聊天界面                                                      | `[n] <esc>`              | `float`: Input+Output<br>`split`: Output     |
+| float/split | Session:New       | 创建一个新的会话                                                  | `[n] <C-n>`              | `float`: Input+Output<br>`split`: Output     |
 | float/split | Session:Models    | 打开模型列表窗口                                                  | `[n] ctrl+m`             | `float`: App input window<br>`split`: Output |
 | split       | Session:History   | 打开会话历史窗口: 移动遵循fzf的配置, `<cr>` 确认选择, `<esc>`关闭 | `[n] ctrl+h`             | Output                                       |
 | float       | Focus:Input       | 从输出窗口切换到输入窗口                                          | -                        | Output                                       |
