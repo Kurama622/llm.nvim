@@ -53,8 +53,9 @@ function utils.overwrite_selection(context, contents)
     context.start_col = context.start_col - 1
   end
 
-  if context.end_col > 0 then
-    context.end_col = context.end_col - 1
+  local last_line_length = #vim.api.nvim_buf_get_lines(context.bufnr, context.end_line - 1, context.end_line, true)[1]
+  if last_line_length ~= context.end_col then
+    context.end_col = last_line_length
   end
 
   vim.api.nvim_buf_set_text(
