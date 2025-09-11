@@ -189,10 +189,7 @@ function M.NewSession()
     -----------------------------------------------------
     if conf.configs.style == "float" then
       _layout.chat_ui()
-      state.layout.popup:mount()
-      if conf.configs.save_session then
-        state.history.popup._.render()
-      end
+      _layout:mount()
       vim.api.nvim_set_current_win(state.input.popup.winid)
       vim.api.nvim_command("startinsert")
       bufnr = state.llm.popup.bufnr
@@ -219,9 +216,7 @@ function M.NewSession()
         elseif k == "Session:New" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.SaveSession()
-            if conf.configs.save_session then
-              state.history.popup._.update()
-            end
+            _layout:update_history()
             vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
             vim.api.nvim_set_current_win(state.input.popup.winid)
             vim.api.nvim_feedkeys("A", "n", false)
@@ -297,9 +292,7 @@ function M.NewSession()
         elseif k == "Session:New" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.SaveSession()
-            if conf.configs.save_session then
-              state.history.popup._.update()
-            end
+            _layout:update_history()
             vim.api.nvim_buf_set_lines(state.llm.popup.bufnr, 0, -1, false, {})
             vim.api.nvim_feedkeys("A", "n", false)
           end, { noremap = true, silent = true })
