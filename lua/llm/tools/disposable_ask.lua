@@ -85,8 +85,9 @@ function M.handler(_, _, _, _, prompt, opts)
     relative = opts.relative or "cursor",
     size = opts.size or {
       width = "50%",
-      height = "5%",
+      height = 1,
     },
+    zindex = 100,
     enter = true,
     display = {
       mapping = {

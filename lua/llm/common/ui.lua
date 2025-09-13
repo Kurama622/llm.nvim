@@ -199,7 +199,7 @@ function ui.FlexibleWindow(str, enter_flexible_win, user_opts)
     },
     enter = enter_flexible_win,
     focusable = true,
-    zindex = 100,
+    zindex = 70,
     border = {
       style = "rounded",
     },
