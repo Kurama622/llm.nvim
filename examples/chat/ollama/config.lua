@@ -9,6 +9,7 @@ return {
         url = "http://localhost:11434/api/chat",
         model = "llama3.2:1b",
         api_type = "ollama",
+        fetch_key = "None",
         temperature = 0.3,
         top_p = 0.7,
 
