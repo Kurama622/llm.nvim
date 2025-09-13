@@ -403,6 +403,7 @@ function M.NewSession()
                       F.NewLine(bufnr, winid)
                       vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                     end
+                    vim.api.nvim_set_current_win(state.llm.popup.winid)
                   end, { noremap = true })
                 elseif name == "Session:Hide" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
