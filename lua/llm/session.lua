@@ -180,7 +180,6 @@ end
 function M.NewSession()
   if conf.session.status == -1 then
     local bufnr = vim.api.nvim_win_get_buf(0)
-    vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
     local filename = vim.api.nvim_buf_get_name(bufnr)
     local winid = vim.api.nvim_get_current_win()
 
@@ -453,6 +452,7 @@ function M.NewSession()
       conf.session.status = 1
     end
 
+    vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
     vim.api.nvim_buf_set_name(bufnr, "[llm-session]")
   else
     ToggleLLM()
