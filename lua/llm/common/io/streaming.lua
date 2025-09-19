@@ -70,6 +70,7 @@ function M.GetStreamingOutput(opts)
     tools = required_params.schema,
   }
 
+  opts.api_type = required_params.api_type
   if required_params.api_type == "workers-ai" then
     required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
   elseif required_params.api_type == "ollama" then

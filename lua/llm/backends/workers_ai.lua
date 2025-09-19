@@ -44,4 +44,29 @@ function workers_ai.ParseHandler(chunk, ctx)
   end
 end
 
+function workers_ai.StreamingTblHandler(results)
+  local assistant_output, line = "", ""
+  for _, chunk in pairs(results) do
+    if not chunk then
+      return assistant_output
+    end
+    local tail = chunk:sub(-1, -1)
+    if tail:sub(1, 1) ~= "}" then
+      line = line .. chunk
+    else
+      line = line .. chunk
+      local json_str = line:sub(7, -1)
+      local status, data = pcall(vim.fn.json_decode, json_str)
+
+      if not status then
+        LOG:TRACE("json decode error:", json_str)
+        return assistant_output
+      end
+
+      assistant_output = assistant_output .. data.response
+      line = ""
+    end
+    -- return assistant_output
+  end
+end
 return workers_ai

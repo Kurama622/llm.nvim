@@ -218,4 +218,25 @@ function backends.gen_msg_with_tool_calls(api_type, configs, ctx)
   return handle_api_type(api_type) or handle_api_type(configs.api_type)
 end
 
+function backends.get_streaming_tbl_handler(api_type, configs)
+  local function handle_api_type(type)
+    local api_handlers = {
+      ["workers-ai"] = function(results)
+        return require("llm.backends.workers_ai").StreamingTblHandler(results)
+      end,
+      ["zhipu"] = function(results)
+        return require("llm.backends.zhipu").StreamingTblHandler(results)
+      end,
+      ["openai"] = function(results)
+        return require("llm.backends.openai").StreamingTblHandler(results)
+      end,
+      ["ollama"] = function(results)
+        return require("llm.backends.ollama").StreamingTblHandler(results)
+      end,
+    }
+    return api_handlers[type] or nil
+  end
+  return handle_api_type(api_type) or handle_api_type(configs.api_type)
+end
+
 return backends
