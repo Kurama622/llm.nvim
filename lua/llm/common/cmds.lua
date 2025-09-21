@@ -32,7 +32,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
     end),
     on_exit = vim.schedule_wrap(function(j)
       local status, search_response = pcall(vim.json.decode, j:result()[1])
-      if not status then
+      if not status or not search_response.results then
         return
       end
       local reference = search_response.results
@@ -72,6 +72,13 @@ local cmds = {
     detail = "Search the web for information",
     callback = function(web_search_conf, msg, opts, chat_job)
       local body = web_search_conf.params
+      local prompt = type(web_search_conf.prompt) == "function" and web_search_conf.prompt()
+        or web_search_conf.prompt
+        or [[You are given a multi-turn conversation between a user and an assistant. The user may ask multiple questions across different turns. Some of these questions have already been answered correctly and acknowledged by the user, so they can be ignored. Other questions may have been answered incorrectly, incompletely, or with outdated information. The user now wants to enable a web search to get the correct answer.
+
+Your task: Identify the single question that the user most likely wants to search for based on the conversation.
+
+Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANATION**.]]
 
       local fetch_key = ""
       if type(web_search_conf.fetch_key) == "function" then
@@ -84,10 +91,7 @@ local cmds = {
         local messages = {
           {
             role = "system",
-            content = [[I will provide the last few turns of a multi-turn conversation. 
-From the context, return only the single most likely question 
-that the user truly wants to search on the web. 
-Output only that question, nothing else.]],
+            content = prompt,
           },
         }
         for i, _ in ipairs(msg) do

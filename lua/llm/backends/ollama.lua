@@ -150,6 +150,8 @@ function ollama.StreamingTblHandler(results)
       if not status or not data.message.content then
         LOG:TRACE("json decode error:", data)
         return assistant_output
+      elseif data.done then
+        return assistant_output
       end
 
       assistant_output = assistant_output .. data.message.content
