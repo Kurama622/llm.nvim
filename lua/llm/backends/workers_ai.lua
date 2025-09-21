@@ -66,7 +66,6 @@ function workers_ai.StreamingTblHandler(results)
       assistant_output = assistant_output .. data.response
       line = ""
     end
-    -- return assistant_output
   end
 end
 return workers_ai
