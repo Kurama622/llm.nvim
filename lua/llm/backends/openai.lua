@@ -177,4 +177,62 @@ function openai.GetToolsRespond(chunk, msg)
     end
   end
 end
+
+function openai.StreamingTblHandler(results)
+  local assistant_output, line = "", ""
+  for _, chunk in pairs(results) do
+    if chunk == "data: [DONE]" or not chunk then
+      return assistant_output
+    end
+
+    -- Gemini
+    if chunk:sub(1, 6) == "Tokens" then
+      return assistant_output
+    end
+
+    local tail = chunk:sub(-1, -1)
+    if tail:sub(1, 1) ~= "}" then
+      line = line .. chunk
+    else
+      line = line .. chunk
+      line = F.TrimLeadingWhitespace(line)
+      local start_idx = line:find("data: ", 1, true)
+      local end_idx = line:find("}]", 1, true)
+      local json_str = nil
+
+      while start_idx ~= nil and end_idx ~= nil do
+        if start_idx < end_idx then
+          json_str = line:sub(7, end_idx + 1) .. "}"
+        end
+
+        local status, data = pcall(vim.fn.json_decode, json_str)
+
+        if data.choices == nil or data.choices[1] == nil then
+          line = ""
+          break
+        end
+
+        if not status or not data.choices[1].delta.content then
+          LOG:TRACE("json decode error:", json_str)
+          break
+        end
+        if F.IsValid(data.choices[1].delta.content) then
+          assistant_output = assistant_output .. data.choices[1].delta.content
+        end
+
+        if end_idx + 2 > #line then
+          line = ""
+          break
+        else
+          line = line:sub(end_idx + 2)
+        end
+        start_idx = line:find("data: ", 1, true)
+        end_idx = line:find("}]", 1, true)
+        if start_idx == nil or end_idx == nil then
+          line = ""
+        end
+      end
+    end
+  end
+end
 return openai
