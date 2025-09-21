@@ -69,7 +69,6 @@ end
 function glm.StreamingTblHandler(results)
   local assistant_output, line = "", ""
   for _, chunk in pairs(results) do
-    LOG:INFO(chunk)
     if chunk == "data: [DONE]" or not chunk then
       return assistant_output
     end
