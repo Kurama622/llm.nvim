@@ -248,22 +248,20 @@ function ui.show_spinner(waiting_state)
   local spinner_hl = conf.configs.spinner.hl
   local frame = 1
 
-  local timer = vim.loop.new_timer()
-  timer:start(
+  waiting_state.timer = vim.loop.new_timer()
+  waiting_state.timer:start(
     0,
     100,
     vim.schedule_wrap(function()
       if waiting_state.box then
         waiting_state.box:unmount()
-        if not waiting_state.finish then
-          waiting_state.box = Popup(waiting_state.box_opts)
-          waiting_state.box:mount()
-          waiting_state.bufnr = waiting_state.box.bufnr
-          waiting_state.winid = waiting_state.box.winid
-        end
+        waiting_state.box = Popup(waiting_state.box_opts)
+        waiting_state.box:mount()
+        waiting_state.bufnr = waiting_state.box.bufnr
+        waiting_state.winid = waiting_state.box.winid
       end
       if not vim.api.nvim_win_is_valid(waiting_state.winid) then
-        timer:stop()
+        waiting_state.timer:stop()
         return
       end
 

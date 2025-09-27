@@ -15,7 +15,7 @@ local io_parse = {
 local function exit_callback(opts, ctx, waiting_state)
   table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
   waiting_state.box:unmount()
-  waiting_state.finish = true
+  waiting_state.timer:stop()
   if opts.exit_handler ~= nil then
     local callback_func = vim.schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
@@ -35,7 +35,6 @@ function io_parse.GetOutput(opts)
     box_opts = wait_box_opts,
     bufnr = wait_box.bufnr,
     winid = wait_box.winid,
-    finish = false,
   }
 
   waiting_state.box:mount()
@@ -184,48 +183,57 @@ function io_parse.GetOutput(opts)
   end
   ctx.args = F.tbl_slice(_args, 1, -2)
 
-  job
-    :new({
-      command = "curl",
-      args = _args,
-      on_stdout = vim.schedule_wrap(function(_, data)
-        local str = api.TrimLeadingWhitespace(data)
-        local prefix = str:sub(1, 1)
-        if prefix ~= "{" then
-          if prefix ~= "" then
-            LOG:ERROR(data)
-          end
-          return
+  local request_job = job:new({
+    command = "curl",
+    args = _args,
+    on_stdout = vim.schedule_wrap(function(_, data)
+      local str = api.TrimLeadingWhitespace(data)
+      local prefix = str:sub(1, 1)
+      if prefix ~= "{" then
+        if prefix ~= "" then
+          LOG:ERROR(data)
         end
-        local success, result = pcall(vim.json.decode, str)
-        if success then
-          ctx.assistant_output = parse(result)
-        else
-          LOG:ERROR("Error occurred:", result)
-        end
-        if ctx.body.tools ~= nil then
-          backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
-        end
-      end),
-      on_stderr = vim.schedule_wrap(function(_, err)
-        if err ~= nil then
-          LOG:ERROR(err)
-        end
-        -- TODO: Add error handling
-      end),
-      on_exit = vim.schedule_wrap(function()
-        if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
-          ctx.callback = function()
-            exit_callback(opts, ctx, waiting_state)
-          end
-          backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-            backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
-          )
-        else
+        return
+      end
+      local success, result = pcall(vim.json.decode, str)
+      if success then
+        ctx.assistant_output = parse(result)
+      else
+        LOG:ERROR("Error occurred:", result)
+      end
+      if ctx.body.tools ~= nil then
+        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
+      end
+    end),
+    on_stderr = vim.schedule_wrap(function(_, err)
+      if err ~= nil then
+        LOG:ERROR(err)
+      end
+      -- TODO: Add error handling
+    end),
+    on_exit = vim.schedule_wrap(function()
+      if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
+        ctx.callback = function()
           exit_callback(opts, ctx, waiting_state)
         end
-      end),
-    })
-    :start()
+        backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
+          backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
+        )
+      else
+        exit_callback(opts, ctx, waiting_state)
+      end
+    end),
+  })
+  local succ, err = pcall(function()
+    request_job:start()
+  end)
+
+  if not succ then
+    if waiting_state.box then
+      waiting_state.timer:stop()
+      waiting_state.box:unmount()
+    end
+    LOG:ERROR(err)
+  end
 end
 return io_parse
