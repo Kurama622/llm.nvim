@@ -10,17 +10,19 @@ local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 local ui = require("llm.common.ui")
+local fio = require("llm.common.file_io")
+local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local function exit_callback(opts, ctx)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
-  local newline_func = vim.schedule_wrap(function()
+  local newline_func = schedule_wrap(function()
     F.NewLine(opts.bufnr, opts.winid)
   end)
   newline_func()
   local name = opts._name or "chat"
   state.llm.worker.jobs[name] = nil
   if opts.exit_handler ~= nil then
-    local callback_func = vim.schedule_wrap(function()
+    local callback_func = schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
     end)
     callback_func()
@@ -129,6 +131,8 @@ function M.GetStreamingOutput(opts)
   if required_params.url ~= nil then
     body.model = required_params.model
 
+    local data_file = conf.configs.curl_data_cache_path .. "/streaming-data"
+    fio.SaveFile(data_file, json.encode(body))
     if opts.args == nil then
       _args = {
         "-s",
@@ -143,7 +147,7 @@ function M.GetStreamingOutput(opts)
         "-H",
         authorization,
         "-d",
-        vim.fn.json_encode(body),
+        "@" .. data_file,
       }
     else
       local env = {
@@ -176,7 +180,7 @@ function M.GetStreamingOutput(opts)
             if start_idx < end_idx then
               json_str = ctx.line:sub(7, end_idx + 3)
             end
-            local data = vim.fn.json_decode(json_str)
+            local data = json.decode(json_str)
             ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
             F.WriteContent(opts.bufnr, opts.winid, data.choices[1].delta.content)
 
@@ -192,57 +196,6 @@ function M.GetStreamingOutput(opts)
         end
       end
     end
-  else
-    if opts.args == nil then
-      LOG:WARN(
-        "[Deprecated Usage] Please configure the url (Note: For cloudflare, you should use https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s"
-      )
-      _args = {
-        "-s",
-        "-m",
-        required_params.timeout,
-        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
-        "-N",
-        "-X",
-        "POST",
-        "-H",
-        "Content-Type: application/json",
-        "-H",
-        authorization,
-        "-d",
-        vim.fn.json_encode(body),
-      }
-    else
-      local env = {
-        ACCOUNT = ACCOUNT,
-        model = required_params.model,
-        authorization = authorization,
-        body = body,
-      }
-
-      setmetatable(env, { __index = _G })
-      _args = F.GetUserRequestArgs(opts.args, env)
-    end
-
-    if stream_output == nil then
-      -- if url is not set, stream_output will be `workers-ai` by default
-      stream_output = function(chunk)
-        if not chunk then
-          return
-        end
-        local tail = chunk:sub(-1, -1)
-        if tail:sub(1, 1) ~= "}" then
-          ctx.line = ctx.line .. chunk
-        else
-          ctx.line = ctx.line .. chunk
-          local json_str = ctx.line:sub(7, -1)
-          local data = vim.fn.json_decode(json_str)
-          ctx.assistant_output = ctx.assistant_output .. data.response
-          F.WriteContent(opts.bufnr, opts.winid, data.response)
-          ctx.line = ""
-        end
-      end
-    end
   end
   ctx.args = F.tbl_slice(_args, 1, -2)
 
@@ -251,7 +204,7 @@ function M.GetStreamingOutput(opts)
   local j = job:new({
     command = "curl",
     args = _args,
-    on_stdout = vim.schedule_wrap(function(_, chunk)
+    on_stdout = schedule_wrap(function(_, chunk)
       ui.clear_spinner_extmark(opts)
       if required_params.api_type or required_params.streaming_handler then
         ctx.assistant_output = stream_output(chunk)
@@ -260,13 +213,13 @@ function M.GetStreamingOutput(opts)
       end
       -- TODO: Add stdout handling
     end),
-    on_stderr = vim.schedule_wrap(function(_, err)
+    on_stderr = schedule_wrap(function(_, err)
       if err ~= nil then
         LOG:ERROR(err)
       end
       -- TODO: Add error handling
     end),
-    on_exit = vim.schedule_wrap(function(j)
+    on_exit = schedule_wrap(function(j)
       if ctx.body.tools ~= nil then
         backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(j:result())
         ctx.callback = function()

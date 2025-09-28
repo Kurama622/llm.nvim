@@ -9,4 +9,11 @@ function fio.CreateDir(path)
   end
 end
 
+function fio.SaveFile(path, str)
+  local fp = io.open(path, "w")
+  if fp then
+    fp:write(str)
+    fp:close()
+  end
+end
 return fio
