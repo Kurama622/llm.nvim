@@ -356,7 +356,7 @@ local function local_llm_streaming_handler(chunk, ctx, F)
     ctx.line = ctx.line .. chunk
   else
     ctx.line = ctx.line .. chunk
-    local status, data = pcall(vim.fn.json_decode, ctx.line)
+    local status, data = pcall(vim.json.decode, ctx.line)
     if not status or not data.message.content then
       return ctx.assistant_output
     end

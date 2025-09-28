@@ -3,6 +3,7 @@ local job = require("plenary.job")
 local F = require("llm.common.api")
 local io_utils = require("llm.common.io.utils")
 local backend_utils = require("llm.backends.utils")
+local schedule_wrap, json = vim.schedule_wrap, vim.json
 local ollama = {}
 
 function ollama.StreamingHandler(chunk, ctx)
@@ -14,7 +15,7 @@ function ollama.StreamingHandler(chunk, ctx)
     ctx.line = ctx.line .. chunk
   else
     ctx.line = ctx.line .. chunk
-    local status, data = pcall(vim.fn.json_decode, ctx.line)
+    local status, data = pcall(json.decode, ctx.line)
     if not status or not data.message.content then
       LOG:TRACE("json decode error:", data)
       return ctx.assistant_output
@@ -38,7 +39,7 @@ end
 
 function ollama.ParseHandler(chunk, ctx)
   if type(chunk) == "string" then
-    chunk = vim.fn.json_decode(chunk)
+    chunk = json.decode(chunk)
   end
   local success, err = pcall(function()
     if chunk and chunk.message then
@@ -88,20 +89,20 @@ function ollama.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-  table.insert(ctx.args, vim.fn.json_encode(ctx.body))
+  table.insert(ctx.args, json.encode(ctx.body))
 
   job
     :new({
       command = "curl",
       args = ctx.args,
-      on_stdout = vim.schedule_wrap(function(_, c)
+      on_stdout = schedule_wrap(function(_, c)
         if ctx.stream then
           ctx.assistant_output = ollama.StreamingHandler(c, ctx)
         else
           ctx.assistant_output = ollama.ParseHandler(c, ctx)
         end
       end),
-      on_exit = vim.schedule_wrap(function()
+      on_exit = schedule_wrap(function()
         if ctx.callback then
           ctx.callback()
         end
@@ -112,7 +113,7 @@ end
 
 function ollama.AppendToolsRespond(chunk, msg)
   if F.IsValid(chunk) then
-    local tool_calls = vim.json.decode(chunk).message.tool_calls
+    local tool_calls = json.decode(chunk).message.tool_calls
     if F.IsValid(tool_calls) then
       if F.IsValid(tool_calls[1]["function"].name) then
         table.insert(
@@ -126,7 +127,7 @@ end
 
 function ollama.GetToolsRespond(chunk, msg)
   if F.IsValid(chunk) then
-    local tool_calls = vim.json.decode(chunk).message.tool_calls
+    local tool_calls = json.decode(chunk).message.tool_calls
     if F.IsValid(tool_calls) then
       for _, item in ipairs(tool_calls) do
         table.insert(msg, item)
@@ -146,7 +147,7 @@ function ollama.StreamingTblHandler(results)
       line = line .. chunk
     else
       line = line .. chunk
-      local status, data = pcall(vim.fn.json_decode, line)
+      local status, data = pcall(json.decode, line)
       if not status or not data.message.content then
         LOG:TRACE("json decode error:", data)
         return assistant_output

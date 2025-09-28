@@ -1,5 +1,6 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local json = vim.json
 local glm = {}
 
 function glm.StreamingHandler(chunk, ctx)
@@ -24,7 +25,7 @@ function glm.StreamingHandler(chunk, ctx)
           json_str = ctx.line:sub(7, end_idx + 3)
         end
 
-        local status, data = pcall(vim.fn.json_decode, json_str)
+        local status, data = pcall(json.decode, json_str)
 
         if not status or not data.choices[1].delta.content then
           LOG:TRACE("json decode error:", json_str)
@@ -90,7 +91,7 @@ function glm.StreamingTblHandler(results)
             json_str = line:sub(7, end_idx + 3)
           end
 
-          local status, data = pcall(vim.fn.json_decode, json_str)
+          local status, data = pcall(json.decode, json_str)
 
           if not status or not data.choices[1].delta.content then
             LOG:TRACE("json decode error:", json_str)

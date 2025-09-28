@@ -201,7 +201,7 @@ function M.GetStreamingOutput(opts)
 
   opts.body = body
   opts.args = _args
-  local j = job:new({
+  local request_job = job:new({
     command = "curl",
     args = _args,
     on_stdout = schedule_wrap(function(_, chunk)
@@ -219,9 +219,9 @@ function M.GetStreamingOutput(opts)
       end
       -- TODO: Add error handling
     end),
-    on_exit = schedule_wrap(function(j)
+    on_exit = schedule_wrap(function(request_job)
       if ctx.body.tools ~= nil then
-        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(j:result())
+        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(request_job:result())
         ctx.callback = function()
           exit_callback(opts, ctx)
         end
@@ -238,12 +238,12 @@ function M.GetStreamingOutput(opts)
   if F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do
       opts.enable_cmds_idx = idx
-      cmd.callback(conf.configs.web_search, opts.messages, opts, j)
+      cmd.callback(conf.configs.web_search, opts.messages, opts, request_job)
     end
   else
     local name = opts._name or "chat"
-    j:start()
-    state.llm.worker.jobs[name] = j
+    request_job:start()
+    state.llm.worker.jobs[name] = request_job
   end
 end
 
