@@ -8,6 +8,7 @@ local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 local dmenu = require("llm.common.dynamic_menu")
 
+local json = vim.json
 local _layout = {}
 
 local function string2number(percent)
@@ -124,7 +125,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
             if not state.session[text] then
               local file = io.open(sess_file, "r")
               if file then
-                local messages = vim.fn.json_decode(file:read())
+                local messages = json.decode(file:read())
                 state.session[text] = messages
                 file:close()
               end

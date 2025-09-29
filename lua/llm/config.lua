@@ -1,14 +1,11 @@
 local M = {}
 local fio = require("llm.common.file_io")
-local luv = vim.loop
+local uv = vim.loop
 
-local function get_win_width()
-  return vim.o.columns
-end
+---@type string|nil
+local HOME = nil
 
-local HOME = ""
-
-local uname = luv.os_uname()
+local uname = uv.os_uname()
 if uname.sysname == "Linux" or uname.sysname == "Darwin" then
   HOME = os.getenv("HOME")
 else
@@ -283,6 +280,7 @@ M.configs = {
   },
 
   history_path = HOME .. "/.local/state/nvim/llm-history",
+  curl_data_cache_path = "/tmp/llm-curl-data/",
   max_history_files = 15,
   max_history_name_length = 10,
   save_session = true,
@@ -351,9 +349,13 @@ function M.setup(opts)
 
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
+  -- create history dir
   if M.configs.save_session then
     fio.CreateDir(M.configs.history_path)
   end
+
+  -- create curl data file
+  fio.CreateDir(M.configs.curl_data_cache_path)
 
   M._.chat_ui_opts = M.configs.chat_ui_opts
 

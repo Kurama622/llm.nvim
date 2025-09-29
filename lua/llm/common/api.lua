@@ -1,5 +1,4 @@
 local api = {}
-local luv = vim.loop
 
 local state = require("llm.state")
 local conf = require("llm.config")
@@ -7,6 +6,7 @@ local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 local LOG = require("llm.common.log")
 local fio = require("llm.common.file_io")
+local luv, json = vim.loop, vim.json
 
 local function IsNotPopwin(winid)
   return not vim.tbl_contains(vim.tbl_keys(state.popwin_list), winid)
@@ -447,7 +447,7 @@ function api.SaveSession()
       end
       local file = io.open(filename, "w")
       if file then
-        file:write(vim.fn.json_encode(state.session[changed_file]))
+        file:write(json.encode(state.session[changed_file]))
         file:close()
       end
       state.session[filename] = nil
@@ -943,7 +943,7 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
           if not state.session[filename] then
             fp = io.open(filename_abspath, "r")
             if fp then
-              local messages = vim.fn.json_decode(fp:read())
+              local messages = json.decode(fp:read())
               state.session[filename] = messages
               fp:close()
             end

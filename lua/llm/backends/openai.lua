@@ -2,6 +2,7 @@ local LOG = require("llm.common.log")
 local F = require("llm.common.api")
 local job = require("plenary.job")
 local backend_utils = require("llm.backends.utils")
+local schedule_wrap, json = vim.schedule_wrap, vim.json
 local openai = {}
 
 function openai.StreamingHandler(chunk, ctx)
@@ -29,7 +30,7 @@ function openai.StreamingHandler(chunk, ctx)
         json_str = ctx.line:sub(7, end_idx + 1) .. "}"
       end
 
-      local status, data = pcall(vim.fn.json_decode, json_str)
+      local status, data = pcall(json.decode, json_str)
 
       if data.choices == nil or data.choices[1] == nil then
         ctx.line = ""
@@ -71,7 +72,7 @@ end
 
 function openai.ParseHandler(chunk, ctx)
   if type(chunk) == "string" then
-    chunk = vim.fn.json_decode(chunk)
+    chunk = json.decode(chunk)
   end
   local success, err = pcall(function()
     if chunk and chunk.choices and chunk.choices[1] then
@@ -123,19 +124,19 @@ function openai.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-  table.insert(ctx.args, vim.fn.json_encode(ctx.body))
+  table.insert(ctx.args, json.encode(ctx.body))
   job
     :new({
       command = "curl",
       args = ctx.args,
-      on_stdout = vim.schedule_wrap(function(_, c)
+      on_stdout = schedule_wrap(function(_, c)
         if ctx.stream then
           ctx.assistant_output = openai.StreamingHandler(c, ctx)
         else
           openai.ParseHandler(c, ctx)
         end
       end),
-      on_exit = vim.schedule_wrap(function()
+      on_exit = schedule_wrap(function()
         if ctx.callback then
           ctx.callback()
         end
@@ -205,7 +206,7 @@ function openai.StreamingTblHandler(results)
           json_str = line:sub(7, end_idx + 1) .. "}"
         end
 
-        local status, data = pcall(vim.fn.json_decode, json_str)
+        local status, data = pcall(json.decode, json_str)
 
         if data.choices == nil or data.choices[1] == nil then
           line = ""

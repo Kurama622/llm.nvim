@@ -8,6 +8,8 @@ local LOG = require("llm.common.log")
 local state = require("llm.state")
 local io_utils = require("llm.common.io.utils")
 local F = require("llm.common.api")
+local fio = require("llm.common.file_io")
+local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local io_parse = {
   required_params = {},
@@ -17,7 +19,7 @@ local function exit_callback(opts, ctx, waiting_state)
   waiting_state.box:unmount()
   waiting_state.timer:stop()
   if opts.exit_handler ~= nil then
-    local callback_func = vim.schedule_wrap(function()
+    local callback_func = schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
     end)
     callback_func()
@@ -104,6 +106,8 @@ function io_parse.GetOutput(opts)
   local _args = nil
   if required_params.url ~= nil then
     body.model = required_params.model
+    local data_file = conf.configs.curl_data_cache_path .. "/non-streaming-data"
+    fio.SaveFile(data_file, json.encode(body))
 
     if opts.args == nil then
       _args = {
@@ -119,7 +123,7 @@ function io_parse.GetOutput(opts)
         "-H",
         authorization,
         "-d",
-        vim.fn.json_encode(body),
+        "@" .. data_file,
       }
     else
       local env = {
@@ -140,53 +144,13 @@ function io_parse.GetOutput(opts)
         return ctx.assistant_output
       end
     end
-  else
-    if opts.args == nil then
-      LOG:WARN(
-        "[Deprecated Usage] Please configure the url (Note: For cloudflare, you should use https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s"
-      )
-      _args = {
-        "-s",
-        "-m",
-        required_params.timeout,
-        string.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", ACCOUNT, required_params.model),
-        "-N",
-        "-X",
-        "POST",
-        "-H",
-        "Content-Type: application/json",
-        "-H",
-        authorization,
-        "-d",
-        vim.fn.json_encode(body),
-      }
-    else
-      local env = {
-        ACCOUNT = ACCOUNT,
-        model = required_params.model,
-        LLM_KEY = LLM_KEY,
-        body = body,
-        authorization = authorization,
-      }
-
-      setmetatable(env, { __index = _G })
-      _args = api.GetUserRequestArgs(opts.args, env)
-    end
-
-    if parse == nil then
-      -- if url is not set, parse will be `workers-ai` by default
-      parse = function(chunk)
-        ctx.assistant_output = chunk.response
-        return ctx.assistant_output
-      end
-    end
   end
   ctx.args = F.tbl_slice(_args, 1, -2)
 
   local request_job = job:new({
     command = "curl",
     args = _args,
-    on_stdout = vim.schedule_wrap(function(_, data)
+    on_stdout = schedule_wrap(function(_, data)
       local str = api.TrimLeadingWhitespace(data)
       local prefix = str:sub(1, 1)
       if prefix ~= "{" then
@@ -195,7 +159,7 @@ function io_parse.GetOutput(opts)
         end
         return
       end
-      local success, result = pcall(vim.json.decode, str)
+      local success, result = pcall(json.decode, str)
       if success then
         ctx.assistant_output = parse(result)
       else
@@ -205,13 +169,13 @@ function io_parse.GetOutput(opts)
         backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
       end
     end),
-    on_stderr = vim.schedule_wrap(function(_, err)
+    on_stderr = schedule_wrap(function(_, err)
       if err ~= nil then
         LOG:ERROR(err)
       end
       -- TODO: Add error handling
     end),
-    on_exit = vim.schedule_wrap(function()
+    on_exit = schedule_wrap(function()
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
           exit_callback(opts, ctx, waiting_state)

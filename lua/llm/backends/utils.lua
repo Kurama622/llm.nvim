@@ -8,6 +8,7 @@ function utils.mark_reason_begin(ctx, append_line_break)
     ctx.reasoning_content = ctx.reasoning_content .. "\n> [!NOTE] reason\n"
     F.WriteContent(ctx.bufnr, ctx.winid, "\n> [!NOTE] reason\n")
     if append_line_break then
+      ctx.reasoning_content = ctx.reasoning_content .. "\n"
       F.WriteContent(ctx.bufnr, ctx.winid, "\n")
     end
     state.reason_range.is_begin = true
@@ -19,6 +20,7 @@ function utils.mark_reason_end(ctx, append_line_break)
     ctx.reasoning_content = ctx.reasoning_content .. "\n> [!NOTE] reason\n"
     F.WriteContent(ctx.bufnr, ctx.winid, "\n> [!NOTE] reason\n")
     if append_line_break then
+      ctx.reasoning_content = ctx.reasoning_content .. "\n"
       F.WriteContent(ctx.bufnr, ctx.winid, "\n")
     end
     state.reason_range.is_end = true

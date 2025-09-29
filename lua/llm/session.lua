@@ -210,6 +210,8 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
             F.CloseLLM()
           end, { noremap = true })
+        elseif k == "Session:Hide" then
+          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, ToggleLLM, { noremap = true })
         elseif k == "Session:New" then

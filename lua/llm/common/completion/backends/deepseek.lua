@@ -2,6 +2,7 @@ local job = require("plenary.job")
 local state = require("llm.state")
 local utils = require("llm.common.completion.utils")
 local LOG = require("llm.common.log")
+local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local deepseek = {}
 
@@ -56,7 +57,7 @@ function deepseek.request(opts)
     "--max-time",
     opts.timeout,
     "-d",
-    vim.fn.json_encode(body),
+    json.encode(body),
   }
 
   for i = 1, opts.n_completions do
@@ -64,18 +65,18 @@ function deepseek.request(opts)
     local new_job = job:new({
       command = "curl",
       args = _args,
-      on_stdout = vim.schedule_wrap(function(_, data)
+      on_stdout = schedule_wrap(function(_, data)
         if data == nil or data:sub(1, 1) ~= "{" then
           return
         end
-        local success, result = pcall(vim.json.decode, data)
+        local success, result = pcall(json.decode, data)
         if success then
           assistant_output = deepseek.parse(result, assistant_output)
         else
           LOG:ERROR("Error occurred:", result)
         end
       end),
-      on_exit = vim.schedule_wrap(function()
+      on_exit = schedule_wrap(function()
         if assistant_output and assistant_output ~= "" then
           LOG:TRACE("Assistant output:", assistant_output)
           state.completion.contents[i] = assistant_output

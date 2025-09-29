@@ -1,5 +1,6 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local json = vim.json
 local workers_ai = {}
 
 function workers_ai.StreamingHandler(chunk, ctx)
@@ -12,7 +13,7 @@ function workers_ai.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
     local json_str = ctx.line:sub(7, -1)
-    local status, data = pcall(vim.fn.json_decode, json_str)
+    local status, data = pcall(json.decode, json_str)
 
     if not status then
       LOG:TRACE("json decode error:", json_str)
@@ -56,7 +57,7 @@ function workers_ai.StreamingTblHandler(results)
     else
       line = line .. chunk
       local json_str = line:sub(7, -1)
-      local status, data = pcall(vim.fn.json_decode, json_str)
+      local status, data = pcall(json.decode, json_str)
 
       if not status then
         LOG:TRACE("json decode error:", json_str)
