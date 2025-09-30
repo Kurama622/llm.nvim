@@ -168,6 +168,60 @@
 
 - `curl`: 请自行安装
 - `fzf >= 0.37.0`: 可选的，split风格预览会话历史以及图像识别工具选择图片会依赖fzf（作者用的0.39.0）
+- `render-markdown.nvim`: 可选的。更好的markdown预览依赖此插件。
+
+```lua
+{
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = {
+      { "nvim-treesitter/nvim-treesitter", branch = "main" },
+      "nvim-mini/mini.icons",
+    }, -- if you use standalone mini plugins
+    ft = { "markdown", "llm" },
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+
+    config = function()
+      require("render-markdown").setup({
+        restart_highlighter = true,
+        heading = {
+          enabled = true,
+          sign = false,
+          position = "overlay", -- inline | overlay
+          icons = { "󰎤 ", "󰎧 ", "󰎪 ", "󰎭 ", "󰎱 ", "󰎳 " },
+          signs = { "󰫎 " },
+          width = "block",
+          left_margin = 0,
+          left_pad = 0,
+          right_pad = 0,
+          min_width = 0,
+          border = false,
+          border_virtual = false,
+          border_prefix = false,
+          above = "▄",
+          below = "▀",
+          backgrounds = {},
+          foregrounds = {
+            "RenderMarkdownH1",
+            "RenderMarkdownH2",
+            "RenderMarkdownH3",
+            "RenderMarkdownH4",
+            "RenderMarkdownH5",
+            "RenderMarkdownH6",
+          },
+        },
+        dash = {
+          enabled = true,
+          icon = "─",
+          width = 0.5,
+          left_margin = 0.5,
+          highlight = "RenderMarkdownDash",
+        },
+        code = { style = "normal" },
+      })
+    end,
+  }
+```
 
 ### 准备工作
 
