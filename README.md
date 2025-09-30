@@ -175,8 +175,6 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
       "nvim-mini/mini.icons",
     }, -- if you use standalone mini plugins
     ft = { "markdown", "llm" },
-    ---@module 'render-markdown'
-    ---@type render.md.UserConfig
 
     config = function()
       require("render-markdown").setup({
