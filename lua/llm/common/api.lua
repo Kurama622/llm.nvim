@@ -992,7 +992,7 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
 end
 
 function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
-  local diagnostics_content = ""
+  local diagnostics_tbl = {}
   local severity_map = {
     [vim.diagnostic.severity.ERROR] = "Error",
     [vim.diagnostic.severity.WARN] = "Warn",
@@ -1007,12 +1007,22 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
 
     for _, diag in ipairs(diagnostics) do
       local level = severity_map[diag.severity] or "Unknow"
-      diagnostics_content = diagnostics_content .. string.format("- %s: %s\n", level, diag.message)
+      local msg = string.format("- %s: %s", level, diag.message)
+      if diagnostics_tbl[diag.lnum] == nil then
+        diagnostics_tbl[diag.lnum] = { msg }
+      elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
+        table.insert(diagnostics_tbl[diag.lnum], msg)
+      end
     end
   end
-  if diagnostics_content ~= "" then
-    return "Diagnostic information as follows:\n" .. diagnostics_content
+
+  if api.IsValid(diagnostics_tbl) then
+    local diagnostics_content = ""
+    for _, diags in pairs(diagnostics_tbl) do
+      diagnostics_content = diagnostics_content .. table.concat(diags, "\n")
+    end
+    return "\nDiagnostics:\n" .. diagnostics_content
   end
-  return diagnostics_content
+  return ""
 end
 return api
