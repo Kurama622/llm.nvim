@@ -3,6 +3,7 @@ AttachToChat = {
   opts = {
     is_codeblock = true,
     inline_assistant = true,
+    diagnostic = { vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN },
     language = "Chinese",
     -- display diff
     display = {

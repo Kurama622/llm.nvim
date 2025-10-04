@@ -1019,7 +1019,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
     for _, diags in pairs(diagnostics_tbl) do
-      diagnostics_content = diagnostics_content .. table.concat(diags, "\n")
+      diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
     end
     return "\nDiagnostics:\n" .. diagnostics_content
   end
