@@ -41,6 +41,7 @@
   * [生成git commit信息](#生成git-commit信息)
   * [生成docstring](#生成docstring)
   * [联网搜索](#联网搜索)
+  * [诊断信息](#诊断信息)
   * [代码补全](#代码补全)
 * [安装](#安装)
   * [依赖](#依赖)
@@ -147,6 +148,20 @@
 ### [联网搜索](./docs/cmds/README.md#web_search)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
+</p>
+
+### 诊断信息
+`Ask` 和 `Attach-To-Chat` 均可以开启该特性:
+
+```lua
+diagnostic = { min = vim.diagnostic.severity.HINT },
+-- or
+-- diagnostic = { vim.diagnostic.severity.WARN, vim.diagnostic.severity.ERROR },
+-- see `:h diagnostic-severity`
+```
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/81973f0d-73d6-43f3-94cc-d4482233b503" alt="diagnostic" width="800">
 </p>
 
 ### [代码补全](./examples/ai-tools/Code-Completions/)
