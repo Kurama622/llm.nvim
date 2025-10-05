@@ -16,9 +16,7 @@ Ask = {
     url = "https://api.chatanywhere.tech/v1/chat/completions",
     model = "gpt-4o-mini",
     api_type = "openai",
-    fetch_key = function()
-      return vim.env.CHAT_ANYWHERE_KEY
-    end,
+    fetch_key = vim.env.CHAT_ANYWHERE_KEY,
 
     -- display diff
     display = {
