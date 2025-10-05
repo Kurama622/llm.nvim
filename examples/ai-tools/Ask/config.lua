@@ -11,6 +11,7 @@ Ask = {
     -- Whether to use the current buffer as context without selecting any text (the tool is called in normal mode)
     enable_buffer_context = true,
     language = "Chinese",
+    diagnostic = { vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN },
 
     -- [optinal] set your llm model
     url = "https://api.chatanywhere.tech/v1/chat/completions",
