@@ -348,21 +348,18 @@ function api.MakeInlineContext(opts, bufnr, name)
     state.summarize_suggestions.ctx = context
     state.summarize_suggestions.cnt = state.summarize_suggestions.cnt + 1
     state.summarize_suggestions.pattern = {
-      -- start_str = "<!%-%-suggestion%-%->\n```",
-      -- end_str = "```\n<!%-%-/suggestion%-%->",
       start_str = "```",
       end_str = "```",
     }
-    state.summarize_suggestions.prompt =
-      -- string.format(require("llm.tools.prompts")[name], "<!--suggestion-->", "<!--/suggestion-->", opts.language)
-      string.format(require("llm.tools.prompts")[name], "", "", opts.language)
+    state.summarize_suggestions.prompt = string.format(require("llm.tools.prompts")[name], "", "", opts.language)
   end
-  return lines
+  return lines, start_line, end_line, start_col, end_col
 end
 
 function api.GetAttach(opts)
   local bufnr = vim.api.nvim_get_current_buf()
-  local lines = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
+  opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
+  local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
   api.VisMode2NorMode()
 
   if opts.is_codeblock and not vim.tbl_isempty(lines) then
@@ -375,6 +372,12 @@ function api.GetAttach(opts)
     )
   else
     state.input.attach_content = api.GetVisualSelection(lines)
+  end
+
+  if api.IsValid(opts.diagnostic) then
+    state.input.attach_content = state.input.attach_content
+      .. "\n"
+      .. api.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
   end
   return bufnr
 end
@@ -986,5 +989,40 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
     term = true,
   })
   vim.cmd.startinsert()
+end
+
+function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
+  local diagnostics_tbl = {}
+  local severity_map = {
+    [vim.diagnostic.severity.ERROR] = "Error",
+    [vim.diagnostic.severity.WARN] = "Warn",
+    [vim.diagnostic.severity.INFO] = "Info",
+    [vim.diagnostic.severity.HINT] = "Hint",
+  }
+  for n_line = start_line, end_line do
+    local diagnostics = vim.diagnostic.get(bufnr, {
+      lnum = n_line - 1,
+      severity = opts.diagnostic,
+    })
+
+    for _, diag in ipairs(diagnostics) do
+      local level = severity_map[diag.severity] or "Unknow"
+      local msg = string.format("- %s: %s", level, diag.message)
+      if diagnostics_tbl[diag.lnum] == nil then
+        diagnostics_tbl[diag.lnum] = { msg }
+      elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
+        table.insert(diagnostics_tbl[diag.lnum], msg)
+      end
+    end
+  end
+
+  if api.IsValid(diagnostics_tbl) then
+    local diagnostics_content = ""
+    for _, diags in pairs(diagnostics_tbl) do
+      diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
+    end
+    return "\nDiagnostics:" .. diagnostics_content
+  end
+  return ""
 end
 return api

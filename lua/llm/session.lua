@@ -70,7 +70,9 @@ end
 
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts = opts or {}
-  local lines = F.MakeInlineContext(opts, vim.api.nvim_get_current_buf(), "disposable_ask")
+  opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
   local content = F.GetVisualSelection(lines)
 
   if builtin_called then
@@ -99,6 +101,9 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     end,
   }
 
+  if F.IsValid(opts.diagnostic) then
+    content = content .. "\n" .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
+  end
   if builtin_called then
     if opts.prompt then
       state.session[popwin.winid] = {

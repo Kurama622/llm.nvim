@@ -38,6 +38,7 @@
   * [Generate Git Commit Message](#generate-git-commit-message)
   * [Generate Doc String](#generate-doc-string)
   * [Web Search](#web-search)
+  * [Diagnostic](#diagnostic)
   * [Code Completions](#code-completions)
 * [Installation](#installation)
   * [Dependencies](#dependencies)
@@ -144,6 +145,20 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 ### [Web Search](./docs/cmds/README.md#web_search)
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
+</p>
+
+### Diagnostic
+Both `Ask` and `Attach-To-Chat` can enable diagnostic features:
+
+```lua
+diagnostic = { min = vim.diagnostic.severity.HINT },
+-- or
+-- diagnostic = { vim.diagnostic.severity.WARN, vim.diagnostic.severity.ERROR },
+-- see `:h diagnostic-severity`
+```
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/81973f0d-73d6-43f3-94cc-d4482233b503" alt="diagnostic" width="800">
 </p>
 
 ### [Code Completions](./examples/ai-tools/Code-Completions/)

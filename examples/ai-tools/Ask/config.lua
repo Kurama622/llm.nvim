@@ -11,14 +11,13 @@ Ask = {
     -- Whether to use the current buffer as context without selecting any text (the tool is called in normal mode)
     enable_buffer_context = true,
     language = "Chinese",
+    diagnostic = { vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN },
 
     -- [optinal] set your llm model
     url = "https://api.chatanywhere.tech/v1/chat/completions",
     model = "gpt-4o-mini",
     api_type = "openai",
-    fetch_key = function()
-      return vim.env.CHAT_ANYWHERE_KEY
-    end,
+    fetch_key = vim.env.CHAT_ANYWHERE_KEY,
 
     -- display diff
     display = {
