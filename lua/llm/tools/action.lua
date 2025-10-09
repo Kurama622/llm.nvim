@@ -106,8 +106,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   local winnr = vim.api.nvim_get_current_win()
   local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
   local mode = options.mode or vim.fn.mode()
-  local lines, start_line, start_col, end_line, end_col =
-    F.GetVisualSelectionRange(bufnr, mode, options.enable_buffer_context)
+  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr, mode, options)
   local source_content = F.GetVisualSelection(lines)
 
   F.VisMode2NorMode()

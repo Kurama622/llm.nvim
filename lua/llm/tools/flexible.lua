@@ -56,7 +56,9 @@ function M.handler(name, F, state, _, prompt, opts)
 
   local content = ""
   if options.apply_visual_selection then
-    content = (F.GetVisualSelection():gsub(".", {
+    local mode = options.mode or vim.fn.mode()
+    local lines = F.GetVisualSelectionRange(vim.api.nvim_get_current_buf(), mode, options)
+    content = (F.GetVisualSelection(lines):gsub(".", {
       ["'"] = "''",
     }))
   end
