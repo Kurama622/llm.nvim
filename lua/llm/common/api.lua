@@ -234,12 +234,11 @@ local function is_visual_mode(mode)
   return mode == "v" or mode == "V" or mode == "\x16"
 end
 
-function api.GetVisualSelectionRange(bufnr, call_mode, enable_buffer_context)
+function api.GetVisualSelectionRange(bufnr, call_mode, opts)
   -- When called by a shortcut key, the current mode is always 'n'.
   -- It is necessary to judge whether it is in visual mode based on the call_mode.
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   call_mode = call_mode or "V"
-  enable_buffer_context = enable_buffer_context or true
   -- store the current mode
   local mode = vim.fn.mode()
   -- if we're not in visual mode, we need to re-enter it briefly
@@ -256,9 +255,11 @@ function api.GetVisualSelectionRange(bufnr, call_mode, enable_buffer_context)
     -- Fallback to marks if not in visual mode
     start_pos = vim.fn.getpos("'<")
     end_pos = vim.fn.getpos("'>")
-  elseif enable_buffer_context then
+  elseif opts.enable_buffer_context then
     start_pos = { 0, 0, 0, 0 }
     end_pos = { 0, 0, 0, 0 }
+  elseif opts.enable_cword_context then
+    return { vim.fn.expand("<cword>") }
   end
 
   local start_line = start_pos[2]
@@ -322,8 +323,7 @@ function api.MakeInlineContext(opts, bufnr, name)
 
   local mode = opts.mode or vim.fn.mode()
   if is_visual_mode(mode) or opts.enable_buffer_context then
-    lines, start_line, start_col, end_line, end_col =
-      api.GetVisualSelectionRange(bufnr, mode, opts.enable_buffer_context)
+    lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr, mode, opts)
   else
     local pos = vim.fn.getpos(".")
     lines = {}

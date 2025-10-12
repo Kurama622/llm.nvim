@@ -8,6 +8,7 @@ NOTE:
   opts = {
     exit_on_move = true,
     enter_flexible_window = false,
+    enable_cword_context = true,
   },
 },
 

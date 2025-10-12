@@ -76,6 +76,7 @@
 </p>
 
 ### [Quick Translation](./examples/ai-tools/Word-Translate/config.lua)
+`enable_cword_context = true`: Translate the text under the cursor in normal mode.
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="800">
 </p>

@@ -44,6 +44,7 @@ vim.api.nvim_create_user_command("LLMSessionToggle", function()
   require("llm.session").NewSession()
 end, {})
 
+-- only for in visual mode
 vim.api.nvim_create_user_command("LLMSelectedTextHandler", function(args)
   require("llm.session").LLMSelectedTextHandler(args.fargs[1], false, { mode = "v" })
 end, { nargs = 1, range = true })
