@@ -79,6 +79,7 @@
 </p>
 
 ### [快速翻译](./examples/ai-tools/Word-Translate/config.lua)
+`enable_cword_context = true`: normal模式下翻译当前光标下的文本
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/4c98484a-f0af-45ae-9b62-ea0069ccbf60" alt="llm-translate" width="800">
 </p>
