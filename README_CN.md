@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/llm-logo-light-purple-font.png" alt="llm.nvim" width="345">
+  <img src="https://github.com/Kurama622/screenshot/raw/master/llm/logo.png" alt="llm.nvim" width="300">
 </p>
 <p align="center">
   <a href="README.md">English</a> |
