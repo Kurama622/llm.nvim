@@ -97,7 +97,7 @@ vim.api.nvim_create_autocmd("VimResized", {
       })
     end
     for _, comp in ipairs({ state.history, state.models }) do
-      if comp.popup ~= nil then
+      if comp.popup ~= nil and comp.popup.winid then
         comp.update()
       end
     end
