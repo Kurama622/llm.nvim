@@ -96,6 +96,7 @@ vim.api.nvim_create_autocmd("VimResized", {
         size = conf.configs.chat_ui_opts.size,
       })
     end
+    -- Update text, truncating display based on window width
     for _, comp in ipairs({ state.history, state.models }) do
       if comp.popup ~= nil and comp.popup.winid then
         comp.update()

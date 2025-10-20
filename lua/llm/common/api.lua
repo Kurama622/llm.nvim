@@ -466,7 +466,7 @@ function api.CloseLLM()
   if state.layout.popup then
     state.layout.popup:unmount()
 
-    for _, comp in ipairs({ state.layout, state.input, state.llm, state.history }) do
+    for _, comp in ipairs({ state.layout, state.input, state.llm, state.history, state.models }) do
       comp.popup = nil
     end
     api.ClearAttach()
