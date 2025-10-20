@@ -134,6 +134,14 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
           end
         end,
       }),
+      __newindex = function(t, key, value)
+        local mt = getmetatable(t)
+        if vim.tbl_contains(vim.tbl_keys(mt.__index), key) then
+          mt.__index[key] = value
+        else
+          rawset(t, key, value)
+        end
+      end,
     })
 
     if conf.configs.models then
@@ -170,6 +178,14 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
             F.SetModelInfo(conf.configs, "Chat", item.id)
           end,
         }),
+        __newindex = function(t, key, value)
+          local mt = getmetatable(t)
+          if vim.tbl_contains(vim.tbl_keys(mt.__index), key) then
+            mt.__index[key] = value
+          else
+            rawset(t, key, value)
+          end
+        end,
       })
     end
   end
