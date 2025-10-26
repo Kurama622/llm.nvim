@@ -12,20 +12,6 @@ local function IsNotPopwin(winid)
   return not vim.tbl_contains(vim.tbl_keys(state.popwin_list), winid)
 end
 
-local function escape_string(str)
-  local replacements = {
-    ["\\"] = "\\\\",
-    ["\n"] = "\\n",
-    ["\t"] = "\\t",
-    ['"'] = '\\"',
-    ["'"] = "\\'",
-    [" "] = "\\ ",
-    ["("] = "\\(",
-    [")"] = "\\)",
-  }
-  return (str:gsub(".", replacements))
-end
-
 -- define utf8 char length
 local function utf8_char_length(byte)
   if byte < 0x80 then
@@ -77,6 +63,125 @@ local function display_sub(s, i, j)
     end
   end
   return s:sub(start, stop)
+end
+
+---@param method string
+---@param params? table LSP request params.
+---@param callback fun(items: vim.quickfix.entry[])
+local function get_locations(method, params, callback)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ method = method, bufnr = bufnr })
+  if not next(clients) then
+    vim.notify(vim.lsp._unsupported_method(method), vim.log.levels.WARN)
+    callback({})
+    return
+  end
+  local remaining = #clients
+
+  ---@type vim.quickfix.entry[]
+  local all_items = {}
+
+  ---@param result nil|lsp.Location|lsp.Location[]
+  ---@param client vim.lsp.Client
+  local function on_response(_, result, client)
+    local locations = {}
+    if result then
+      locations = vim.islist(result) and result or { result }
+    end
+    local items = vim.lsp.util.locations_to_items(locations, client.offset_encoding)
+    vim.list_extend(all_items, items)
+    remaining = remaining - 1
+    if remaining == 0 then
+      callback(all_items)
+    end
+  end
+
+  for _, client in ipairs(clients) do
+    client:request(method, params, function(_, result)
+      on_response(_, result, client)
+    end)
+  end
+end
+
+local function find_definition_node(bufnr, row, col)
+  local parser = vim.treesitter.get_parser(bufnr)
+  local tree = parser:parse()[1]
+  local root = tree:root()
+
+  local node = root:named_descendant_for_range(row, col, row, col)
+
+  local definition_nodes = {
+    -- 通用
+    variable_declaration = true,
+    assignment_statement = true,
+    function_definition = true,
+    function_declaration = true,
+    method_definition = true,
+    method_declaration = true,
+    class_declaration = true,
+    enum_specifier = true,
+    interface_declaration = true,
+    type_definition = true,
+    type_alias_declaration = true,
+    -- module_declaration = true,
+    trait_item = true,
+    impl_item = true,
+    interface_body = true,
+
+    -- Python
+    class_definition = true,
+
+    -- Go
+    type_declaration = true,
+    const_declaration = true,
+    var_declaration = true,
+
+    -- Lua
+    local_variable_declaration = true,
+    local_function = true,
+
+    -- Java / C#
+    constructor_declaration = true,
+    field_declaration = true,
+    property_declaration = true,
+
+    -- C++
+    class_specifier = true,
+    struct_specifier = true,
+    template_declaration = "container",
+    namespace_definition = "container",
+    linkage_specification = "container",
+    module_declaration = "container",
+  }
+
+  -- 一些节点其实是“声明语句”，比如 declaration、definition、specifier 的组合
+  local function is_definition_node(n)
+    if not n then
+      return false
+    end
+    local kind = definition_nodes[n:type()]
+    if kind == true or kind == "container" then
+      return true
+    end
+    local t = n:type()
+    return t:match("declaration$") or t:match("definition$") or t:match("specifier$")
+  end
+
+  while node and not is_definition_node(node) do
+    node = node:parent()
+  end
+
+  if not node then
+    vim.notify("未找到定义节点", vim.log.levels.WARN)
+    return nil
+  end
+
+  local parent = node:parent()
+  while parent and definition_nodes[parent:type()] == "container" do
+    node = parent
+    parent = node:parent()
+  end
+  return node
 end
 
 function api.IsValid(v)
@@ -378,6 +483,15 @@ function api.GetAttach(opts)
     state.input.attach_content = state.input.attach_content
       .. "\n"
       .. api.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
+  end
+
+  opts.lsp = true
+  if opts.lsp ~= nil then
+    state.input.attach_content = state.input.attach_content
+      .. "\n Here are some relevant context codes, which do not require optimization and are only for analysis."
+    api.lsp_wrap(function(symbol, definition)
+      state.input.attach_content = state.input.attach_content .. "\n - " .. symbol .. "\n" .. definition
+    end)
   end
   return bufnr
 end
@@ -1025,4 +1139,99 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
   end
   return ""
 end
+
+--- 主函数：获取选中代码中所有符号的定义
+function api.lsp_wrap(callback)
+  local _, start_line, _, end_line, _ = api.GetVisualSelectionRange()
+  state.start_line = start_line - 1
+  state.end_line = end_line - 1
+
+  -- 2. 使用 Tree-sitter 获取该范围内的所有标识符
+  local parser = vim.treesitter.get_parser(0)
+  if not parser then
+    LOG:WARN(string.format("Lack of %s's treesitter parser"), vim.bo.ft)
+    return
+  end
+
+  state.fname = vim.uri_to_fname(vim.uri_from_bufnr(0))
+  local root = parser:parse()[1]:root()
+  local symbols_to_query = {}
+  local queried_symbols = {} -- 用于去重
+
+  -- 定义一个递归遍历函数来替代 ts_utils.traverse_tree
+  local function traverse(node)
+    local node_start_line, _, node_end_line, _ = node:range()
+    -- 如果节点范围与选择范围有交集
+    if math.max(state.start_line, node_start_line) <= math.min(state.end_line, node_end_line) then
+      -- 我们只关心标识符和函数名 (call_expression 的一部分)
+      if node:type() == "identifier" then
+        local name = vim.treesitter.get_node_text(node, 0)
+        if not queried_symbols[name] then
+          table.insert(symbols_to_query, { name = name, node = node })
+          queried_symbols[name] = true
+        end
+      end
+      -- 继续遍历子节点
+      for child in node:iter_children() do
+        traverse(child)
+      end
+    end
+  end
+
+  traverse(root)
+
+  if #symbols_to_query == 0 then
+    LOG:WARN("No searchable symbols were found in the district.")
+    return
+  end
+
+  local results = {}
+
+  -- local pending_requests = #symbols_to_query
+  -- vim.notify("正在查询 " .. pending_requests .. " 个符号的定义...", vim.log.levels.INFO)
+
+  -- 3. 对每个符号异步调用 LSP
+  for _, symbol in ipairs(symbols_to_query) do
+    local row, col = symbol.node:start()
+    LOG:INFO(vim.inspect(symbol), row, col)
+    local params = {
+      textDocument = vim.lsp.util.make_text_document_params(0),
+      position = { line = row, character = col },
+    }
+
+    -- "textDocument/declaration"
+    get_locations("textDocument/definition", params, function(locations)
+      for _, location in pairs(locations) do
+        local uri = location.user_data.targetUri or location.user_data.uri
+        local range = location.user_data.targetRange or location.user_data.range
+        if not uri or not range then
+          vim.notify("无效的 LSP Location", vim.log.levels.WARN)
+          return
+        end
+
+        local fname = vim.uri_to_fname(uri)
+        -- 确保 buffer 已加载
+        local bufnr = vim.fn.bufadd(fname)
+        vim.fn.bufload(bufnr)
+        local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+
+        -- vim.api.nvim_buf_attach()
+        -- 取 LSP 返回的位置
+        row = range.start.line
+        col = range.start.character
+
+        if fname == state.fname and row >= state.start_line and row <= state.end_line then
+          return
+        end
+        local node = find_definition_node(bufnr, row, col)
+        if node then
+          callback(symbol.name, "```" .. ft .. "\n" .. vim.treesitter.get_node_text(node, bufnr) .. "\n```")
+          table.insert(results, vim.inspect(vim.treesitter.get_node_text(node, bufnr)))
+        end
+        vim.notify(vim.inspect(results), vim.log.levels.INFO)
+      end
+    end)
+  end
+end
+
 return api
