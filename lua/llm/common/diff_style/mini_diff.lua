@@ -39,7 +39,7 @@ function MiniDiff.new(args)
   -- Change the buffer source
   vim.b[self.bufnr].minidiff_config = {
     source = {
-      name = "codecompanion",
+      name = "llm",
       attach = function(bufnr)
         diff.set_ref_text(bufnr, self.contents)
         diff.toggle_overlay(self.bufnr)
