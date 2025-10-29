@@ -1215,7 +1215,6 @@ function api.lsp_wrap(callback)
         vim.fn.bufload(bufnr)
         local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
 
-        -- vim.api.nvim_buf_attach()
         -- 取 LSP 返回的位置
         row = range.start.line
         col = range.start.character
