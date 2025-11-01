@@ -71,6 +71,7 @@ end
 function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts = opts or {}
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
+  opts.lsp = opts.lsp or conf.configs.lsp
   local bufnr = vim.api.nvim_get_current_buf()
   local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
   local content = F.GetVisualSelection(lines)
@@ -263,11 +264,8 @@ function M.NewSession()
         if k == "Input:Submit" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
-            local input = table.concat(input_table, "\n")
-            if state.input.attach_content then
-              input = input .. "\n" .. state.input.attach_content
-              F.ClearAttach()
-            end
+            local input = table.concat(input_table, "\n") .. "\n" .. state.input.attach_content
+
             if not conf.configs.save_session then
               state.session.filename = "current"
               if not state.session[state.session.filename] then
@@ -282,6 +280,22 @@ function M.NewSession()
               F.SetRole(bufnr, winid, "user")
               F.AppendChunkToBuffer(bufnr, winid, input)
               F.NewLine(bufnr, winid)
+              if F.IsValid(state.input.lsp_ctx) then
+                table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                F.SetRole(bufnr, winid, "user")
+                local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
+                F.AppendChunkToBuffer(bufnr, winid, lsp_ctx_tbl[1] .. "\n" .. table.concat(
+                  vim.tbl_filter(function(item)
+                    if string.match(item, "^- ") then
+                      return true
+                    end
+                    return false
+                  end, lsp_ctx_tbl),
+                  "\n"
+                ))
+                F.NewLine(bufnr, winid)
+                F.ClearAttach()
+              end
               vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
             end
           end, { noremap = true })
@@ -389,11 +403,7 @@ function M.NewSession()
                 if name == "Input:Submit" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
-                    local input = table.concat(input_table, "\n")
-                    if state.input.attach_content then
-                      input = input .. "\n" .. state.input.attach_content
-                      F.ClearAttach()
-                    end
+                    local input = table.concat(input_table, "\n") .. "\n" .. state.input.attach_content
                     state.session.filename = state.session.filename or "current"
                     if not state.session[state.session.filename] then
                       state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
@@ -407,6 +417,28 @@ function M.NewSession()
                       F.SetRole(bufnr, winid, "user")
                       F.AppendChunkToBuffer(bufnr, winid, input)
                       F.NewLine(bufnr, winid)
+                      if F.IsValid(state.input.lsp_ctx) then
+                        table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                        F.SetRole(bufnr, winid, "user")
+                        local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
+                        F.AppendChunkToBuffer(
+                          bufnr,
+                          winid,
+                          lsp_ctx_tbl[1]
+                            .. "\n"
+                            .. table.concat(
+                              vim.tbl_filter(function(item)
+                                if string.match(item, "^- ") then
+                                  return true
+                                end
+                                return false
+                              end, lsp_ctx_tbl),
+                              "\n"
+                            )
+                        )
+                        F.NewLine(bufnr, winid)
+                        F.ClearAttach()
+                      end
                       vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                     end
                     vim.api.nvim_set_current_win(state.llm.popup.winid)

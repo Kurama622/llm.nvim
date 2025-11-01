@@ -13,7 +13,8 @@ M.llm = {
 
 M.input = {
   popup = nil,
-  attach_content = nil,
+  attach_content = "",
+  lsp_ctx = {},
 }
 
 M.history = {
