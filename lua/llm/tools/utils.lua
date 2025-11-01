@@ -98,6 +98,14 @@ function utils.new_diff(diff, opts, context, suggestion)
         contents = contents,
         winnr = context.winnr,
       }),
+      __newindex = function(t, key, value)
+        local mt = getmetatable(t)
+        if vim.tbl_contains(vim.tbl_keys(mt.__index), key) then
+          mt.__index[key] = value
+        else
+          rawset(t, key, value)
+        end
+      end,
     })
   end
 end
