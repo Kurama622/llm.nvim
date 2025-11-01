@@ -13,7 +13,8 @@ M.llm = {
 
 M.input = {
   popup = nil,
-  attach_content = nil,
+  attach_content = "",
+  lsp_ctx = {},
 }
 
 M.history = {
@@ -89,4 +90,7 @@ M.reason_range = {
 }
 
 M.enabled_cmds = {}
+
+M.lsp_context = { fname = nil, start_line = nil, end_line = nil }
+
 return M
