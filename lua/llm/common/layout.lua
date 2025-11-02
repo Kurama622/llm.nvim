@@ -116,7 +116,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
           if text == "current" then
             state.session.filename = text
             if not state.session[text] then
-              state.session[text] = F.DeepCopy(conf.session.messages)
+              state.session[text] = vim.deepcopy(conf.session.messages)
             end
             F.RefreshLLMText(state.session[text])
           else

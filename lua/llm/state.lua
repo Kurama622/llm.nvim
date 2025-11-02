@@ -91,6 +91,4 @@ M.reason_range = {
 
 M.enabled_cmds = {}
 
-M.lsp_context = { fname = nil, start_line = nil, end_line = nil }
-
 return M

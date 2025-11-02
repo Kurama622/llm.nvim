@@ -65,11 +65,11 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
+---@param bufnr integer Buffer number.
 ---@param method string
 ---@param params? table LSP request params.
 ---@param callback fun(items: vim.quickfix.entry[])
-local function get_locations(method, params, callback)
-  local bufnr = vim.api.nvim_get_current_buf()
+local function get_locations(bufnr, method, params, callback)
   local clients = vim.lsp.get_clients({ method = method, bufnr = bufnr })
   if not next(clients) then
     vim.notify(vim.lsp._unsupported_method(method), vim.log.levels.WARN)
@@ -95,7 +95,6 @@ local function get_locations(method, params, callback)
       callback(all_items)
     end
   end
-
   for _, client in ipairs(clients) do
     client:request(method, params, function(_, result)
       on_response(_, result, client)
@@ -203,18 +202,6 @@ function api.TrimLeadingWhitespace(str)
     return ""
   end
   return (str:gsub("^[\n%s]*", ""))
-end
-
-function api.DeepCopy(t)
-  local new_t = {}
-  for k, v in pairs(t) do
-    if type(v) == "table" then
-      new_t[k] = api.DeepCopy(v)
-    else
-      new_t[k] = v
-    end
-  end
-  return new_t
 end
 
 function api.GetFileType(bufnr)
@@ -465,6 +452,8 @@ function api.GetAttach(opts)
   local bufnr = vim.api.nvim_get_current_buf()
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
   opts.lsp = opts.lsp or conf.configs.lsp
+  opts.lsp.bufnr = bufnr
+
   local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
   api.VisMode2NorMode()
 
@@ -485,26 +474,7 @@ function api.GetAttach(opts)
       .. "\n"
       .. api.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
   end
-
-  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp.methods) then
-    state.input.lsp_ctx.role = "user"
-    state.input.lsp_ctx.type = "lsp"
-    state.input.lsp_ctx.content =
-      "Here are some relevant context codes, which do not require optimization and are only for analysis:"
-    api.lsp_wrap(opts.lsp, function(symbol, context)
-      state.input.lsp_ctx.content = state.input.lsp_ctx.content
-        .. "\n- "
-        .. symbol.fname
-        .. ":"
-        .. symbol.start_line
-        .. "-"
-        .. symbol.end_line
-        .. " | "
-        .. symbol.name
-        .. "\n"
-        .. context
-    end)
-  end
+  state.input.request_with_lsp = api.lsp_wrap(opts)
   return bufnr
 end
 
@@ -706,9 +676,6 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
     if msg.role == "system" or msg.role == "tool" then
     elseif msg.role == "user" and api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
-      if api.IsValid(msg._llm_reasoning_content) then
-        api.AppendChunkToBuffer(bufnr, winid, msg._llm_reasoning_content, detach)
-      end
       if msg.type == "lsp" then
         local lsp_ctx_tbl = vim.split(msg.content, "\n")
         api.AppendChunkToBuffer(bufnr, winid, lsp_ctx_tbl[1] .. "\n" .. table.concat(
@@ -723,6 +690,13 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
       else
         api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
       end
+      api.NewLine(bufnr, winid, detach)
+    elseif api.IsValid(msg.content) then
+      api.SetRole(bufnr, winid, msg.role, detach)
+      if api.IsValid(msg._llm_reasoning_content) then
+        api.AppendChunkToBuffer(bufnr, winid, msg._llm_reasoning_content, detach)
+      end
+      api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
       api.NewLine(bufnr, winid, detach)
     end
   end
@@ -1166,20 +1140,51 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
   return ""
 end
 
+function api.lsp_wrap(opts)
+  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp.methods) then
+    return function(llm_request)
+      state.input.lsp_ctx.role = "user"
+      state.input.lsp_ctx.type = "lsp"
+      state.input.lsp_ctx.content = ""
+      api.lsp_request(opts.lsp, function(symbol, context)
+        state.input.lsp_ctx.content = state.input.lsp_ctx.content
+          .. "\n- "
+          .. symbol.fname
+          .. ":"
+          .. symbol.start_line
+          .. "-"
+          .. symbol.end_line
+          .. " | "
+          .. symbol.name
+          .. "\n"
+          .. context
+        if symbol.total_request_cnt == symbol.done_cnt then
+          if api.IsValid(state.input.lsp_ctx.content) then
+            state.input.lsp_ctx.content = "Here are some relevant context codes, which do not require optimization and are only for analysis:"
+              .. state.input.lsp_ctx.content
+          end
+          llm_request()
+        end
+      end)
+    end
+  end
+  return nil
+end
+
 --- 主函数：获取选中代码中所有符号的定义
-function api.lsp_wrap(cfg, callback)
-  local _, start_line, _, end_line, _ = api.GetVisualSelectionRange()
+function api.lsp_request(cfg, callback)
+  local _, start_line, _, end_line, _ = api.GetVisualSelectionRange(cfg.bufnr)
   state.input.lsp_ctx.start_line = start_line - 1
   state.input.lsp_ctx.end_line = end_line - 1
 
   -- 2. 使用 Tree-sitter 获取该范围内的所有标识符
-  local parser = vim.treesitter.get_parser(0)
+  local parser = vim.treesitter.get_parser(cfg.bufnr)
   if not parser then
     LOG:WARN(string.format("Lack of %s's treesitter parser"), vim.bo.ft)
     return
   end
 
-  state.input.lsp_ctx.fname = vim.uri_to_fname(vim.uri_from_bufnr(0))
+  state.input.lsp_ctx.fname = vim.uri_to_fname(vim.uri_from_bufnr(cfg.bufnr))
   local root = parser:parse()[1]:root()
   local symbols_to_query = {}
   local queried_symbols = {} -- 用于去重
@@ -1192,7 +1197,7 @@ function api.lsp_wrap(cfg, callback)
     then
       -- 我们只关心标识符和函数名 (call_expression 的一部分)
       if node:type() == "identifier" then
-        local name = vim.treesitter.get_node_text(node, 0)
+        local name = vim.treesitter.get_node_text(node, cfg.bufnr)
         if not queried_symbols[name] then
           table.insert(symbols_to_query, { name = name, node = node })
           queried_symbols[name] = true
@@ -1212,27 +1217,25 @@ function api.lsp_wrap(cfg, callback)
     return
   end
 
-  local results = {}
-
-  -- local pending_requests = #symbols_to_query
-  -- vim.notify("正在查询 " .. pending_requests .. " 个符号的定义...", vim.log.levels.INFO)
+  local results, done_cnt = {}, 0
+  local total_request_cnt = #symbols_to_query * #cfg.methods
 
   -- 3. 对每个符号异步调用 LSP
   for _, symbol in ipairs(symbols_to_query) do
     local row, col = symbol.node:start()
-    LOG:INFO(vim.inspect(symbol), row, col)
     local params = {
-      textDocument = vim.lsp.util.make_text_document_params(0),
+      textDocument = vim.lsp.util.make_text_document_params(cfg.bufnr),
       position = { line = row, character = col },
     }
 
     for _, method in pairs(cfg.methods) do
-      get_locations("textDocument/" .. method, params, function(locations)
+      get_locations(cfg.bufnr, "textDocument/" .. method, params, function(locations)
         for _, location in pairs(locations) do
           local uri = location.user_data.targetUri or location.user_data.uri
           local range = location.user_data.targetRange or location.user_data.range
           if not uri or not range then
-            vim.notify("无效的 LSP Location", vim.log.levels.WARN)
+            LOG:WARN("Invalid LSP Location")
+            done_cnt = done_cnt + 1
             return
           end
 
@@ -1251,21 +1254,24 @@ function api.lsp_wrap(cfg, callback)
             and row >= state.input.lsp_ctx.start_line
             and row <= state.input.lsp_ctx.end_line
           then
+            done_cnt = done_cnt + 1
             return
           end
           local node = find_definition_node(bufnr, row, col)
 
           if node then
             local node_start_line, _, node_end_line, _ = vim.treesitter.get_node_range(node)
+            done_cnt = done_cnt + 1
             callback({
               ["name"] = symbol.name,
               ["fname"] = fname,
               ["start_line"] = node_start_line + 1,
               ["end_line"] = node_end_line + 1,
+              ["done_cnt"] = done_cnt,
+              ["total_request_cnt"] = total_request_cnt,
             }, "```" .. ft .. "\n" .. vim.treesitter.get_node_text(node, bufnr) .. "\n```")
             table.insert(results, vim.inspect(vim.treesitter.get_node_text(node, bufnr)))
           end
-          -- vim.notify(vim.inspect(results), vim.log.levels.INFO)
         end
       end)
     end
