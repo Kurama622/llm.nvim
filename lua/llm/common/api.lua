@@ -71,8 +71,8 @@ end
 ---@param callback fun(items: vim.quickfix.entry[])
 local function get_locations(bufnr, method, params, callback)
   local clients = vim.lsp.get_clients({ method = method, bufnr = bufnr })
+
   if not next(clients) then
-    vim.notify(vim.lsp._unsupported_method(method), vim.log.levels.WARN)
     callback({})
     return
   end
@@ -171,7 +171,7 @@ local function find_definition_node(bufnr, row, col)
   end
 
   if not node then
-    vim.notify("未找到定义节点", vim.log.levels.WARN)
+    LOG:DEBUG("Not found definition node.")
     return nil
   end
 
@@ -455,6 +455,7 @@ function api.GetAttach(opts)
   opts.lsp.bufnr = bufnr
 
   local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
+  opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
   api.VisMode2NorMode()
 
   if opts.is_codeblock and not vim.tbl_isempty(lines) then
@@ -1173,9 +1174,8 @@ end
 
 --- 主函数：获取选中代码中所有符号的定义
 function api.lsp_request(cfg, callback)
-  local _, start_line, _, end_line, _ = api.GetVisualSelectionRange(cfg.bufnr)
-  state.input.lsp_ctx.start_line = start_line - 1
-  state.input.lsp_ctx.end_line = end_line - 1
+  state.input.lsp_ctx.start_line = cfg.start_line - 1
+  state.input.lsp_ctx.end_line = cfg.end_line - 1
 
   -- 2. 使用 Tree-sitter 获取该范围内的所有标识符
   local parser = vim.treesitter.get_parser(cfg.bufnr)
@@ -1184,14 +1184,14 @@ function api.lsp_request(cfg, callback)
     return
   end
 
+  state.input.lsp_ctx.root_dir = vim.fs.root(cfg.bufnr, cfg.root_dir)
   state.input.lsp_ctx.fname = vim.uri_to_fname(vim.uri_from_bufnr(cfg.bufnr))
   local root = parser:parse()[1]:root()
   local symbols_to_query = {}
-  local queried_symbols = {} -- 用于去重
+  local queried_symbols = {}
 
   local function traverse(node)
     local node_start_line, _, node_end_line, _ = node:range()
-    -- 如果节点范围与选择范围有交集
     if
       math.max(state.input.lsp_ctx.start_line, node_start_line) <= math.min(state.input.lsp_ctx.end_line, node_end_line)
     then
@@ -1203,7 +1203,6 @@ function api.lsp_request(cfg, callback)
           queried_symbols[name] = true
         end
       end
-      -- 继续遍历子节点
       for child in node:iter_children() do
         traverse(child)
       end
@@ -1218,7 +1217,20 @@ function api.lsp_request(cfg, callback)
   end
 
   local results, done_cnt = {}, 0
-  local total_request_cnt = #symbols_to_query * #cfg.methods
+  local supported_method_cnt = 0
+
+  for _, method in pairs(cfg.methods) do
+    local clients = vim.lsp.get_clients({ method = method, bufnr = cfg.bufnr })
+
+    for i = 1, #clients do
+      if clients[i].supports_method("textDocument/" .. method, cfg.bufnr) then
+        supported_method_cnt = supported_method_cnt + 1
+      else
+        LOG:DEBUG(vim.lsp._unsupported_method("textDocument/" .. method))
+      end
+    end
+  end
+  local total_request_cnt = #symbols_to_query * supported_method_cnt
 
   -- 3. 对每个符号异步调用 LSP
   for _, symbol in ipairs(symbols_to_query) do
@@ -1250,9 +1262,11 @@ function api.lsp_request(cfg, callback)
           col = range.start.character
 
           if
-            fname == state.input.lsp_ctx.fname
-            and row >= state.input.lsp_ctx.start_line
-            and row <= state.input.lsp_ctx.end_line
+            (
+              fname == state.input.lsp_ctx.fname
+              and row >= state.input.lsp_ctx.start_line
+              and row <= state.input.lsp_ctx.end_line
+            ) or (string.match(fname, state.input.lsp_ctx.root_dir) == nil)
           then
             done_cnt = done_cnt + 1
             return

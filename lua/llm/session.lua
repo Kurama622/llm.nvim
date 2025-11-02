@@ -75,6 +75,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts.lsp = opts.lsp or conf.configs.lsp
   opts.lsp.bufnr = bufnr
   local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
+  opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
   state.input.attach_content = F.GetVisualSelection(lines)
 
   if builtin_called then
