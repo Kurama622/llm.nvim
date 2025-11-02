@@ -18,8 +18,8 @@ function M.handler(_, _, _, _, prompt, opts)
       setmetatable(display_opts, {
         __index = state.summarize_suggestions,
       })
-      utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
       local winid = vim.api.nvim_get_current_win()
+      utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
       state.popwin_list[winid]:unmount()
       state.popwin_list[winid] = nil
       state.session[winid] = nil
