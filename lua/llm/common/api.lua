@@ -1148,18 +1148,20 @@ function api.lsp_wrap(opts)
       state.input.lsp_ctx.type = "lsp"
       state.input.lsp_ctx.content = ""
       api.lsp_request(opts.lsp, function(symbol, context)
-        state.input.lsp_ctx.content = state.input.lsp_ctx.content
-          .. "\n- "
-          .. symbol.fname
-          .. ":"
-          .. symbol.start_line
-          .. "-"
-          .. symbol.end_line
-          .. " | "
-          .. symbol.name
-          .. "\n"
-          .. context
-        if symbol.total_request_cnt == symbol.done_cnt then
+        if context then
+          state.input.lsp_ctx.content = state.input.lsp_ctx.content
+            .. "\n- "
+            .. symbol.fname
+            .. ":"
+            .. symbol.start_line
+            .. "-"
+            .. symbol.end_line
+            .. " | "
+            .. symbol.name
+            .. "\n"
+            .. context
+        end
+        if symbol.done then
           if api.IsValid(state.input.lsp_ctx.content) then
             state.input.lsp_ctx.content = "Here are some relevant context codes, which do not require optimization and are only for analysis:"
               .. state.input.lsp_ctx.content
@@ -1216,7 +1218,6 @@ function api.lsp_request(cfg, callback)
     return
   end
 
-  local results, done_cnt = {}, 0
   local supported_method_cnt = 0
 
   for _, method in pairs(cfg.methods) do
@@ -1230,24 +1231,26 @@ function api.lsp_request(cfg, callback)
       end
     end
   end
-  local total_request_cnt = #symbols_to_query * supported_method_cnt
 
   -- 3. 对每个符号异步调用 LSP
-  for _, symbol in ipairs(symbols_to_query) do
+  for n_symbol, symbol in pairs(symbols_to_query) do
     local row, col = symbol.node:start()
     local params = {
       textDocument = vim.lsp.util.make_text_document_params(cfg.bufnr),
       position = { line = row, character = col },
     }
 
-    for _, method in pairs(cfg.methods) do
+    for n_method, method in pairs(cfg.methods) do
       get_locations(cfg.bufnr, "textDocument/" .. method, params, function(locations)
-        for _, location in pairs(locations) do
+        for n_location, location in pairs(locations) do
+          local lsp_request_done = (n_symbol == #symbols_to_query) and (n_method == supported_method_cnt)
           local uri = location.user_data.targetUri or location.user_data.uri
           local range = location.user_data.targetRange or location.user_data.range
           if not uri or not range then
             LOG:WARN("Invalid LSP Location")
-            done_cnt = done_cnt + 1
+            if lsp_request_done then
+              callback({ ["done"] = true })
+            end
             return
           end
 
@@ -1268,23 +1271,28 @@ function api.lsp_request(cfg, callback)
               and row <= state.input.lsp_ctx.end_line
             ) or (string.match(fname, state.input.lsp_ctx.root_dir) == nil)
           then
-            done_cnt = done_cnt + 1
+            if lsp_request_done then
+              callback({ ["done"] = true })
+            end
             return
           end
           local node = find_definition_node(bufnr, row, col)
 
           if node then
             local node_start_line, _, node_end_line, _ = vim.treesitter.get_node_range(node)
-            done_cnt = done_cnt + 1
             callback({
               ["name"] = symbol.name,
               ["fname"] = fname,
               ["start_line"] = node_start_line + 1,
               ["end_line"] = node_end_line + 1,
-              ["done_cnt"] = done_cnt,
-              ["total_request_cnt"] = total_request_cnt,
+              ["done"] = lsp_request_done and (n_location == #locations),
             }, "```" .. ft .. "\n" .. vim.treesitter.get_node_text(node, bufnr) .. "\n```")
-            table.insert(results, vim.inspect(vim.treesitter.get_node_text(node, bufnr)))
+          else
+            if lsp_request_done and (n_location == #locations) then
+              callback({ ["done"] = true })
+            else
+              callback({ ["done"] = false })
+            end
           end
         end
       end)
