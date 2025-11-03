@@ -1269,7 +1269,8 @@ function api.lsp_request(cfg, callback)
               fname == state.input.lsp_ctx.fname
               and row >= state.input.lsp_ctx.start_line
               and row <= state.input.lsp_ctx.end_line
-            ) or (string.match(fname, state.input.lsp_ctx.root_dir) == nil)
+            )
+            or (api.IsValid(state.input.lsp_ctx.root_dir) and string.match(fname, state.input.lsp_ctx.root_dir) == nil)
           then
             if lsp_request_done then
               callback({ ["done"] = true })
