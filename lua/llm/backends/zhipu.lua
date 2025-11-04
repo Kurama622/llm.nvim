@@ -13,16 +13,16 @@ function glm.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
 
-    local start_idx = ctx.line:find("data: ", 1, true)
-    local end_idx = ctx.line:find("}}]}", 1, true)
+    local start_idx = ctx.line:find("data: ")
+    local end_idx = ctx.line:find("}}]}$") or ctx.line:find("}}$")
     local json_str = nil
 
     if start_idx == nil or end_idx == nil then
-      LOG:TRACE(ctx.line)
+      LOG:ERROR(ctx.line)
     else
       while start_idx ~= nil and end_idx ~= nil do
         if start_idx < end_idx then
-          json_str = ctx.line:sub(7, end_idx + 3)
+          json_str = ctx.line:sub(start_idx + 6, end_idx + 3)
         end
 
         local status, data = pcall(json.decode, json_str)
@@ -41,8 +41,8 @@ function glm.StreamingHandler(chunk, ctx)
         else
           ctx.line = ctx.line:sub(end_idx + 4)
         end
-        start_idx = ctx.line:find("data: ", 1, true)
-        end_idx = ctx.line:find("}}]}", 1, true)
+        start_idx = ctx.line:find("data: ")
+        end_idx = ctx.line:find("}}]}$")
       end
     end
   end
@@ -79,16 +79,16 @@ function glm.StreamingTblHandler(results)
     else
       line = line .. chunk
 
-      local start_idx = line:find("data: ", 1, true)
-      local end_idx = line:find("}}]}", 1, true)
+      local start_idx = line:find("data: ")
+      local end_idx = line:find("}}]}$") or line:find("}}$")
       local json_str = nil
 
       if start_idx == nil or end_idx == nil then
-        LOG:TRACE(line)
+        LOG:ERROR(line)
       else
         while start_idx ~= nil and end_idx ~= nil do
           if start_idx < end_idx then
-            json_str = line:sub(7, end_idx + 3)
+            json_str = line:sub(start_idx + 6, end_idx + 3)
           end
 
           local status, data = pcall(json.decode, json_str)
@@ -106,8 +106,8 @@ function glm.StreamingTblHandler(results)
           else
             line = line:sub(end_idx + 4)
           end
-          start_idx = line:find("data: ", 1, true)
-          end_idx = line:find("}}]}", 1, true)
+          start_idx = line:find("data: ")
+          end_idx = line:find("}}]}$")
         end
       end
     end

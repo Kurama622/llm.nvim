@@ -21,13 +21,16 @@ function openai.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
     ctx.line = F.TrimLeadingWhitespace(ctx.line)
-    local start_idx = ctx.line:find("data: ", 1, true)
-    local end_idx = ctx.line:find("}]", 1, true)
+    local start_idx = ctx.line:find("data: ")
+    local end_idx = ctx.line:find("}$")
     local json_str = nil
+    if start_idx == nil or end_idx == nil then
+      LOG:ERROR(ctx.line)
+    end
 
     while start_idx ~= nil and end_idx ~= nil do
       if start_idx < end_idx then
-        json_str = ctx.line:sub(7, end_idx + 1) .. "}"
+        json_str = ctx.line:sub(start_idx + 6, end_idx)
       end
 
       local status, data = pcall(json.decode, json_str)
@@ -54,14 +57,14 @@ function openai.StreamingHandler(chunk, ctx)
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end
 
-      if end_idx + 2 > #ctx.line then
+      if end_idx + 1 > #ctx.line then
         ctx.line = ""
         break
       else
-        ctx.line = ctx.line:sub(end_idx + 2)
+        ctx.line = ctx.line:sub(end_idx + 1)
       end
-      start_idx = ctx.line:find("data: ", 1, true)
-      end_idx = ctx.line:find("}]", 1, true)
+      start_idx = ctx.line:find("data: ")
+      end_idx = ctx.line:find("}$")
       if start_idx == nil or end_idx == nil then
         ctx.line = ""
       end
@@ -148,7 +151,8 @@ end
 function openai.AppendToolsRespond(results, msg)
   local fc_type = "function"
   for _, fc_respond_str in pairs(results) do
-    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(7))
+    local start_idx = fc_respond_str:find("data: ") or 1
+    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
     if status then
       if
         F.IsValid(fc_respond.choices)
@@ -197,13 +201,16 @@ function openai.StreamingTblHandler(results)
     else
       line = line .. chunk
       line = F.TrimLeadingWhitespace(line)
-      local start_idx = line:find("data: ", 1, true)
-      local end_idx = line:find("}]", 1, true)
+      local start_idx = line:find("data: ")
+      local end_idx = line:find("}$")
       local json_str = nil
+      if start_idx == nil or end_idx == nil then
+        LOG:ERROR(line)
+      end
 
       while start_idx ~= nil and end_idx ~= nil do
         if start_idx < end_idx then
-          json_str = line:sub(7, end_idx + 1) .. "}"
+          json_str = line:sub(start_idx + 6, end_idx)
         end
 
         local status, data = pcall(json.decode, json_str)
@@ -221,14 +228,14 @@ function openai.StreamingTblHandler(results)
           assistant_output = assistant_output .. data.choices[1].delta.content
         end
 
-        if end_idx + 2 > #line then
+        if end_idx + 1 > #line then
           line = ""
           break
         else
-          line = line:sub(end_idx + 2)
+          line = line:sub(end_idx + 1)
         end
-        start_idx = line:find("data: ", 1, true)
-        end_idx = line:find("}]", 1, true)
+        start_idx = line:find("data: ")
+        end_idx = line:find("}$")
         if start_idx == nil or end_idx == nil then
           line = ""
         end
