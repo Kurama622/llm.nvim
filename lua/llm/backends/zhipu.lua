@@ -1,5 +1,6 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
+local backend_utils = require("llm.backends.utils")
 local json = vim.json
 local glm = {}
 
@@ -27,13 +28,22 @@ function glm.StreamingHandler(chunk, ctx)
 
         local status, data = pcall(json.decode, json_str)
 
-        if not status or not data.choices[1].delta.content then
+        if not status or (not data.choices[1].delta.content and not data.choices[1].delta.reasoning_content) then
           LOG:TRACE("json decode error:", json_str)
           break
         end
 
-        ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
-        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
+        -- add reasoning_content
+        if F.IsValid(data.choices[1].delta.reasoning_content) then
+          backend_utils.mark_reason_begin(ctx, true)
+          ctx.reasoning_content = ctx.reasoning_content .. data.choices[1].delta.reasoning_content
+
+          F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.reasoning_content)
+        elseif F.IsValid(data.choices[1].delta.content) then
+          backend_utils.mark_reason_end(ctx, true)
+          ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
+          F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
+        end
 
         if end_idx + 4 > #ctx.line then
           ctx.line = ""
@@ -93,12 +103,14 @@ function glm.StreamingTblHandler(results)
 
           local status, data = pcall(json.decode, json_str)
 
-          if not status or not data.choices[1].delta.content then
+          if not status or (not data.choices[1].delta.content and not data.choices[1].delta.reasoning_content) then
             LOG:TRACE("json decode error:", json_str)
             break
           end
 
-          assistant_output = assistant_output .. data.choices[1].delta.content
+          if F.IsValid(data.choices[1].delta.content) then
+            assistant_output = assistant_output .. data.choices[1].delta.content
+          end
 
           if end_idx + 4 > #line then
             line = ""

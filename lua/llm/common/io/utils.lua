@@ -29,6 +29,16 @@ function utils.add_request_body_params(body, key, val, api_type)
     else
       body[key] = val
     end
+  elseif api_type == "zhipu" then
+    if key == "enable_thinking" then
+      if val then
+        body.thinking = { ["type"] = "enabled" }
+      else
+        body.thinking = { ["type"] = "disabled" }
+      end
+    else
+      body[key] = val
+    end
   else
     body[key] = val
   end
