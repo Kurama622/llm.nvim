@@ -89,6 +89,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+  options.diagnostic = options.diagnostic or conf.configs.diagnostic
 
   if prompt == nil then
     prompt = string.format(require("llm.tools.prompts").action, options.language)
@@ -123,10 +124,22 @@ function M.handler(name, F, state, streaming, prompt, opts)
     end_col = end_col,
   }
 
-  state.app["session"][name] = {
-    { role = "system", content = prompt },
-    { role = "user", content = source_content },
-  }
+  if F.IsValid(options.diagnostic) then
+    state.app["session"][name] = {
+      { role = "system", content = prompt },
+      {
+        role = "user",
+        content = source_content
+          .. "\n"
+          .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, options),
+      },
+    }
+  else
+    state.app["session"][name] = {
+      { role = "system", content = prompt },
+      { role = "user", content = source_content },
+    }
+  end
   options.messages = state.app.session[name]
   local default_actions = {}
   if options.only_display_diff then
