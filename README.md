@@ -149,7 +149,7 @@ You can configure [inline_assistant](./examples/ai-tools/Attach-To-Chat/config.l
 </p>
 
 ### Diagnostic
-Both `Ask` and `Attach-To-Chat` can enable diagnostic features:
+Both `disposable_ask_handler`, `attach_to_chat_handler`, `side_by_side_handler` and `action_handler` can enable diagnostic features:
 
 ```lua
 diagnostic = { min = vim.diagnostic.severity.HINT },

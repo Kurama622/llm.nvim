@@ -12,8 +12,6 @@ function M.handler(name, F, state, streaming, prompt, opts)
     prompt = prompt()
   end
 
-  local source_content = F.GetVisualSelection()
-
   local options = {
     _name = "side_by_side",
     left = {
@@ -76,7 +74,13 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
+  options.diagnostic = options.diagnostic or conf.configs.diagnostic
   options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local mode = options.mode or vim.fn.mode()
+  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr, mode, options)
+  local source_content = F.GetVisualSelection(lines)
 
   local source_box = Popup(options.left)
   local preview_box = Popup(options.right)
@@ -95,10 +99,22 @@ function M.handler(name, F, state, streaming, prompt, opts)
   state.popwin_list[source_box.winid] = source_box
   F.WriteContent(source_box.bufnr, source_box.winid, source_content)
 
-  state.app["session"][name] = {
-    { role = "system", content = prompt },
-    { role = "user", content = source_content },
-  }
+  if F.IsValid(options.diagnostic) then
+    state.app["session"][name] = {
+      { role = "system", content = prompt },
+      {
+        role = "user",
+        content = source_content
+          .. "\n"
+          .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, options),
+      },
+    }
+  else
+    state.app["session"][name] = {
+      { role = "system", content = prompt },
+      { role = "user", content = source_content },
+    }
+  end
   options.messages = state.app["session"][name]
   options.bufnr = preview_box.bufnr
   options.winid = preview_box.winid

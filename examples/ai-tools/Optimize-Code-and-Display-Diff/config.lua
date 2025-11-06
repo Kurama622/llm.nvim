@@ -6,5 +6,6 @@ OptimCompare = {
     model = "gpt-4o-mini",
     api_type = "openai",
     language = "Chinese",
+    diagnostic = { vim.diagnostic.severity.WARN, vim.diagnostic.severity.ERROR },
   },
 },

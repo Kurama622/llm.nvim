@@ -152,7 +152,7 @@
 </p>
 
 ### 诊断信息
-`Ask` 和 `Attach-To-Chat` 均可以开启该特性:
+`disposable_ask_handler`、`attach_to_chat_handler`、`side_by_side_handler`和`action_handler`均可以开启该特性:
 
 ```lua
 diagnostic = { min = vim.diagnostic.severity.HINT },
