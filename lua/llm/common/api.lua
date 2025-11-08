@@ -451,7 +451,6 @@ function api.MakeInlineContext(opts, bufnr, name)
       prompt = opts.prompt()
     end
     state.summarize_suggestions.prompt = string.format(prompt, opts.language)
-    LOG:INFO(state.summarize_suggestions.prompt)
   end
   return lines, start_line, end_line, start_col, end_col
 end
