@@ -158,6 +158,8 @@ function M.handler(_, _, _, _, prompt, opts)
       prompt = prompt,
       inline_assistant = options.inline_assistant,
       enable_buffer_context = options.enable_buffer_context,
+      diagnostic = options.diagnostic,
+      lsp = options.lsp,
       language = options.language,
       action = default_actions,
       _ = options,

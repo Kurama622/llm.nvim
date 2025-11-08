@@ -15,11 +15,9 @@ Here are some example prompts:
 
 Your code MUST follow the following rules:
 1. Replace <language> with the code’s language (e.g., python) and <content> with the optimized code.
-%s
 ```<language>
 <content>
 ```
-%s
 2. The **INDENTATION FORMAT** of the optimized code remains exactly the **SAME** as the original code.
 3. You may explain the reasons for such optimization appropriately, unless the user requests otherwise.
 4. All **non-code text** responses and **thinking text** must be written in the %s language indicated.
