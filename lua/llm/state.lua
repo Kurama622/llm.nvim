@@ -9,6 +9,7 @@ M.cursor = {
 M.llm = {
   popup = nil,
   worker = { jobs = {} },
+  start_line = 1,
 }
 
 M.input = {

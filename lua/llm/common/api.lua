@@ -1120,9 +1120,12 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
       severity = opts.diagnostic,
     })
 
-    for _, diag in ipairs(diagnostics) do
+    for i, diag in ipairs(diagnostics) do
       local level = severity_map[diag.severity] or "Unknow"
-      local msg = string.format("- %s: %s", level, diag.message)
+      if level == "Error" then
+        state.input.diagnostic_error = true
+      end
+      local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message)
       if diagnostics_tbl[diag.lnum] == nil then
         diagnostics_tbl[diag.lnum] = { msg }
       elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
@@ -1131,14 +1134,17 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
     end
   end
 
+  local diagnostics_prompt = state.input.diagnostic_error and ""
+    or "All dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
+
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
     for _, diags in pairs(diagnostics_tbl) do
       diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
     end
-    return "\nDiagnostics:" .. diagnostics_content
+    return diagnostics_prompt .. "\nBelow is the diagnostics for the code:" .. diagnostics_content
   end
-  return ""
+  return diagnostics_prompt
 end
 
 function api.lsp_wrap(opts)

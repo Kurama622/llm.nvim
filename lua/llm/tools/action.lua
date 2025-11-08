@@ -124,25 +124,13 @@ function M.handler(name, F, state, streaming, prompt, opts)
     end_col = end_col,
   }
 
-  if F.IsValid(options.diagnostic) then
-    state.app["session"][name] = {
-      { role = "system", content = prompt },
-      {
-        role = "user",
-        content = source_content
-          .. "\n"
-          .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, options),
-      },
-    }
-  else
+  local default_actions = {}
+  if options.only_display_diff then
     state.app["session"][name] = {
       { role = "system", content = prompt },
       { role = "user", content = source_content },
     }
-  end
-  options.messages = state.app.session[name]
-  local default_actions = {}
-  if options.only_display_diff then
+    options.messages = state.app.session[name]
     default_actions = {
       accept = function()
         if diff and diff.valid then
@@ -166,6 +154,23 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
     parse.GetOutput(options)
   else
+    if F.IsValid(options.diagnostic) then
+      state.app["session"][name] = {
+        { role = "system", content = prompt },
+        {
+          role = "user",
+          content = source_content
+            .. "\n"
+            .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, options),
+        },
+      }
+    else
+      state.app["session"][name] = {
+        { role = "system", content = prompt },
+        { role = "user", content = source_content },
+      }
+    end
+    options.messages = state.app.session[name]
     local preview_box = Split({
       relative = options.output.relative,
       position = options.output.position,
