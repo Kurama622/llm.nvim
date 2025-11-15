@@ -92,20 +92,6 @@ function M.handler(_, _, _, _, _, opts)
   local bufnr = F.GetAttach(options)
   LOG:INFO("Attach successfully!")
 
-  for _, k in ipairs({ "accept", "reject", "close" }) do
-    utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
-      default_actions[k]()
-      if options[k].action ~= nil then
-        options[k].action()
-      end
-      if k == "close" then
-        for _, kk in ipairs({ "accept", "reject", "close" }) do
-          utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
-        end
-      end
-    end, bufnr)
-  end
-
   sess.NewSession()
 
   local bufnr_list = F.GetChatUiBufnrList()
@@ -113,6 +99,21 @@ function M.handler(_, _, _, _, _, opts)
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
         default_actions[k]()
+        if k == "display" then
+          for _, op in ipairs({ "accept", "reject", "close" }) do
+            utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
+              default_actions[op]()
+              if options[op].action ~= nil then
+                options[op].action()
+              end
+              if op == "close" then
+                for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+                  utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
+                end
+              end
+            end, bufnr)
+          end
+        end
         if options[k].action ~= nil then
           options[k].action()
         end

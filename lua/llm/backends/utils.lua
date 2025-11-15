@@ -24,6 +24,7 @@ function utils.mark_reason_end(ctx, append_line_break)
       F.WriteContent(ctx.bufnr, ctx.winid, "\n")
     end
     state.reason_range.is_end = true
+    state.llm.start_line = vim.api.nvim_buf_line_count(ctx.bufnr)
   end
 end
 

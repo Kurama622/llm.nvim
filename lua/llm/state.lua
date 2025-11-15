@@ -9,11 +9,13 @@ M.cursor = {
 M.llm = {
   popup = nil,
   worker = { jobs = {} },
+  start_line = 1,
 }
 
 M.input = {
   popup = nil,
-  attach_content = nil,
+  attach_content = "",
+  lsp_ctx = {},
 }
 
 M.history = {
@@ -89,4 +91,5 @@ M.reason_range = {
 }
 
 M.enabled_cmds = {}
+
 return M
