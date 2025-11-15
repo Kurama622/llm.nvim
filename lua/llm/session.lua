@@ -325,19 +325,15 @@ function M.NewSession()
                   if F.IsValid(state.input.lsp_ctx.content) then
                     table.insert(state.session[state.session.filename], state.input.lsp_ctx)
                     F.SetRole(bufnr, winid, "user")
-                    local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
                     F.AppendChunkToBuffer(
                       bufnr,
                       winid,
-                      lsp_ctx_tbl[1]
+                      require("llm.tools.prompts").lsp
                         .. "\n"
                         .. table.concat(
-                          vim.tbl_filter(function(item)
-                            if string.match(item, "^- ") then
-                              return true
-                            end
-                            return false
-                          end, lsp_ctx_tbl),
+                          vim.tbl_map(function(item)
+                            return "- " .. item
+                          end, state.input.lsp_ctx.symbols_location_list),
                           "\n"
                         )
                     )
@@ -475,18 +471,16 @@ function M.NewSession()
                             table.insert(state.session[state.session.filename], state.input.lsp_ctx)
                             F.SetRole(bufnr, winid, "user")
                             local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
+
                             F.AppendChunkToBuffer(
                               bufnr,
                               winid,
-                              lsp_ctx_tbl[1]
+                              require("llm.tools.prompts").lsp
                                 .. "\n"
                                 .. table.concat(
-                                  vim.tbl_filter(function(item)
-                                    if string.match(item, "^- ") then
-                                      return true
-                                    end
-                                    return false
-                                  end, lsp_ctx_tbl),
+                                  vim.tbl_map(function(item)
+                                    return "- " .. item
+                                  end, state.input.lsp_ctx.symbols_location_list),
                                   "\n"
                                 )
                             )

@@ -1166,24 +1166,24 @@ function api.lsp_wrap(opts)
       state.input.lsp_ctx.role = "user"
       state.input.lsp_ctx.type = "lsp"
       state.input.lsp_ctx.content = ""
+      state.input.lsp_ctx.symbols_location_list = {}
       api.lsp_request(opts.lsp, function(symbol, context)
         if context then
-          state.input.lsp_ctx.content = state.input.lsp_ctx.content
-            .. "\n- "
-            .. symbol.fname
+          local symbol_location = symbol.fname
             .. "#L"
             .. symbol.start_line
             .. "-"
             .. symbol.end_line
             .. " | "
             .. symbol.name
-            .. "\n"
-            .. context
+          if not vim.tbl_contains(state.input.lsp_ctx.symbols_location_list, symbol_location) then
+            table.insert(state.input.lsp_ctx.symbols_location_list, symbol_location)
+            state.input.lsp_ctx.content = state.input.lsp_ctx.content .. "\n- " .. symbol_location .. "\n" .. context
+          end
         end
         if symbol.done then
           if api.IsValid(state.input.lsp_ctx.content) then
-            state.input.lsp_ctx.content = "Here are some relevant context codes, which do not require optimization and are only for analysis:"
-              .. state.input.lsp_ctx.content
+            state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
           end
           llm_request()
         end
@@ -1219,7 +1219,7 @@ function api.lsp_request(cfg, callback)
       math.max(state.input.lsp_ctx.start_line, node_start_line) <= math.min(state.input.lsp_ctx.end_line, node_end_line)
     then
       -- 我们只关心标识符和函数名 (call_expression 的一部分)
-      if node:type() == "identifier" then
+      if node:type():match("identifier$") then
         local name = vim.treesitter.get_node_text(node, cfg.bufnr)
         if not queried_symbols[name] then
           table.insert(symbols_to_query, { name = name, node = node })

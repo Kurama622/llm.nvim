@@ -87,4 +87,5 @@ When given a task:
   images = [[Please summarize the content of the image.]],
   attach_to_chat = summarize_suggestions_prompt,
   disposable_ask = summarize_suggestions_prompt,
+  lsp = "Here are some relevant context codes, which do not require optimization and are only for analysis:",
 }
