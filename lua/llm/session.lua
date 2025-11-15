@@ -73,9 +73,11 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
   local bufnr = vim.api.nvim_get_current_buf()
   opts.lsp = opts.lsp or conf.configs.lsp
-  opts.lsp.bufnr = bufnr
   local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
-  opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  if F.IsValid(opts.lsp) then
+    opts.lsp.bufnr = bufnr
+    opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  end
   state.input.attach_content = F.GetVisualSelection(lines)
 
   if builtin_called then
@@ -303,25 +305,27 @@ function M.NewSession()
               F.NewLine(bufnr, winid)
               if state.input.request_with_lsp ~= nil then
                 state.input.request_with_lsp(function()
-                  table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                  F.SetRole(bufnr, winid, "user")
-                  local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
-                  F.AppendChunkToBuffer(
-                    bufnr,
-                    winid,
-                    lsp_ctx_tbl[1]
-                      .. "\n"
-                      .. table.concat(
-                        vim.tbl_filter(function(item)
-                          if string.match(item, "^- ") then
-                            return true
-                          end
-                          return false
-                        end, lsp_ctx_tbl),
-                        "\n"
-                      )
-                  )
-                  F.NewLine(bufnr, winid)
+                  if F.IsValid(state.input.lsp_ctx.content) then
+                    table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                    F.SetRole(bufnr, winid, "user")
+                    local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
+                    F.AppendChunkToBuffer(
+                      bufnr,
+                      winid,
+                      lsp_ctx_tbl[1]
+                        .. "\n"
+                        .. table.concat(
+                          vim.tbl_filter(function(item)
+                            if string.match(item, "^- ") then
+                              return true
+                            end
+                            return false
+                          end, lsp_ctx_tbl),
+                          "\n"
+                        )
+                    )
+                    F.NewLine(bufnr, winid)
+                  end
                   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                   F.ClearAttach()
                 end)
@@ -450,25 +454,27 @@ function M.NewSession()
                       F.NewLine(bufnr, winid)
                       if state.input.request_with_lsp ~= nil then
                         state.input.request_with_lsp(function()
-                          table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                          F.SetRole(bufnr, winid, "user")
-                          local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
-                          F.AppendChunkToBuffer(
-                            bufnr,
-                            winid,
-                            lsp_ctx_tbl[1]
-                              .. "\n"
-                              .. table.concat(
-                                vim.tbl_filter(function(item)
-                                  if string.match(item, "^- ") then
-                                    return true
-                                  end
-                                  return false
-                                end, lsp_ctx_tbl),
-                                "\n"
-                              )
-                          )
-                          F.NewLine(bufnr, winid)
+                          if F.IsValid(state.input.lsp_ctx.content) then
+                            table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                            F.SetRole(bufnr, winid, "user")
+                            local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
+                            F.AppendChunkToBuffer(
+                              bufnr,
+                              winid,
+                              lsp_ctx_tbl[1]
+                                .. "\n"
+                                .. table.concat(
+                                  vim.tbl_filter(function(item)
+                                    if string.match(item, "^- ") then
+                                      return true
+                                    end
+                                    return false
+                                  end, lsp_ctx_tbl),
+                                  "\n"
+                                )
+                            )
+                            F.NewLine(bufnr, winid)
+                          end
                           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                           F.ClearAttach()
                         end)

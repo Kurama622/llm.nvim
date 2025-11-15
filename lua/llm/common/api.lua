@@ -92,7 +92,11 @@ local function get_locations(bufnr, method, params, callback)
     vim.list_extend(all_items, items)
     remaining = remaining - 1
     if remaining == 0 then
-      callback(all_items)
+      if vim.tbl_isempty(all_items) then
+        callback({ { user_data = { targetUri = nil } } })
+      else
+        callback(all_items)
+      end
     end
   end
   for _, client in ipairs(clients) do
@@ -459,10 +463,12 @@ function api.GetAttach(opts)
   local bufnr = vim.api.nvim_get_current_buf()
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
   opts.lsp = opts.lsp or conf.configs.lsp
-  opts.lsp.bufnr = bufnr
 
   local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
-  opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  if api.IsValid(opts.lsp) then
+    opts.lsp.bufnr = bufnr
+    opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  end
   api.VisMode2NorMode()
 
   if opts.is_codeblock and not vim.tbl_isempty(lines) then
@@ -1155,7 +1161,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
 end
 
 function api.lsp_wrap(opts)
-  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp.methods) then
+  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp[vim.bo.ft].methods) then
     return function(llm_request)
       state.input.lsp_ctx.role = "user"
       state.input.lsp_ctx.type = "lsp"
@@ -1165,7 +1171,7 @@ function api.lsp_wrap(opts)
           state.input.lsp_ctx.content = state.input.lsp_ctx.content
             .. "\n- "
             .. symbol.fname
-            .. ":"
+            .. "#L"
             .. symbol.start_line
             .. "-"
             .. symbol.end_line
@@ -1233,9 +1239,16 @@ function api.lsp_request(cfg, callback)
 
   local supported_method_cnt = 0
 
-  for _, method in pairs(cfg.methods) do
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = cfg.bufnr })
+
+  for _, method in pairs(cfg[ft].methods) do
     local clients = vim.lsp.get_clients({ method = method, bufnr = cfg.bufnr })
 
+    if #clients == 0 then
+      LOG:WARN(ft .. " lacks an LSP client.")
+      callback({ ["done"] = true })
+      return
+    end
     for i = 1, #clients do
       if clients[i].supports_method("textDocument/" .. method, cfg.bufnr) then
         supported_method_cnt = supported_method_cnt + 1
@@ -1253,14 +1266,14 @@ function api.lsp_request(cfg, callback)
       position = { line = row, character = col },
     }
 
-    for n_method, method in pairs(cfg.methods) do
+    for n_method, method in pairs(cfg[ft].methods) do
       get_locations(cfg.bufnr, "textDocument/" .. method, params, function(locations)
         for n_location, location in pairs(locations) do
           local lsp_request_done = (n_symbol == #symbols_to_query) and (n_method == supported_method_cnt)
           local uri = location.user_data.targetUri or location.user_data.uri
           local range = location.user_data.targetRange or location.user_data.range
           if not uri or not range then
-            LOG:WARN("Invalid LSP Location")
+            LOG:DEBUG("symbol '" .. symbol.name .. "': Invalid LSP Location")
             if lsp_request_done then
               callback({ ["done"] = true })
             end
@@ -1271,7 +1284,6 @@ function api.lsp_request(cfg, callback)
           -- 确保 buffer 已加载
           local bufnr = vim.fn.bufadd(fname)
           vim.fn.bufload(bufnr)
-          local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
 
           -- 取 LSP 返回的位置
           row = range.start.line

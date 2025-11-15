@@ -90,6 +90,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
   options = vim.tbl_deep_extend("force", options, opts or {})
   options.diagnostic = options.diagnostic or conf.configs.diagnostic
+  options.lsp = options.lsp or conf.configs.lsp
 
   if prompt == nil then
     prompt = string.format(require("llm.tools.prompts").action, options.language)
@@ -170,7 +171,12 @@ function M.handler(name, F, state, streaming, prompt, opts)
         { role = "user", content = source_content },
       }
     end
-    options.messages = state.app.session[name]
+    if F.IsValid(options.lsp) then
+      options.lsp.bufnr = bufnr
+      options.lsp.start_line, options.lsp.end_line = start_line, end_line
+      state.input.request_with_lsp = F.lsp_wrap(options)
+    end
+
     local preview_box = Split({
       relative = options.output.relative,
       position = options.output.position,
@@ -192,7 +198,17 @@ function M.handler(name, F, state, streaming, prompt, opts)
       buf_options = options.input.buf_options,
       win_options = options.input.win_options,
     })
-    utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+    if state.input.request_with_lsp ~= nil then
+      state.input.request_with_lsp(function()
+        table.insert(state.app.session[name], state.input.lsp_ctx)
+        options.messages = state.app.session[name]
+        utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+        F.ClearAttach()
+      end)
+    else
+      options.messages = state.app.session[name]
+      utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+    end
 
     preview_box:map("n", "<C-c>", F.CancelLLM)
 
