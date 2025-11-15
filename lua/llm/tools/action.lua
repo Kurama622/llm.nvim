@@ -126,6 +126,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   local default_actions = {}
+
+  -- Only display diff for docstring
   if options.only_display_diff then
     state.app["session"][name] = {
       { role = "system", content = prompt },
@@ -202,12 +204,12 @@ function M.handler(name, F, state, streaming, prompt, opts)
       state.input.request_with_lsp(function()
         table.insert(state.app.session[name], state.input.lsp_ctx)
         options.messages = state.app.session[name]
-        utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+        utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
         F.ClearAttach()
       end)
     else
       options.messages = state.app.session[name]
-      utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+      utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
     end
 
     preview_box:map("n", "<C-c>", F.CancelLLM)
@@ -257,7 +259,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
         table.remove(state.app.session[name], #state.app.session[name])
         state.app.session[name][1].content = state.app.session[name][1].content .. "\n" .. table.concat(contents, "\n")
         vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
-        utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+        utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
       end)
     end)
 
@@ -266,22 +268,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
         diff:reject()
       end
       table.remove(state.app.session[name], #state.app.session[name])
-      utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+      utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
     end)
-  end
-
-  for _, k in ipairs({ "accept", "reject", "close" }) do
-    utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
-      default_actions[k]()
-      if options[k].action ~= nil then
-        options[k].action()
-      end
-      if k == "close" then
-        for _, kk in ipairs({ "accept", "reject", "close" }) do
-          utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
-        end
-      end
-    end, bufnr)
   end
 end
 return M

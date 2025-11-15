@@ -45,7 +45,7 @@ end
 
 function utils.clear_keymapping(mode, keymaps, bufnr)
   for _, key in pairs(keymaps) do
-    vim.keymap.del(mode, key, { buffer = bufnr })
+    pcall(vim.keymap.del, mode, key, { buffer = bufnr })
   end
 end
 
@@ -87,6 +87,7 @@ function utils.new_diff(diff, opts, context, suggestion)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
     LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
+    return false
   else
     local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
     local idx = utils.get_hunk_idx(range_tbl)
@@ -109,17 +110,32 @@ function utils.new_diff(diff, opts, context, suggestion)
         end
       end,
     })
+    return true
   end
 end
 
-function utils.single_turn_dialogue(preview_box, streaming, options, context, diff)
+function utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
   if preview_box then
     F.AppendChunkToBuffer(preview_box.bufnr, preview_box.winid, "-----\n")
   end
   options.bufnr = preview_box.bufnr
   options.winid = preview_box.winid
   options.exit_handler = function(ostr)
-    utils.new_diff(diff, options, context, ostr)
+    if utils.new_diff(diff, options, context, ostr) then
+      for _, op in ipairs({ "accept", "reject", "close" }) do
+        utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
+          default_actions[op]()
+          if options[op].action ~= nil then
+            options[op].action()
+          end
+          if op == "close" then
+            for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+              utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, context.bufnr)
+            end
+          end
+        end, context.bufnr)
+      end
+    end
   end
   streaming(options)
 end

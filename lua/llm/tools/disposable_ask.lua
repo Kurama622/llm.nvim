@@ -127,24 +127,6 @@ function M.handler(_, _, _, _, prompt, opts)
 
   options = vim.tbl_deep_extend("force", options, opts or {})
 
-  -- set diff keymapping
-  local bufnr = vim.api.nvim_get_current_buf()
-  if vim.api.nvim_get_option_value("buftype", { buf = bufnr }) ~= "nofile" then
-    for _, k in ipairs({ "accept", "reject", "close" }) do
-      utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
-        default_actions[k]()
-        if options[k].action ~= nil then
-          options[k].action()
-        end
-        if k == "close" then
-          for _, kk in ipairs({ "accept", "reject", "close" }) do
-            utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
-          end
-        end
-      end, bufnr)
-    end
-  end
-
   local input_box = Popup(options)
   local mode = options.mode or vim.fn.mode()
 

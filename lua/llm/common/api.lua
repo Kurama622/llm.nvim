@@ -1161,7 +1161,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
 end
 
 function api.lsp_wrap(opts)
-  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp[vim.bo.ft].methods) then
+  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp[vim.bo.ft]) and api.IsValid(opts.lsp[vim.bo.ft].methods) then
     return function(llm_request)
       state.input.lsp_ctx.role = "user"
       state.input.lsp_ctx.type = "lsp"
@@ -1205,7 +1205,9 @@ function api.lsp_request(cfg, callback)
     return
   end
 
-  state.input.lsp_ctx.root_dir = vim.fs.root(cfg.bufnr, cfg.root_dir)
+  if cfg.root_dir then
+    state.input.lsp_ctx.root_dir = vim.fs.root(cfg.bufnr, cfg.root_dir)
+  end
   state.input.lsp_ctx.fname = vim.uri_to_fname(vim.uri_from_bufnr(cfg.bufnr))
   local root = parser:parse()[1]:root()
   local symbols_to_query = {}
@@ -1306,9 +1308,12 @@ function api.lsp_request(cfg, callback)
 
           if node then
             local node_start_line, _, node_end_line, _ = vim.treesitter.get_node_range(node)
+            local relative_fname = state.input.lsp_ctx.root_dir ~= nil
+                and vim.fs.relpath(state.input.lsp_ctx.root_dir, fname)
+              or fname
             callback({
               ["name"] = symbol.name,
-              ["fname"] = fname,
+              ["fname"] = relative_fname,
               ["start_line"] = node_start_line + 1,
               ["end_line"] = node_end_line + 1,
               ["done"] = lsp_request_done and (n_location == #locations),
