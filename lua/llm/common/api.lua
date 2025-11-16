@@ -142,6 +142,7 @@ local function find_definition_node(bufnr, row, col)
     -- Lua
     local_variable_declaration = true,
     local_function = true,
+    field = true,
 
     -- Java / C#
     constructor_declaration = true,
