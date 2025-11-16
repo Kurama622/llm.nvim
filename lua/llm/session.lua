@@ -325,17 +325,25 @@ function M.NewSession()
                   if F.IsValid(state.input.lsp_ctx.content) then
                     table.insert(state.session[state.session.filename], state.input.lsp_ctx)
                     F.SetRole(bufnr, winid, "user")
+
+                    local symbols_location_info = ""
+                    for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+                      for _, sym in pairs(symbol_location) do
+                        symbols_location_info = symbols_location_info
+                          .. "\n- "
+                          .. fname
+                          .. "#L"
+                          .. sym.start_row
+                          .. "-"
+                          .. sym.end_row
+                          .. " | "
+                          .. sym.name
+                      end
+                    end
                     F.AppendChunkToBuffer(
                       bufnr,
                       winid,
-                      require("llm.tools.prompts").lsp
-                        .. "\n"
-                        .. table.concat(
-                          vim.tbl_map(function(item)
-                            return "- " .. item
-                          end, state.input.lsp_ctx.symbols_location_list),
-                          "\n"
-                        )
+                      require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
                     )
                     F.NewLine(bufnr, winid)
                   end
@@ -470,19 +478,25 @@ function M.NewSession()
                           if F.IsValid(state.input.lsp_ctx.content) then
                             table.insert(state.session[state.session.filename], state.input.lsp_ctx)
                             F.SetRole(bufnr, winid, "user")
-                            local lsp_ctx_tbl = vim.split(state.input.lsp_ctx.content, "\n")
 
+                            local symbols_location_info = ""
+                            for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+                              for _, sym in pairs(symbol_location) do
+                                symbols_location_info = symbols_location_info
+                                  .. "\n- "
+                                  .. fname
+                                  .. "#L"
+                                  .. sym.start_row
+                                  .. "-"
+                                  .. sym.end_row
+                                  .. " | "
+                                  .. sym.name
+                              end
+                            end
                             F.AppendChunkToBuffer(
                               bufnr,
                               winid,
-                              require("llm.tools.prompts").lsp
-                                .. "\n"
-                                .. table.concat(
-                                  vim.tbl_map(function(item)
-                                    return "- " .. item
-                                  end, state.input.lsp_ctx.symbols_location_list),
-                                  "\n"
-                                )
+                              require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
                             )
                             F.NewLine(bufnr, winid)
                           end

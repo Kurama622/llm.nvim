@@ -1155,7 +1155,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
     for _, diags in pairs(diagnostics_tbl) do
       diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
     end
-    return diagnostics_prompt .. "\nBelow is the diagnostics for the code:" .. diagnostics_content
+    return diagnostics_prompt .. "\nThe code's diagnostics:" .. diagnostics_content
   end
   return diagnostics_prompt
 end
@@ -1167,21 +1167,67 @@ function api.lsp_wrap(opts)
       state.input.lsp_ctx.type = "lsp"
       state.input.lsp_ctx.content = ""
       state.input.lsp_ctx.symbols_location_list = {}
-      api.lsp_request(opts.lsp, function(symbol, context)
-        if context then
-          local symbol_location = symbol.fname
-            .. "#L"
-            .. symbol.start_line
-            .. "-"
-            .. symbol.end_line
-            .. " | "
-            .. symbol.name
-          if not vim.tbl_contains(state.input.lsp_ctx.symbols_location_list, symbol_location) then
-            table.insert(state.input.lsp_ctx.symbols_location_list, symbol_location)
-            state.input.lsp_ctx.content = state.input.lsp_ctx.content .. "\n- " .. symbol_location .. "\n" .. context
+      api.lsp_request(opts.lsp, function(symbol, exist)
+        if exist then
+          local symbol_location = {
+            start_row = symbol.start_row,
+            end_row = symbol.end_row,
+            start_col = symbol.start_col,
+            end_col = symbol.end_col,
+            name = symbol.name,
+            bufnr = symbol.bufnr,
+          }
+
+          -- Deduplicate and take the union of the returned symbol definitions.
+          if not api.IsValid(state.input.lsp_ctx.symbols_location_list[symbol.fname]) then
+            state.input.lsp_ctx.symbols_location_list[symbol.fname] = { symbol_location }
+          else
+            local placed = false
+
+            for i, item in pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname]) do
+              if item.start_row > symbol_location.start_row and item.end_row < symbol_location.end_row then
+                state.input.lsp_ctx.symbols_location_list[symbol.fname][i] = symbol_location
+                placed = true
+                break
+              elseif item.start_row <= symbol_location.start_row and item.end_row >= symbol_location.end_row then
+                placed = true
+                break
+              end
+            end
+            if not placed then
+              table.insert(state.input.lsp_ctx.symbols_location_list[symbol.fname], symbol_location)
+            end
           end
         end
         if symbol.done then
+          for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+            for _, sym in pairs(symbol_location) do
+              state.input.lsp_ctx.content = state.input.lsp_ctx.content
+                .. "\n- "
+                .. fname
+                .. "#L"
+                .. sym.start_row
+                .. "-"
+                .. sym.end_row
+                .. " | "
+                .. sym.name
+                .. "\n```"
+                .. vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr })
+                .. "\n"
+                .. table.concat(
+                  vim.api.nvim_buf_get_text(
+                    sym.bufnr,
+                    sym.start_row - 1,
+                    sym.start_col - 1,
+                    sym.end_row - 1,
+                    sym.end_col - 1,
+                    {}
+                  ),
+                  "\n"
+                )
+                .. "\n```"
+            end
+          end
           if api.IsValid(state.input.lsp_ctx.content) then
             state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
           end
@@ -1307,17 +1353,20 @@ function api.lsp_request(cfg, callback)
           local node = find_definition_node(bufnr, row, col)
 
           if node then
-            local node_start_line, _, node_end_line, _ = vim.treesitter.get_node_range(node)
+            local node_start_row, node_start_col, node_end_row, node_end_col = vim.treesitter.get_node_range(node)
             local relative_fname = state.input.lsp_ctx.root_dir ~= nil
                 and vim.fs.relpath(state.input.lsp_ctx.root_dir, fname)
               or fname
             callback({
               ["name"] = symbol.name,
               ["fname"] = relative_fname,
-              ["start_line"] = node_start_line + 1,
-              ["end_line"] = node_end_line + 1,
+              ["start_row"] = node_start_row + 1,
+              ["end_row"] = node_end_row + 1,
+              ["start_col"] = node_start_col + 1,
+              ["end_col"] = node_end_col + 1,
+              ["bufnr"] = bufnr,
               ["done"] = lsp_request_done and (n_location == #locations),
-            }, "```" .. ft .. "\n" .. vim.treesitter.get_node_text(node, bufnr) .. "\n```")
+            }, true)
           else
             if lsp_request_done and (n_location == #locations) then
               callback({ ["done"] = true })
