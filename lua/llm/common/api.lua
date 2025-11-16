@@ -692,16 +692,26 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
     elseif msg.role == "user" and api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if msg.type == "lsp" then
-        local lsp_ctx_tbl = vim.split(msg.content, "\n")
-        api.AppendChunkToBuffer(bufnr, winid, lsp_ctx_tbl[1] .. "\n" .. table.concat(
-          vim.tbl_filter(function(item)
-            if string.match(item, "^- ") then
-              return true
-            end
-            return false
-          end, lsp_ctx_tbl),
-          "\n"
-        ), detach)
+        local symbols_location_info = ""
+        for fname, symbol_location in pairs(msg.symbols_location_list) do
+          for _, sym in pairs(symbol_location) do
+            symbols_location_info = symbols_location_info
+              .. "\n- "
+              .. fname
+              .. "#L"
+              .. sym.start_row
+              .. "-"
+              .. sym.end_row
+              .. " | "
+              .. sym.name
+          end
+        end
+        api.AppendChunkToBuffer(
+          bufnr,
+          winid,
+          require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n",
+          detach
+        )
       else
         api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
       end
@@ -1149,7 +1159,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
   end
 
   local diagnostics_prompt = state.input.diagnostic_error and ""
-    or "All dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
+    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
 
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
