@@ -72,8 +72,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts = opts or {}
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
   local bufnr = vim.api.nvim_get_current_buf()
+  opts.lsp = opts.lsp or conf.configs.lsp
   local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
-  local content = F.GetVisualSelection(lines)
+  if F.IsValid(opts.lsp) then
+    opts.lsp.bufnr = bufnr
+    opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  end
+  state.input.attach_content = F.GetVisualSelection(lines)
 
   if builtin_called then
     conf.configs.popwin_opts.border.text.top = conf.configs.popwin_opts.border.text.top_builtin
@@ -102,8 +107,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   }
 
   if F.IsValid(opts.diagnostic) then
-    content = content .. "\n" .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
+    state.input.attach_content = state.input.attach_content
+      .. "\n"
+      .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
   end
+
+  state.input.request_with_lsp = F.lsp_wrap(opts)
+
   if builtin_called then
     if opts.prompt then
       state.session[popwin.winid] = {
@@ -112,17 +122,39 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     else
       state.session[popwin.winid] = {}
     end
-    table.insert(state.session[popwin.winid], { role = "user", content = description .. "\n" .. content .. "\n" })
+    table.insert(
+      state.session[popwin.winid],
+      { role = "user", content = description .. "\n" .. state.input.attach_content .. "\n" }
+    )
+
     F.UpdatePrompt(popwin.winid)
 
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(opts._[k].mapping.mode, opts._[k].mapping.keys, function()
         opts.action[k]()
+        if k == "display" then
+          if vim.api.nvim_get_option_value("buftype", { buf = bufnr }) ~= "nofile" then
+            for _, op in ipairs({ "accept", "reject", "close" }) do
+              utils.set_keymapping(opts._[op].mapping.mode, opts._[op].mapping.keys, function()
+                opts.action[op]()
+                if opts._[op].action ~= nil then
+                  opts._[op].action()
+                end
+                if op == "close" then
+                  for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+                    utils.clear_keymapping(opts._[reset_op].mapping.mode, opts._[reset_op].mapping.keys, bufnr)
+                  end
+                end
+              end, bufnr)
+            end
+          end
+        end
         if opts._[k].action ~= nil then
           opts._[k].action()
         end
       end, popwin.bufnr)
     end
+
     local params = {
       _name = opts._._name,
       bufnr = popwin.bufnr,
@@ -133,11 +165,20 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     for _, key in pairs(state.model_params) do
       params[key] = opts._[key]
     end
-    streaming.GetStreamingOutput(params)
+
+    if state.input.request_with_lsp ~= nil then
+      state.input.request_with_lsp(function()
+        table.insert(state.session[popwin.winid], state.input.lsp_ctx)
+        streaming.GetStreamingOutput(params)
+        F.ClearAttach()
+      end)
+    else
+      streaming.GetStreamingOutput(params)
+    end
   else
     state.session[popwin.winid] = {
       { role = "system", content = description },
-      { role = "user", content = content },
+      { role = "user", content = state.input.attach_content },
     }
     streaming.GetStreamingOutput({
       bufnr = popwin.bufnr,
@@ -204,7 +245,7 @@ function M.NewSession()
       -------------------------------------------------------------------------
       state.session.filename = "current"
       if not state.session[state.session.filename] then
-        state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+        state.session[state.session.filename] = vim.deepcopy(conf.session.messages)
       end
 
       F.RefreshLLMText(state.session[state.session.filename])
@@ -263,15 +304,12 @@ function M.NewSession()
         if k == "Input:Submit" then
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
-            local input = table.concat(input_table, "\n")
-            if state.input.attach_content then
-              input = input .. "\n" .. state.input.attach_content
-              F.ClearAttach()
-            end
+            local input = table.concat(input_table, "\n") .. "\n" .. state.input.attach_content
+
             if not conf.configs.save_session then
               state.session.filename = "current"
               if not state.session[state.session.filename] then
-                state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+                state.session[state.session.filename] = vim.deepcopy(conf.session.messages)
               end
             end
             vim.api.nvim_buf_set_lines(state.input.popup.bufnr, 0, -1, false, {})
@@ -282,7 +320,39 @@ function M.NewSession()
               F.SetRole(bufnr, winid, "user")
               F.AppendChunkToBuffer(bufnr, winid, input)
               F.NewLine(bufnr, winid)
-              vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+              if state.input.request_with_lsp ~= nil then
+                state.input.request_with_lsp(function()
+                  if F.IsValid(state.input.lsp_ctx.content) then
+                    table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                    F.SetRole(bufnr, winid, "user")
+
+                    local symbols_location_info = ""
+                    for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+                      for _, sym in pairs(symbol_location) do
+                        symbols_location_info = symbols_location_info
+                          .. "\n- "
+                          .. fname
+                          .. "#L"
+                          .. sym.start_row
+                          .. "-"
+                          .. sym.end_row
+                          .. " | "
+                          .. sym.name
+                      end
+                    end
+                    F.AppendChunkToBuffer(
+                      bufnr,
+                      winid,
+                      require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
+                    )
+                    F.NewLine(bufnr, winid)
+                  end
+                  vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                  F.ClearAttach()
+                end)
+              else
+                vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+              end
             end
           end, { noremap = true })
         elseif k == "Input:Cancel" then
@@ -389,14 +459,10 @@ function M.NewSession()
                 if name == "Input:Submit" then
                   F.SetFloatKeyMapping(state.input.popup, d.mode, d.key, function()
                     local input_table = vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
-                    local input = table.concat(input_table, "\n")
-                    if state.input.attach_content then
-                      input = input .. "\n" .. state.input.attach_content
-                      F.ClearAttach()
-                    end
+                    local input = table.concat(input_table, "\n") .. "\n" .. state.input.attach_content
                     state.session.filename = state.session.filename or "current"
                     if not state.session[state.session.filename] then
-                      state.session[state.session.filename] = F.DeepCopy(conf.session.messages)
+                      state.session[state.session.filename] = vim.deepcopy(conf.session.messages)
                     end
                     state.input.popup:unmount()
                     state.input.popup = nil
@@ -407,7 +473,39 @@ function M.NewSession()
                       F.SetRole(bufnr, winid, "user")
                       F.AppendChunkToBuffer(bufnr, winid, input)
                       F.NewLine(bufnr, winid)
-                      vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                      if state.input.request_with_lsp ~= nil then
+                        state.input.request_with_lsp(function()
+                          if F.IsValid(state.input.lsp_ctx.content) then
+                            table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                            F.SetRole(bufnr, winid, "user")
+
+                            local symbols_location_info = ""
+                            for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+                              for _, sym in pairs(symbol_location) do
+                                symbols_location_info = symbols_location_info
+                                  .. "\n- "
+                                  .. fname
+                                  .. "#L"
+                                  .. sym.start_row
+                                  .. "-"
+                                  .. sym.end_row
+                                  .. " | "
+                                  .. sym.name
+                              end
+                            end
+                            F.AppendChunkToBuffer(
+                              bufnr,
+                              winid,
+                              require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
+                            )
+                            F.NewLine(bufnr, winid)
+                          end
+                          vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                          F.ClearAttach()
+                        end)
+                      else
+                        vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                      end
                     end
                     vim.api.nvim_set_current_win(state.llm.popup.winid)
                   end, { noremap = true })

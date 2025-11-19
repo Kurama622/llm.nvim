@@ -12,20 +12,6 @@ local function IsNotPopwin(winid)
   return not vim.tbl_contains(vim.tbl_keys(state.popwin_list), winid)
 end
 
-local function escape_string(str)
-  local replacements = {
-    ["\\"] = "\\\\",
-    ["\n"] = "\\n",
-    ["\t"] = "\\t",
-    ['"'] = '\\"',
-    ["'"] = "\\'",
-    [" "] = "\\ ",
-    ["("] = "\\(",
-    [")"] = "\\)",
-  }
-  return (str:gsub(".", replacements))
-end
-
 -- define utf8 char length
 local function utf8_char_length(byte)
   if byte < 0x80 then
@@ -79,6 +65,129 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
+---@param bufnr integer Buffer number.
+---@param method string
+---@param params? table LSP request params.
+---@param callback fun(items: vim.quickfix.entry[])
+local function get_locations(bufnr, method, params, callback)
+  local clients = vim.lsp.get_clients({ method = method, bufnr = bufnr })
+
+  if not next(clients) then
+    callback({})
+    return
+  end
+  local remaining = #clients
+
+  ---@type vim.quickfix.entry[]
+  local all_items = {}
+
+  ---@param result nil|lsp.Location|lsp.Location[]
+  ---@param client vim.lsp.Client
+  local function on_response(_, result, client)
+    local locations = {}
+    if result then
+      locations = vim.islist(result) and result or { result }
+    end
+    local items = vim.lsp.util.locations_to_items(locations, client.offset_encoding)
+    vim.list_extend(all_items, items)
+    remaining = remaining - 1
+    if remaining == 0 then
+      if vim.tbl_isempty(all_items) then
+        callback({ { user_data = { targetUri = nil } } })
+      else
+        callback(all_items)
+      end
+    end
+  end
+  for _, client in ipairs(clients) do
+    client:request(method, params, function(_, result)
+      on_response(_, result, client)
+    end)
+  end
+end
+
+local function find_definition_node(bufnr, row, col)
+  local parser = vim.treesitter.get_parser(bufnr)
+  local tree = parser:parse()[1]
+  local root = tree:root()
+
+  local node = root:named_descendant_for_range(row, col, row, col)
+
+  local definition_nodes = {
+    -- 通用
+    variable_declaration = true,
+    assignment_statement = true,
+    function_definition = true,
+    function_declaration = true,
+    method_definition = true,
+    method_declaration = true,
+    class_declaration = true,
+    enum_specifier = true,
+    interface_declaration = true,
+    type_definition = true,
+    type_alias_declaration = true,
+    -- module_declaration = true,
+    trait_item = true,
+    impl_item = true,
+    interface_body = true,
+
+    -- Python
+    class_definition = true,
+
+    -- Go
+    type_declaration = true,
+    const_declaration = true,
+    var_declaration = true,
+
+    -- Lua
+    local_variable_declaration = true,
+    local_function = true,
+    field = true,
+
+    -- Java / C#
+    constructor_declaration = true,
+    field_declaration = true,
+    property_declaration = true,
+
+    -- C++
+    class_specifier = true,
+    struct_specifier = true,
+    template_declaration = "container",
+    namespace_definition = "container",
+    linkage_specification = "container",
+    module_declaration = "container",
+  }
+
+  -- 一些节点其实是“声明语句”，比如 declaration、definition、specifier 的组合
+  local function is_definition_node(n)
+    if not n then
+      return false
+    end
+    local kind = definition_nodes[n:type()]
+    if kind == true or kind == "container" then
+      return true
+    end
+    local t = n:type()
+    return t:match("declaration$") or t:match("definition$") or t:match("specifier$")
+  end
+
+  while node and not is_definition_node(node) do
+    node = node:parent()
+  end
+
+  if not node then
+    LOG:DEBUG("Not found definition node.")
+    return nil
+  end
+
+  local parent = node:parent()
+  while parent and definition_nodes[parent:type()] == "container" do
+    node = parent
+    parent = node:parent()
+  end
+  return node
+end
+
 function api.IsValid(v)
   if type(v) == "table" then
     return not vim.tbl_isempty(v)
@@ -98,18 +207,6 @@ function api.TrimLeadingWhitespace(str)
     return ""
   end
   return (str:gsub("^[\n%s]*", ""))
-end
-
-function api.DeepCopy(t)
-  local new_t = {}
-  for k, v in pairs(t) do
-    if type(v) == "table" then
-      new_t[k] = api.DeepCopy(v)
-    else
-      new_t[k] = v
-    end
-  end
-  return new_t
 end
 
 function api.GetFileType(bufnr)
@@ -351,7 +448,14 @@ function api.MakeInlineContext(opts, bufnr, name)
       start_str = "```",
       end_str = "```",
     }
-    state.summarize_suggestions.prompt = string.format(require("llm.tools.prompts")[name], "", "", opts.language)
+    local prompt = ""
+
+    if opts.prompt == nil then
+      prompt = require("llm.tools.prompts")[name]
+    elseif type(opts.prompt) == "function" then
+      prompt = opts.prompt()
+    end
+    state.summarize_suggestions.prompt = string.format(prompt, opts.language)
   end
   return lines, start_line, end_line, start_col, end_col
 end
@@ -359,7 +463,13 @@ end
 function api.GetAttach(opts)
   local bufnr = vim.api.nvim_get_current_buf()
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
+  opts.lsp = opts.lsp or conf.configs.lsp
+
   local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
+  if api.IsValid(opts.lsp) then
+    opts.lsp.bufnr = bufnr
+    opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+  end
   api.VisMode2NorMode()
 
   if opts.is_codeblock and not vim.tbl_isempty(lines) then
@@ -379,11 +489,13 @@ function api.GetAttach(opts)
       .. "\n"
       .. api.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
   end
+  state.input.request_with_lsp = api.lsp_wrap(opts)
   return bufnr
 end
 
 function api.ClearAttach()
-  state.input.attach_content = nil
+  state.input.attach_content = ""
+  state.input.lsp_ctx = {}
 end
 
 function api.UpdatePrompt(name)
@@ -577,6 +689,33 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
   for _, msg in ipairs(messages) do
     if msg.role == "system" or msg.role == "tool" then
+    elseif msg.role == "user" and api.IsValid(msg.content) then
+      api.SetRole(bufnr, winid, msg.role, detach)
+      if msg.type == "lsp" then
+        local symbols_location_info = ""
+        for fname, symbol_location in pairs(msg.symbols_location_list) do
+          for _, sym in pairs(symbol_location) do
+            symbols_location_info = symbols_location_info
+              .. "\n- "
+              .. fname
+              .. "#L"
+              .. sym.start_row
+              .. "-"
+              .. sym.end_row
+              .. " | "
+              .. sym.name
+          end
+        end
+        api.AppendChunkToBuffer(
+          bufnr,
+          winid,
+          require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n",
+          detach
+        )
+      else
+        api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
+      end
+      api.NewLine(bufnr, winid, detach)
     elseif api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if api.IsValid(msg._llm_reasoning_content) then
@@ -1005,9 +1144,12 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
       severity = opts.diagnostic,
     })
 
-    for _, diag in ipairs(diagnostics) do
+    for i, diag in ipairs(diagnostics) do
       local level = severity_map[diag.severity] or "Unknow"
-      local msg = string.format("- %s: %s", level, diag.message)
+      if level == "Error" then
+        state.input.diagnostic_error = true
+      end
+      local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message)
       if diagnostics_tbl[diag.lnum] == nil then
         diagnostics_tbl[diag.lnum] = { msg }
       elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
@@ -1016,13 +1158,237 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
     end
   end
 
+  local diagnostics_prompt = state.input.diagnostic_error and ""
+    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
+
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
     for _, diags in pairs(diagnostics_tbl) do
       diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
     end
-    return "\nDiagnostics:" .. diagnostics_content
+    return diagnostics_prompt .. "\nThe code's diagnostics:" .. diagnostics_content
   end
-  return ""
+  return diagnostics_prompt
 end
+
+function api.lsp_wrap(opts)
+  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp[vim.bo.ft]) and api.IsValid(opts.lsp[vim.bo.ft].methods) then
+    return function(llm_request)
+      state.input.lsp_ctx.role = "user"
+      state.input.lsp_ctx.type = "lsp"
+      state.input.lsp_ctx.content = ""
+      state.input.lsp_ctx.symbols_location_list = {}
+      api.lsp_request(opts.lsp, function(symbol, exist)
+        if exist then
+          local symbol_location = {
+            start_row = symbol.start_row,
+            end_row = symbol.end_row,
+            start_col = symbol.start_col,
+            end_col = symbol.end_col,
+            name = symbol.name,
+            bufnr = symbol.bufnr,
+          }
+
+          -- Deduplicate and take the union of the returned symbol definitions.
+          if not api.IsValid(state.input.lsp_ctx.symbols_location_list[symbol.fname]) then
+            state.input.lsp_ctx.symbols_location_list[symbol.fname] = { symbol_location }
+          else
+            local placed = false
+
+            for i, item in pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname]) do
+              if item.start_row > symbol_location.start_row and item.end_row < symbol_location.end_row then
+                state.input.lsp_ctx.symbols_location_list[symbol.fname][i] = symbol_location
+                placed = true
+                break
+              elseif item.start_row <= symbol_location.start_row and item.end_row >= symbol_location.end_row then
+                placed = true
+                break
+              end
+            end
+            if not placed then
+              table.insert(state.input.lsp_ctx.symbols_location_list[symbol.fname], symbol_location)
+            end
+          end
+        end
+        if symbol.done then
+          for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+            for _, sym in pairs(symbol_location) do
+              state.input.lsp_ctx.content = state.input.lsp_ctx.content
+                .. "\n- "
+                .. fname
+                .. "#L"
+                .. sym.start_row
+                .. "-"
+                .. sym.end_row
+                .. " | "
+                .. sym.name
+                .. "\n```"
+                .. vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr })
+                .. "\n"
+                .. table.concat(
+                  vim.api.nvim_buf_get_text(
+                    sym.bufnr,
+                    sym.start_row - 1,
+                    sym.start_col - 1,
+                    sym.end_row - 1,
+                    sym.end_col - 1,
+                    {}
+                  ),
+                  "\n"
+                )
+                .. "\n```"
+            end
+          end
+          if api.IsValid(state.input.lsp_ctx.content) then
+            state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
+          end
+          llm_request()
+        end
+      end)
+    end
+  end
+  return nil
+end
+
+--- 主函数：获取选中代码中所有符号的定义
+function api.lsp_request(cfg, callback)
+  state.input.lsp_ctx.start_line = cfg.start_line - 1
+  state.input.lsp_ctx.end_line = cfg.end_line - 1
+
+  -- 2. 使用 Tree-sitter 获取该范围内的所有标识符
+  local parser = vim.treesitter.get_parser(cfg.bufnr)
+  if not parser then
+    LOG:WARN(string.format("Lack of %s's treesitter parser"), vim.bo.ft)
+    return
+  end
+
+  if cfg.root_dir then
+    state.input.lsp_ctx.root_dir = vim.fs.root(cfg.bufnr, cfg.root_dir)
+  end
+  state.input.lsp_ctx.fname = vim.uri_to_fname(vim.uri_from_bufnr(cfg.bufnr))
+  local root = parser:parse()[1]:root()
+  local symbols_to_query = {}
+  local queried_symbols = {}
+
+  local function traverse(node)
+    local node_start_line, _, node_end_line, _ = node:range()
+    if
+      math.max(state.input.lsp_ctx.start_line, node_start_line) <= math.min(state.input.lsp_ctx.end_line, node_end_line)
+    then
+      -- 我们只关心标识符和函数名 (call_expression 的一部分)
+      if node:type():match("identifier$") then
+        local name = vim.treesitter.get_node_text(node, cfg.bufnr)
+        if not queried_symbols[name] then
+          table.insert(symbols_to_query, { name = name, node = node })
+          queried_symbols[name] = true
+        end
+      end
+      for child in node:iter_children() do
+        traverse(child)
+      end
+    end
+  end
+
+  traverse(root)
+
+  if #symbols_to_query == 0 then
+    LOG:WARN("No searchable symbols were found in the district.")
+    return
+  end
+
+  local supported_method_cnt = 0
+
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = cfg.bufnr })
+
+  for _, method in pairs(cfg[ft].methods) do
+    local clients = vim.lsp.get_clients({ method = method, bufnr = cfg.bufnr })
+
+    if #clients == 0 then
+      LOG:WARN(ft .. " lacks an LSP client.")
+      callback({ ["done"] = true })
+      return
+    end
+    for i = 1, #clients do
+      if clients[i].supports_method("textDocument/" .. method, cfg.bufnr) then
+        supported_method_cnt = supported_method_cnt + 1
+      else
+        LOG:DEBUG(vim.lsp._unsupported_method("textDocument/" .. method))
+      end
+    end
+  end
+
+  -- 3. 对每个符号异步调用 LSP
+  for n_symbol, symbol in pairs(symbols_to_query) do
+    local row, col = symbol.node:start()
+    local params = {
+      textDocument = vim.lsp.util.make_text_document_params(cfg.bufnr),
+      position = { line = row, character = col },
+    }
+
+    for n_method, method in pairs(cfg[ft].methods) do
+      get_locations(cfg.bufnr, "textDocument/" .. method, params, function(locations)
+        for n_location, location in pairs(locations) do
+          local lsp_request_done = (n_symbol == #symbols_to_query) and (n_method == supported_method_cnt)
+          local uri = location.user_data.targetUri or location.user_data.uri
+          local range = location.user_data.targetRange or location.user_data.range
+          if not uri or not range then
+            LOG:DEBUG("symbol '" .. symbol.name .. "': Invalid LSP Location")
+            if lsp_request_done then
+              callback({ ["done"] = true })
+            end
+            return
+          end
+
+          local fname = vim.uri_to_fname(uri)
+          -- 确保 buffer 已加载
+          local bufnr = vim.fn.bufadd(fname)
+          vim.fn.bufload(bufnr)
+
+          -- 取 LSP 返回的位置
+          row = range.start.line
+          col = range.start.character
+
+          if
+            (
+              fname == state.input.lsp_ctx.fname
+              and row >= state.input.lsp_ctx.start_line
+              and row <= state.input.lsp_ctx.end_line
+            )
+            or (api.IsValid(state.input.lsp_ctx.root_dir) and string.match(fname, state.input.lsp_ctx.root_dir) == nil)
+          then
+            if lsp_request_done then
+              callback({ ["done"] = true })
+            end
+            return
+          end
+          local node = find_definition_node(bufnr, row, col)
+
+          if node then
+            local node_start_row, node_start_col, node_end_row, node_end_col = vim.treesitter.get_node_range(node)
+            local relative_fname = state.input.lsp_ctx.root_dir ~= nil
+                and vim.fs.relpath(state.input.lsp_ctx.root_dir, fname)
+              or fname
+            callback({
+              ["name"] = symbol.name,
+              ["fname"] = relative_fname,
+              ["start_row"] = node_start_row + 1,
+              ["end_row"] = node_end_row + 1,
+              ["start_col"] = node_start_col + 1,
+              ["end_col"] = node_end_col + 1,
+              ["bufnr"] = bufnr,
+              ["done"] = lsp_request_done and (n_location == #locations),
+            }, true)
+          else
+            if lsp_request_done and (n_location == #locations) then
+              callback({ ["done"] = true })
+            else
+              callback({ ["done"] = false })
+            end
+          end
+        end
+      end)
+    end
+  end
+end
+
 return api

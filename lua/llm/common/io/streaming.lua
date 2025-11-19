@@ -127,6 +127,7 @@ function M.GetStreamingOutput(opts)
   local stream_output =
     backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
 
+  state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
   local _args = nil
   if required_params.url ~= nil then
     body.model = required_params.model
