@@ -133,6 +133,7 @@ local function find_definition_node(bufnr, row, col)
 
     -- Python
     class_definition = true,
+    assignment = true,
 
     -- Go
     type_declaration = true,
@@ -494,6 +495,7 @@ function api.GetAttach(opts)
 end
 
 function api.ClearAttach()
+  state.input.diagnostic_error = nil
   state.input.attach_content = ""
   state.input.lsp_ctx = {}
 end
@@ -1149,7 +1151,7 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
       if level == "Error" then
         state.input.diagnostic_error = true
       end
-      local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message)
+      local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message:gsub("\n", "\n\t"))
       if diagnostics_tbl[diag.lnum] == nil then
         diagnostics_tbl[diag.lnum] = { msg }
       elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
