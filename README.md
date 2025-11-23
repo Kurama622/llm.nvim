@@ -39,7 +39,7 @@
   * [Generate Doc String](#generate-doc-string)
   * [Web Search](#web-search)
   * [Diagnostic](#diagnostic)
-  * [Code Completions](#code-completions)
+  * [Lsp](#lsp)
 * [Installation](#installation)
   * [Dependencies](#dependencies)
   * [Preconditions](#preconditions)
@@ -162,16 +162,38 @@ diagnostic = { min = vim.diagnostic.severity.HINT },
   <img src="https://github.com/user-attachments/assets/81973f0d-73d6-43f3-94cc-d4482233b503" alt="diagnostic" width="800">
 </p>
 
-### [Code Completions](./examples/ai-tools/Code-Completions/)
-  - **virtual text**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
-  </p>
+### Lsp
 
-  - **blink.cmp or nvim-cmp**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
-  </p>
+> [!NOTE]
+> New features, still in continuous iteration.
+
+Both `disposable_ask_handler`, `attach_to_chat_handler`, and `action_handler` can enable lsp features:
+
+```lua
+lsp = {
+  cpp = { methods = { "definition", "declaration" } },
+  python = { methods = { "definition" } },
+  lua = { methods = { "definition", "declaration" } },
+
+  root_dir = { {'pyproject.toml', 'setup.py' }, ".git" },
+},
+```
+
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/2cadfaad-b201-4167-baa6-ec9ed5d7177b" alt="lsp" width="800">
+</p>
+
+
+<!-- ### [Code Completions](./examples/ai-tools/Code-Completions/) -->
+<!--   - **virtual text** -->
+<!--   <p align= "center"> -->
+<!--     <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800"> -->
+<!--   </p> -->
+<!---->
+<!--   - **blink.cmp or nvim-cmp** -->
+<!--   <p align= "center"> -->
+<!--     <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800"> -->
+<!--   </p> -->
 
 [⬆ back to top](#contents)
 

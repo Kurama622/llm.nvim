@@ -42,7 +42,7 @@
   * [生成docstring](#生成docstring)
   * [联网搜索](#联网搜索)
   * [诊断信息](#诊断信息)
-  * [代码补全](#代码补全)
+  * [Lsp](#lsp)
 * [安装](#安装)
   * [依赖](#依赖)
   * [准备工作](#准备工作)
@@ -165,16 +165,36 @@ diagnostic = { min = vim.diagnostic.severity.HINT },
   <img src="https://github.com/user-attachments/assets/81973f0d-73d6-43f3-94cc-d4482233b503" alt="diagnostic" width="800">
 </p>
 
-### [代码补全](./examples/ai-tools/Code-Completions/)
-  - **虚拟文本**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800">
-  </p>
+### Lsp
 
-  - **blink.cmp 或 nvim-cmp**
-  <p align= "center">
-    <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800">
-  </p>
+> [!NOTE]
+> 新特性，还在持续迭代
+
+`disposable_ask_handler`、`attach_to_chat_handler`和`action_handler`均可以开启该特性:
+
+```lua
+lsp = {
+  cpp = { methods = { "definition", "declaration" } },
+  python = { methods = { "definition" } },
+  lua = { methods = { "definition", "declaration" } },
+
+  root_dir = { {'pyproject.toml', 'setup.py' }, ".git" },
+},
+
+```
+<p align= "center">
+  <img src="https://github.com/user-attachments/assets/2cadfaad-b201-4167-baa6-ec9ed5d7177b" alt="lsp" width="800">
+</p>
+<!-- ### [代码补全](./examples/ai-tools/Code-Completions/) -->
+<!--   - **虚拟文本** -->
+<!--   <p align= "center"> -->
+<!--     <img src="https://github.com/user-attachments/assets/9215ba1c-df62-4ca8-badb-cf4b62262c57" alt="completion-virtual-text" width="800"> -->
+<!--   </p> -->
+<!---->
+<!--   - **blink.cmp 或 nvim-cmp** -->
+<!--   <p align= "center"> -->
+<!--     <img src="https://github.com/user-attachments/assets/93ef3c02-799d-435e-81fa-c4bf7df936d9" alt="completion-blink-cmp" width="800"> -->
+<!--   </p> -->
 
 [⬆ 返回目录](#目录)
 
