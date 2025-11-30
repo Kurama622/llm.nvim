@@ -107,57 +107,14 @@ local function get_locations(bufnr, method, params, callback)
 end
 
 local function find_definition_node(bufnr, row, col)
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
   local parser = vim.treesitter.get_parser(bufnr)
   local tree = parser:parse()[1]
   local root = tree:root()
 
   local node = root:named_descendant_for_range(row, col, row, col)
 
-  local definition_nodes = {
-    -- 通用
-    variable_declaration = true,
-    assignment_statement = true,
-    function_definition = true,
-    function_declaration = true,
-    method_definition = true,
-    method_declaration = true,
-    class_declaration = true,
-    enum_specifier = true,
-    interface_declaration = true,
-    type_definition = true,
-    type_alias_declaration = true,
-    -- module_declaration = true,
-    trait_item = true,
-    impl_item = true,
-    interface_body = true,
-
-    -- Python
-    class_definition = true,
-    assignment = true,
-
-    -- Go
-    type_declaration = true,
-    const_declaration = true,
-    var_declaration = true,
-
-    -- Lua
-    local_variable_declaration = true,
-    local_function = true,
-    field = true,
-
-    -- Java / C#
-    constructor_declaration = true,
-    field_declaration = true,
-    property_declaration = true,
-
-    -- C++
-    class_specifier = true,
-    struct_specifier = true,
-    template_declaration = "container",
-    namespace_definition = "container",
-    linkage_specification = "container",
-    module_declaration = "container",
-  }
+  local definition_nodes = require("llm.lsp." .. ft) or {}
 
   -- 一些节点其实是“声明语句”，比如 declaration、definition、specifier 的组合
   local function is_definition_node(n)
