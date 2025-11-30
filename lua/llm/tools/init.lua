@@ -5,9 +5,6 @@ local M = {
   completion_handler = function()
     return require("llm.tools.completion").handler
   end,
-  curl_request_handler = function()
-    return require("llm.tools.curl_request").handler
-  end,
   flexi_handler = function()
     return require("llm.tools.flexible").handler
   end,
@@ -26,11 +23,19 @@ local M = {
   attach_to_chat_handler = function()
     return require("llm.tools.attach_to_chat").handler
   end,
+  curl_request_handler = function(...)
+    return require("llm.tools.curl_request").handler(...)
+  end,
 }
 setmetatable(M, {
   __call = function(t, key, ...)
     if type(key) == "function" then
-      return key()(...)
+      local fn = key()
+      if type(fn) == "function" then
+        return fn(...)
+      else
+        return fn
+      end
     end
     if type(key) == "string" then
       return t[key]()(...)
