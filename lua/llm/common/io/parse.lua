@@ -1,6 +1,5 @@
 local Popup = require("nui.popup")
 local conf = require("llm.config")
-local ui = require("llm.common.ui")
 local api = require("llm.common.api")
 local backends = require("llm.backends")
 local job = require("plenary.job")
@@ -29,6 +28,7 @@ local function exit_callback(opts, ctx, waiting_state)
 end
 
 function io_parse.GetOutput(opts)
+  local ui = require("llm.common.ui")
   local wait_box_opts = ui.wait_ui_opts()
   local wait_box = Popup(wait_box_opts)
 

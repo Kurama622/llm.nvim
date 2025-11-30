@@ -9,7 +9,6 @@ local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
-local ui = require("llm.common.ui")
 local fio = require("llm.common.file_io")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
@@ -37,6 +36,7 @@ local function exit_callback(opts, ctx)
 end
 
 function M.GetStreamingOutput(opts)
+  local ui = require("llm.common.ui")
   local ACCOUNT = os.getenv("ACCOUNT")
   local LLM_KEY = os.getenv("LLM_KEY")
 

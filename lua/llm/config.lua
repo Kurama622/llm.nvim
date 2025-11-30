@@ -1,5 +1,4 @@
 local M = {}
-local fio = require("llm.common.file_io")
 local uv = vim.loop
 
 ---@type string|nil
@@ -349,6 +348,7 @@ function M.setup(opts)
 
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
+  local fio = require("llm.common.file_io")
   -- create history dir
   if M.configs.save_session then
     fio.CreateDir(M.configs.history_path)

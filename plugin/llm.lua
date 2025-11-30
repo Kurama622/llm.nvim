@@ -1,9 +1,7 @@
 local state = require("llm.state")
 local conf = require("llm.config")
-local streaming = require("llm.common.io.streaming")
 local app = require("llm.app")
 local F = require("llm.common.api")
-local cmds = require("llm.common.cmds")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE", default = true },
@@ -29,6 +27,7 @@ for k, v in pairs(highlight) do
 end
 
 local function OpenLLM()
+  local streaming = require("llm.common.io.streaming")
   F.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, "assistant")
   streaming.GetStreamingOutput({
     bufnr = state.llm.popup.bufnr,
@@ -115,6 +114,8 @@ vim.api.nvim_create_autocmd("FileType", {
     if vim.bo.ft ~= "llm" then
       return
     end
+
+    local cmds = require("llm.common.cmds")
     local bufnr = args.buf
     for _, item in ipairs(cmds) do
       vim.api.nvim_buf_call(bufnr, function()
