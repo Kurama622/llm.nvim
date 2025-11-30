@@ -1,5 +1,5 @@
 Completion = {
-  handler = tools.completion_handler,
+  handler = "completion_handler",
   opts = {
     -------------------------------------------------
     ---                   ollama

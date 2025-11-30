@@ -1,5 +1,5 @@
 Ask = {
-  handler = tools.disposable_ask_handler,
+  handler = "disposable_ask_handler",
   opts = {
     position = {
       row = 2,

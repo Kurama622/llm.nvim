@@ -1,5 +1,5 @@
 CommitMsg = {
-  handler = tools.flexi_handler,
+  handler = "flexi_handler",
   prompt = function()
     -- Source: https://andrewian.dev/blog/ai-git-commits
     return string.format(

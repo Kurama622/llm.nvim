@@ -10,7 +10,7 @@ You must:
 - Follow the format of examples carefully if the examples are provided.
 - Use Markdown formatting in your answers.
 - Include the programming language name at the start of the Markdown code blocks.]],
-  handler = tools.action_handler,
+  handler = "action_handler",
   opts = {
     only_display_diff = true,
     templates = {

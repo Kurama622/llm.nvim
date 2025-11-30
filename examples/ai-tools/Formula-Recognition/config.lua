@@ -1,5 +1,5 @@
 FormulaRecognition = {
-  handler = tools.images_handler,
+  handler = "images_handler",
   prompt = "Please convert the formula in the image to LaTeX syntax, and only return the syntax of the formula.",
   opts = {
     url = "http://localhost:11434/api/chat",

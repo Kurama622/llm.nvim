@@ -1,5 +1,5 @@
 OptimCompare = {
-  handler = tools.action_handler,
+  handler = "action_handler",
   opts = {
     fetch_key = "<your api key>",
     url = "https://models.inference.ai.azure.com/chat/completions",

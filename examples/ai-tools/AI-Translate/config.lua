@@ -1,5 +1,5 @@
 Translate = {
-  handler = tools.qa_handler,
+  handler = "qa_handler",
   opts = {
     component_width = "60%",
     component_height = "50%",

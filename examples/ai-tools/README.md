@@ -25,7 +25,6 @@ return {
     dependencies = { "nvim-lua/plenary.nvim", "MunifTanjim/nui.nvim" },
     cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
     config = function()
-      local tools = require("llm.tools")
       require("llm").setup({
         -- [[ Github Models ]]
         url = "https://models.inference.ai.azure.com/chat/completions",

@@ -1,5 +1,5 @@
 WordTranslate = {
-  handler = tools.flexi_handler,
+  handler = "flexi_handler",
   prompt = [[You are a translation expert. Your task is to translate all the text provided by the user into Chinese.
 
 NOTE:
