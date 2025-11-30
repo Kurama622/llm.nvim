@@ -1,11 +1,6 @@
 local M = {}
 
 local conf = require("llm.config")
-local LOG = require("llm.common.log")
-local F = require("llm.common.api")
-local streaming = require("llm.common.io.streaming").GetStreamingOutput
-
-local state = require("llm.state")
 
 function M.LLMAppHandler(name, arg_opts)
   if conf.configs.app_handler[name] ~= nil then
@@ -19,6 +14,8 @@ function M.LLMAppHandler(name, arg_opts)
       },
     }
 
+    local state = require("llm.state")
+    local F = require("llm.common.api")
     table.insert(tool.opts.hook, function(bufnr, opts)
       local _table = conf.configs.keys["Session:Models"]
       local _modes = type(_table.mode) == "string" and { _table.mode } or _table.mode
@@ -50,6 +47,8 @@ function M.LLMAppHandler(name, arg_opts)
       end
     end
 
+    local streaming = require("llm.common.io.streaming").GetStreamingOutput
+    local extension_call = require("llm.tools")
     if tool.opts.models then
       F.ModelsPreview(tool.opts, name, function(choice, idx)
         if not choice then
@@ -58,10 +57,10 @@ function M.LLMAppHandler(name, arg_opts)
         F.ResetModel(tool.opts, tool.opts, idx)
         -- Each call requires selecting a model, so there is no need to record the selected model information.
 
-        tool.handler(name, F, state, streaming, tool.prompt, tool.opts)
+        extension_call(tool.handler, name, F, state, streaming, tool.prompt, tool.opts)
       end)
     else
-      tool.handler(name, F, state, streaming, tool.prompt, tool.opts)
+      extension_call(tool.handler, name, F, state, streaming, tool.prompt, tool.opts)
     end
   end
 end

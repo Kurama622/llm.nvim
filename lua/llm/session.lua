@@ -2,13 +2,9 @@ local M = {}
 
 local conf = require("llm.config")
 local state = require("llm.state")
-local streaming = require("llm.common.io.streaming")
 local Popup = require("nui.popup")
 local F = require("llm.common.api")
 local LOG = require("llm.common.log")
-local _layout = require("llm.common.layout")
-local utils = require("llm.tools.utils")
-local Split = require("nui.split")
 
 local function hide_session()
   if state.layout.popup then
@@ -114,6 +110,8 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
 
   state.input.request_with_lsp = F.lsp_wrap(opts)
 
+  local streaming = require("llm.common.io.streaming")
+  local utils = require("llm.tools.utils")
   if builtin_called then
     if opts.prompt then
       state.session[popwin.winid] = {
@@ -233,6 +231,7 @@ function M.NewSession()
     ---                FLOAT STYLE
     -----------------------------------------------------
     if conf.configs.style == "float" then
+      local _layout = require("llm.common.layout")
       _layout.chat_ui()
       _layout:mount()
       vim.api.nvim_set_current_win(state.input.popup.winid)
@@ -402,6 +401,7 @@ function M.NewSession()
       -----------------------------------------------------
       ---                 SPLIT STYLE
       -----------------------------------------------------
+      local Split = require("nui.split")
       if filename ~= "" or vim.bo.modifiable == false then
         state.llm.popup = Split({
           relative = "editor",
@@ -568,6 +568,7 @@ function M.NewSession()
   if state.input.popup then
     table.insert(bufnr_list, state.input.popup.bufnr)
   end
+  local utils = require("llm.tools.utils")
   for _, bufnr in ipairs(bufnr_list) do
     for _, key in ipairs({ "y", "Y" }) do
       vim.api.nvim_buf_set_keymap(bufnr, "n", key, "", {
