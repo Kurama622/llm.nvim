@@ -156,6 +156,17 @@ function M.handler(name, F, state, streaming, prompt, opts)
     end
 
     parse.GetOutput(options)
+    for _, op in ipairs({ "accept", "reject", "close" }) do
+      utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
+        default_actions[op]()
+        if options[op].action ~= nil then
+          options[op].action()
+        end
+        for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+          utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
+        end
+      end, bufnr)
+    end
   else
     if F.IsValid(options.diagnostic) then
       state.app["session"][name] = {

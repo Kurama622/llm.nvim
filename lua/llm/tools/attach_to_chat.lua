@@ -106,10 +106,8 @@ function M.handler(_, _, _, _, _, opts)
               if options[op].action ~= nil then
                 options[op].action()
               end
-              if op == "close" then
-                for _, reset_op in ipairs({ "accept", "reject", "close" }) do
-                  utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
-                end
+              for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+                utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
               end
             end, bufnr)
           end

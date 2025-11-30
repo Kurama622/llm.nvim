@@ -138,10 +138,8 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
                 if opts._[op].action ~= nil then
                   opts._[op].action()
                 end
-                if op == "close" then
-                  for _, reset_op in ipairs({ "accept", "reject", "close" }) do
-                    utils.clear_keymapping(opts._[reset_op].mapping.mode, opts._[reset_op].mapping.keys, bufnr)
-                  end
+                for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+                  utils.clear_keymapping(opts._[reset_op].mapping.mode, opts._[reset_op].mapping.keys, bufnr)
                 end
               end, bufnr)
             end
