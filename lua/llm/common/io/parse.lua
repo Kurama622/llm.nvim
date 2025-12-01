@@ -15,8 +15,11 @@ local io_parse = {
 }
 local function exit_callback(opts, ctx, waiting_state)
   table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
-  waiting_state.box:unmount()
-  waiting_state.timer:stop()
+  while waiting_state.timer:is_active() do
+    waiting_state.box:unmount()
+    waiting_state.timer:close()
+    waiting_state.box = nil
+  end
   if opts.exit_handler ~= nil then
     local callback_func = schedule_wrap(function()
       opts.exit_handler(ctx.assistant_output)
@@ -193,9 +196,10 @@ function io_parse.GetOutput(opts)
   end)
 
   if not succ then
-    if waiting_state.box then
-      waiting_state.timer:stop()
+    while waiting_state.box do
+      waiting_state.timer:close()
       waiting_state.box:unmount()
+      waiting_state.box = nil
     end
     LOG:ERROR(err)
   end
