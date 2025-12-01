@@ -213,7 +213,9 @@ function M.handler(name, F, state, streaming, prompt, opts)
     })
     if state.input.request_with_lsp ~= nil then
       state.input.request_with_lsp(function()
-        table.insert(state.app.session[name], state.input.lsp_ctx)
+        if F.IsValid(state.input.lsp_ctx.content) then
+          table.insert(state.app.session[name], state.input.lsp_ctx)
+        end
         options.messages = state.app.session[name]
         utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
         F.ClearAttach()

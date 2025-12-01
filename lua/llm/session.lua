@@ -164,7 +164,9 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
 
     if state.input.request_with_lsp ~= nil then
       state.input.request_with_lsp(function()
-        table.insert(state.session[popwin.winid], state.input.lsp_ctx)
+        if F.IsValid(state.input.lsp_ctx.content) then
+          table.insert(state.session[popwin.winid], state.input.lsp_ctx)
+        end
         streaming.GetStreamingOutput(params)
         F.ClearAttach()
       end)
