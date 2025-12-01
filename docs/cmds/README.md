@@ -24,22 +24,24 @@ Tavily: https://www.tavily.com
   dependencies = { "nvim-lua/plenary.nvim", "Kurama622/nui.nvim", "Kurama622/windsurf.nvim" },
   cmd = { "LLMSessionToggle", "LLMSelectedTextHandler", "LLMAppHandler" },
   config = function()
-    web_search = {
-      url = "https://api.tavily.com/search",
-      fetch_key = vim.env.TAVILY_TOKEN,
-      params = {
-        auto_parameters = false,
-        topic = "general",
-        search_depth = "basic",
-        chunks_per_source = 3,
-        max_results = 3,
-        include_answer = true,
-        include_raw_content = true,
-        include_images = false,
-        include_image_descriptions = false,
-        include_favicon = false,
+    require('llm').setup({
+      web_search = {
+        url = "https://api.tavily.com/search",
+        fetch_key = vim.env.TAVILY_TOKEN,
+        params = {
+          auto_parameters = false,
+          topic = "general",
+          search_depth = "basic",
+          chunks_per_source = 3,
+          max_results = 3,
+          include_answer = true,
+          include_raw_content = true,
+          include_images = false,
+          include_image_descriptions = false,
+          include_favicon = false,
+        },
       },
-    },
+    })
   end,
 }
 ```
