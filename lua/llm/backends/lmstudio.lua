@@ -1,6 +1,7 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
 local backend_utils = require("llm.backends.utils")
+local json = vim.json
 local lmstudio = {}
 
 function lmstudio.StreamingHandler(chunk, ctx)
