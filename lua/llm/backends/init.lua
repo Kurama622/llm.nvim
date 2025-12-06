@@ -37,6 +37,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
       return function(chunk)
         return require("llm.backends.ollama").StreamingHandler(chunk, ctx)
       end
+    elseif api_type == "lmstudio" then
+      return function(chunk)
+        return require("llm.backends.lmstudio").StreamingHandler(chunk, ctx)
+      end
     end
   elseif configs.streaming_handler then
     return function(chunk)
@@ -62,6 +66,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
     elseif configs.api_type == "ollama" then
       return function(chunk)
         return require("llm.backends.ollama").StreamingHandler(chunk, ctx)
+      end
+    elseif configs.api_type == "lmstudio" then
+      return function(chunk)
+        return require("llm.backends.lmstudio").StreamingHandler(chunk, ctx)
       end
     end
   end
@@ -99,6 +107,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       return function(chunk)
         return require("llm.backends.ollama").ParseHandler(chunk, ctx)
       end
+    elseif api_type == "lmstudio" then
+      return function(chunk)
+        return require("llm.backends.lmstudio").ParseHandler(chunk, ctx)
+      end
     end
   elseif configs.parse_handler then
     return function(chunk)
@@ -130,6 +142,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
     elseif configs.api_type == "ollama" then
       return function(chunk)
         return require("llm.backends.ollama").ParseHandler(chunk, ctx)
+      end
+    elseif configs.api_type == "lmstudio" then
+      return function(chunk)
+        return require("llm.backends.lmstudio").ParseHandler(chunk, ctx)
       end
     end
   end

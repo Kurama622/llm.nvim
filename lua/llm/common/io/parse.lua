@@ -99,6 +99,7 @@ function io_parse.GetOutput(opts)
   end
 
   local ctx = {
+    line = "",
     assistant_output = "",
     body = body,
     functions_tbl = required_params.functions_tbl,
@@ -155,18 +156,29 @@ function io_parse.GetOutput(opts)
     args = _args,
     on_stdout = schedule_wrap(function(_, data)
       local str = api.TrimLeadingWhitespace(data)
-      local prefix = str:sub(1, 1)
-      if prefix ~= "{" then
-        if prefix ~= "" then
-          LOG:ERROR(data)
+
+      if required_params.api_type ~= "lmstudio" then
+        -- Display errors returned by the request:
+        -- request exceeds rate limit, incorrect api_key, etc.
+        local prefix = str:sub(1, 1)
+        if prefix ~= "{" then
+          if prefix ~= "" then
+            LOG:ERROR(data)
+          end
+          return
         end
-        return
-      end
-      local success, result = pcall(json.decode, str)
-      if success then
-        ctx.assistant_output = parse(result)
+        local success, result = pcall(json.decode, str)
+        if success then
+          ctx.assistant_output = parse(result)
+        else
+          LOG:ERROR("Error occurred:", result)
+        end
       else
-        LOG:ERROR("Error occurred:", result)
+        ctx.line = ctx.line .. str
+        local success, result = pcall(json.decode, ctx.line)
+        if success then
+          ctx.assistant_output = parse(result)
+        end
       end
       if ctx.body.tools ~= nil then
         backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
