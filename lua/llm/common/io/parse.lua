@@ -29,6 +29,17 @@ local function exit_callback(opts, ctx, waiting_state)
   -- reset tool_calls content
   backends.msg_tool_calls_content = {}
 end
+local function validate_str_and_log_error(str)
+  -- Display errors returned by the request:
+  -- request exceeds rate limit, incorrect api_key, etc.
+  local prefix = str:sub(1, 1)
+  if prefix ~= "{" then
+    if prefix ~= "" then
+      LOG:ERROR(str)
+    end
+    return
+  end
+end
 
 function io_parse.GetOutput(opts)
   local ui = require("llm.common.ui")
@@ -157,27 +168,15 @@ function io_parse.GetOutput(opts)
     on_stdout = schedule_wrap(function(_, data)
       local str = api.TrimLeadingWhitespace(data)
 
-      if required_params.api_type ~= "lmstudio" then
-        -- Display errors returned by the request:
-        -- request exceeds rate limit, incorrect api_key, etc.
-        local prefix = str:sub(1, 1)
-        if prefix ~= "{" then
-          if prefix ~= "" then
-            LOG:ERROR(data)
-          end
-          return
-        end
+      if required_params.api_type == "lmstudio" then
+        ctx.line = ctx.line .. str
+      else
+        validate_str_and_log_error(str)
         local success, result = pcall(json.decode, str)
         if success then
           ctx.assistant_output = parse(result)
         else
           LOG:ERROR("Error occurred:", result)
-        end
-      else
-        ctx.line = ctx.line .. str
-        local success, result = pcall(json.decode, ctx.line)
-        if success then
-          ctx.assistant_output = parse(result)
         end
       end
       if ctx.body.tools ~= nil then
@@ -191,6 +190,15 @@ function io_parse.GetOutput(opts)
       -- TODO: Add error handling
     end),
     on_exit = schedule_wrap(function()
+      if required_params.api_type == "lmstudio" then
+        validate_str_and_log_error(ctx.line)
+        local success, result = pcall(json.decode, ctx.line)
+        if success then
+          ctx.assistant_output = parse(result)
+        else
+          LOG:ERROR("Error occurred:", result)
+        end
+      end
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
           exit_callback(opts, ctx, waiting_state)
