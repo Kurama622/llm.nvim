@@ -2,7 +2,6 @@
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local utils = require("llm.common.completion.utils")
-local cmds = require("llm.common.cmds")
 local F = require("llm.common.api")
 
 local blink = { name = "blink" }
@@ -39,7 +38,7 @@ function blink:keymap()
 end
 
 function blink.get_trigger_characters()
-  return { "@", ".", "(", "[", ":", "{", " " }
+  return { "@", ".", "(", "[", ":", "{", " ", "/" }
 end
 
 function blink.new()
@@ -57,7 +56,30 @@ function blink:execute(ctx, item, callback, default_implementation)
         return key == "label" or key == "kind_name" or key == "callback"
       end, item)
     )
+  elseif item.kind_name == "llm.buffers" then
+    item.picker(function(quote_buf)
+      vim.api.nvim_set_current_win(state.input.popup.winid)
+      if quote_buf then
+        item.textEdit.newText = item.textEdit.newText .. "(" .. quote_buf .. ")"
+        vim.api.nvim_buf_set_text(
+          ctx.bufnr,
+          item.textEdit.range.start.line,
+          item.textEdit.range.start.character,
+          item.textEdit.range["end"].line,
+          item.textEdit.range["end"].character,
+          { item.textEdit.newText }
+        )
+
+        vim.api.nvim_feedkeys("A", "n", false)
+      else
+        default_implementation()
+        callback()
+      end
+    end)
+
+    return
   end
+
   default_implementation()
   callback()
 end
@@ -65,29 +87,57 @@ end
 function blink:get_completions(ctx, callback)
   local trigger_char = ctx.trigger.character or ctx.line:sub(ctx.bounds.start_col - 1, ctx.bounds.start_col - 1)
 
-  if vim.bo.ft == "llm" and trigger_char == "@" then
-    callback({
-      context = ctx,
-      is_incomplete_forward = false,
-      is_incomplete_backward = false,
-      items = vim
-        .iter(cmds)
-        :map(function(item)
-          return {
-            label = item.label,
-            documentation = {
-              kind = "markdown",
-              value = item.detail,
-            },
-            insertText = item.label,
-            insertTextFormat = vim.lsp.protocol.CompletionItemKind.Text,
-            kind = vim.lsp.protocol.CompletionItemKind.Text,
-            kind_name = "llm.cmds",
-            callback = item.callback,
-          }
-        end)
-        :totable(),
-    })
+  if vim.bo.ft == "llm" then
+    if trigger_char == "@" then
+      local cmds = require("llm.common.cmds")
+      callback({
+        context = ctx,
+        is_incomplete_forward = false,
+        is_incomplete_backward = false,
+        items = vim
+          .iter(cmds)
+          :map(function(item)
+            return {
+              label = item.label,
+              documentation = {
+                kind = "markdown",
+                value = item.detail,
+              },
+              insertText = item.label,
+              insertTextFormat = vim.lsp.protocol.CompletionItemKind.Text,
+              kind = vim.lsp.protocol.CompletionItemKind.Text,
+              kind_name = "llm.cmds",
+              callback = item.callback,
+            }
+          end)
+          :totable(),
+      })
+    elseif trigger_char == "/" then
+      local buffers = require("llm.common.buffers")
+      callback({
+        context = ctx,
+        is_incomplete_forward = false,
+        is_incomplete_backward = false,
+        items = vim
+          .iter(buffers)
+          :map(function(item)
+            return {
+              label = item.label,
+              documentation = {
+                kind = "markdown",
+                value = item.detail,
+              },
+              insertText = item.label,
+              insertTextFormat = vim.lsp.protocol.CompletionItemKind.Text,
+              kind = vim.lsp.protocol.CompletionItemKind.Text,
+              kind_name = "llm.buffers",
+              picker = item.picker,
+              callback = item.callback,
+            }
+          end)
+          :totable(),
+      })
+    end
   end
 
   if

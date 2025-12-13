@@ -236,7 +236,12 @@ function M.GetStreamingOutput(opts)
   })
 
   ui.display_spinner_extmark(opts)
-  if F.IsValid(state.enabled_cmds) then
+  if F.IsValid(state.quote_buffers) then
+    for idx, buffer in ipairs(state.quote_buffers) do
+      opts.enable_buffer_idx = idx
+      buffer.callback()
+    end
+  elseif F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do
       opts.enable_cmds_idx = idx
       cmd.callback(conf.configs.web_search, opts.messages, opts, request_job)
