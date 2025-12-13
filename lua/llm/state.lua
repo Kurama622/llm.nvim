@@ -91,5 +91,6 @@ M.reason_range = {
 }
 
 M.enabled_cmds = {}
+M.quote_buffers = {}
 
 return M
