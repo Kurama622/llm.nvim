@@ -91,6 +91,6 @@ M.reason_range = {
 }
 
 M.enabled_cmds = {}
-M.quote_buffers = {}
+M.quote_buffers = { buffer_info_list = {} }
 
 return M

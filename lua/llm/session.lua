@@ -105,7 +105,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   if F.IsValid(opts.diagnostic) then
     state.input.attach_content = state.input.attach_content
       .. "\n"
-      .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
+      .. F.GetRangeDiagnostics({ { bufnr, start_line, end_line, start_col, end_col } }, opts)
   end
 
   state.input.request_with_lsp = F.lsp_wrap(opts)

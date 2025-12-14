@@ -56,7 +56,7 @@ function blink:execute(ctx, item, callback, default_implementation)
         return key == "label" or key == "kind_name" or key == "callback"
       end, item)
     )
-  elseif item.kind_name == "llm.buffers" then
+  elseif item.kind_name == "llm.buffer" then
     item.picker(function(quote_buf)
       vim.api.nvim_set_current_win(state.input.popup.winid)
       if quote_buf then
@@ -130,8 +130,10 @@ function blink:get_completions(ctx, callback)
               insertText = item.label,
               insertTextFormat = vim.lsp.protocol.CompletionItemKind.Text,
               kind = vim.lsp.protocol.CompletionItemKind.Text,
-              kind_name = "llm.buffers",
-              picker = item.picker,
+              kind_name = item.kind_name,
+              picker = function(complete)
+                item:picker(complete)
+              end,
               callback = item.callback,
             }
           end)

@@ -48,6 +48,8 @@ function M.GetStreamingOutput(opts)
       required_params[key] = io_utils.get_params_value(key, opts)
     end
   end
+  opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
+  opts.lsp = opts.lsp or conf.configs.lsp
 
   if required_params.fetch_key ~= nil then
     if type(required_params.fetch_key) == "function" then
@@ -237,9 +239,14 @@ function M.GetStreamingOutput(opts)
 
   ui.display_spinner_extmark(opts)
   if F.IsValid(state.quote_buffers) then
+    table.insert(opts.body.messages, {
+      role = "user",
+      content = "This is the content of the buffer involved:",
+      type = "quote_buffers",
+    })
     for idx, buffer in ipairs(state.quote_buffers) do
       opts.enable_buffer_idx = idx
-      buffer.callback()
+      buffer:callback(opts, request_job)
     end
   elseif F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do

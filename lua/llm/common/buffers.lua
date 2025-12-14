@@ -5,8 +5,37 @@ local buffers = {
   {
     label = "buffer",
     detail = "Quote the content of the buffer",
-    callback = function() end,
-    picker = function(complete)
+    kind_name = "llm.buffer",
+    callback = function(bufnr, opts, chat_job)
+      local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+      local buffer_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
+
+      table.insert(state.quote_buffers.buffer_info_list, { bufnr, start_line, end_line, start_col, end_col })
+
+      local msg_idx = #opts.body.messages
+      opts.body.messages[msg_idx].content = opts.body.messages[msg_idx].content
+        .. "\n- buffer("
+        .. bufnr
+        .. ")\n```"
+        .. ft
+        .. "\n"
+        .. F.GetVisualSelection(buffer_ctx_tbl)
+        .. "\n```"
+      if opts.enable_buffer_idx == #state.quote_buffers then
+        local name = opts._name or "chat"
+
+        if F.IsValid(opts.diagnostic) then
+          opts.body.messages[msg_idx].content = opts.body.messages[msg_idx].content
+            .. "\n"
+            .. F.GetRangeDiagnostics(state.quote_buffers.buffer_info_list, opts)
+        end
+
+        opts.args[#opts.args] = vim.json.encode(opts.body)
+        chat_job:start()
+        state.llm.worker.jobs[name] = chat_job
+      end
+    end,
+    picker = function(self, complete)
       local has_fzf_lua, fzf_lua = pcall(require, "fzf-lua")
       local has_snacks, snacks = pcall(require, "snacks")
       if has_fzf_lua then
@@ -17,13 +46,15 @@ local buffers = {
               if F.IsValid(selected) then
                 -- 注意这中间的空白是特殊空格，实际可以复制粘贴替换
                 local str = selected[1]:gsub(" ", " ")
-
                 local parts = vim.split(str, "%s+")
-                buf = parts[1]:match("%w+")
+                buf = tonumber(parts[1]:match("%w+"))
                 file = parts[3]:match("^(.-):%w+")
                 table.insert(state.quote_buffers, {
                   buf = buf,
                   file = file,
+                  callback = function(_, opts, chat_job)
+                    self.callback(_.buf, opts, chat_job)
+                  end,
                 })
               end
               complete(buf)
@@ -38,6 +69,9 @@ local buffers = {
               table.insert(state.quote_buffers, {
                 buf = v.buf,
                 file = v.file:gsub(" ", "\\ "),
+                callback = function(_, opts, chat_job)
+                  self.callback(_.buf, opts, chat_job)
+                end,
               })
               complete(v.buf)
             end,
@@ -66,8 +100,11 @@ local buffers = {
               return
             else
               table.insert(state.quote_buffers, {
-                buf = choice.buf,
+                buf = tonumber(choice.buf),
                 file = choice.file,
+                callback = function(_, opts, chat_job)
+                  self.callback(_.buf, opts, chat_job)
+                end,
               })
 
               complete(choice.buf)

@@ -445,7 +445,7 @@ function api.GetAttach(opts)
   if api.IsValid(opts.diagnostic) then
     state.input.attach_content = state.input.attach_content
       .. "\n"
-      .. api.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, opts)
+      .. api.GetRangeDiagnostics({ { bufnr, start_line, end_line, start_col, end_col } }, opts)
   end
   state.input.request_with_lsp = api.lsp_wrap(opts)
   return bufnr
@@ -647,7 +647,7 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
   winid = winid or state.llm.popup.winid
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
   for _, msg in ipairs(messages) do
-    if msg.role == "system" or msg.role == "tool" then
+    if msg.role == "system" or msg.role == "tool" or msg.type == "quote_buffers" then
     elseif msg.role == "user" and api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if msg.type == "lsp" then
@@ -1089,7 +1089,7 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
   vim.cmd.startinsert()
 end
 
-function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
+function api.GetRangeDiagnostics(bufnr_info_list, opts)
   local diagnostics_tbl = {}
   local severity_map = {
     [vim.diagnostic.severity.ERROR] = "Error",
@@ -1097,22 +1097,25 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
     [vim.diagnostic.severity.INFO] = "Info",
     [vim.diagnostic.severity.HINT] = "Hint",
   }
-  for n_line = start_line, end_line do
-    local diagnostics = vim.diagnostic.get(bufnr, {
-      lnum = n_line - 1,
-      severity = opts.diagnostic,
-    })
+  for _, bufnr_info in ipairs(bufnr_info_list) do
+    local bufnr, start_line, end_line, _, _ = unpack(bufnr_info)
+    for n_line = start_line, end_line do
+      local diagnostics = vim.diagnostic.get(bufnr, {
+        lnum = n_line - 1,
+        severity = opts.diagnostic,
+      })
 
-    for i, diag in ipairs(diagnostics) do
-      local level = severity_map[diag.severity] or "Unknow"
-      if level == "Error" then
-        state.input.diagnostic_error = true
-      end
-      local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message:gsub("\n", "\n\t"))
-      if diagnostics_tbl[diag.lnum] == nil then
-        diagnostics_tbl[diag.lnum] = { msg }
-      elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
-        table.insert(diagnostics_tbl[diag.lnum], msg)
+      for i, diag in ipairs(diagnostics) do
+        local level = severity_map[diag.severity] or "Unknow"
+        if level == "Error" then
+          state.input.diagnostic_error = true
+        end
+        local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message:gsub("\n", "\n\t"))
+        if diagnostics_tbl[diag.lnum] == nil then
+          diagnostics_tbl[diag.lnum] = { msg }
+        elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
+          table.insert(diagnostics_tbl[diag.lnum], msg)
+        end
       end
     end
   end
@@ -1131,7 +1134,11 @@ function api.GetRangeDiagnostics(bufnr, start_line, end_line, _, _, opts)
 end
 
 function api.lsp_wrap(opts)
-  if api.IsValid(opts.lsp) and api.IsValid(opts.lsp[vim.bo.ft]) and api.IsValid(opts.lsp[vim.bo.ft].methods) then
+  if not api.IsValid(opts.lsp) then
+    return
+  end
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = opts.lsp.bufnr })
+  if api.IsValid(opts.lsp[ft]) and api.IsValid(opts.lsp[ft].methods) then
     return function(llm_request)
       state.input.lsp_ctx.role = "user"
       state.input.lsp_ctx.type = "lsp"
@@ -1214,10 +1221,11 @@ function api.lsp_request(cfg, callback)
   state.input.lsp_ctx.start_line = cfg.start_line - 1
   state.input.lsp_ctx.end_line = cfg.end_line - 1
 
+  local ft = vim.api.nvim_get_option_value("filetype", { buf = cfg.bufnr })
   -- 2. 使用 Tree-sitter 获取该范围内的所有标识符
   local parser = vim.treesitter.get_parser(cfg.bufnr)
   if not parser then
-    LOG:WARN(string.format("Lack of %s's treesitter parser"), vim.bo.ft)
+    LOG:WARN(string.format("Lack of %s's treesitter parser"), ft)
     return
   end
 
@@ -1232,7 +1240,8 @@ function api.lsp_request(cfg, callback)
   local function traverse(node)
     local node_start_line, _, node_end_line, _ = node:range()
     if
-      math.max(state.input.lsp_ctx.start_line, node_start_line) <= math.min(state.input.lsp_ctx.end_line, node_end_line)
+      math.max(state.input.lsp_ctx.start_line, node_start_line)
+      <= math.min(state.input.lsp_ctx.end_line, node_end_line)
     then
       -- 我们只关心标识符和函数名 (call_expression 的一部分)
       if node:type():match("identifier$") then
@@ -1256,8 +1265,6 @@ function api.lsp_request(cfg, callback)
   end
 
   local supported_method_cnt = 0
-
-  local ft = vim.api.nvim_get_option_value("filetype", { buf = cfg.bufnr })
 
   for _, method in pairs(cfg[ft].methods) do
     local clients = vim.lsp.get_clients({ method = method, bufnr = cfg.bufnr })
