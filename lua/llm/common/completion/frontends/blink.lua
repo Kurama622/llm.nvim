@@ -70,7 +70,9 @@ function blink:execute(ctx, item, callback, default_implementation)
           { item.textEdit.newText }
         )
 
-        vim.api.nvim_feedkeys("A", "n", false)
+        if vim.api.nvim_get_mode() ~= "i" then
+          vim.api.nvim_feedkeys("A", "n", false)
+        end
       else
         default_implementation()
         callback()
