@@ -123,7 +123,7 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.cmd.syntax('match LlmCmds "@' .. item.label .. '"')
       end)
     end
-    vim.cmd.syntax('match LlmBuffers "/buffer(\\d\\+)"')
+    vim.cmd.syntax('match LlmBuffers "buffer(\\d\\+)"')
   end),
 })
 

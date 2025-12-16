@@ -43,29 +43,37 @@ local buffers = {
           actions = {
             default = function(selected)
               local buf, file
+              local buf_list = {}
               if F.IsValid(selected) then
-                -- 注意这中间的空白是特殊空格，实际可以复制粘贴替换
-                local str = selected[1]:gsub(" ", " ")
-                local parts = vim.split(str, "%s+")
-                buf = tonumber(parts[1]:match("%w+"))
-                file = parts[3]:match("^(.-):%w+")
-                table.insert(state.quote_buffers, {
-                  buf = buf,
-                  file = file,
-                  callback = function(_, opts, chat_job)
-                    self.callback(_.buf, opts, chat_job)
-                  end,
-                })
+                for _, item in ipairs(selected) do
+                  -- 注意这中间的空白是特殊空格，实际可以复制粘贴替换
+                  local str = item:gsub(" ", " ")
+                  local parts = vim.split(str, "%s+")
+                  buf = tonumber(parts[1]:match("%w+"))
+                  file = parts[3]:match("^(.-):%w+")
+                  table.insert(buf_list, buf)
+                  table.insert(state.quote_buffers, {
+                    buf = buf,
+                    file = file,
+                    callback = function(_, opts, chat_job)
+                      self.callback(_.buf, opts, chat_job)
+                    end,
+                  })
+                end
               end
-              complete(buf)
+              complete(buf_list)
             end,
           },
         })
       elseif has_snacks then
         snacks.picker.buffers({
           actions = {
+            close = function()
+              vim.api.startinsert()
+            end,
             confirm = function(picker, v)
               picker:close()
+              picker.close = picker.init_opts.actions.close
               table.insert(state.quote_buffers, {
                 buf = v.buf,
                 file = v.file:gsub(" ", "\\ "),
@@ -73,7 +81,7 @@ local buffers = {
                   self.callback(_.buf, opts, chat_job)
                 end,
               })
-              complete(v.buf)
+              complete({ v.buf })
             end,
           },
         })
@@ -107,7 +115,7 @@ local buffers = {
                 end,
               })
 
-              complete(choice.buf)
+              complete({ choice.buf })
             end
           end)
           return

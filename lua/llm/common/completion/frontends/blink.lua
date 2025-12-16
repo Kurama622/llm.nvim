@@ -57,22 +57,29 @@ function blink:execute(ctx, item, callback, default_implementation)
       end, item)
     )
   elseif item.kind_name == "llm.buffer" then
-    item.picker(function(quote_buf)
+    item.picker(function(quote_buf_list)
       vim.api.nvim_set_current_win(state.input.popup.winid)
-      if quote_buf then
-        item.textEdit.newText = item.textEdit.newText .. "(" .. quote_buf .. ")"
+      local new_text = ""
+      for _, quote_buf in ipairs(quote_buf_list) do
+        if F.IsValid(new_text) then
+          new_text = new_text .. " buffer(" .. quote_buf .. ")"
+        else
+          new_text = "buffer(" .. quote_buf .. ")"
+        end
+      end
+
+      if F.IsValid(new_text) then
+        item.textEdit.newText = new_text
         vim.api.nvim_buf_set_text(
           ctx.bufnr,
           item.textEdit.range.start.line,
-          item.textEdit.range.start.character,
+          item.textEdit.range.start.character - 1,
           item.textEdit.range["end"].line,
           item.textEdit.range["end"].character,
           { item.textEdit.newText }
         )
 
-        if vim.api.nvim_get_mode() ~= "i" then
-          vim.api.nvim_feedkeys("A", "n", false)
-        end
+        vim.api.nvim_feedkeys("A", "n", false)
       else
         default_implementation()
         callback()
