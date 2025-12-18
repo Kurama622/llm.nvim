@@ -1140,77 +1140,81 @@ function api.lsp_wrap(opts)
   local ft = vim.api.nvim_get_option_value("filetype", { buf = opts.lsp.bufnr })
   if api.IsValid(opts.lsp[ft]) and api.IsValid(opts.lsp[ft].methods) then
     return function(llm_request)
-      state.input.lsp_ctx.role = "user"
-      state.input.lsp_ctx.type = "lsp"
-      state.input.lsp_ctx.content = ""
-      state.input.lsp_ctx.symbols_location_list = {}
-      api.lsp_request(opts.lsp, function(symbol, exist)
-        if exist then
-          local symbol_location = {
-            start_row = symbol.start_row,
-            end_row = symbol.end_row,
-            start_col = symbol.start_col,
-            end_col = symbol.end_col,
-            name = symbol.name,
-            bufnr = symbol.bufnr,
-          }
+      if api.IsValid(state.input.attach_content) then
+        state.input.lsp_ctx.role = "user"
+        state.input.lsp_ctx.type = "lsp"
+        state.input.lsp_ctx.content = ""
+        state.input.lsp_ctx.symbols_location_list = {}
+        api.lsp_request(opts.lsp, function(symbol, exist)
+          if exist then
+            local symbol_location = {
+              start_row = symbol.start_row,
+              end_row = symbol.end_row,
+              start_col = symbol.start_col,
+              end_col = symbol.end_col,
+              name = symbol.name,
+              bufnr = symbol.bufnr,
+            }
 
-          -- Deduplicate and take the union of the returned symbol definitions.
-          if not api.IsValid(state.input.lsp_ctx.symbols_location_list[symbol.fname]) then
-            state.input.lsp_ctx.symbols_location_list[symbol.fname] = { symbol_location }
-          else
-            local placed = false
+            -- Deduplicate and take the union of the returned symbol definitions.
+            if not api.IsValid(state.input.lsp_ctx.symbols_location_list[symbol.fname]) then
+              state.input.lsp_ctx.symbols_location_list[symbol.fname] = { symbol_location }
+            else
+              local placed = false
 
-            for i, item in pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname]) do
-              if item.start_row > symbol_location.start_row and item.end_row < symbol_location.end_row then
-                state.input.lsp_ctx.symbols_location_list[symbol.fname][i] = symbol_location
-                placed = true
-                break
-              elseif item.start_row <= symbol_location.start_row and item.end_row >= symbol_location.end_row then
-                placed = true
-                break
+              for i, item in pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname]) do
+                if item.start_row > symbol_location.start_row and item.end_row < symbol_location.end_row then
+                  state.input.lsp_ctx.symbols_location_list[symbol.fname][i] = symbol_location
+                  placed = true
+                  break
+                elseif item.start_row <= symbol_location.start_row and item.end_row >= symbol_location.end_row then
+                  placed = true
+                  break
+                end
+              end
+              if not placed then
+                table.insert(state.input.lsp_ctx.symbols_location_list[symbol.fname], symbol_location)
               end
             end
-            if not placed then
-              table.insert(state.input.lsp_ctx.symbols_location_list[symbol.fname], symbol_location)
+          end
+          if symbol.done then
+            for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+              for _, sym in pairs(symbol_location) do
+                state.input.lsp_ctx.content = state.input.lsp_ctx.content
+                  .. "\n- "
+                  .. fname
+                  .. "#L"
+                  .. sym.start_row
+                  .. "-"
+                  .. sym.end_row
+                  .. " | "
+                  .. sym.name
+                  .. "\n```"
+                  .. vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr })
+                  .. "\n"
+                  .. table.concat(
+                    vim.api.nvim_buf_get_text(
+                      sym.bufnr,
+                      sym.start_row - 1,
+                      sym.start_col - 1,
+                      sym.end_row - 1,
+                      sym.end_col - 1,
+                      {}
+                    ),
+                    "\n"
+                  )
+                  .. "\n```"
+              end
             end
-          end
-        end
-        if symbol.done then
-          for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-            for _, sym in pairs(symbol_location) do
-              state.input.lsp_ctx.content = state.input.lsp_ctx.content
-                .. "\n- "
-                .. fname
-                .. "#L"
-                .. sym.start_row
-                .. "-"
-                .. sym.end_row
-                .. " | "
-                .. sym.name
-                .. "\n```"
-                .. vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr })
-                .. "\n"
-                .. table.concat(
-                  vim.api.nvim_buf_get_text(
-                    sym.bufnr,
-                    sym.start_row - 1,
-                    sym.start_col - 1,
-                    sym.end_row - 1,
-                    sym.end_col - 1,
-                    {}
-                  ),
-                  "\n"
-                )
-                .. "\n```"
+            if api.IsValid(state.input.lsp_ctx.content) then
+              state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
             end
+            llm_request()
           end
-          if api.IsValid(state.input.lsp_ctx.content) then
-            state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
-          end
-          llm_request()
-        end
-      end)
+        end)
+      else
+        llm_request()
+      end
     end
   end
   return nil
