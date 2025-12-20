@@ -239,11 +239,7 @@ function M.GetStreamingOutput(opts)
 
   ui.display_spinner_extmark(opts)
   if F.IsValid(state.quote_buffers[1]) then
-    table.insert(opts.body.messages, {
-      role = "user",
-      content = "This is the content of the buffer involved:",
-      type = "quote_buffers",
-    })
+    state.input.attach_content = state.input.attach_content .. "This is the content of the buffer involved:"
     for idx, buffer in ipairs(state.quote_buffers) do
       opts.enable_buffer_idx = idx
       buffer:callback(opts, request_job)

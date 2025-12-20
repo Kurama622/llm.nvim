@@ -175,7 +175,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
           role = "user",
           content = source_content
             .. "\n"
-            .. F.GetRangeDiagnostics({ { bufnr, start_line, end_line, start_col, end_col } }, options),
+            .. F.GetRangeDiagnostics(
+              { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
+              options
+            ),
         },
       }
     else
@@ -185,8 +188,13 @@ function M.handler(name, F, state, streaming, prompt, opts)
       }
     end
     if F.IsValid(options.lsp) then
-      options.lsp.bufnr = bufnr
-      options.lsp.start_line, options.lsp.end_line = start_line, end_line
+      options.lsp.bufnr_info_list = {
+        bufnr = {
+          start_line = start_line,
+          end_line = end_line,
+          ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr }),
+        },
+      }
       state.input.request_with_lsp = F.lsp_wrap(options)
     end
 

@@ -71,8 +71,13 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   opts.lsp = opts.lsp or conf.configs.lsp
   local lines, start_line, end_line, start_col, end_col = F.MakeInlineContext(opts, bufnr, "disposable_ask")
   if F.IsValid(opts.lsp) then
-    opts.lsp.bufnr = bufnr
-    opts.lsp.start_line, opts.lsp.end_line = start_line, end_line
+    opts.lsp.bufnr_info_list = {
+      [bufnr] = {
+        start_line = start_line,
+        end_line = end_line,
+        ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr }),
+      },
+    }
   end
   state.input.attach_content = F.GetVisualSelection(lines)
 
@@ -105,7 +110,10 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   if F.IsValid(opts.diagnostic) then
     state.input.attach_content = state.input.attach_content
       .. "\n"
-      .. F.GetRangeDiagnostics({ { bufnr, start_line, end_line, start_col, end_col } }, opts)
+      .. F.GetRangeDiagnostics(
+        { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
+        opts
+      )
   end
 
   state.input.request_with_lsp = F.lsp_wrap(opts)
@@ -323,28 +331,7 @@ function M.NewSession()
                 state.input.request_with_lsp(function()
                   if F.IsValid(state.input.lsp_ctx.content) then
                     table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                    F.SetRole(bufnr, winid, "user")
-
-                    local symbols_location_info = ""
-                    for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-                      for _, sym in pairs(symbol_location) do
-                        symbols_location_info = symbols_location_info
-                          .. "\n- "
-                          .. fname
-                          .. "#L"
-                          .. sym.start_row
-                          .. "-"
-                          .. sym.end_row
-                          .. " | "
-                          .. sym.name
-                      end
-                    end
-                    F.AppendChunkToBuffer(
-                      bufnr,
-                      winid,
-                      require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
-                    )
-                    F.NewLine(bufnr, winid)
+                    F.AppendLspMsg(bufnr, winid)
                   end
                   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                   F.ClearAttach()
@@ -477,28 +464,7 @@ function M.NewSession()
                         state.input.request_with_lsp(function()
                           if F.IsValid(state.input.lsp_ctx.content) then
                             table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                            F.SetRole(bufnr, winid, "user")
-
-                            local symbols_location_info = ""
-                            for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-                              for _, sym in pairs(symbol_location) do
-                                symbols_location_info = symbols_location_info
-                                  .. "\n- "
-                                  .. fname
-                                  .. "#L"
-                                  .. sym.start_row
-                                  .. "-"
-                                  .. sym.end_row
-                                  .. " | "
-                                  .. sym.name
-                              end
-                            end
-                            F.AppendChunkToBuffer(
-                              bufnr,
-                              winid,
-                              require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
-                            )
-                            F.NewLine(bufnr, winid)
+                            F.AppendLspMsg(bufnr, winid)
                           end
                           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
                           F.ClearAttach()

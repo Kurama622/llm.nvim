@@ -10,10 +10,15 @@ local buffers = {
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
       local buffer_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
 
-      table.insert(state.quote_buffers.buffer_info_list, { bufnr, start_line, end_line, start_col, end_col })
+      state.quote_buffers.buffer_info_list[bufnr] = {
+        start_line = start_line,
+        end_line = end_line,
+        start_col = start_col,
+        end_col = end_col,
+        ft = ft,
+      }
 
-      local msg_idx = #opts.body.messages
-      opts.body.messages[msg_idx].content = opts.body.messages[msg_idx].content
+      state.input.attach_content = state.input.attach_content
         .. "\n- buffer("
         .. bufnr
         .. ")\n```"
@@ -21,18 +26,44 @@ local buffers = {
         .. "\n"
         .. F.GetVisualSelection(buffer_ctx_tbl)
         .. "\n```"
+
       if opts.enable_buffer_idx == #state.quote_buffers then
         local name = opts._name or "chat"
 
         if F.IsValid(opts.diagnostic) then
-          opts.body.messages[msg_idx].content = opts.body.messages[msg_idx].content
+          state.input.attach_content = state.input.attach_content
             .. "\n"
             .. F.GetRangeDiagnostics(state.quote_buffers.buffer_info_list, opts)
         end
 
-        opts.args[#opts.args] = vim.json.encode(opts.body)
-        chat_job:start()
-        state.llm.worker.jobs[name] = chat_job
+        table.insert(opts.body.messages, {
+          role = "user",
+          content = state.input.attach_content,
+          type = "quote_buffers",
+        })
+
+        if F.IsValid(opts.lsp) then
+          opts.lsp.bufnr_info_list = state.quote_buffers.buffer_info_list
+          state.input.request_with_lsp = F.lsp_wrap(opts)
+        end
+        if state.input.request_with_lsp ~= nil then
+          state.input.request_with_lsp(function()
+            if F.IsValid(state.input.lsp_ctx.content) then
+              table.insert(opts.body.messages, state.input.lsp_ctx)
+              -- Do not display lsp information
+              -- F.AppendLspMsg(state.llm.popup.bufnr, state.llm.popup.winid)
+            end
+            opts.args[#opts.args] = vim.json.encode(opts.body)
+            chat_job:start()
+            state.llm.worker.jobs[name] = chat_job
+
+            F.ClearAttach()
+          end)
+        else
+          opts.args[#opts.args] = vim.json.encode(opts.body)
+          chat_job:start()
+          state.llm.worker.jobs[name] = chat_job
+        end
       end
     end,
     picker = function(self, complete)
