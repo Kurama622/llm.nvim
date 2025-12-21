@@ -1,19 +1,19 @@
-local cmp_cmds = { name = "cmp_cmds" }
+local cmp_cmd = { name = "cmp_cmd" }
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local cmp = require("cmp")
 local lsp = require("cmp.types.lsp")
 local F = require("llm.common.api")
 
-function cmp_cmds:is_available()
+function cmp_cmd:is_available()
   return vim.bo.filetype == "llm"
 end
 
-function cmp_cmds:get_trigger_characters()
+function cmp_cmd:get_trigger_characters()
   return { "@" }
 end
 
-function cmp_cmds:get_keyword_pattern()
+function cmp_cmd:get_keyword_pattern()
   return "^$"
 end
 
@@ -21,8 +21,8 @@ end
 ---@param item table The selected item from the completion menu
 ---@param callback function
 ---@return nil
-function cmp_cmds:execute(item, callback)
-  if item.cmp.kind_text == "llm.cmds" then
+function cmp_cmd:execute(item, callback)
+  if item.cmp.kind_text == "llm.cmd" then
     table.insert(
       state.enabled_cmds,
       F.table_filter(function(key, _)
@@ -33,12 +33,12 @@ function cmp_cmds:execute(item, callback)
   callback(item)
 end
 
-function cmp_cmds.new()
-  return setmetatable({}, { __index = cmp_cmds })
+function cmp_cmd.new()
+  return setmetatable({}, { __index = cmp_cmd })
 end
 
-function cmp_cmds:complete(ctx, callback)
-  local items = require("llm.common.cmds")
+function cmp_cmd:complete(ctx, callback)
+  local items = require("llm.common.cmd")
 
   vim.iter(items):map(function(item)
     item.documentation = {
@@ -50,7 +50,7 @@ function cmp_cmds:complete(ctx, callback)
     item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
     item.cmp = {
       kind_hl_group = "CmpItemKind",
-      kind_text = "llm.cmds",
+      kind_text = "llm.cmd",
     }
 
     return item
@@ -62,4 +62,4 @@ function cmp_cmds:complete(ctx, callback)
   })
 end
 
-return cmp_cmds
+return cmp_cmd

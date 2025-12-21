@@ -145,12 +145,15 @@ if has_blink then
   pcall(function()
     blink.add_filetype_source("llm", source)
   end)
-elseif has_cmp and not has_blink then
-  cmp.register_source("llm_cmds", require("llm.common.completion.frontends.cmp.cmds").new())
+elseif has_cmp then
+  for _, name in ipairs({ "cmd", "buffer" }) do
+    cmp.register_source("llm_" .. name, require("llm.common.completion.frontends.cmp." .. name).new())
+  end
   cmp.setup.filetype("llm", {
     enabled = true,
     sources = vim.list_extend({
-      { name = "llm_cmds", group_index = 1 },
+      { name = "llm_cmd", group_index = 1 },
+      { name = "llm_buffer", group_index = 1 },
     }, cmp.get_config().sources),
   })
 end
