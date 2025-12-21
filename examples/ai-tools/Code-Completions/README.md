@@ -136,27 +136,56 @@ Completion AI tool requires setting `style = "nvim-cmp"`
 
 ```lua
 {
-  "hrsh7th/nvim-cmp",
-  dependencies = { "Kurama622/llm.nvim" },
-  optional = true,
-  opts = function(_, opts)
-    -- if you wish to use autocomplete
-    table.insert(opts.sources, 1, {
-      name = "llm",
-      group_index = 1,
-      priority = 100,
-    })
+    "hrsh7th/nvim-cmp",
+    version = false, -- last release is way too old
+    event = "InsertEnter",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "Kurama622/llm.nvim",
+    },
 
-    opts.performance = {
-      -- It is recommended to increase the timeout duration due to
-      -- the typically slower response speed of LLMs compared to
-      -- other completion sources. This is not needed when you only
-      -- need manual completion.
-      fetching_timeout = 5000,
-    }
-  end,
-},
+    opts = function()
+      -- Register nvim-cmp lsp capabilities
+      vim.lsp.config("*", { capabilities = require("cmp_nvim_lsp").default_capabilities() })
 
+      vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
+      local cmp = require("cmp")
+      local defaults = require("cmp.config.default")()
+      local auto_select = true
+      return {
+        auto_brackets = {}, -- configure any filetype to auto add brackets
+        completion = {
+          completeopt = "menu,menuone,noinsert" .. (auto_select and "" or ",noselect"),
+        },
+        preselect = auto_select and cmp.PreselectMode.Item or cmp.PreselectMode.None,
+        mapping = cmp.mapping.preset.insert({
+          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+          ["<C-f>"] = cmp.mapping.scroll_docs(4),
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-e>"] = cmp.mapping.abort(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        }),
+        sources = cmp.config.sources({
+          { name = "lazydev" },
+          { name = "nvim_lsp" },
+          { name = "path" },
+        }, {
+          { name = "buffer" },
+          { name = "llm", group_index = 1, priority = 100 },
+        }),
+        sorting = defaults.sorting,
+        performance = {
+          -- It is recommended to increase the timeout duration due to
+          -- the typically slower response speed of LLMs compared to
+          -- other completion sources. This is not needed when you only
+          -- need manual completion.
+          fetching_timeout = 10000,
+        },
+      }
+    end,
+  }
 ```
 
 ## UI(Icon)
@@ -253,17 +282,19 @@ Completion AI tool requires setting `style = "nvim-cmp"`
 ### nvim-cmp
 
 ```lua
-{
+  {
     "hrsh7th/nvim-cmp",
-    optional = true,
-    opts = function(_, opts)
-      -- if you wish to use autocomplete
-      table.insert(opts.sources, 1, {
-        name = "llm",
-        group_index = 1,
-        priority = 100,
-      })
+    version = false, -- last release is way too old
+    event = "InsertEnter",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "Kurama622/llm.nvim",
+    },
 
+    opts = function()
+      local cmp = require("cmp")
       local kind_icons = {
         Text = "",
         Method = "󰆧",
@@ -292,23 +323,33 @@ Completion AI tool requires setting `style = "nvim-cmp"`
         TypeParameter = "󰅲",
         llm = " ",
       }
-      opts.formatting = {
-        format = function(entry, vim_item)
-          vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind)
+      return {
+        sources = cmp.config.sources({
+          { name = "lazydev" },
+          { name = "nvim_lsp" },
+          { name = "path" },
+        }, {
+          { name = "buffer" },
+          { name = "llm", group_index = 1, priority = 100 },
+        }),
+        formatting = {
+          format = function(entry, vim_item)
+            vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind], vim_item.kind)
 
-          vim_item.menu = ({
-            buffer = "[Buffer]",
-            nvim_lsp = "[LSP]",
-            luasnip = "[LuaSnip]",
-            nvim_lua = "[Lua]",
-            latex_symbols = "[LaTeX]",
-            llm = "[LLM]",
-          })[entry.source.name]
-          return vim_item
-        end,
-      }
-      opts.performance = {
-        fetching_timeout = 10000,
+            vim_item.menu = ({
+              buffer = "[Buffer]",
+              nvim_lsp = "[LSP]",
+              luasnip = "[LuaSnip]",
+              nvim_lua = "[Lua]",
+              latex_symbols = "[LaTeX]",
+              llm = "[LLM]",
+            })[entry.source.name]
+            return vim_item
+          end,
+        },
+        performance = {
+          fetching_timeout = 10000,
+        },
       }
     end,
   }
