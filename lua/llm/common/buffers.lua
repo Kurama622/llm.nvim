@@ -102,17 +102,24 @@ local buffers = {
             close = function()
               vim.api.startinsert()
             end,
-            confirm = function(picker, v)
+            confirm = function(picker, _)
               picker:close()
               picker.close = picker.init_opts.actions.close
-              table.insert(state.quote_buffers, {
-                buf = v.buf,
-                file = v.file:gsub(" ", "\\ "),
-                callback = function(_, opts, chat_job)
-                  self.callback(_.buf, opts, chat_job)
-                end,
-              })
-              complete({ v.buf })
+              local buf, file
+              local buf_list = {}
+              for _, item in ipairs(picker:selected()) do
+                buf = item.buf
+                file = item.file:gsub(" ", "\\ ")
+                table.insert(buf_list, buf)
+                table.insert(state.quote_buffers, {
+                  buf = buf,
+                  file = file,
+                  callback = function(_, opts, chat_job)
+                    self.callback(_.buf, opts, chat_job)
+                  end,
+                })
+              end
+              complete(buf_list)
             end,
           },
         })
