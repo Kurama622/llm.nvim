@@ -106,7 +106,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
         role = "user",
         content = source_content
           .. "\n"
-          .. F.GetRangeDiagnostics(bufnr, start_line, end_line, start_col, end_col, options),
+          .. F.GetRangeDiagnostics(
+            { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
+            options
+          ),
       },
     }
   else

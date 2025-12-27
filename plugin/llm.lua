@@ -17,7 +17,8 @@ local highlight = {
   LlmPurpleNormal = { fg = "#c099ff", bg = "NONE", default = true },
   LlmPurpleLight = { fg = "#ee82ee", bg = "NONE", default = true },
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE", default = true },
-  LlmCmds = { link = "Special", default = true },
+  LlmCmds = { fg = "#2aa198", bg = "NONE", default = true },
+  LlmBuffers = { fg = "#2aa198", bg = "NONE", default = true, reverse = true },
 }
 
 local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })
@@ -122,6 +123,7 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.cmd.syntax('match LlmCmds "@' .. item.label .. '"')
       end)
     end
+    vim.cmd.syntax('match LlmBuffers "buffer(\\d\\+)"')
   end),
 })
 
@@ -129,24 +131,29 @@ vim.api.nvim_create_autocmd("FileType", {
 local has_cmp, cmp = pcall(require, "cmp")
 local has_blink, blink = pcall(require, "blink.cmp")
 if has_blink then
+  local name = "LLM_METHODS"
+  local source = "llm_methods"
   pcall(function()
     local add_provider = blink.add_source_provider or blink.add_provider
-    add_provider("llm_cmds", {
-      name = "LLM_CMDS",
+    add_provider(source, {
+      name = name,
       module = "llm.common.completion.frontends.blink",
       enabled = true,
       score_offset = 10,
     })
   end)
   pcall(function()
-    blink.add_filetype_source("llm", "llm_cmds")
+    blink.add_filetype_source("llm", source)
   end)
-elseif has_cmp and not has_blink then
-  cmp.register_source("llm_cmds", require("llm.common.completion.frontends.cmp.cmds").new())
+elseif has_cmp then
+  for _, name in ipairs({ "cmd", "buffer" }) do
+    cmp.register_source("llm_" .. name, require("llm.common.completion.frontends.cmp." .. name).new())
+  end
   cmp.setup.filetype("llm", {
     enabled = true,
     sources = vim.list_extend({
-      { name = "llm_cmds", group_index = 1 },
+      { name = "llm_cmd", group_index = 1 },
+      { name = "llm_buffer", group_index = 1 },
     }, cmp.get_config().sources),
   })
 end

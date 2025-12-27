@@ -1,6 +1,5 @@
 local LOG = require("llm.common.log")
 local sess = require("llm.session")
-local conf = require("llm.config")
 local F = require("llm.common.api")
 local diff = require("llm.common.diff_style")
 local utils = require("llm.tools.utils")
