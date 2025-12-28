@@ -36,9 +36,12 @@ local function validate_str_and_log_error(str)
   if prefix ~= "{" then
     if prefix ~= "" then
       LOG:ERROR(str)
+    else
+      LOG:ERROR("The model returned an empty response.")
     end
-    return
+    return false
   end
+  return true
 end
 
 function io_parse.GetOutput(opts)
@@ -166,22 +169,7 @@ function io_parse.GetOutput(opts)
     command = "curl",
     args = _args,
     on_stdout = schedule_wrap(function(_, data)
-      local str = api.TrimLeadingWhitespace(data)
-
-      if required_params.api_type == "lmstudio" then
-        ctx.line = ctx.line .. str
-      else
-        validate_str_and_log_error(str)
-        local success, result = pcall(json.decode, str)
-        if success then
-          ctx.assistant_output = parse(result)
-        else
-          LOG:ERROR("Error occurred:", result)
-        end
-      end
-      if ctx.body.tools ~= nil then
-        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(data)
-      end
+      ctx.line = ctx.line .. api.TrimLeadingWhitespace(data)
     end),
     on_stderr = schedule_wrap(function(_, err)
       if err ~= nil then
@@ -190,14 +178,17 @@ function io_parse.GetOutput(opts)
       -- TODO: Add error handling
     end),
     on_exit = schedule_wrap(function()
-      if required_params.api_type == "lmstudio" then
-        validate_str_and_log_error(ctx.line)
-        local success, result = pcall(json.decode, ctx.line)
-        if success then
-          ctx.assistant_output = parse(result)
-        else
-          LOG:ERROR("Error occurred:", result)
-        end
+      if not validate_str_and_log_error(ctx.line) then
+        return exit_callback(opts, ctx, waiting_state)
+      end
+      local success, result = pcall(json.decode, ctx.line)
+      if success then
+        ctx.assistant_output = parse(result)
+      else
+        LOG:ERROR("Error occurred:", result)
+      end
+      if ctx.body.tools ~= nil then
+        backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(ctx.line)
       end
       if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
         ctx.callback = function()
