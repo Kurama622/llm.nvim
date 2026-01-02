@@ -38,7 +38,7 @@ function cmp_cmd.new()
 end
 
 function cmp_cmd:complete(ctx, callback)
-  local items = require("llm.common.cmd")
+  local items = require("llm.common.cmds")
 
   vim.iter(items):map(function(item)
     item.documentation = {

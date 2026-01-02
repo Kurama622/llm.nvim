@@ -146,7 +146,7 @@ if has_blink then
     blink.add_filetype_source("llm", source)
   end)
 elseif has_cmp then
-  for _, name in ipairs({ "cmd", "buffer" }) do
+  for _, name in ipairs({ "cmd", "buffer", "file" }) do
     cmp.register_source("llm_" .. name, require("llm.common.completion.frontends.cmp." .. name).new())
   end
   cmp.setup.filetype("llm", {
@@ -154,6 +154,7 @@ elseif has_cmp then
     sources = vim.list_extend({
       { name = "llm_cmd", group_index = 1 },
       { name = "llm_buffer", group_index = 1 },
+      { name = "llm_file", group_index = 1 },
     }, cmp.get_config().sources),
   })
 end

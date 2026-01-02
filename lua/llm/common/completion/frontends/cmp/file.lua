@@ -1,17 +1,17 @@
-local cmp_buffer = { name = "cmp_buffer" }
+local cmp_file = { name = "cmp_file" }
 local state = require("llm.state")
 local cmp = require("cmp")
 local lsp = require("cmp.types.lsp")
 local F = require("llm.common.api")
 
-function cmp_buffer:is_available()
+function cmp_file:is_available()
   return vim.bo.filetype == "llm"
 end
-function cmp_buffer:get_trigger_characters()
+function cmp_file:get_trigger_characters()
   return { "/" }
 end
 
-function cmp_buffer:get_keyword_pattern()
+function cmp_file:get_keyword_pattern()
   return [=[/\zs[^/\\:\*?<>'"`\|]*]=]
 end
 
@@ -19,16 +19,16 @@ end
 ---@param item table The selected item from the completion menu
 ---@param callback function
 ---@return nil
-function cmp_buffer:execute(item, callback)
-  if item.cmp.kind_text == "llm.buffer" then
-    item:picker(function(quote_buf_list)
+function cmp_file:execute(item, callback)
+  if item.cmp.kind_text == "llm.file" then
+    item:picker(function(quote_file_list)
       vim.api.nvim_set_current_win(state.input.popup.winid)
       local new_text = ""
-      for _, quote_buf in ipairs(quote_buf_list) do
+      for _, quote_file in ipairs(quote_file_list) do
         if F.IsValid(new_text) then
-          new_text = new_text .. " buffer(" .. quote_buf .. ")"
+          new_text = new_text .. " " .. quote_file
         else
-          new_text = "buffer(" .. quote_buf .. ")"
+          new_text = quote_file
         end
       end
 
@@ -54,18 +54,18 @@ function cmp_buffer:execute(item, callback)
   callback()
 end
 
-function cmp_buffer.new()
-  return setmetatable({}, { __index = cmp_buffer })
+function cmp_file.new()
+  return setmetatable({}, { __index = cmp_file })
 end
 
-function cmp_buffer:complete(ctx, callback)
-  local items = require("llm.common.buffers")
+function cmp_file:complete(ctx, callback)
+  local items = require("llm.common.files")
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local bufnr = vim.api.nvim_get_current_buf()
   vim.iter(items):map(function(item)
     item._textEdit = {
-      newText = "buffer",
+      newText = "file",
       range = {
         ["start"] = { line = row - 1, character = col },
         ["end"] = { line = row - 1, character = col + vim.api.nvim_strwidth(item.label) },
@@ -81,7 +81,7 @@ function cmp_buffer:complete(ctx, callback)
     item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
     item.cmp = {
       kind_hl_group = "CmpItemKind",
-      kind_text = "llm.buffer",
+      kind_text = "llm.file",
     }
 
     return item
@@ -93,4 +93,4 @@ function cmp_buffer:complete(ctx, callback)
   })
 end
 
-return cmp_buffer
+return cmp_file

@@ -471,6 +471,7 @@ function api.ClearAttach()
   state.input.attach_content = ""
   state.input.lsp_ctx = {}
   state.quote_buffers = { buffer_info_list = {} }
+  state.quote_files = { file_info_list = {} }
   state.input.request_with_lsp = nil
 end
 
@@ -516,6 +517,7 @@ function api.CancelLLM()
   end
   state.enabled_cmds = {}
   state.quote_buffers = { buffer_info_list = {} }
+  state.quote_files = { file_info_list = {} }
   api.ClearSummarizeSuggestions()
 end
 

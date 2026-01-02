@@ -87,6 +87,37 @@ function blink:execute(ctx, item, callback, default_implementation)
     end)
 
     return
+  elseif item.kind_name == "llm.file" then
+    item.picker(function(quote_file_list)
+      vim.api.nvim_set_current_win(state.input.popup.winid)
+      local new_text = ""
+      for _, quote_file in ipairs(quote_file_list) do
+        if F.IsValid(new_text) then
+          new_text = new_text .. " " .. quote_file
+        else
+          new_text = quote_file
+        end
+      end
+
+      if F.IsValid(new_text) then
+        item.textEdit.newText = new_text
+        vim.api.nvim_buf_set_text(
+          ctx.bufnr,
+          item.textEdit.range.start.line,
+          item.textEdit.range.start.character - 1,
+          item.textEdit.range["end"].line,
+          item.textEdit.range["end"].character,
+          { item.textEdit.newText }
+        )
+
+        vim.api.nvim_feedkeys("A", "n", false)
+      else
+        default_implementation()
+        callback()
+      end
+    end)
+
+    return
   end
 
   default_implementation()
@@ -123,12 +154,13 @@ function blink:get_completions(ctx, callback)
       })
     elseif trigger_char == "/" then
       local buffers = require("llm.common.buffers")
+      local files = require("llm.common.files")
       callback({
         context = ctx,
         is_incomplete_forward = false,
         is_incomplete_backward = false,
         items = vim
-          .iter(buffers)
+          .iter({ unpack(files), unpack(buffers) })
           :map(function(item)
             return {
               label = item.label,
