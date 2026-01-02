@@ -53,7 +53,10 @@ Completion = {
     -- just trigger by { "@", ".", "(", "[", ":", " " } for `style = "nvim-cmp"`
     only_trigger_by_keywords = true,
 
-    style = "virtual_text", -- nvim-cmp or blink.cmp
+    -- If the style is set to nil, it will automatically determine
+    -- whether you are using nvim-cmp or blink.cmp.
+    -- If neither is used, it will use the virtual text style.
+    style = nil, -- nvim-cmp, blink.cmp or virtual_text
 
     timeout = 10, -- max request time
 

@@ -131,8 +131,8 @@ vim.api.nvim_create_autocmd("FileType", {
 local has_cmp, cmp = pcall(require, "cmp")
 local has_blink, blink = pcall(require, "blink.cmp")
 if has_blink then
-  local name = "LLM_METHODS"
-  local source = "llm_methods"
+  local name = "LLM_FUNCTIONS"
+  local source = "llm_functions"
   pcall(function()
     local add_provider = blink.add_source_provider or blink.add_provider
     add_provider(source, {

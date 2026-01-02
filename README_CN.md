@@ -146,7 +146,10 @@
   <img src="https://github.com/user-attachments/assets/a1ae0ba7-d914-4bcd-a136-b88d79f7eb91" alt="llm-docstring" width="800">
 </p>
 
-### [联网搜索](./docs/cmds/README.md#web_search)
+### [联网搜索](./docs/functions/README.md#web_search)
+
+[**`/buffer`**](./docs/functions/README.md#buffers) | [**`/file`**](./docs/functions/README.md#files) | [**`@web_search`**](./docs/functions/README.md#web_search)
+
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/acf57069-a561-4f23-ba89-f666193dcde4" alt="web-search" width="800">
 </p>

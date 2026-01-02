@@ -1,14 +1,24 @@
 <!-- mtoc-start -->
 
-* [llm.nvim cmds](#llmnvim-cmds)
-  * [web_search](#web_search)
+* [llm.nvim functions](#llmnvim-functions)
+  * [buffers](#buffers)
+  * [files](#files)
+  * [cmds](#cmds)
+    * [web_search](#web_search)
 
 <!-- mtoc-end -->
-# llm.nvim cmds
+# llm.nvim functions
+## buffers
+**USAGE**: use `/buffer` in the input window
+
+## files
+**USAGE**: use `/file` in the input window
+
+## cmds
 
 **USAGE**: use `@ + the command name` in the input window
 
-## web_search
+### web_search
 
 You can use `@web_search` to search the web for information.
 
