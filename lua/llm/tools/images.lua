@@ -155,7 +155,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       options.picker.extern(function(item)
         if item then
           local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
-          vim.api.nvim_buf_set_lines(input_box.bufnr, start_pos - 1, -1, false, { item })
+          vim.api.nvim_buf_set_lines(input_box.bufnr, start_pos - 1, -1, false, item)
         end
         vim.api.nvim_set_current_win(input_box.winid)
       end)

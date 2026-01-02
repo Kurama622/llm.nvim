@@ -72,10 +72,23 @@ FormulaRecognition = {
             },
           },
           actions = {
-            confirm = function(picker, item)
+            close = function()
+              vim.api.startinsert()
+            end,
+            confirm = function(picker, selected)
               picker:close()
-              local path = string.gsub(item._path, " ", "\\ ")
-              callback(path)
+              picker.close = picker.init_opts.actions.close
+              local file, file_list = nil, {}
+              if picker:selected()[1] ~= nil then
+                for _, item in ipairs(picker:selected()) do
+                  file = item.file:gsub(" ", "\\ ")
+                  table.insert(file_list, file)
+                end
+              else
+                file = selected.file:gsub(" ", "\\ ")
+                table.insert(file_list, file)
+              end
+              callback(file_list)
             end,
           },
           on_close = function()
@@ -117,9 +130,13 @@ FormulaRecognition = {
           },
           actions = {
             default = function(selected)
-              local path = string.gsub(selected[1], "^[^%w%p]+%s*", "") --  remove the icon if the file_icon is enable
-              path = string.gsub(path, " ", "\\ ")
-              callback(path)
+              local file_list = {}
+              for _, file in ipairs(selected) do
+                file = file:gsub("^[^%w%p]+%s*", "") --  remove the icon if the file_icon is enable
+                file = file:gsub(" ", "\\ ")
+                table.insert(file_list, file)
+              end
+              callback(file_list)
             end,
           },
         })

@@ -76,6 +76,7 @@ local files = {
               local file_list = {}
               if F.IsValid(selected) then
                 for _, file in ipairs(selected) do
+                  file = file:gsub("^[^%w%p]+%s*", "") --  remove the icon if the file_icon is enable
                   local buf = vim.fn.bufadd(file)
                   vim.fn.bufload(buf)
                   table.insert(file_list, file)
