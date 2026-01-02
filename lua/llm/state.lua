@@ -92,5 +92,6 @@ M.reason_range = {
 
 M.enabled_cmds = {}
 M.quote_buffers = { buffer_info_list = {} }
+M.quote_files = { file_info_list = {} }
 
 return M

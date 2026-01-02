@@ -244,6 +244,12 @@ function M.GetStreamingOutput(opts)
       opts.enable_buffer_idx = idx
       buffer:callback(opts, request_job)
     end
+  elseif F.IsValid(state.quote_files[1]) then
+    state.input.attach_content = state.input.attach_content .. "This is the content of the file involved:"
+    for idx, file in ipairs(state.quote_files) do
+      opts.enable_file_idx = idx
+      file:callback(opts, request_job)
+    end
   elseif F.IsValid(state.enabled_cmds) then
     for idx, cmd in ipairs(state.enabled_cmds) do
       opts.enable_cmds_idx = idx
