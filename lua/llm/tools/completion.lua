@@ -17,7 +17,7 @@ function M.handler(name, F, state, _, prompt, opts)
     default_filetype_enabled = true,
     auto_trigger = true,
     only_trigger_by_keywords = true,
-    style = "virtual_text",
+    style = nil,
     keymap = {
       virtual_text = {
         accept = {
@@ -40,6 +40,19 @@ function M.handler(name, F, state, _, prompt, opts)
     },
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
+
+  if options.style == nil then
+    local has_cmp, _ = pcall(require, "cmp")
+    local has_blink, _ = pcall(require, "blink.cmp")
+
+    if has_blink then
+      options.style = "blink.cmp"
+    elseif has_cmp then
+      options.style = "nvim-cmp"
+    else
+      options.style = "virtual_text"
+    end
+  end
 
   options.timeout = tostring(options.timeout)
   completion:init(options)
