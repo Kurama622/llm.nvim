@@ -51,6 +51,7 @@ function cmp_buffer:execute(item, callback)
       end
     end)
   end
+  callback()
 end
 
 function cmp_buffer.new()

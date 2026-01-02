@@ -51,6 +51,7 @@ function cmp_file:execute(item, callback)
       end
     end)
   end
+  callback()
 end
 
 function cmp_file.new()
