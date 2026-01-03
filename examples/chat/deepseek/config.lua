@@ -8,10 +8,11 @@ return {
         -- [[ Deepseek ]]
         url = "https://api.deepseek.com/chat/completions",
         model = "deepseek-chat",
-        api_type = "openai",
+        api_type = "deepseek",
         max_tokens = 4096,
         temperature = 0.3,
         top_p = 0.7,
+        enable_thinking = false,
 
         prompt = "You are a helpful chinese assistant.",
 
