@@ -33,6 +33,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
       return function(chunk)
         return require("llm.backends.openai").StreamingHandler(chunk, ctx)
       end
+    elseif api_type == "deepseek" then
+      return function(chunk)
+        return require("llm.backends.deepseek").StreamingHandler(chunk, ctx)
+      end
     elseif api_type == "ollama" then
       return function(chunk)
         return require("llm.backends.ollama").StreamingHandler(chunk, ctx)
@@ -62,6 +66,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
     elseif configs.api_type == "openai" then
       return function(chunk)
         return require("llm.backends.openai").StreamingHandler(chunk, ctx)
+      end
+    elseif configs.api_type == "deepseek" then
+      return function(chunk)
+        return require("llm.backends.deepseek").StreamingHandler(chunk, ctx)
       end
     elseif configs.api_type == "ollama" then
       return function(chunk)
@@ -103,6 +111,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       return function(chunk)
         return require("llm.backends.openai").ParseHandler(chunk, ctx)
       end
+    elseif api_type == "deepseek" then
+      return function(chunk)
+        return require("llm.backends.deepseek").ParseHandler(chunk, ctx)
+      end
     elseif api_type == "ollama" then
       return function(chunk)
         return require("llm.backends.ollama").ParseHandler(chunk, ctx)
@@ -139,6 +151,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       return function(chunk)
         return require("llm.backends.openai").ParseHandler(chunk, ctx)
       end
+    elseif configs.api_type == "deepseek" then
+      return function(chunk)
+        return require("llm.backends.deepseek").ParseHandler(chunk, ctx)
+      end
     elseif configs.api_type == "ollama" then
       return function(chunk)
         return require("llm.backends.ollama").ParseHandler(chunk, ctx)
@@ -163,6 +179,9 @@ function backends.get_function_calling(api_type, configs, ctx)
       ["openai"] = function(t)
         return require("llm.backends.openai").FunctionCalling(ctx, t)
       end,
+      ["deepseek"] = function(t)
+        return require("llm.backends.deepseek").FunctionCalling(ctx, t)
+      end,
       ["ollama"] = function(t)
         return require("llm.backends.ollama").FunctionCalling(ctx, t)
       end,
@@ -185,6 +204,11 @@ function backends.get_tools_respond(api_type, configs, ctx)
         return require("llm.backends.openai").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
       end or function(chunk)
         return require("llm.backends.openai").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+      end,
+      ["deepseek"] = ctx.stream and function(chunk)
+        return require("llm.backends.deepseek").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+      end or function(chunk)
+        return require("llm.backends.deepseek").GetToolsRespond(chunk, backends.msg_tool_calls_content)
       end,
       ["ollama"] = ctx.stream and function(chunk)
         return require("llm.backends.ollama").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
@@ -209,6 +233,17 @@ function backends.gen_msg_with_tool_calls(api_type, configs, ctx)
         LOG:ERROR("GLM do not support function-calling.")
       end,
       ["openai"] = {
+        choices = {
+          {
+            message = {
+              role = "assistant",
+              content = ctx.assistant_output,
+              tool_calls = backends.msg_tool_calls_content,
+            },
+          },
+        },
+      },
+      ["deepseek"] = {
         choices = {
           {
             message = {
@@ -245,6 +280,9 @@ function backends.get_streaming_tbl_handler(api_type, configs)
       end,
       ["openai"] = function(results)
         return require("llm.backends.openai").StreamingTblHandler(results)
+      end,
+      ["deepseek"] = function(results)
+        return require("llm.backends.deepseek").StreamingTblHandler(results)
       end,
       ["ollama"] = function(results)
         return require("llm.backends.ollama").StreamingTblHandler(results)
