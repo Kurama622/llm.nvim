@@ -34,7 +34,6 @@ function cmp_file:execute(item, callback)
 
       if F.IsValid(new_text) then
         item.insertText = new_text
-        item.label = new_text
       end
       if F.IsValid(new_text) then
         item._textEdit.newText = new_text
