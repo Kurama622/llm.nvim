@@ -137,6 +137,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
 
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
       utils.set_keymapping(opts._[k].mapping.mode, opts._[k].mapping.keys, function()
+        -- default action
         opts.action[k]()
         if k == "display" then
           if vim.api.nvim_get_option_value("buftype", { buf = bufnr }) ~= "nofile" then
@@ -144,7 +145,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
               utils.set_keymapping(opts._[op].mapping.mode, opts._[op].mapping.keys, function()
                 opts.action[op]()
                 if opts._[op].action ~= nil then
-                  opts._[op].action()
+                  opts._[op]:action(opts._)
                 end
                 for _, reset_op in ipairs({ "accept", "reject", "close" }) do
                   utils.clear_keymapping(opts._[reset_op].mapping.mode, opts._[reset_op].mapping.keys, bufnr)
@@ -154,7 +155,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
           end
         end
         if opts._[k].action ~= nil then
-          opts._[k].action()
+          opts._[k]:action(opts._)
         end
       end, popwin.bufnr)
     end

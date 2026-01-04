@@ -160,7 +160,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
         default_actions[op]()
         if options[op].action ~= nil then
-          options[op].action()
+          options[op]:action(options)
         end
         for _, reset_op in ipairs({ "accept", "reject", "close" }) do
           utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
@@ -259,7 +259,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
     preview_box:map(options.close.mapping.mode, options.close.mapping.keys, function()
       default_actions.close()
       if options.close.action ~= nil then
-        options.close.action()
+        options.close:action(options)
       end
       for _, kk in ipairs({ "accept", "reject", "close" }) do
         utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
