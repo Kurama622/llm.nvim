@@ -261,7 +261,7 @@ function ui.show_spinner(waiting_state)
         waiting_state.winid = waiting_state.box.winid
       end
       if not vim.api.nvim_win_is_valid(waiting_state.winid) then
-        waiting_state.timer:stop()
+        waiting_state.timer:close()
         return
       end
 
@@ -297,7 +297,7 @@ function ui.display_spinner_extmark(opts)
         end
       end
       if not opts.spinner_status or not vim.api.nvim_win_is_valid(opts.winid) then
-        timer:stop()
+        timer:close()
         return
       end
 
