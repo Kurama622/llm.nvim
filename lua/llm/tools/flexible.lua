@@ -93,7 +93,7 @@ function M.handler(name, F, state, _, prompt, opts)
       for _, v in ipairs({ "accept", "reject", "close" }) do
         flexible_box:map(options[v].mapping.mode, options[v].mapping.keys, function()
           if options[v].action ~= nil then
-            options[v].action()
+            options[v]:action(options)
           else
             default_actions[v]()
           end

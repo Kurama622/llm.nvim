@@ -140,7 +140,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       v:map(options[k].mapping.mode, options[k].mapping.keys, function()
         F.CancelLLM()
         if options[k].action ~= nil then
-          options[k].action()
+          options[k]:action(options)
         else
           default_actions[k]()
         end

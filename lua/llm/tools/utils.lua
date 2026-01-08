@@ -126,7 +126,7 @@ function utils.single_turn_dialogue(preview_box, streaming, options, context, di
         utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
           default_actions[op]()
           if options[op].action ~= nil then
-            options[op].action()
+            options[op]:action(options)
           end
           for _, reset_op in ipairs({ "accept", "reject", "close" }) do
             utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, context.bufnr)
