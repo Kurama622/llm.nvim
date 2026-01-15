@@ -9,16 +9,6 @@ NOTE:
     exit_on_move = true,
     enter_flexible_window = false,
     enable_cword_context = true,
-
-    -- Customize the behavior of accept (default keymap: y/Y),
-    -- with the default action being entering visual-line mode to copy.
-    -- This sample code is for entering the visual mode to copy.
-    accept = {
-      action = function(self, opts)
-        vim.api.nvim_set_current_win(opts.winid)
-        vim.api.nvim_command("normal! gg^vGkk$hy")
-      end,
-    },
   },
 },
 
