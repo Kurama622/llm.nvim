@@ -108,6 +108,7 @@ function M.handler(name, F, state, _, prompt, opts)
   F.VisMode2NorMode()
   if options.exit_on_move then
     vim.api.nvim_create_autocmd("CursorMoved", {
+      group = vim.api.nvim_create_augroup("exit_on_move", { clear = true }),
       callback = function()
         if flexible_box ~= nil then
           flexible_box:unmount()
