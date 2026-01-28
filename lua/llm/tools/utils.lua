@@ -25,8 +25,9 @@ function utils.parse_suggestion(suggestion, pattern)
   return res, range_tbl
 end
 
-function utils.get_hunk_idx(range_tbl)
-  local cursor_linenr = vim.api.nvim_win_get_cursor(0)[1] - state.llm.start_line + 1
+function utils.get_hunk_idx(range_tbl, full_buffer_content)
+  local cursor_linenr = full_buffer_content and vim.api.nvim_win_get_cursor(0)[1]
+    or vim.api.nvim_win_get_cursor(0)[1] - state.llm.start_line + 1
   local idx = 0
   for n, range in ipairs(range_tbl) do
     idx = n
@@ -70,13 +71,13 @@ function utils.overwrite_selection(context, contents)
   vim.api.nvim_win_set_cursor(context.winnr, { context.start_line, context.start_col })
 end
 
-function utils.copy_suggestion_code(opts, suggestion)
+function utils.copy_suggestion_code(opts, suggestion, full_buffer_content)
   local pattern = string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
     LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
   else
-    local idx = utils.get_hunk_idx(range_tbl)
+    local idx = utils.get_hunk_idx(range_tbl, full_buffer_content)
     vim.fn.setreg("+", res[idx])
   end
 end
