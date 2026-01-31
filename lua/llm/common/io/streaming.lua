@@ -155,8 +155,14 @@ function M.GetStreamingOutput(opts)
         "@" .. data_file,
       }
       if required_params.api_type == "copilot" then
+        local nvim_version = vim.version()
         table.insert(_args, "-H")
-        table.insert(_args, "Editor-Version: vscode/1.94.2")
+        table.insert(_args, "Copilot-Integration-Id: vscode-chat")
+        table.insert(_args, "-H")
+        table.insert(
+          _args,
+          "Editor-Version: Neovim/" .. ("%d.%d.%d"):format(nvim_version.major, nvim_version.minor, nvim_version.patch)
+        )
       end
     else
       local env = {

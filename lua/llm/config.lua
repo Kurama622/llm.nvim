@@ -34,6 +34,7 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       buf_options = {
         filetype = "llm",
@@ -59,6 +60,7 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       buf_options = {
         filetype = "llm",
@@ -83,6 +85,7 @@ M._.chat_ui_opts = {
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
         spell = false,
         wrap = true,
+        winfixbuf = true,
       },
       buf_options = {
         filetype = "llm",
@@ -103,6 +106,7 @@ M._.chat_ui_opts = {
         spell = false,
         wrap = true,
         linebreak = false,
+        winfixbuf = true,
       },
     },
   },
@@ -125,6 +129,7 @@ M._.chat_ui_opts = {
         winblend = 0,
         cursorline = true,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       size = { height = "85%", width = "20%" },
       order = 2,
@@ -136,6 +141,7 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       select = {
         border = {
@@ -167,6 +173,7 @@ M._.chat_ui_opts = {
         winblend = 0,
         cursorline = true,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       size = { height = "85%", width = "20%" },
       order = 2,
@@ -186,6 +193,7 @@ M._.chat_ui_opts = {
       win_options = {
         winblend = 0,
         winhighlight = "Normal:LlmWhiteNormal,FloatBorder:FloatBorder",
+        winfixbuf = true,
       },
       size = { height = "30%", width = "30%" },
       order = 1,
@@ -219,6 +227,7 @@ M._.popwin_opts = {
     spell = false,
     linebreak = false,
     wrap = true,
+    winfixbuf = true,
   },
   buf_options = {
     filetype = "llm",

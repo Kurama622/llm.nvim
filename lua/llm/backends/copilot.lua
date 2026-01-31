@@ -148,6 +148,8 @@ function copilot.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
+  table.insert(ctx.args, "-H")
+  table.insert(ctx.args, "X-Initiator: agent")
   table.insert(ctx.args, json.encode(ctx.body))
   job
     :new({
