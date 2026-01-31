@@ -82,8 +82,6 @@ function io_parse.GetOutput(opts)
     end
   end
 
-  local authorization = "Authorization: Bearer " .. LLM_KEY
-
   local body = {
     stream = false,
     messages = opts.messages,
@@ -92,8 +90,11 @@ function io_parse.GetOutput(opts)
 
   if required_params.api_type == "ollama" then
     body.options = {}
+  elseif required_params.api_type == "copilot" then
+    LLM_KEY = require("llm.backends.copilot"):get_authorization_token(LLM_KEY)
   end
 
+  local authorization = "Authorization: Bearer " .. LLM_KEY
   local params = {
     max_tokens = required_params.max_tokens,
     keep_alive = required_params.keep_alive,
@@ -143,6 +144,10 @@ function io_parse.GetOutput(opts)
         "-d",
         "@" .. data_file,
       }
+      if required_params.api_type == "copilot" then
+        table.insert(_args, "-H")
+        table.insert(_args, "Editor-Version: vscode/1.94.2")
+      end
     else
       local env = {
         url = required_params.url,

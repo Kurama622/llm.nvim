@@ -61,12 +61,6 @@ function M.GetStreamingOutput(opts)
     end
   end
 
-  local authorization = "Authorization: Bearer " .. LLM_KEY
-
-  if LLM_KEY == "NONE" then
-    authorization = ""
-  end
-
   -- set request body params
   local body = {
     stream = true,
@@ -95,6 +89,14 @@ function M.GetStreamingOutput(opts)
         table.insert(msg.content, { ["type"] = "text", text = msg_content })
       end
     end
+  elseif required_params.api_type == "copilot" then
+    LLM_KEY = require("llm.backends.copilot"):get_authorization_token(LLM_KEY)
+  end
+
+  local authorization = "Authorization: Bearer " .. LLM_KEY
+
+  if LLM_KEY == "NONE" then
+    authorization = ""
   end
 
   local params = {
@@ -152,6 +154,10 @@ function M.GetStreamingOutput(opts)
         "-d",
         "@" .. data_file,
       }
+      if required_params.api_type == "copilot" then
+        table.insert(_args, "-H")
+        table.insert(_args, "Editor-Version: vscode/1.94.2")
+      end
     else
       local env = {
         url = required_params.url,
