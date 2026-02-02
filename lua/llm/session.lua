@@ -328,20 +328,18 @@ function M.NewSession()
               F.SetRole(bufnr, winid, "user")
               F.AppendChunkToBuffer(bufnr, winid, input)
               F.NewLine(bufnr, winid)
-              vim.schedule(function()
-                if state.input.request_with_lsp ~= nil then
-                  state.input.request_with_lsp(function()
-                    if F.IsValid(state.input.lsp_ctx.content) then
-                      table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                      F.AppendLspMsg(bufnr, winid)
-                    end
-                    vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                    F.ClearAttach()
-                  end)
-                else
+              if state.input.request_with_lsp ~= nil then
+                state.input.request_with_lsp(function()
+                  if F.IsValid(state.input.lsp_ctx.content) then
+                    table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                    F.AppendLspMsg(bufnr, winid)
+                  end
                   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                end
-              end)
+                  F.ClearAttach()
+                end)
+              else
+                vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+              end
             end
           end, { noremap = true })
         elseif k == "Input:Cancel" then
@@ -463,20 +461,18 @@ function M.NewSession()
                       F.SetRole(bufnr, winid, "user")
                       F.AppendChunkToBuffer(bufnr, winid, input)
                       F.NewLine(bufnr, winid)
-                      vim.schedule(function()
-                        if state.input.request_with_lsp ~= nil then
-                          state.input.request_with_lsp(function()
-                            if F.IsValid(state.input.lsp_ctx.content) then
-                              table.insert(state.session[state.session.filename], state.input.lsp_ctx)
-                              F.AppendLspMsg(bufnr, winid)
-                            end
-                            vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                            F.ClearAttach()
-                          end)
-                        else
+                      if state.input.request_with_lsp ~= nil then
+                        state.input.request_with_lsp(function()
+                          if F.IsValid(state.input.lsp_ctx.content) then
+                            table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                            F.AppendLspMsg(bufnr, winid)
+                          end
                           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                        end
-                      end)
+                          F.ClearAttach()
+                        end)
+                      else
+                        vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                      end
                     end
                     vim.api.nvim_set_current_win(state.llm.popup.winid)
                   end, { noremap = true })

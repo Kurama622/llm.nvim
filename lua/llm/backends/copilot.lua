@@ -4,13 +4,13 @@ local curl = require("plenary.curl")
 local job = require("plenary.job")
 local backend_utils = require("llm.backends.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
-local copilot = { token = nil, expires_time = -1 }
+local copilot = { token = "", expires_time = -1 }
 
-function copilot:get_authorization_token(LLM_KEY)
+function copilot:get_authorization_token(LLM_KEY, co)
   if self.token and self.expires_time >= os.time() then
     return self.token
   end
-  local data = curl.get("https://api.github.com/copilot_internal/v2/token", {
+  curl.get("https://api.github.com/copilot_internal/v2/token", {
     headers = {
       Authorization = "Bearer " .. LLM_KEY,
       ["Accept"] = "application/json",
@@ -18,17 +18,16 @@ function copilot:get_authorization_token(LLM_KEY)
     on_error = function(err)
       LOG:ERROR("Copilot: Token request error %s", err)
     end,
-  })
-  local status, respond = pcall(json.decode, data.body)
+    callback = function(data)
+      local status, respond = pcall(json.decode, data.body)
 
-  if status then
-    self.token = respond.token
-    self.expires_time = respond.expires_at
-  end
-  if not self.token then
-    return ""
-  end
-  return self.token
+      if status then
+        self.token = respond.token
+        self.expires_time = respond.expires_at
+      end
+      coroutine.resume(co, self.token)
+    end,
+  })
 end
 
 function copilot.StreamingHandler(chunk, ctx)
