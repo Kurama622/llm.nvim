@@ -33,6 +33,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
       return function(chunk)
         return require("llm.backends.openai").StreamingHandler(chunk, ctx)
       end
+    elseif api_type == "copilot" then
+      return function(chunk)
+        return require("llm.backends.copilot").StreamingHandler(chunk, ctx)
+      end
     elseif api_type == "deepseek" then
       return function(chunk)
         return require("llm.backends.deepseek").StreamingHandler(chunk, ctx)
@@ -66,6 +70,10 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
     elseif configs.api_type == "openai" then
       return function(chunk)
         return require("llm.backends.openai").StreamingHandler(chunk, ctx)
+      end
+    elseif configs.api_type == "copilot" then
+      return function(chunk)
+        return require("llm.backends.copilot").StreamingHandler(chunk, ctx)
       end
     elseif configs.api_type == "deepseek" then
       return function(chunk)
@@ -111,6 +119,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       return function(chunk)
         return require("llm.backends.openai").ParseHandler(chunk, ctx)
       end
+    elseif api_type == "copilot" then
+      return function(chunk)
+        return require("llm.backends.copilot").ParseHandler(chunk, ctx)
+      end
     elseif api_type == "deepseek" then
       return function(chunk)
         return require("llm.backends.deepseek").ParseHandler(chunk, ctx)
@@ -151,6 +163,10 @@ function backends.get_parse_handler(parse_handler, api_type, configs, ctx)
       return function(chunk)
         return require("llm.backends.openai").ParseHandler(chunk, ctx)
       end
+    elseif configs.api_type == "copilot" then
+      return function(chunk)
+        return require("llm.backends.copilot").ParseHandler(chunk, ctx)
+      end
     elseif configs.api_type == "deepseek" then
       return function(chunk)
         return require("llm.backends.deepseek").ParseHandler(chunk, ctx)
@@ -179,6 +195,9 @@ function backends.get_function_calling(api_type, configs, ctx)
       ["openai"] = function(t)
         return require("llm.backends.openai").FunctionCalling(ctx, t)
       end,
+      ["copilot"] = function(t)
+        return require("llm.backends.copilot").FunctionCalling(ctx, t)
+      end,
       ["deepseek"] = function(t)
         return require("llm.backends.deepseek").FunctionCalling(ctx, t)
       end,
@@ -204,6 +223,11 @@ function backends.get_tools_respond(api_type, configs, ctx)
         return require("llm.backends.openai").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
       end or function(chunk)
         return require("llm.backends.openai").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+      end,
+      ["copilot"] = ctx.stream and function(chunk)
+        return require("llm.backends.copilot").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+      end or function(chunk)
+        return require("llm.backends.copilot").GetToolsRespond(chunk, backends.msg_tool_calls_content)
       end,
       ["deepseek"] = ctx.stream and function(chunk)
         return require("llm.backends.deepseek").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
@@ -233,6 +257,17 @@ function backends.gen_msg_with_tool_calls(api_type, configs, ctx)
         LOG:ERROR("GLM do not support function-calling.")
       end,
       ["openai"] = {
+        choices = {
+          {
+            message = {
+              role = "assistant",
+              content = ctx.assistant_output,
+              tool_calls = backends.msg_tool_calls_content,
+            },
+          },
+        },
+      },
+      ["copilot"] = {
         choices = {
           {
             message = {
@@ -280,6 +315,9 @@ function backends.get_streaming_tbl_handler(api_type, configs)
       end,
       ["openai"] = function(results)
         return require("llm.backends.openai").StreamingTblHandler(results)
+      end,
+      ["copilot"] = function(results)
+        return require("llm.backends.copilot").StreamingTblHandler(results)
       end,
       ["deepseek"] = function(results)
         return require("llm.backends.deepseek").StreamingTblHandler(results)
