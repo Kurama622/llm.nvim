@@ -6,7 +6,7 @@ local conf = require("llm.config")
 local backends = require("llm.backends")
 local ui = require("llm.common.ui")
 
-local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, chat_job)
+local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
   return job:new({
     command = "curl",
     args = {
@@ -60,9 +60,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
 
       state.llm.worker.jobs.web_search = nil
       table.remove(state.enabled_cmds, opts.enabled_cmds_idx)
-      local name = opts._name or "chat"
-      chat_job:start()
-      state.llm.worker.jobs[name] = chat_job
+      coroutine.resume(co)
     end),
   })
 end

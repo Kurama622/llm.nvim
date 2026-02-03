@@ -6,7 +6,7 @@ local buffers = {
     label = "buffer",
     detail = "Quote the content of the buffer",
     kind_name = "llm.buffer",
-    callback = function(bufnr, opts, chat_job)
+    callback = function(bufnr, opts, co)
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
       local buffer_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
 
@@ -28,8 +28,6 @@ local buffers = {
         .. "\n```"
 
       if opts.enable_buffer_idx == #state.quote_buffers then
-        local name = opts._name or "chat"
-
         if F.IsValid(opts.diagnostic) then
           state.input.attach_content = state.input.attach_content
             .. "\n"
@@ -49,20 +47,21 @@ local buffers = {
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
             if F.IsValid(state.input.lsp_ctx.content) then
-              table.insert(opts.body.messages, state.input.lsp_ctx)
+              table.insert(opts.body.messages, {
+                role = "user",
+                ["type"] = "lsp",
+                symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+                content = table.concat(state.input.lsp_ctx.content, "\n"),
+              })
               -- Do not display lsp information
               -- F.AppendLspMsg(state.llm.popup.bufnr, state.llm.popup.winid)
             end
             opts.args[#opts.args] = vim.json.encode(opts.body)
-            chat_job:start()
-            state.llm.worker.jobs[name] = chat_job
-
-            F.ClearAttach()
+            coroutine.resume(co)
           end)
         else
           opts.args[#opts.args] = vim.json.encode(opts.body)
-          chat_job:start()
-          state.llm.worker.jobs[name] = chat_job
+          coroutine.resume(co)
         end
       end
     end,

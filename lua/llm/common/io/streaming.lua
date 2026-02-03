@@ -37,6 +37,7 @@ end
 
 function M.GetStreamingOutput(opts)
   return coroutine.wrap(function()
+    local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
     local ACCOUNT = os.getenv("ACCOUNT")
     local LLM_KEY = os.getenv("LLM_KEY")
@@ -91,7 +92,6 @@ function M.GetStreamingOutput(opts)
         end
       end
     elseif required_params.api_type == "copilot" then
-      local co = assert(coroutine.running())
       require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
       LLM_KEY = coroutine.yield()
     end
@@ -257,24 +257,29 @@ function M.GetStreamingOutput(opts)
       state.input.attach_content = state.input.attach_content .. "This is the content of the buffer involved:"
       for idx, buffer in ipairs(state.quote_buffers) do
         opts.enable_buffer_idx = idx
-        buffer:callback(opts, request_job)
+        buffer:callback(opts, co)
+        coroutine.yield()
       end
-    elseif F.IsValid(state.quote_files[1]) then
+    end
+    if F.IsValid(state.quote_files[1]) then
       state.input.attach_content = state.input.attach_content .. "This is the content of the file involved:"
       for idx, file in ipairs(state.quote_files) do
         opts.enable_file_idx = idx
-        file:callback(opts, request_job)
+        file:callback(opts, co)
+        coroutine.yield()
       end
-    elseif F.IsValid(state.enabled_cmds) then
+    end
+    if F.IsValid(state.enabled_cmds) then
       for idx, cmd in ipairs(state.enabled_cmds) do
         opts.enable_cmds_idx = idx
-        cmd.callback(conf.configs.web_search, opts.messages, opts, request_job)
+        cmd.callback(conf.configs.web_search, opts.messages, opts, co)
+        coroutine.yield()
       end
-    else
-      local name = opts._name or "chat"
-      request_job:start()
-      state.llm.worker.jobs[name] = request_job
     end
+    local name = opts._name or "chat"
+    request_job:start()
+    state.llm.worker.jobs[name] = request_job
+    F.ClearAttach()
   end)()
 end
 

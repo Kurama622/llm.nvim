@@ -46,6 +46,7 @@ end
 
 function io_parse.GetOutput(opts)
   return coroutine.wrap(function()
+    local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
     local wait_box_opts = ui.wait_ui_opts()
     local wait_box = Popup(wait_box_opts)
@@ -92,7 +93,6 @@ function io_parse.GetOutput(opts)
     if required_params.api_type == "ollama" then
       body.options = {}
     elseif required_params.api_type == "copilot" then
-      local co = assert(coroutine.running())
       require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
       LLM_KEY = coroutine.yield()
     end
