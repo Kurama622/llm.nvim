@@ -9,3 +9,4 @@
 - [openrouter](./openrouter/config.lua)
 - [siliconflow](./siliconflow/config.lua)
 - [chatanywhere](./chatanywhere/)
+- [copilot](./copilot/)
