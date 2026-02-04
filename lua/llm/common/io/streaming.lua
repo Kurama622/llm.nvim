@@ -269,6 +269,18 @@ function M.GetStreamingOutput(opts)
         coroutine.yield()
       end
     end
+    -- Insert the LSP symbols of the file and buffer methods
+    if F.IsValid(state.input.lsp_ctx.content) then
+      table.insert(opts.body.messages, {
+        role = "user",
+        ["type"] = "lsp",
+        symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+        content = table.concat(state.input.lsp_ctx.content, "\n"),
+      })
+      -- Do not display lsp information
+      -- F.AppendLspMsg(state.llm.popup.bufnr, state.llm.popup.winid)
+    end
+
     if F.IsValid(state.enabled_cmds) then
       for idx, cmd in ipairs(state.enabled_cmds) do
         opts.enable_cmds_idx = idx

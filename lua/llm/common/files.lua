@@ -46,15 +46,6 @@ local files = {
         end
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
-            if F.IsValid(state.input.lsp_ctx.content) then
-              table.insert(opts.body.messages, {
-                role = "user",
-                ["type"] = "lsp",
-                content = table.concat(state.input.lsp_ctx.content, "\n"),
-              })
-              -- Do not display lsp information
-              -- F.AppendLspMsg(state.llm.popup.bufnr, state.llm.popup.winid)
-            end
             opts.args[#opts.args] = vim.json.encode(opts.body)
             coroutine.resume(co)
           end)

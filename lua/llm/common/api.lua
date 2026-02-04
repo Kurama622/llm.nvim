@@ -1205,28 +1205,30 @@ function api.lsp_wrap(opts)
           end
           if symbol.done then
             for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-              for _, sym in pairs(symbol_location) do
-                table.insert(
-                  state.input.lsp_ctx.content,
-                  ("- %s#L%d-%d | %s\n```%s\n%s\n```"):format(
-                    fname,
-                    sym.start_row,
-                    sym.end_row,
-                    sym.name,
-                    vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr }),
-                    table.concat(
-                      vim.api.nvim_buf_get_text(
-                        sym.bufnr,
-                        sym.start_row - 1,
-                        sym.start_col - 1,
-                        sym.end_row - 1,
-                        sym.end_col - 1,
-                        {}
-                      ),
-                      "\n"
+              if type(symbol_location) == "table" then
+                for _, sym in pairs(symbol_location) do
+                  table.insert(
+                    state.input.lsp_ctx.content,
+                    ("- %s#L%d-%d | %s\n```%s\n%s\n```"):format(
+                      fname,
+                      sym.start_row,
+                      sym.end_row,
+                      sym.name,
+                      vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr }),
+                      table.concat(
+                        vim.api.nvim_buf_get_text(
+                          sym.bufnr,
+                          sym.start_row - 1,
+                          sym.start_col - 1,
+                          sym.end_row - 1,
+                          sym.end_col - 1,
+                          {}
+                        ),
+                        "\n"
+                      )
                     )
                   )
-                )
+                end
               end
             end
             if
