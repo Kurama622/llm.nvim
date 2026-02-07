@@ -243,7 +243,12 @@ function M.handler(name, F, state, streaming, prompt, opts)
     if state.input.request_with_lsp ~= nil then
       state.input.request_with_lsp(function()
         if F.IsValid(state.input.lsp_ctx.content) then
-          table.insert(state.app.session[name], state.input.lsp_ctx)
+          table.insert(state.app.session[name], {
+            role = "user",
+            ["type"] = "lsp",
+            symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+            content = table.concat(state.input.lsp_ctx.content, "\n"),
+          })
         end
         options.messages = state.app.session[name]
         utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)

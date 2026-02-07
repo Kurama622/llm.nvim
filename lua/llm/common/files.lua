@@ -6,7 +6,7 @@ local files = {
     label = "file",
     detail = "Quote the content of the file",
     kind_name = "llm.file",
-    callback = function(bufnr, path, opts, chat_job)
+    callback = function(bufnr, path, opts, co)
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
       local file_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
 
@@ -28,8 +28,6 @@ local files = {
         .. "\n```"
 
       if opts.enable_file_idx == #state.quote_files then
-        local name = opts._name or "chat"
-
         if F.IsValid(opts.diagnostic) then
           state.input.attach_content = state.input.attach_content
             .. "\n"
@@ -48,22 +46,16 @@ local files = {
         end
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
-            if F.IsValid(state.input.lsp_ctx.content) then
-              table.insert(opts.body.messages, state.input.lsp_ctx)
-              -- Do not display lsp information
-              -- F.AppendLspMsg(state.llm.popup.bufnr, state.llm.popup.winid)
-            end
             opts.args[#opts.args] = vim.json.encode(opts.body)
-            chat_job:start()
-            state.llm.worker.jobs[name] = chat_job
-
-            F.ClearAttach()
+            coroutine.resume(co)
           end)
         else
-          opts.args[#opts.args] = vim.json.encode(opts.body)
-          chat_job:start()
-          state.llm.worker.jobs[name] = chat_job
+          vim.schedule(function()
+            opts.args[#opts.args] = vim.json.encode(opts.body)
+            coroutine.resume(co)
+          end)
         end
+        coroutine.yield()
       end
     end,
     picker = function(self, complete)

@@ -469,7 +469,10 @@ end
 function api.ClearAttach()
   state.input.diagnostic_error = nil
   state.input.attach_content = ""
-  state.input.lsp_ctx = {}
+  state.input.lsp_ctx = {
+    content = {},
+    symbols_location_list = {},
+  }
   state.quote_buffers = { buffer_info_list = {} }
   state.quote_files = { file_info_list = {} }
   state.input.request_with_lsp = nil
@@ -673,16 +676,18 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
       if msg.type == "lsp" then
         local symbols_location_info = ""
         for fname, symbol_location in pairs(msg.symbols_location_list) do
-          for _, sym in pairs(symbol_location) do
-            symbols_location_info = symbols_location_info
-              .. "\n- "
-              .. fname
-              .. "#L"
-              .. sym.start_row
-              .. "-"
-              .. sym.end_row
-              .. " | "
-              .. sym.name
+          if type(symbol_location) == "table" then
+            for _, sym in pairs(symbol_location) do
+              symbols_location_info = symbols_location_info
+                .. "\n- "
+                .. fname
+                .. "#L"
+                .. sym.start_row
+                .. "-"
+                .. sym.end_row
+                .. " | "
+                .. sym.name
+            end
           end
         end
         api.AppendChunkToBuffer(
@@ -1166,10 +1171,6 @@ function api.lsp_wrap(opts)
   if api.IsValid(opts.lsp.bufnr_info_list) then
     return function(llm_request)
       if api.IsValid(state.input.attach_content) then
-        state.input.lsp_ctx.role = "user"
-        state.input.lsp_ctx.type = "lsp"
-        state.input.lsp_ctx.content = ""
-        state.input.lsp_ctx.symbols_location_list = {}
         api.lsp_request(opts.lsp, function(symbol, exist)
           if exist then
             local symbol_location = {
@@ -1204,35 +1205,37 @@ function api.lsp_wrap(opts)
           end
           if symbol.done then
             for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-              for _, sym in pairs(symbol_location) do
-                state.input.lsp_ctx.content = state.input.lsp_ctx.content
-                  .. "\n- "
-                  .. fname
-                  .. "#L"
-                  .. sym.start_row
-                  .. "-"
-                  .. sym.end_row
-                  .. " | "
-                  .. sym.name
-                  .. "\n```"
-                  .. vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr })
-                  .. "\n"
-                  .. table.concat(
-                    vim.api.nvim_buf_get_text(
-                      sym.bufnr,
-                      sym.start_row - 1,
-                      sym.start_col - 1,
-                      sym.end_row - 1,
-                      sym.end_col - 1,
-                      {}
-                    ),
-                    "\n"
+              if type(symbol_location) == "table" then
+                for _, sym in pairs(symbol_location) do
+                  table.insert(
+                    state.input.lsp_ctx.content,
+                    ("- %s#L%d-%d | %s\n```%s\n%s\n```"):format(
+                      fname,
+                      sym.start_row,
+                      sym.end_row,
+                      sym.name,
+                      vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr }),
+                      table.concat(
+                        vim.api.nvim_buf_get_text(
+                          sym.bufnr,
+                          sym.start_row - 1,
+                          sym.start_col - 1,
+                          sym.end_row - 1,
+                          sym.end_col - 1,
+                          {}
+                        ),
+                        "\n"
+                      )
+                    )
                   )
-                  .. "\n```"
+                end
               end
             end
-            if api.IsValid(state.input.lsp_ctx.content) then
-              state.input.lsp_ctx.content = require("llm.tools.prompts").lsp .. state.input.lsp_ctx.content
+            if
+              not state.input.lsp_ctx.symbols_location_list.lsp_prompt and api.IsValid(state.input.lsp_ctx.content)
+            then
+              table.insert(state.input.lsp_ctx.content, 1, require("llm.tools.prompts").lsp)
+              state.input.lsp_ctx.symbols_location_list.lsp_prompt = true
             end
             llm_request()
           end
@@ -1421,16 +1424,18 @@ function api.AppendLspMsg(bufnr, winid)
 
   local symbols_location_info = ""
   for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
-    for _, sym in pairs(symbol_location) do
-      symbols_location_info = symbols_location_info
-        .. "\n- "
-        .. fname
-        .. "#L"
-        .. sym.start_row
-        .. "-"
-        .. sym.end_row
-        .. " | "
-        .. sym.name
+    if type(symbol_location) == "table" then
+      for _, sym in pairs(symbol_location) do
+        symbols_location_info = symbols_location_info
+          .. "\n- "
+          .. fname
+          .. "#L"
+          .. sym.start_row
+          .. "-"
+          .. sym.end_row
+          .. " | "
+          .. sym.name
+      end
     end
   end
   api.AppendChunkToBuffer(bufnr, winid, require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n")

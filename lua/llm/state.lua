@@ -15,7 +15,10 @@ M.llm = {
 M.input = {
   popup = nil,
   attach_content = "",
-  lsp_ctx = {},
+  lsp_ctx = {
+    content = {},
+    symbols_location_list = {},
+  },
 }
 
 M.history = {

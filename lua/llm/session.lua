@@ -174,10 +174,14 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     if state.input.request_with_lsp ~= nil then
       state.input.request_with_lsp(function()
         if F.IsValid(state.input.lsp_ctx.content) then
-          table.insert(state.session[popwin.winid], state.input.lsp_ctx)
+          table.insert(state.session[popwin.winid], {
+            role = "user",
+            ["type"] = "lsp",
+            symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+            content = table.concat(state.input.lsp_ctx.content, "\n"),
+          })
         end
         streaming.GetStreamingOutput(params)
-        F.ClearAttach()
       end)
     else
       streaming.GetStreamingOutput(params)
@@ -331,11 +335,15 @@ function M.NewSession()
               if state.input.request_with_lsp ~= nil then
                 state.input.request_with_lsp(function()
                   if F.IsValid(state.input.lsp_ctx.content) then
-                    table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                    table.insert(state.session[state.session.filename], {
+                      role = "user",
+                      ["type"] = "lsp",
+                      symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+                      content = table.concat(state.input.lsp_ctx.content, "\n"),
+                    })
                     F.AppendLspMsg(bufnr, winid)
                   end
                   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                  F.ClearAttach()
                 end)
               else
                 vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
@@ -464,11 +472,15 @@ function M.NewSession()
                       if state.input.request_with_lsp ~= nil then
                         state.input.request_with_lsp(function()
                           if F.IsValid(state.input.lsp_ctx.content) then
-                            table.insert(state.session[state.session.filename], state.input.lsp_ctx)
+                            table.insert(state.session[state.session.filename], {
+                              role = "user",
+                              ["type"] = "lsp",
+                              symbols_location_list = state.input.lsp_ctx.symbols_location_list,
+                              content = table.concat(state.input.lsp_ctx.content, "\n"),
+                            })
                             F.AppendLspMsg(bufnr, winid)
                           end
                           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                          F.ClearAttach()
                         end)
                       else
                         vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
