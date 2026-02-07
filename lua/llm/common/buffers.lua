@@ -50,9 +50,12 @@ local buffers = {
             coroutine.resume(co)
           end)
         else
-          opts.args[#opts.args] = vim.json.encode(opts.body)
-          coroutine.resume(co)
+          vim.schedule(function()
+            opts.args[#opts.args] = vim.json.encode(opts.body)
+            coroutine.resume(co)
+          end)
         end
+        coroutine.yield()
       end
     end,
     picker = function(self, complete)

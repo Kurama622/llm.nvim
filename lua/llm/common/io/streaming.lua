@@ -258,7 +258,6 @@ function M.GetStreamingOutput(opts)
       for idx, buffer in ipairs(state.quote_buffers) do
         opts.enable_buffer_idx = idx
         buffer:callback(opts, co)
-        coroutine.yield()
       end
     end
     if F.IsValid(state.quote_files[1]) then
@@ -266,7 +265,6 @@ function M.GetStreamingOutput(opts)
       for idx, file in ipairs(state.quote_files) do
         opts.enable_file_idx = idx
         file:callback(opts, co)
-        coroutine.yield()
       end
     end
     -- Insert the LSP symbols of the file and buffer methods
@@ -285,7 +283,6 @@ function M.GetStreamingOutput(opts)
       for idx, cmd in ipairs(state.enabled_cmds) do
         opts.enable_cmds_idx = idx
         cmd.callback(conf.configs.web_search, opts.messages, opts, co)
-        coroutine.yield()
       end
     end
     local name = opts._name or "chat"

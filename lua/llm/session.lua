@@ -182,7 +182,6 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
           })
         end
         streaming.GetStreamingOutput(params)
-        F.ClearAttach()
       end)
     else
       streaming.GetStreamingOutput(params)
@@ -345,7 +344,6 @@ function M.NewSession()
                     F.AppendLspMsg(bufnr, winid)
                   end
                   vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                  F.ClearAttach()
                 end)
               else
                 vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
@@ -483,7 +481,6 @@ function M.NewSession()
                             F.AppendLspMsg(bufnr, winid)
                           end
                           vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
-                          F.ClearAttach()
                         end)
                       else
                         vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })

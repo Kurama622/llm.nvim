@@ -68,7 +68,7 @@ local cmds = {
   {
     label = "web_search",
     detail = "Search the web for information",
-    callback = function(web_search_conf, msg, opts, chat_job)
+    callback = function(web_search_conf, msg, opts, co)
       local body = web_search_conf.params
       local prompt = type(web_search_conf.prompt) == "function" and web_search_conf.prompt()
         or web_search_conf.prompt
@@ -118,7 +118,7 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
           on_exit = vim.schedule_wrap(function(query_summarize_job)
             body.query = backends.get_streaming_tbl_handler(opts.api_type, conf.configs)(query_summarize_job:result())
             LOG:INFO("Start search ...")
-            local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, chat_job)
+            local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
             j:start()
             state.llm.worker.jobs.web_search = j
           end),
@@ -127,10 +127,11 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
       else
         body.query = msg[#msg].content:gsub("@web_search", "")
         LOG:INFO("Start search ...")
-        local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, chat_job)
+        local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
         j:start()
         state.llm.worker.jobs.web_search = j
       end
+      coroutine.yield()
     end,
   },
 }
