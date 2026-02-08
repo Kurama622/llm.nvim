@@ -75,6 +75,7 @@ M.model_params = {
   "enable_thinking",
   "thinking_budget",
   "timeout", -- for curl
+  "proxy", --for curl
   "schema",
   "functions_tbl",
 }
