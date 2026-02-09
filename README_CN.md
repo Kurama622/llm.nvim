@@ -15,7 +15,7 @@
 >
 > 2. 支持定义属于你自己的AI工具，且不同工具可以使用不同的模型
 >
-> 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Cloudflare`，`Github models`，`siliconflow`、`openrouter`或者其他的平台）
+> 3. 最重要的一点，你可以使用任何平台提供的免费模型（比如`Copilot`，`Github models`，`siliconflow`、`openrouter`，`Cloudflare`或者其他的平台）
 
 > [!NOTE]
 > 不同大模型的配置(比如**ollama**, **deepseek**)、 界面的配置、以及AI工具的配置(包括**代码补全**) 请先查阅 [examples](examples). 这里有你想知道的大部分内容。在使用插件之前，应该确保你的`LLM_KEY`是有效的，并且该环境变量已经生效。
@@ -368,8 +368,9 @@ require("llm").setup({
 | ------------------ | -------                                                                                  | -                                                                                                                                           |
 | url                | 请求地址                                                                                 | String                                                                                                                                      |
 | model              | 模型名                                                                                   | String                                                                                                                                      |
-| api_type           | 输出解析格式                                                                             | `workers-ai` \| `zhipu`\|<br>`openai`\| `ollama`\| `deepseek`                                                                               |
+| api_type           | 输出解析格式                                                                             | `workers-ai` \| `zhipu`\|<br>`openai` \| `ollama`\|<br>`deepseek` \| `copilot` \|<br>`lmstudio`                                             |  |
 | timeout            | 响应最大超时时间 (单位: 秒)                                                              | Number                                                                                                                                      |
+| proxy              | Curl请求代理                                                                             | String (`noproxy`\|`<ip>:<port>`) \| nil                                                                                                    |
 | fetch_key          | API KEY或者返回API KEY的函数                                                             | Function \| String                                                                                                                          |
 | max_tokens         | 响应的最大token数                                                                        | Number                                                                                                                                      |
 | temperature        | 取值范围0到1。值越小，回复越贴近主题; 值越大，回复越发散，但太高的值也容易使回复偏离主题 | Number                                                                                                                                      |
