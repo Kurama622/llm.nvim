@@ -132,11 +132,31 @@ function io_parse.GetOutput(opts)
       fio.SaveFile(data_file, json.encode(body))
 
       if opts.args == nil then
-        _args = {
-          "-s",
-          "-m",
-          required_params.timeout,
-          required_params.url,
+        _args = { "-s", "-m", required_params.timeout }
+
+        -- set curl proxy
+        if required_params.proxy then
+          if required_params.proxy == "noproxy" then
+            table.insert(_args, "--noproxy")
+            table.insert(_args, "*")
+          else
+            table.insert(_args, "-x")
+            table.insert(_args, required_params.proxy)
+          end
+        end
+
+        if required_params.api_type == "copilot" then
+          local nvim_version = vim.version()
+          table.insert(_args, "-H")
+          table.insert(_args, "Copilot-Integration-Id: vscode-chat")
+          table.insert(_args, "-H")
+          table.insert(
+            _args,
+            ("Editor-Version: Neovim/%d.%d.%d"):format(nvim_version.major, nvim_version.minor, nvim_version.patch)
+          )
+        end
+
+        for _, arg in ipairs({
           "-N",
           "-X",
           "POST",
@@ -146,16 +166,9 @@ function io_parse.GetOutput(opts)
           authorization,
           "-d",
           "@" .. data_file,
-        }
-        if required_params.api_type == "copilot" then
-          local nvim_version = vim.version()
-          table.insert(_args, "-H")
-          table.insert(_args, "Copilot-Integration-Id: vscode-chat")
-          table.insert(_args, "-H")
-          table.insert(
-            _args,
-            "Editor-Version: Neovim/" .. ("%d.%d.%d"):format(nvim_version.major, nvim_version.minor, nvim_version.patch)
-          )
+          required_params.url,
+        }) do
+          table.insert(_args, arg)
         end
       else
         local env = {
