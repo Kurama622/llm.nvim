@@ -1,5 +1,3 @@
-local parse = require("llm.common.io.parse")
-local ui = require("llm.common.ui")
 local conf = require("llm.config")
 local LOG = require("llm.common.log")
 
@@ -74,7 +72,7 @@ function M.handler(name, F, state, _, prompt, opts)
   options.messages = state.app.session[name]
   if options.exit_handler == nil then
     options.exit_handler = function(output)
-      flexible_box = ui.FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
+      flexible_box = require("llm.common.ui").FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
       if flexible_box then
         flexible_box:mount()
       else
@@ -103,7 +101,7 @@ function M.handler(name, F, state, _, prompt, opts)
     end
   end
 
-  parse.GetOutput(options)
+  require("llm.common.io.parse").GetOutput(options)
 
   F.VisMode2NorMode()
   if options.exit_on_move then

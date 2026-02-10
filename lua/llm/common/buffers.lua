@@ -1,12 +1,12 @@
-local state = require("llm.state")
-local F = require("llm.common.api")
-
 local buffers = {
   {
     label = "buffer",
     detail = "Quote the content of the buffer",
     kind_name = "llm.buffer",
     callback = function(bufnr, opts, co)
+      local state = require("llm.state")
+      local F = require("llm.common.api")
+
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
       local buffer_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
 

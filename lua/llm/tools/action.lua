@@ -1,13 +1,11 @@
 local LOG = require("llm.common.log")
-local utils = require("llm.tools.utils")
-local diff = require("llm.common.diff_style")
-local parse = require("llm.common.io.parse")
 local conf = require("llm.config")
-local Split = require("nui.split")
 
 local M = {}
 
 function M.handler(name, F, state, streaming, prompt, opts)
+  local utils = require("llm.tools.utils")
+  local diff = require("llm.common.diff_style")
   if diff.style == nil then
     diff = diff:update()
   end
@@ -155,7 +153,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       utils.new_diff(diff, options, context, ostr)
     end
 
-    parse.GetOutput(options)
+    require("llm.common.io.parse").GetOutput(options)
     for _, op in ipairs({ "accept", "reject", "close" }) do
       utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
         default_actions[op]()
@@ -198,6 +196,7 @@ function M.handler(name, F, state, streaming, prompt, opts)
       state.input.request_with_lsp = F.lsp_wrap(options)
     end
 
+    local Split = require("nui.split")
     local preview_box = Split({
       relative = options.output.relative,
       position = options.output.position,

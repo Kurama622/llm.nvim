@@ -1,4 +1,3 @@
-local Popup = require("nui.popup")
 local conf = require("llm.config")
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
@@ -210,7 +209,8 @@ function ui.FlexibleWindow(str, enter_flexible_win, user_opts)
   }
 
   opts = vim.tbl_deep_extend("force", opts, user_opts or {})
-  local flexible_box = Popup(opts)
+
+  local flexible_box = require("nui.popup")(opts)
 
   vim.api.nvim_buf_set_lines(flexible_box.bufnr, 0, -1, false, text)
   return flexible_box
@@ -255,7 +255,8 @@ function ui.show_spinner(waiting_state)
     vim.schedule_wrap(function()
       if waiting_state.box then
         waiting_state.box:unmount()
-        waiting_state.box = Popup(waiting_state.box_opts)
+
+        waiting_state.box = require("nui.popup")(waiting_state.box_opts)
         waiting_state.box:mount()
         waiting_state.bufnr = waiting_state.box.bufnr
         waiting_state.winid = waiting_state.box.winid

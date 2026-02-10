@@ -1,12 +1,11 @@
 local LOG = require("llm.common.log")
-local sess = require("llm.session")
 local F = require("llm.common.api")
-local diff = require("llm.common.diff_style")
-local utils = require("llm.tools.utils")
 local state = require("llm.state")
 local M = {}
 
 function M.handler(_, _, _, _, _, opts)
+  local diff = require("llm.common.diff_style")
+  local utils = require("llm.tools.utils")
   local default_actions = {
     display = function()
       if diff.style == nil then
@@ -91,7 +90,7 @@ function M.handler(_, _, _, _, _, opts)
   local bufnr = F.GetAttach(options)
   LOG:INFO("Attach successfully!")
 
-  sess.NewSession()
+  require("llm.session").NewSession()
 
   local bufnr_list = F.GetChatUiBufnrList()
   for _, ui_bufnr in ipairs(bufnr_list) do

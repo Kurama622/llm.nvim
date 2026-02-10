@@ -1,8 +1,6 @@
 local Popup = require("nui.popup")
 local conf = require("llm.config")
-local api = require("llm.common.api")
 local backends = require("llm.backends")
-local job = require("plenary.job")
 local LOG = require("llm.common.log")
 local state = require("llm.state")
 local io_utils = require("llm.common.io.utils")
@@ -179,7 +177,7 @@ function io_parse.GetOutput(opts)
         }
 
         setmetatable(env, { __index = _G })
-        _args = api.GetUserRequestArgs(opts.args, env)
+        _args = F.GetUserRequestArgs(opts.args, env)
       end
 
       if parse == nil then
@@ -192,11 +190,12 @@ function io_parse.GetOutput(opts)
     end
     ctx.args = F.tbl_slice(_args, 1, -2)
 
+    local job = require("plenary.job")
     local request_job = job:new({
       command = "curl",
       args = _args,
       on_stdout = schedule_wrap(function(_, data)
-        ctx.line = ctx.line .. api.TrimLeadingWhitespace(data)
+        ctx.line = ctx.line .. F.TrimLeadingWhitespace(data)
       end),
       on_stderr = schedule_wrap(function(_, err)
         if err ~= nil then

@@ -1,12 +1,4 @@
-local Layout = require("nui.layout")
-local Popup = require("nui.popup")
-local nui_utils = require("nui.utils")
-local Tree = require("nui.tree")
-local conf = require("llm.config")
 local state = require("llm.state")
-local F = require("llm.common.api")
-local LOG = require("llm.common.log")
-local dmenu = require("llm.common.dynamic_menu")
 
 local json = vim.json
 local _layout = {}
@@ -51,11 +43,17 @@ local _dir = {
 ---@param popup_output_opts table|nil
 ---@param popup_other_opts table|nil
 function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup_other_opts)
+  local conf = require("llm.config")
   local layout = layout_opts or conf.configs.chat_ui_opts
   local input = popup_input_opts or conf.configs.chat_ui_opts.input.float
   local output = popup_output_opts or conf.configs.chat_ui_opts.output.float
   local other = popup_other_opts or conf.configs.chat_ui_opts.history.float
   local models = conf.configs.chat_ui_opts.models.float
+  local Popup = require("nui.popup")
+  local Layout = require("nui.layout")
+  local nui_utils = require("nui.utils")
+  local Tree = require("nui.tree")
+  local dmenu = require("llm.common.dynamic_menu")
 
   state.input.popup = Popup({
     enter = input.enter,
@@ -82,6 +80,7 @@ function _layout.chat_ui(layout_opts, popup_input_opts, popup_output_opts, popup
       win_options = other.win_options,
     })
   else
+    local F = require("llm.common.api")
     if not state.history.hl then
       state.history.hl = other.win_options.winhighlight:match("Normal:(.-),")
       other.win_options.winhighlight = other.win_options.winhighlight:gsub("Normal:(.-),", "Normal:LlmGrayLight,")

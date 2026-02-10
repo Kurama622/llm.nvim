@@ -1,9 +1,3 @@
-local nui_utils = require("nui.utils")
-local LOG = require("llm.common.log")
-local Tree = require("nui.tree")
-local Popup = require("nui.popup")
-local NuiLine = require("nui.line")
-
 local function default_get_node_id(node)
   return node.id
 end
@@ -18,6 +12,7 @@ local function default_prepare_node(node)
     texts = { node.text }
   end
 
+  local NuiLine = require("nui.line")
   local lines = {}
   for _, text in ipairs(texts) do
     local line = NuiLine()
@@ -30,7 +25,7 @@ end
 local dynamic_menu = {}
 
 function dynamic_menu:init(options, configs)
-  self.popup = Popup({
+  self.popup = require("nui.popup")({
     enter = options.enter,
     focusable = options.focusable,
     zindex = options.zindex,
@@ -38,7 +33,7 @@ function dynamic_menu:init(options, configs)
     win_options = options.win_options,
   })
 
-  self.popup.tree = Tree({
+  self.popup.tree = require("nui.tree")({
     bufnr = self.popup.bufnr,
     nodes = {},
 

@@ -2,10 +2,7 @@ local api = {}
 
 local state = require("llm.state")
 local conf = require("llm.config")
-local Popup = require("nui.popup")
-local Layout = require("nui.layout")
 local LOG = require("llm.common.log")
-local fio = require("llm.common.file_io")
 local luv, json = vim.loop, vim.json
 
 local function IsNotPopwin(winid)
@@ -553,6 +550,19 @@ function api.SaveSession()
   state.session = { filename = nil, changed = {} }
 end
 
+function api.OpenLLM()
+  local streaming = require("llm.common.io.streaming")
+  api.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, "assistant")
+  streaming.GetStreamingOutput({
+    bufnr = state.llm.popup.bufnr,
+    winid = state.llm.popup.winid,
+    messages = state.session[state.session.filename],
+    fetch_key = conf.configs.fetch_key,
+    args = conf.configs.args,
+    streaming_handler = conf.configs.streaming_handler,
+  })
+end
+
 function api.CloseLLM()
   api.CancelLLM()
 
@@ -594,7 +604,7 @@ end
 function api.ResendLLM()
   table.insert(state.session.changed, state.session.filename)
   state.session[state.session.filename][#state.session[state.session.filename]] = nil
-  vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+  api.OpenLLM()
 end
 
 function api.CloseInput()
@@ -753,6 +763,8 @@ function api.CreateLayout(_width, _height, boxes, opts)
     },
   }
   options = vim.tbl_deep_extend("force", options, opts or {})
+
+  local Layout = require("nui.layout")
   return Layout(options, boxes)
 end
 
@@ -962,6 +974,7 @@ function api.base64_images_encode(paths)
 end
 
 function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
+  local fio = require("llm.common.file_io")
   fio.CreateDir("/tmp/")
   local focus_file = "/tmp/llm-fzf-focus-file"
   local position = "50%"
@@ -1002,6 +1015,7 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
   }
   ui = vim.tbl_deep_extend("force", default_ui, ui)
 
+  local Popup = require("nui.popup")
   local select_popup = Popup({
     relative = ui.relative,
     position = ui.position,
@@ -1024,6 +1038,7 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
       win_options = ui.preview.win_options,
     })
 
+    local Layout = require("nui.layout")
     Layout(
       {
         relative = ui.relative,

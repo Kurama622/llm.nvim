@@ -3,7 +3,6 @@ local M = {
 }
 
 local conf = require("llm.config")
-local job = require("plenary.job")
 local F = require("llm.common.api")
 local backends = require("llm.backends")
 local state = require("llm.state")
@@ -232,6 +231,8 @@ function M.GetStreamingOutput(opts)
 
     opts.body = body
     opts.args = _args
+
+    local job = require("plenary.job")
     local request_job = job:new({
       command = "curl",
       args = _args,
