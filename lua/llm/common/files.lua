@@ -128,8 +128,7 @@ local files = {
           },
         })
       else
-        local fio = require("llm.common.file_io")
-        local files = fio.ScanDir(vim.uv.cwd())
+        local files = require("llm.common.file_io").ScanDir(vim.uv.cwd())
         if F.IsValid(files) then
           vim.ui.select(files, {
             prompt = "files",

@@ -8,7 +8,6 @@ local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
-local fio = require("llm.common.file_io")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local function exit_callback(opts, ctx)
@@ -139,7 +138,8 @@ function M.GetStreamingOutput(opts)
       body.model = required_params.model
 
       local data_file = conf.configs.curl_data_cache_path .. "/streaming-data"
-      fio.SaveFile(data_file, json.encode(body))
+
+      require("llm.common.file_io").SaveFile(data_file, json.encode(body))
       if opts.args == nil then
         _args = { "-s", "-m", required_params.timeout }
 

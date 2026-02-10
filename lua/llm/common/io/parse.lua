@@ -1,11 +1,9 @@
-local Popup = require("nui.popup")
 local conf = require("llm.config")
 local backends = require("llm.backends")
 local LOG = require("llm.common.log")
 local state = require("llm.state")
 local io_utils = require("llm.common.io.utils")
 local F = require("llm.common.api")
-local fio = require("llm.common.file_io")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local io_parse = {
@@ -47,7 +45,7 @@ function io_parse.GetOutput(opts)
     local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
     local wait_box_opts = ui.wait_ui_opts()
-    local wait_box = Popup(wait_box_opts)
+    local wait_box = require("nui.popup")(wait_box_opts)
 
     local waiting_state = {
       box = wait_box,
@@ -127,7 +125,8 @@ function io_parse.GetOutput(opts)
     if required_params.url ~= nil then
       body.model = required_params.model
       local data_file = conf.configs.curl_data_cache_path .. "/non-streaming-data"
-      fio.SaveFile(data_file, json.encode(body))
+
+      require("llm.common.file_io").SaveFile(data_file, json.encode(body))
 
       if opts.args == nil then
         _args = { "-s", "-m", required_params.timeout }

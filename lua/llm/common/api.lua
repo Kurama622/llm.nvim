@@ -974,8 +974,7 @@ function api.base64_images_encode(paths)
 end
 
 function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
-  local fio = require("llm.common.file_io")
-  fio.CreateDir("/tmp/")
+  require("llm.common.file_io").CreateDir("/tmp/")
   local focus_file = "/tmp/llm-fzf-focus-file"
   local position = "50%"
   local size = "60%"
