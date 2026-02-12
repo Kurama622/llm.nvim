@@ -21,7 +21,7 @@ function openai.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
     ctx.line = F.TrimLeadingWhitespace(ctx.line)
-    local start_idx = ctx.line:find("data: ")
+    local start_idx = ctx.line:find("^data:%s*")
     local end_idx = ctx.line:find("}$")
     local json_str = nil
     if start_idx == nil or end_idx == nil then
@@ -63,7 +63,7 @@ function openai.StreamingHandler(chunk, ctx)
       else
         ctx.line = ctx.line:sub(end_idx + 1)
       end
-      start_idx = ctx.line:find("data: ")
+      start_idx = ctx.line:find("^data:%s*")
       end_idx = ctx.line:find("}$")
       if start_idx == nil or end_idx == nil then
         ctx.line = ""
@@ -151,7 +151,7 @@ end
 function openai.AppendToolsRespond(results, msg)
   local fc_type = "function"
   for _, fc_respond_str in pairs(results) do
-    local start_idx = fc_respond_str:find("data: ") or 1
+    local start_idx = fc_respond_str:find("^data:%s*") or 1
     local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
     if status then
       if
@@ -201,7 +201,7 @@ function openai.StreamingTblHandler(results)
     else
       line = line .. chunk
       line = F.TrimLeadingWhitespace(line)
-      local start_idx = line:find("data: ")
+      local start_idx = line:find("^data:%s*")
       local end_idx = line:find("}$")
       local json_str = nil
       if start_idx == nil or end_idx == nil then
@@ -234,7 +234,7 @@ function openai.StreamingTblHandler(results)
         else
           line = line:sub(end_idx + 1)
         end
-        start_idx = line:find("data: ")
+        start_idx = line:find("^data:%s*")
         end_idx = line:find("}$")
         if start_idx == nil or end_idx == nil then
           line = ""
