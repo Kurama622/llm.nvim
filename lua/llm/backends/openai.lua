@@ -127,7 +127,9 @@ function openai.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-  table.insert(ctx.args, json.encode(ctx.body))
+
+  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
+
   job
     :new({
       command = "curl",
