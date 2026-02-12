@@ -129,6 +129,7 @@ function io_parse.GetOutput(opts)
     if required_params.url ~= nil then
       body.model = required_params.model
       local data_file = conf.configs.curl_data_cache_path .. "/non-streaming-data"
+      ctx.request_body_file = data_file
       fio.SaveFile(data_file, json.encode(body))
 
       if opts.args == nil then
@@ -190,7 +191,7 @@ function io_parse.GetOutput(opts)
         end
       end
     end
-    ctx.args = F.tbl_slice(_args, 1, -2)
+    ctx.args = _args
 
     local request_job = job:new({
       command = "curl",

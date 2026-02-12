@@ -21,16 +21,16 @@ function openai.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
     ctx.line = F.TrimLeadingWhitespace(ctx.line)
-    local start_idx = ctx.line:find("data: ")
-    local end_idx = ctx.line:find("}$")
+    local lstart, rstart = ctx.line:find("^data:%s*")
+    local lend = ctx.line:find("}$")
     local json_str = nil
-    if start_idx == nil or end_idx == nil then
+    if lstart == nil or lend == nil then
       LOG:ERROR(ctx.line)
     end
 
-    while start_idx ~= nil and end_idx ~= nil do
-      if start_idx < end_idx then
-        json_str = ctx.line:sub(start_idx + 6, end_idx)
+    while lstart ~= nil and lend ~= nil do
+      if lstart < lend then
+        json_str = ctx.line:sub(rstart + 1, lend)
       end
 
       local status, data = pcall(json.decode, json_str)
@@ -57,15 +57,15 @@ function openai.StreamingHandler(chunk, ctx)
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end
 
-      if end_idx + 1 > #ctx.line then
+      if lend + 1 > #ctx.line then
         ctx.line = ""
         break
       else
-        ctx.line = ctx.line:sub(end_idx + 1)
+        ctx.line = ctx.line:sub(lend + 1)
       end
-      start_idx = ctx.line:find("data: ")
-      end_idx = ctx.line:find("}$")
-      if start_idx == nil or end_idx == nil then
+      lstart = ctx.line:find("^data:%s*")
+      lend = ctx.line:find("}$")
+      if lstart == nil or lend == nil then
         ctx.line = ""
       end
     end
@@ -127,7 +127,9 @@ function openai.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-  table.insert(ctx.args, json.encode(ctx.body))
+
+  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
+
   job
     :new({
       command = "curl",
@@ -151,8 +153,12 @@ end
 function openai.AppendToolsRespond(results, msg)
   local fc_type = "function"
   for _, fc_respond_str in pairs(results) do
-    local start_idx = fc_respond_str:find("data: ") or 1
-    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
+    local lstart, rstart = fc_respond_str:find("^data:%s*")
+    if lstart == nil then
+      rstart = 6
+    end
+
+    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(rstart + 1))
     if status then
       if
         F.IsValid(fc_respond.choices)
@@ -201,16 +207,16 @@ function openai.StreamingTblHandler(results)
     else
       line = line .. chunk
       line = F.TrimLeadingWhitespace(line)
-      local start_idx = line:find("data: ")
-      local end_idx = line:find("}$")
+      local lstart, rstart = line:find("^data:%s*")
+      local lend = line:find("}$")
       local json_str = nil
-      if start_idx == nil or end_idx == nil then
+      if lstart == nil or lend == nil then
         LOG:ERROR(line)
       end
 
-      while start_idx ~= nil and end_idx ~= nil do
-        if start_idx < end_idx then
-          json_str = line:sub(start_idx + 6, end_idx)
+      while lstart ~= nil and lend ~= nil do
+        if lstart < lend then
+          json_str = line:sub(rstart + 1, lend)
         end
 
         local status, data = pcall(json.decode, json_str)
@@ -228,15 +234,15 @@ function openai.StreamingTblHandler(results)
           assistant_output = assistant_output .. data.choices[1].delta.content
         end
 
-        if end_idx + 1 > #line then
+        if lend + 1 > #line then
           line = ""
           break
         else
-          line = line:sub(end_idx + 1)
+          line = line:sub(lend + 1)
         end
-        start_idx = line:find("data: ")
-        end_idx = line:find("}$")
-        if start_idx == nil or end_idx == nil then
+        lstart = line:find("^data:%s*")
+        lend = line:find("}$")
+        if lstart == nil or lend == nil then
           line = ""
         end
       end

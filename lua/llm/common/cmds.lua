@@ -55,7 +55,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
       end
       -- update plenary job args
       opts.body.messages = msg
-      opts.args[#opts.args] = vim.json.encode(opts.body)
+      require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
       LOG:INFO("Finish search!")
 
       state.llm.worker.jobs.web_search = nil
@@ -110,7 +110,8 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
             table.insert(query_summarize_args, arg)
           end
         end
-        table.insert(query_summarize_args, vim.json.encode(query_summarize_body))
+
+        require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(query_summarize_body))
 
         local query_summarize_job = job:new({
           command = "curl",
