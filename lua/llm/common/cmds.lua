@@ -4,7 +4,6 @@ local LOG = require("llm.common.log")
 local F = require("llm.common.api")
 local conf = require("llm.config")
 local backends = require("llm.backends")
-local ui = require("llm.common.ui")
 
 local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
   return job:new({
@@ -22,7 +21,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
       vim.json.encode(body),
     },
     on_stdout = vim.schedule_wrap(function(_, data)
-      ui.clear_spinner_extmark(opts)
+      require("llm.common.ui").clear_spinner_extmark(opts)
     end),
     on_stderr = vim.schedule_wrap(function(_, err)
       if err ~= nil then

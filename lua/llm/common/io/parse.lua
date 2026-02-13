@@ -189,8 +189,7 @@ function io_parse.GetOutput(opts)
     end
     ctx.args = _args
 
-    local job = require("plenary.job")
-    local request_job = job:new({
+    local request_job = require("plenary.job"):new({
       command = "curl",
       args = _args,
       on_stdout = schedule_wrap(function(_, data)
