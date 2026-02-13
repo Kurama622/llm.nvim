@@ -110,7 +110,7 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
             table.insert(query_summarize_args, arg)
           end
         end
-
+        -- update curl request body file
         require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(query_summarize_body))
 
         local query_summarize_job = job:new({

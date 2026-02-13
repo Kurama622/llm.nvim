@@ -127,7 +127,7 @@ function openai.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-
+  -- update curl request body file
   require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
 
   job
