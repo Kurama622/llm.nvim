@@ -1,7 +1,5 @@
 local LOG = require("llm.common.log")
-local job = require("plenary.job")
 local F = require("llm.common.api")
-local io_utils = require("llm.common.io.utils")
 local backend_utils = require("llm.backends.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 local ollama = {}
@@ -92,7 +90,7 @@ function ollama.FunctionCalling(ctx, t)
   -- update curl request body file
   require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
 
-  job
+  require("plenary.job")
     :new({
       command = "curl",
       args = ctx.args,
