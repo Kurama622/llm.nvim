@@ -138,8 +138,9 @@ function M.GetStreamingOutput(opts)
       body.model = required_params.model
 
       local data_file = conf.configs.curl_data_cache_path .. "/streaming-data"
-
+      ctx.request_body_file = data_file
       require("llm.common.file_io").SaveFile(data_file, json.encode(body))
+
       if opts.args == nil then
         _args = { "-s", "-m", required_params.timeout }
 
@@ -227,13 +228,13 @@ function M.GetStreamingOutput(opts)
         end
       end
     end
-    ctx.args = F.tbl_slice(_args, 1, -2)
+    ctx.args = _args
 
     opts.body = body
     opts.args = _args
+    opts.request_body_file = ctx.request_body_file
 
-    local job = require("plenary.job")
-    local request_job = job:new({
+    local request_job = require("plenary.job"):new({
       command = "curl",
       args = _args,
       on_stdout = schedule_wrap(function(_, chunk)

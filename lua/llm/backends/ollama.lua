@@ -89,7 +89,8 @@ function ollama.FunctionCalling(ctx, t)
     table.insert(ctx.body.messages, msg)
     table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
   end
-  table.insert(ctx.args, json.encode(ctx.body))
+  -- update curl request body file
+  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
 
   job
     :new({
@@ -113,13 +114,21 @@ end
 
 function ollama.AppendToolsRespond(chunk, msg)
   if F.IsValid(chunk) then
-    local tool_calls = json.decode(chunk).message.tool_calls
-    if F.IsValid(tool_calls) then
-      if F.IsValid(tool_calls[1]["function"].name) then
-        table.insert(
-          msg,
-          { ["function"] = { name = tool_calls[1]["function"].name, arguments = tool_calls[1]["function"].arguments } }
-        )
+    for _, fc_respond_str in pairs(chunk) do
+      local status, fc_respond = pcall(vim.json.decode, fc_respond_str)
+
+      if status then
+        local tool_calls = fc_respond.message.tool_calls
+        if F.IsValid(tool_calls) then
+          if F.IsValid(tool_calls[1]["function"].name) then
+            table.insert(msg, {
+              ["function"] = {
+                name = tool_calls[1]["function"].name,
+                arguments = tool_calls[1]["function"].arguments,
+              },
+            })
+          end
+        end
       end
     end
   end

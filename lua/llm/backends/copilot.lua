@@ -149,7 +149,8 @@ function copilot.FunctionCalling(ctx, t)
   end
   table.insert(ctx.args, "-H")
   table.insert(ctx.args, "X-Initiator: agent")
-  table.insert(ctx.args, json.encode(ctx.body))
+  -- update curl request body file
+  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
   job
     :new({
       command = "curl",
