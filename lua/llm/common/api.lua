@@ -670,7 +670,7 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
   winid = winid or state.llm.popup.winid
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
   for _, msg in ipairs(messages) do
-    if msg.role == "system" or msg.role == "tool" or msg.type == "quote_buffers" then
+    if msg.role == "system" or msg.role == "tool" then
     elseif msg.role == "user" and api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if msg.type == "lsp" then

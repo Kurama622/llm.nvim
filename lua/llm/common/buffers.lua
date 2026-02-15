@@ -46,12 +46,12 @@ local buffers = {
         end
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
-            opts.args[#opts.args] = vim.json.encode(opts.body)
+            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
             coroutine.resume(co)
           end)
         else
           vim.schedule(function()
-            opts.args[#opts.args] = vim.json.encode(opts.body)
+            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
             coroutine.resume(co)
           end)
         end
