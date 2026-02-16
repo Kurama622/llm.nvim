@@ -1320,6 +1320,7 @@ function api.lsp_request(cfg, callback)
 
   if symbols_to_query_cnt == 0 then
     LOG:WARN("No searchable symbols were found in the district.")
+    callback({ ["done"] = true })
     return
   end
 
