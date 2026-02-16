@@ -41,7 +41,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
         F.WriteContent(opts.bufnr, opts.winid, "> - [" .. item.title .. "](" .. item.url .. ")\n")
       end
       F.WriteContent(opts.bufnr, opts.winid, "\n")
-      if search_response.answer and search_response.answer ~= vim.NIL then
+      if F.IsValid(search_response.answer) then
         msg[#msg].content = body.query
           .. "\nPlease answer the question based on the provided web search results.\n\n---\nSearch results:\n"
           .. search_response.answer
