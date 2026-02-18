@@ -60,6 +60,7 @@ Based on this format, generate appropriate commit messages. Respond with message
         local cmd = string.format('!git commit -m "%s"', table.concat(contents, '" -m "'))
         cmd = (cmd:gsub(".", {
           ["#"] = "\\#",
+          ["%"] = "\\%",
         }))
 
         vim.api.nvim_command(cmd)
