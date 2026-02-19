@@ -34,6 +34,7 @@ local function exit_callback(opts, ctx)
 end
 
 function M.GetStreamingOutput(opts)
+  state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
   return coroutine.wrap(function()
     local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
@@ -90,8 +91,10 @@ function M.GetStreamingOutput(opts)
         end
       end
     elseif required_params.api_type == "copilot" then
-      require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
-      LLM_KEY = coroutine.yield()
+      LLM_KEY = require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
+      if LLM_KEY == nil then
+        LLM_KEY = coroutine.yield()
+      end
     end
 
     local authorization = "Authorization: Bearer " .. LLM_KEY
@@ -132,7 +135,6 @@ function M.GetStreamingOutput(opts)
     local stream_output =
       backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
 
-    state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
     local _args = nil
     if required_params.url ~= nil then
       body.model = required_params.model
