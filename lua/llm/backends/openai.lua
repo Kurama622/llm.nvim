@@ -47,12 +47,18 @@ function openai.StreamingHandler(chunk, ctx)
       -- add reasoning_content
       if F.IsValid(data.choices[1].delta.reasoning_content) then
         backend_utils.mark_reason_begin(ctx, false)
-        ctx.reasoning_content = ctx.reasoning_content .. data.choices[1].delta.reasoning_content
+        ctx.reasoning_content = ctx.reasoning_content
+          .. data.choices[1].delta.reasoning_content
 
-        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.reasoning_content)
+        F.WriteContent(
+          ctx.bufnr,
+          ctx.winid,
+          data.choices[1].delta.reasoning_content
+        )
       elseif F.IsValid(data.choices[1].delta.content) then
         backend_utils.mark_reason_end(ctx, false)
-        ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
+        ctx.assistant_output = ctx.assistant_output
+          .. data.choices[1].delta.content
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end
 
@@ -106,7 +112,8 @@ function openai.FunctionCalling(ctx, t)
 
     -- openai: arguments is string
     -- format_json_str: Tool_calls arguments may contain excessive quotation marks, causing JSON parsing to fail.
-    local params = backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
+    local params =
+      backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name
     end, ctx.body.tools)[1]["function"].parameters.required
@@ -124,10 +131,16 @@ function openai.FunctionCalling(ctx, t)
 
     local res = ctx.functions_tbl[name](unpack(p))
     table.insert(ctx.body.messages, msg)
-    table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
+    table.insert(
+      ctx.body.messages,
+      { role = "tool", content = tostring(res), tool_call_id = id }
+    )
   end
   -- update curl request body file
-  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
+  require("llm.common.file_io").SaveFile(
+    ctx.request_body_file,
+    json.encode(ctx.body)
+  )
 
   require("plenary.job")
     :new({
@@ -157,7 +170,8 @@ function openai.AppendToolsRespond(results, msg)
       rstart = 6
     end
 
-    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(rstart + 1))
+    local status, fc_respond =
+      pcall(vim.json.decode, fc_respond_str:sub(rstart + 1))
     if status then
       if
         F.IsValid(fc_respond.choices)

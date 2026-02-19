@@ -29,31 +29,51 @@ end
 
 function LOG:DEBUG(...)
   if self.log_level <= 0 then
-    vim.notify(format_string(...), vim.log.levels.DEBUG, { title = self.plugin_name })
+    vim.notify(
+      format_string(...),
+      vim.log.levels.DEBUG,
+      { title = self.plugin_name }
+    )
   end
 end
 
 function LOG:INFO(...)
   if self.log_level <= 1 then
-    vim.notify(format_string(...), vim.log.levels.INFO, { title = self.plugin_name })
+    vim.notify(
+      format_string(...),
+      vim.log.levels.INFO,
+      { title = self.plugin_name }
+    )
   end
 end
 
 function LOG:WARN(...)
   if self.log_level <= 2 then
-    vim.notify(format_string(...), vim.log.levels.WARN, { title = self.plugin_name })
+    vim.notify(
+      format_string(...),
+      vim.log.levels.WARN,
+      { title = self.plugin_name }
+    )
   end
 end
 
 function LOG:ERROR(...)
   if self.log_level <= 3 then
-    vim.notify(format_string(...), vim.log.levels.ERROR, { title = self.plugin_name })
+    vim.notify(
+      format_string(...),
+      vim.log.levels.ERROR,
+      { title = self.plugin_name }
+    )
   end
 end
 
 function LOG:TRACE(...)
   if self.enable_trace then
-    vim.notify(format_string(...), vim.log.levels.TRACE, { title = self.plugin_name })
+    vim.notify(
+      format_string(...),
+      vim.log.levels.TRACE,
+      { title = self.plugin_name }
+    )
   end
 end
 

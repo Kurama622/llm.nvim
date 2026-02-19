@@ -10,7 +10,10 @@ local io_parse = {
   required_params = {},
 }
 local function exit_callback(opts, ctx, waiting_state)
-  table.insert(opts.messages, { role = "assistant", content = ctx.assistant_output })
+  table.insert(
+    opts.messages,
+    { role = "assistant", content = ctx.assistant_output }
+  )
   while waiting_state.timer:is_active() do
     waiting_state.box:unmount()
     waiting_state.timer:close()
@@ -67,7 +70,8 @@ function io_parse.GetOutput(opts)
     end
 
     if required_params.api_type == "workers-ai" then
-      required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
+      required_params.url =
+        string.format(required_params.url, ACCOUNT, required_params.model)
     end
 
     if required_params.fetch_key ~= nil then
@@ -103,7 +107,12 @@ function io_parse.GetOutput(opts)
     }
 
     for param_name, param_value in pairs(params) do
-      io_utils.add_request_body_params(body, param_name, param_value, required_params.api_type)
+      io_utils.add_request_body_params(
+        body,
+        param_name,
+        param_value,
+        required_params.api_type
+      )
     end
 
     if required_params.api_type == "ollama" then
@@ -120,11 +129,17 @@ function io_parse.GetOutput(opts)
       stream = false,
     }
 
-    local parse = backends.get_parse_handler(required_params.parse_handler, required_params.api_type, conf.configs, ctx)
+    local parse = backends.get_parse_handler(
+      required_params.parse_handler,
+      required_params.api_type,
+      conf.configs,
+      ctx
+    )
     local _args = nil
     if required_params.url ~= nil then
       body.model = required_params.model
-      local data_file = conf.configs.curl_data_cache_path .. "/non-streaming-data"
+      local data_file = conf.configs.curl_data_cache_path
+        .. "/non-streaming-data"
       ctx.request_body_file = data_file
       require("llm.common.file_io").SaveFile(data_file, json.encode(body))
 
@@ -149,7 +164,11 @@ function io_parse.GetOutput(opts)
           table.insert(_args, "-H")
           table.insert(
             _args,
-            ("Editor-Version: Neovim/%d.%d.%d"):format(nvim_version.major, nvim_version.minor, nvim_version.patch)
+            ("Editor-Version: Neovim/%d.%d.%d"):format(
+              nvim_version.major,
+              nvim_version.minor,
+              nvim_version.patch
+            )
           )
         end
 
@@ -212,14 +231,28 @@ function io_parse.GetOutput(opts)
           LOG:ERROR("Error occurred:", result)
         end
         if ctx.body.tools ~= nil then
-          backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(ctx.line)
+          backends.get_tools_respond(
+            required_params.api_type,
+            conf.configs,
+            ctx
+          )(ctx.line)
         end
-        if ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content) then
+        if
+          ctx.body.tools ~= nil and F.IsValid(backends.msg_tool_calls_content)
+        then
           ctx.callback = function()
             exit_callback(opts, ctx, waiting_state)
           end
-          backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-            backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
+          backends.get_function_calling(
+            required_params.api_type,
+            conf.configs,
+            ctx
+          )(
+            backends.gen_msg_with_tool_calls(
+              required_params.api_type,
+              conf.configs,
+              ctx
+            )
           )
         else
           exit_callback(opts, ctx, waiting_state)

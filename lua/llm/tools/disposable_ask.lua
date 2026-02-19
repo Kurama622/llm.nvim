@@ -17,7 +17,12 @@ function M.handler(_, _, _, _, prompt, opts)
         __index = state.summarize_suggestions,
       })
       local winid = vim.api.nvim_get_current_win()
-      utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
+      utils.new_diff(
+        diff,
+        display_opts.pattern,
+        display_opts.ctx,
+        display_opts.assistant_output
+      )
       state.popwin_list[winid]:unmount()
       state.popwin_list[winid] = nil
       state.session[winid] = nil
@@ -28,7 +33,10 @@ function M.handler(_, _, _, _, prompt, opts)
       setmetatable(display_opts, {
         __index = state.summarize_suggestions,
       })
-      utils.copy_suggestion_code(display_opts.pattern, table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, true), "\n"))
+      utils.copy_suggestion_code(
+        display_opts.pattern,
+        table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, true), "\n")
+      )
       local winid = vim.api.nvim_get_current_win()
       state.popwin_list[winid]:unmount()
       state.popwin_list[winid] = nil
@@ -132,7 +140,10 @@ function M.handler(_, _, _, _, prompt, opts)
 
   vim.api.nvim_command("startinsert")
   input_box:map("n", "<cr>", function()
-    local description = table.concat(vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true), "\n")
+    local description = table.concat(
+      vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true),
+      "\n"
+    )
     input_box:unmount()
     local builtin_opts = {
       prompt = prompt,
@@ -145,7 +156,11 @@ function M.handler(_, _, _, _, prompt, opts)
       _ = options,
       mode = mode,
     }
-    require("llm.session").LLMSelectedTextHandler(description, true, builtin_opts)
+    require("llm.session").LLMSelectedTextHandler(
+      description,
+      true,
+      builtin_opts
+    )
   end)
 
   for _, f in pairs(options.hook) do

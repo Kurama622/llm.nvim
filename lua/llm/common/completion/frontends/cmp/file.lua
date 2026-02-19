@@ -67,7 +67,10 @@ function cmp_file:complete(ctx, callback)
       newText = "file",
       range = {
         ["start"] = { line = row - 1, character = col },
-        ["end"] = { line = row - 1, character = col + vim.api.nvim_strwidth(item.label) },
+        ["end"] = {
+          line = row - 1,
+          character = col + vim.api.nvim_strwidth(item.label),
+        },
       },
     }
     item.documentation = {

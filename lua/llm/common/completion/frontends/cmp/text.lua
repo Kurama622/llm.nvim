@@ -61,7 +61,10 @@ end
 
 function ncmp:complete(ctx, callback)
   -- we want to always invoke completion when invoked manually
-  if (not state.completion.enable) or (not self.opts.auto_trigger and ctx.context.option.reason ~= "manual") then
+  if
+    not state.completion.enable
+    or (not self.opts.auto_trigger and ctx.context.option.reason ~= "manual")
+  then
     callback()
     return
   end

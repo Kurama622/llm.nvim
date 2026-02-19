@@ -8,7 +8,8 @@ local buffers = {
       local F = require("llm.common.api")
 
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-      local buffer_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
+      local buffer_ctx_tbl, start_line, start_col, end_line, end_col =
+        F.GetVisualSelectionRange(bufnr)
 
       state.quote_buffers.buffer_info_list[bufnr] = {
         start_line = start_line,
@@ -31,7 +32,10 @@ local buffers = {
         if F.IsValid(opts.diagnostic) then
           state.input.attach_content = state.input.attach_content
             .. "\n"
-            .. F.GetRangeDiagnostics(state.quote_buffers.buffer_info_list, opts)
+            .. F.GetRangeDiagnostics(
+              state.quote_buffers.buffer_info_list,
+              opts
+            )
         end
 
         table.insert(opts.body.messages, {
@@ -46,12 +50,18 @@ local buffers = {
         end
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
-            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
+            require("llm.common.file_io").SaveFile(
+              opts.request_body_file,
+              vim.json.encode(opts.body)
+            )
             coroutine.resume(co)
           end)
         else
           vim.schedule(function()
-            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
+            require("llm.common.file_io").SaveFile(
+              opts.request_body_file,
+              vim.json.encode(opts.body)
+            )
             coroutine.resume(co)
           end)
         end
@@ -129,16 +139,22 @@ local buffers = {
           },
         })
       else
-        local buffers = vim.tbl_map(function(v)
-          if F.IsValid(v) then
-            local parts = vim.split(v, "%s+")
+        local buffers = vim.tbl_map(
+          function(v)
+            if F.IsValid(v) then
+              local parts = vim.split(v, "%s+")
 
-            return {
-              buf = parts[2],
-              file = parts[4],
-            }
-          end
-        end, vim.split(vim.api.nvim_exec2("buffers", { output = true }).output, "\n"))
+              return {
+                buf = parts[2],
+                file = parts[4],
+              }
+            end
+          end,
+          vim.split(
+            vim.api.nvim_exec2("buffers", { output = true }).output,
+            "\n"
+          )
+        )
 
         if F.IsValid(buffers) then
           vim.ui.select(buffers, {

@@ -4,7 +4,12 @@ local backends = {
   msg_tool_calls_content = {},
 }
 
-function backends.get_streaming_handler(streaming_handler, api_type, configs, ctx)
+function backends.get_streaming_handler(
+  streaming_handler,
+  api_type,
+  configs,
+  ctx
+)
   if streaming_handler then
     return function(chunk)
       if debug.getinfo(streaming_handler, "u").nparams == 3 then
@@ -17,7 +22,14 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
             title = "llm.nvim",
           }
         )
-        return streaming_handler(chunk, ctx.line, ctx.assistant_output, ctx.bufnr, ctx.winid, F)
+        return streaming_handler(
+          chunk,
+          ctx.line,
+          ctx.assistant_output,
+          ctx.bufnr,
+          ctx.winid,
+          F
+        )
       end
     end
   elseif api_type then
@@ -55,7 +67,14 @@ function backends.get_streaming_handler(streaming_handler, api_type, configs, ct
       if debug.getinfo(configs.streaming_handler, "u").nparams == 3 then
         return configs.streaming_handler(chunk, ctx, F)
       else
-        return configs.streaming_handler(chunk, ctx.line, ctx.assistant_output, ctx.bufnr, ctx.winid, F)
+        return configs.streaming_handler(
+          chunk,
+          ctx.line,
+          ctx.assistant_output,
+          ctx.bufnr,
+          ctx.winid,
+          F
+        )
       end
     end
   elseif configs.api_type then
@@ -220,24 +239,48 @@ function backends.get_tools_respond(api_type, configs, ctx)
         LOG:ERROR("GLM do not support function-calling.")
       end,
       ["openai"] = ctx.stream and function(chunk)
-        return require("llm.backends.openai").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.openai").AppendToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end or function(chunk)
-        return require("llm.backends.openai").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.openai").GetToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end,
       ["copilot"] = ctx.stream and function(chunk)
-        return require("llm.backends.copilot").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.copilot").AppendToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end or function(chunk)
-        return require("llm.backends.copilot").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.copilot").GetToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end,
       ["deepseek"] = ctx.stream and function(chunk)
-        return require("llm.backends.deepseek").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.deepseek").AppendToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end or function(chunk)
-        return require("llm.backends.deepseek").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.deepseek").GetToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end,
       ["ollama"] = ctx.stream and function(chunk)
-        return require("llm.backends.ollama").AppendToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.ollama").AppendToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end or function(chunk)
-        return require("llm.backends.ollama").GetToolsRespond(chunk, backends.msg_tool_calls_content)
+        return require("llm.backends.ollama").GetToolsRespond(
+          chunk,
+          backends.msg_tool_calls_content
+        )
       end,
     }
 

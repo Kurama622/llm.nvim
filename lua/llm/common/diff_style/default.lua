@@ -62,14 +62,21 @@ function Diff.new(args)
   end
 
   -- Create the diff window
-  diff.win = api.nvim_open_win(diff.buf, true, { vertical = vertical, win = self.winnr })
+  diff.win = api.nvim_open_win(
+    diff.buf,
+    true,
+    { vertical = vertical, win = self.winnr }
+  )
   for opt, value in pairs(win_opts) do
     vim.api.nvim_set_option_value(opt, value, { win = diff.win })
   end
   -- Set the diff buffer to the contents, prior to any modifications
   api.nvim_buf_set_lines(diff.buf, 0, -1, true, self.contents)
   if self.cursor_pos then
-    api.nvim_win_set_cursor(diff.win, { self.cursor_pos[1], self.cursor_pos[2] })
+    api.nvim_win_set_cursor(
+      diff.win,
+      { self.cursor_pos[1], self.cursor_pos[2] }
+    )
   end
 
   -- Begin diffing

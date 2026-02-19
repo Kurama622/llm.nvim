@@ -5,7 +5,14 @@ local F = require("llm.common.api")
 local conf = require("llm.config")
 local backends = require("llm.backends")
 
-local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
+local function setup_web_search_job(
+  web_search_conf,
+  fetch_key,
+  opts,
+  body,
+  msg,
+  co
+)
   return job:new({
     command = "curl",
     args = {
@@ -38,7 +45,11 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
 
       F.WriteContent(opts.bufnr, opts.winid, "\n> [!CITE] References\n")
       for _, item in pairs(reference) do
-        F.WriteContent(opts.bufnr, opts.winid, "> - [" .. item.title .. "](" .. item.url .. ")\n")
+        F.WriteContent(
+          opts.bufnr,
+          opts.winid,
+          "> - [" .. item.title .. "](" .. item.url .. ")\n"
+        )
       end
       F.WriteContent(opts.bufnr, opts.winid, "\n")
       if F.IsValid(search_response.answer) then
@@ -49,12 +60,19 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
         msg[#msg].content = body.query
           .. "\nPlease answer the question based on the provided web search results:\n\n---\nSearch results:\n"
         for idx, item in ipairs(reference) do
-          msg[#msg].content = msg[#msg].content .. idx .. ". " .. item.content .. "\n"
+          msg[#msg].content = msg[#msg].content
+            .. idx
+            .. ". "
+            .. item.content
+            .. "\n"
         end
       end
       -- update plenary job args
       opts.body.messages = msg
-      require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
+      require("llm.common.file_io").SaveFile(
+        opts.request_body_file,
+        vim.json.encode(opts.body)
+      )
       LOG:INFO("Finish search!")
 
       require("llm.common.ui").display_spinner_extmark(opts)
@@ -70,7 +88,8 @@ local cmds = {
     detail = "Search the web for information",
     callback = function(web_search_conf, msg, opts, co)
       local body = web_search_conf.params
-      local prompt = type(web_search_conf.prompt) == "function" and web_search_conf.prompt()
+      local prompt = type(web_search_conf.prompt) == "function"
+          and web_search_conf.prompt()
         or web_search_conf.prompt
         or [[You are given a multi-turn conversation between a user and an assistant. The user may ask multiple questions across different turns. Some of these questions have already been answered correctly and acknowledged by the user, so they can be ignored. Other questions may have been answered incorrectly, incompletely, or with outdated information. The user now wants to enable a web search to get the correct answer.
 
@@ -111,15 +130,28 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
           end
         end
         -- update curl request body file
-        require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(query_summarize_body))
+        require("llm.common.file_io").SaveFile(
+          opts.request_body_file,
+          vim.json.encode(query_summarize_body)
+        )
 
         local query_summarize_job = job:new({
           command = "curl",
           args = query_summarize_args,
           on_exit = vim.schedule_wrap(function(query_summarize_job)
-            body.query = backends.get_streaming_tbl_handler(opts.api_type, conf.configs)(query_summarize_job:result())
+            body.query = backends.get_streaming_tbl_handler(
+              opts.api_type,
+              conf.configs
+            )(query_summarize_job:result())
             LOG:INFO("Start search ...")
-            local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
+            local j = setup_web_search_job(
+              web_search_conf,
+              fetch_key,
+              opts,
+              body,
+              msg,
+              co
+            )
             j:start()
             state.llm.worker.jobs.web_search = j
           end),
@@ -128,7 +160,14 @@ Output **ONLY THE QUESTION ITSELF**, in plain text, **WITH NO ADDITIONAL EXPLANA
       else
         body.query = msg[#msg].content:gsub("@web_search", "")
         LOG:INFO("Start search ...")
-        local j = setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
+        local j = setup_web_search_job(
+          web_search_conf,
+          fetch_key,
+          opts,
+          body,
+          msg,
+          co
+        )
         j:start()
         state.llm.worker.jobs.web_search = j
       end

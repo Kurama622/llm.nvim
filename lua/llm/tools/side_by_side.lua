@@ -75,11 +75,13 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
   options = vim.tbl_deep_extend("force", options, opts or {})
   options.diagnostic = options.diagnostic or conf.configs.diagnostic
-  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key
+    or conf.configs.fetch_key
 
   local bufnr = vim.api.nvim_get_current_buf()
   local mode = options.mode or vim.fn.mode()
-  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr, mode, options)
+  local lines, start_line, start_col, end_line, end_col =
+    F.GetVisualSelectionRange(bufnr, mode, options)
   local source_content = F.GetVisualSelection(lines)
 
   local source_box = Popup(options.left)
@@ -104,12 +106,17 @@ function M.handler(name, F, state, streaming, prompt, opts)
       { role = "system", content = prompt },
       {
         role = "user",
-        content = source_content
-          .. "\n"
-          .. F.GetRangeDiagnostics(
-            { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
-            options
-          ),
+        content = source_content .. "\n" .. F.GetRangeDiagnostics(
+          {
+            [bufnr] = {
+              start_line = start_line,
+              end_line = end_line,
+              start_col = start_col,
+              end_col = end_col,
+            },
+          },
+          options
+        ),
       },
     }
   else

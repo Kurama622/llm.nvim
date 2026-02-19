@@ -5,7 +5,10 @@ local conf = require("llm.config")
 
 local ok, diff = pcall(require, "mini.diff")
 if not ok then
-  return vim.notify(string.format("Failed to load mini.diff: %s", diff), vim.log.levels.ERROR)
+  return vim.notify(
+    string.format("Failed to load mini.diff: %s", diff),
+    vim.log.levels.ERROR
+  )
 end
 
 local api = vim.api

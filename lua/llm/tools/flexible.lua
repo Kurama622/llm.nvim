@@ -55,10 +55,13 @@ function M.handler(name, F, state, _, prompt, opts)
   local content = ""
   if options.apply_visual_selection then
     local mode = options.mode or vim.fn.mode()
-    local lines = F.GetVisualSelectionRange(vim.api.nvim_get_current_buf(), mode, options)
-    content = (F.GetVisualSelection(lines):gsub(".", {
-      ["'"] = "''",
-    }))
+    local lines =
+      F.GetVisualSelectionRange(vim.api.nvim_get_current_buf(), mode, options)
+    content = (
+      F.GetVisualSelection(lines):gsub(".", {
+        ["'"] = "''",
+      })
+    )
   end
 
   local flexible_box = nil
@@ -66,13 +69,21 @@ function M.handler(name, F, state, _, prompt, opts)
   if content == "" then
     state.app.session[name] = { { role = "user", content = prompt } }
   else
-    state.app.session[name] = { { role = "system", content = prompt }, { role = "user", content = content } }
+    state.app.session[name] = {
+      { role = "system", content = prompt },
+      { role = "user", content = content },
+    }
   end
-  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key
+    or conf.configs.fetch_key
   options.messages = state.app.session[name]
   if options.exit_handler == nil then
     options.exit_handler = function(output)
-      flexible_box = require("llm.common.ui").FlexibleWindow(output, options.enter_flexible_window, options.win_opts)
+      flexible_box = require("llm.common.ui").FlexibleWindow(
+        output,
+        options.enter_flexible_window,
+        options.win_opts
+      )
       if flexible_box then
         flexible_box:mount()
       else
@@ -89,14 +100,18 @@ function M.handler(name, F, state, _, prompt, opts)
       }
       -- set keymaps and action
       for _, v in ipairs({ "accept", "reject", "close" }) do
-        flexible_box:map(options[v].mapping.mode, options[v].mapping.keys, function()
-          if options[v].action ~= nil then
-            options[v]:action(options)
-          else
-            default_actions[v]()
+        flexible_box:map(
+          options[v].mapping.mode,
+          options[v].mapping.keys,
+          function()
+            if options[v].action ~= nil then
+              options[v]:action(options)
+            else
+              default_actions[v]()
+            end
+            flexible_box:unmount()
           end
-          flexible_box:unmount()
-        end)
+        )
       end
     end
   end

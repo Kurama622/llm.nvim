@@ -8,7 +8,8 @@ local files = {
     kind_name = "llm.file",
     callback = function(bufnr, path, opts, co)
       local ft = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-      local file_ctx_tbl, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr)
+      local file_ctx_tbl, start_line, start_col, end_line, end_col =
+        F.GetVisualSelectionRange(bufnr)
 
       state.quote_files.file_info_list[bufnr] = {
         start_line = start_line,
@@ -46,12 +47,18 @@ local files = {
         end
         if state.input.request_with_lsp ~= nil then
           state.input.request_with_lsp(function()
-            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
+            require("llm.common.file_io").SaveFile(
+              opts.request_body_file,
+              vim.json.encode(opts.body)
+            )
             coroutine.resume(co)
           end)
         else
           vim.schedule(function()
-            require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
+            require("llm.common.file_io").SaveFile(
+              opts.request_body_file,
+              vim.json.encode(opts.body)
+            )
             coroutine.resume(co)
           end)
         end

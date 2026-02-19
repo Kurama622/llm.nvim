@@ -85,10 +85,16 @@ function ollama.FunctionCalling(ctx, t)
     end
     local res = ctx.functions_tbl[name](unpack(p))
     table.insert(ctx.body.messages, msg)
-    table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
+    table.insert(
+      ctx.body.messages,
+      { role = "tool", content = tostring(res), tool_call_id = id }
+    )
   end
   -- update curl request body file
-  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
+  require("llm.common.file_io").SaveFile(
+    ctx.request_body_file,
+    json.encode(ctx.body)
+  )
 
   require("plenary.job")
     :new({
