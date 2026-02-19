@@ -8,24 +8,27 @@ function copilot:get_authorization_token(LLM_KEY, co)
   if self.token and self.expires_time >= os.time() then
     return self.token
   end
-  require("plenary.curl").get("https://api.github.com/copilot_internal/v2/token", {
-    headers = {
-      Authorization = "Bearer " .. LLM_KEY,
-      ["Accept"] = "application/json",
-    },
-    on_error = function(err)
-      LOG:ERROR("Copilot: Token request error %s", err)
-    end,
-    callback = function(data)
-      local status, respond = pcall(json.decode, data.body)
+  require("plenary.curl").get(
+    "https://api.github.com/copilot_internal/v2/token",
+    {
+      headers = {
+        Authorization = "Bearer " .. LLM_KEY,
+        ["Accept"] = "application/json",
+      },
+      on_error = function(err)
+        LOG:ERROR("Copilot: Token request error %s", err)
+      end,
+      callback = function(data)
+        local status, respond = pcall(json.decode, data.body)
 
-      if status then
-        self.token = respond.token
-        self.expires_time = respond.expires_at
-      end
-      coroutine.resume(co, self.token)
-    end,
-  })
+        if status then
+          self.token = respond.token
+          self.expires_time = respond.expires_at
+        end
+        coroutine.resume(co, self.token)
+      end,
+    }
+  )
 end
 
 function copilot.StreamingHandler(chunk, ctx)
@@ -66,12 +69,18 @@ function copilot.StreamingHandler(chunk, ctx)
       -- add reasoning_content
       if F.IsValid(data.choices[1].delta.reasoning_content) then
         backend_utils.mark_reason_begin(ctx, false)
-        ctx.reasoning_content = ctx.reasoning_content .. data.choices[1].delta.reasoning_content
+        ctx.reasoning_content = ctx.reasoning_content
+          .. data.choices[1].delta.reasoning_content
 
-        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.reasoning_content)
+        F.WriteContent(
+          ctx.bufnr,
+          ctx.winid,
+          data.choices[1].delta.reasoning_content
+        )
       elseif F.IsValid(data.choices[1].delta.content) then
         backend_utils.mark_reason_end(ctx, false)
-        ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
+        ctx.assistant_output = ctx.assistant_output
+          .. data.choices[1].delta.content
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end
 
@@ -125,7 +134,8 @@ function copilot.FunctionCalling(ctx, t)
 
     -- openai: arguments is string
     -- format_json_str: Tool_calls arguments may contain excessive quotation marks, causing JSON parsing to fail.
-    local params = backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
+    local params =
+      backend_utils.format_json_str(msg.tool_calls[i]["function"].arguments)
     local keys = vim.tbl_filter(function(item)
       return item["function"].name == name
     end, ctx.body.tools)[1]["function"].parameters.required
@@ -143,12 +153,18 @@ function copilot.FunctionCalling(ctx, t)
 
     local res = ctx.functions_tbl[name](unpack(p))
     table.insert(ctx.body.messages, msg)
-    table.insert(ctx.body.messages, { role = "tool", content = tostring(res), tool_call_id = id })
+    table.insert(
+      ctx.body.messages,
+      { role = "tool", content = tostring(res), tool_call_id = id }
+    )
   end
   table.insert(ctx.args, "-H")
   table.insert(ctx.args, "X-Initiator: agent")
   -- update curl request body file
-  require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
+  require("llm.common.file_io").SaveFile(
+    ctx.request_body_file,
+    json.encode(ctx.body)
+  )
 
   require("plenary.job")
     :new({
@@ -174,7 +190,8 @@ function copilot.AppendToolsRespond(results, msg)
   local fc_type = "function"
   for _, fc_respond_str in pairs(results) do
     local start_idx = fc_respond_str:find("data: ") or 1
-    local status, fc_respond = pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
+    local status, fc_respond =
+      pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
     if status then
       if
         F.IsValid(fc_respond.choices)

@@ -14,7 +14,8 @@ local function init(opts)
       LOG:TRACE("llm.nvim completion provider:", opts.api_type)
       return deepseek
     elseif opts.api_type == "codeium" then
-      local codeium = require("llm.common.completion.backends.codeium"):init(opts)
+      local codeium =
+        require("llm.common.completion.backends.codeium"):init(opts)
 
       state.completion.backend = codeium
       LOG:TRACE("llm.nvim completion provider:", opts.api_type)

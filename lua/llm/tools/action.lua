@@ -91,7 +91,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
   options.lsp = options.lsp or conf.configs.lsp
 
   if prompt == nil then
-    prompt = string.format(require("llm.tools.prompts").action, options.language)
+    prompt =
+      string.format(require("llm.tools.prompts").action, options.language)
   elseif type(prompt) == "function" then
     prompt = prompt()
   end
@@ -100,13 +101,15 @@ function M.handler(name, F, state, streaming, prompt, opts)
   if options.templates and options.templates[ft] then
     prompt = prompt .. string.format("\n\n%s", options.templates[ft])
   end
-  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key
+    or conf.configs.fetch_key
 
   local bufnr = vim.api.nvim_get_current_buf()
   local winnr = vim.api.nvim_get_current_win()
   local cursor_pos = vim.api.nvim_win_get_cursor(winnr)
   local mode = options.mode or vim.fn.mode()
-  local lines, start_line, start_col, end_line, end_col = F.GetVisualSelectionRange(bufnr, mode, options)
+  local lines, start_line, start_col, end_line, end_col =
+    F.GetVisualSelectionRange(bufnr, mode, options)
   local source_content = F.GetVisualSelection(lines)
 
   F.VisMode2NorMode()
@@ -155,15 +158,24 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
     require("llm.common.io.parse").GetOutput(options)
     for _, op in ipairs({ "accept", "reject", "close" }) do
-      utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
-        default_actions[op]()
-        if options[op].action ~= nil then
-          options[op]:action(options)
-        end
-        for _, reset_op in ipairs({ "accept", "reject", "close" }) do
-          utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
-        end
-      end, bufnr)
+      utils.set_keymapping(
+        options[op].mapping.mode,
+        options[op].mapping.keys,
+        function()
+          default_actions[op]()
+          if options[op].action ~= nil then
+            options[op]:action(options)
+          end
+          for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+            utils.clear_keymapping(
+              options[reset_op].mapping.mode,
+              options[reset_op].mapping.keys,
+              bufnr
+            )
+          end
+        end,
+        bufnr
+      )
     end
   else
     if F.IsValid(options.diagnostic) then
@@ -171,12 +183,17 @@ function M.handler(name, F, state, streaming, prompt, opts)
         { role = "system", content = prompt },
         {
           role = "user",
-          content = source_content
-            .. "\n"
-            .. F.GetRangeDiagnostics(
-              { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
-              options
-            ),
+          content = source_content .. "\n" .. F.GetRangeDiagnostics(
+            {
+              [bufnr] = {
+                start_line = start_line,
+                end_line = end_line,
+                start_col = start_col,
+                end_col = end_col,
+              },
+            },
+            options
+          ),
         },
       }
     else
@@ -250,25 +267,47 @@ function M.handler(name, F, state, streaming, prompt, opts)
           })
         end
         options.messages = state.app.session[name]
-        utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
+        utils.single_turn_dialogue(
+          preview_box,
+          streaming,
+          options,
+          context,
+          diff,
+          default_actions
+        )
         F.ClearAttach()
       end)
     else
       options.messages = state.app.session[name]
-      utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
+      utils.single_turn_dialogue(
+        preview_box,
+        streaming,
+        options,
+        context,
+        diff,
+        default_actions
+      )
     end
 
     preview_box:map("n", "<C-c>", F.CancelLLM)
 
-    preview_box:map(options.close.mapping.mode, options.close.mapping.keys, function()
-      default_actions.close()
-      if options.close.action ~= nil then
-        options.close:action(options)
+    preview_box:map(
+      options.close.mapping.mode,
+      options.close.mapping.keys,
+      function()
+        default_actions.close()
+        if options.close.action ~= nil then
+          options.close:action(options)
+        end
+        for _, kk in ipairs({ "accept", "reject", "close" }) do
+          utils.clear_keymapping(
+            options[kk].mapping.mode,
+            options[kk].mapping.keys,
+            bufnr
+          )
+        end
       end
-      for _, kk in ipairs({ "accept", "reject", "close" }) do
-        utils.clear_keymapping(options[kk].mapping.mode, options[kk].mapping.keys, bufnr)
-      end
-    end)
+    )
 
     preview_box:map("n", { "I", "i" }, function()
       input_box:mount()
@@ -281,11 +320,21 @@ function M.handler(name, F, state, streaming, prompt, opts)
       end)
 
       input_box:map("n", { "<CR>" }, function()
-        local contents = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+        local contents =
+          vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
         table.remove(state.app.session[name], #state.app.session[name])
-        state.app.session[name][1].content = state.app.session[name][1].content .. "\n" .. table.concat(contents, "\n")
+        state.app.session[name][1].content = state.app.session[name][1].content
+          .. "\n"
+          .. table.concat(contents, "\n")
         vim.api.nvim_buf_set_lines(input_box.bufnr, 0, -1, false, {})
-        utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
+        utils.single_turn_dialogue(
+          preview_box,
+          streaming,
+          options,
+          context,
+          diff,
+          default_actions
+        )
       end)
     end)
 
@@ -294,7 +343,14 @@ function M.handler(name, F, state, streaming, prompt, opts)
         diff:reject()
       end
       table.remove(state.app.session[name], #state.app.session[name])
-      utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
+      utils.single_turn_dialogue(
+        preview_box,
+        streaming,
+        options,
+        context,
+        diff,
+        default_actions
+      )
     end)
   end
 end

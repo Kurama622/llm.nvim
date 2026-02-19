@@ -16,7 +16,12 @@ function M.handler(_, _, _, _, _, opts)
       setmetatable(display_opts, {
         __index = state.summarize_suggestions,
       })
-      utils.new_diff(diff, display_opts.pattern, display_opts.ctx, display_opts.assistant_output)
+      utils.new_diff(
+        diff,
+        display_opts.pattern,
+        display_opts.ctx,
+        display_opts.assistant_output
+      )
       F.CloseLLM()
     end,
     copy_suggestion_code = function()
@@ -24,7 +29,10 @@ function M.handler(_, _, _, _, _, opts)
       setmetatable(display_opts, {
         __index = state.summarize_suggestions,
       })
-      utils.copy_suggestion_code(display_opts.pattern, display_opts.assistant_output)
+      utils.copy_suggestion_code(
+        display_opts.pattern,
+        display_opts.assistant_output
+      )
       F.CloseLLM()
     end,
     accept = function()
@@ -95,25 +103,39 @@ function M.handler(_, _, _, _, _, opts)
   local bufnr_list = F.GetChatUiBufnrList()
   for _, ui_bufnr in ipairs(bufnr_list) do
     for _, k in ipairs({ "display", "copy_suggestion_code" }) do
-      utils.set_keymapping(options[k].mapping.mode, options[k].mapping.keys, function()
-        default_actions[k]()
-        if k == "display" then
-          for _, op in ipairs({ "accept", "reject", "close" }) do
-            utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
-              default_actions[op]()
-              if options[op].action ~= nil then
-                options[op]:action(options)
-              end
-              for _, reset_op in ipairs({ "accept", "reject", "close" }) do
-                utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, bufnr)
-              end
-            end, bufnr)
+      utils.set_keymapping(
+        options[k].mapping.mode,
+        options[k].mapping.keys,
+        function()
+          default_actions[k]()
+          if k == "display" then
+            for _, op in ipairs({ "accept", "reject", "close" }) do
+              utils.set_keymapping(
+                options[op].mapping.mode,
+                options[op].mapping.keys,
+                function()
+                  default_actions[op]()
+                  if options[op].action ~= nil then
+                    options[op]:action(options)
+                  end
+                  for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+                    utils.clear_keymapping(
+                      options[reset_op].mapping.mode,
+                      options[reset_op].mapping.keys,
+                      bufnr
+                    )
+                  end
+                end,
+                bufnr
+              )
+            end
           end
-        end
-        if options[k].action ~= nil then
-          options[k]:action(options)
-        end
-      end, ui_bufnr)
+          if options[k].action ~= nil then
+            options[k]:action(options)
+          end
+        end,
+        ui_bufnr
+      )
     end
   end
 end

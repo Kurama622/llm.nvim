@@ -83,18 +83,22 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
-  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key
+    or conf.configs.fetch_key
 
-  options.input_box_opts.border = vim.tbl_deep_extend("keep", options.input_box_opts.border, {
-    text = {
-      top = options.query.title,
-    },
-  })
-  options.input_box_opts.border.style = ui.seamless(options.input_box_opts.border.style, "top")
+  options.input_box_opts.border =
+    vim.tbl_deep_extend("keep", options.input_box_opts.border, {
+      text = {
+        top = options.query.title,
+      },
+    })
+  options.input_box_opts.border.style =
+    ui.seamless(options.input_box_opts.border.style, "top")
 
-  options.preview_box_opts.border = vim.tbl_deep_extend("force", options.preview_box_opts.border, {
-    style = ui.seamless(options.preview_box_opts.border.style, "bottom"),
-  })
+  options.preview_box_opts.border =
+    vim.tbl_deep_extend("force", options.preview_box_opts.border, {
+      style = ui.seamless(options.preview_box_opts.border.style, "bottom"),
+    })
 
   vim.api.nvim_set_hl(0, "LLMQuery", options.query.hl)
 
@@ -111,7 +115,10 @@ function M.handler(name, F, state, streaming, prompt, opts)
     options.component_height,
     Layout.Box({
       Layout.Box(input_box, { size = options.input_box_opts.size }),
-      Layout.Box(preview_box, { size = options.preview_box_opts.size, { grow = 1 } }),
+      Layout.Box(
+        preview_box,
+        { size = options.preview_box_opts.size, { grow = 1 } }
+      ),
     }, { dir = "col" })
   )
 
@@ -121,7 +128,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
     -- clear preview_box content [optional]
     vim.api.nvim_buf_set_lines(preview_box.bufnr, 0, -1, false, {})
 
-    local input_table = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+    local input_table =
+      vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
     local input = table.concat(input_table, "\n")
 
     -- clear input_box content

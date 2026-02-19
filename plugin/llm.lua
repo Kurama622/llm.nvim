@@ -28,7 +28,11 @@ end, {})
 
 -- only for in visual mode
 vim.api.nvim_create_user_command("LLMSelectedTextHandler", function(args)
-  require("llm.session").LLMSelectedTextHandler(args.fargs[1], false, { mode = "v" })
+  require("llm.session").LLMSelectedTextHandler(
+    args.fargs[1],
+    false,
+    { mode = "v" }
+  )
 end, { nargs = 1, range = true })
 
 vim.api.nvim_create_user_command("LLMAppHandler", function(args)
@@ -121,7 +125,10 @@ if has_blink then
   end)
 elseif has_cmp then
   for _, name in ipairs({ "cmd", "buffer", "file" }) do
-    cmp.register_source("llm_" .. name, require("llm.common.completion.frontends.cmp." .. name).new())
+    cmp.register_source(
+      "llm_" .. name,
+      require("llm.common.completion.frontends.cmp." .. name).new()
+    )
   end
   cmp.setup.filetype("llm", {
     enabled = true,

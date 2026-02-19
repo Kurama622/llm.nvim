@@ -84,7 +84,11 @@ end
 function virtual_text:update_preview()
   self:clear()
   if state.completion.contents[self.choice] then
-    self.display_lines = vim.split(state.completion.contents[self.choice], "\n", { plain = true })
+    self.display_lines = vim.split(
+      state.completion.contents[self.choice],
+      "\n",
+      { plain = true }
+    )
     local extmark = {
       id = self.extmark_id,
       virt_text = { { self.display_lines[1], "LLMCodeSuggestion" } },
@@ -93,12 +97,19 @@ function virtual_text:update_preview()
     if #self.display_lines > 1 then
       extmark.virt_lines = {}
       for i = 2, #self.display_lines do
-        extmark.virt_lines[i - 1] = { { self.display_lines[i], "LLMCodeSuggestion" } }
+        extmark.virt_lines[i - 1] =
+          { { self.display_lines[i], "LLMCodeSuggestion" } }
       end
     end
     self.cursor_col = vim.fn.col(".")
     self.cursor_line = vim.fn.line(".")
-    vim.api.nvim_buf_set_extmark(0, self.ns_id, self.cursor_line - 1, self.cursor_col - 1, extmark)
+    vim.api.nvim_buf_set_extmark(
+      0,
+      self.ns_id,
+      self.cursor_line - 1,
+      self.cursor_col - 1,
+      extmark
+    )
     self.rendered = true
   end
 end
@@ -132,7 +143,11 @@ function virtual_text:accept()
       vim.api.nvim_feedkeys(ctrl_o .. "$", "n", false)
     else
       -- move cursor to the end of inserted text
-      vim.api.nvim_feedkeys(string.rep(down_key, #self.display_lines - 1), "n", false)
+      vim.api.nvim_feedkeys(
+        string.rep(down_key, #self.display_lines - 1),
+        "n",
+        false
+      )
       vim.api.nvim_feedkeys(ctrl_o .. "$", "n", false)
     end
   end)()
@@ -157,12 +172,14 @@ function virtual_text:autocmd()
   if state.completion.set_autocmd then
     return
   end
-  local virt_group = vim.api.nvim_create_augroup("virt_completions", { clear = true })
+  local virt_group =
+    vim.api.nvim_create_augroup("virt_completions", { clear = true })
 
   vim.api.nvim_create_autocmd("InsertLeavePre", {
     group = virt_group,
     callback = function()
-      local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+      local cond = self.opts.filetypes[vim.bo.ft] == nil
+          and self.opts.default_filetype_enabled
         or self.opts.filetypes[vim.bo.ft]
       if not (state.completion.enable and cond) then
         return
@@ -176,7 +193,8 @@ function virtual_text:autocmd()
     vim.api.nvim_create_autocmd("InsertEnter", {
       group = virt_group,
       callback = function()
-        local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+        local cond = self.opts.filetypes[vim.bo.ft] == nil
+            and self.opts.default_filetype_enabled
           or self.opts.filetypes[vim.bo.ft]
         if not (state.completion.enable and cond) then
           return
@@ -188,7 +206,8 @@ function virtual_text:autocmd()
     vim.api.nvim_create_autocmd("TextChangedI", {
       group = virt_group,
       callback = function()
-        local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+        local cond = self.opts.filetypes[vim.bo.ft] == nil
+            and self.opts.default_filetype_enabled
           or self.opts.filetypes[vim.bo.ft]
         if not (state.completion.enable and cond) then
           return
@@ -201,7 +220,8 @@ function virtual_text:autocmd()
   vim.api.nvim_create_autocmd("CompleteDone", {
     group = virt_group,
     callback = function()
-      local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+      local cond = self.opts.filetypes[vim.bo.ft] == nil
+          and self.opts.default_filetype_enabled
         or self.opts.filetypes[vim.bo.ft]
       if not (state.completion.enable and cond) then
         return

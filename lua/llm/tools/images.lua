@@ -116,18 +116,22 @@ function M.handler(name, F, state, streaming, prompt, opts)
   }
 
   options = vim.tbl_deep_extend("force", options, opts or {})
-  options.fetch_key = options.fetch_key and options.fetch_key or conf.configs.fetch_key
+  options.fetch_key = options.fetch_key and options.fetch_key
+    or conf.configs.fetch_key
 
-  options.input_box_opts.border = vim.tbl_deep_extend("keep", options.input_box_opts.border, {
-    text = {
-      top = options.query.title,
-    },
-  })
-  options.input_box_opts.border.style = ui.seamless(options.input_box_opts.border.style, "top")
+  options.input_box_opts.border =
+    vim.tbl_deep_extend("keep", options.input_box_opts.border, {
+      text = {
+        top = options.query.title,
+      },
+    })
+  options.input_box_opts.border.style =
+    ui.seamless(options.input_box_opts.border.style, "top")
 
-  options.preview_box_opts.border = vim.tbl_deep_extend("force", options.preview_box_opts.border, {
-    style = ui.seamless(options.preview_box_opts.border.style, "bottom"),
-  })
+  options.preview_box_opts.border =
+    vim.tbl_deep_extend("force", options.preview_box_opts.border, {
+      style = ui.seamless(options.preview_box_opts.border.style, "bottom"),
+    })
 
   vim.api.nvim_set_hl(0, "LLMQuery", options.query.hl)
 
@@ -144,41 +148,63 @@ function M.handler(name, F, state, streaming, prompt, opts)
     options.component_height,
     Layout.Box({
       Layout.Box(input_box, { size = options.input_box_opts.size }),
-      Layout.Box(preview_box, { size = options.preview_box_opts.size, { grow = 1 } }),
+      Layout.Box(
+        preview_box,
+        { size = options.preview_box_opts.size, { grow = 1 } }
+      ),
     }, { dir = "col" })
   )
 
   layout:mount()
 
-  input_box:map(options.picker.mapping.mode, options.picker.mapping.keys, function()
-    if options.picker.extern then
-      options.picker.extern(function(item)
-        if item then
-          local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
-          vim.api.nvim_buf_set_lines(input_box.bufnr, start_pos - 1, -1, false, item)
-        end
-        vim.api.nvim_set_current_win(input_box.winid)
-      end)
-    else
-      F.Picker(options.picker.cmd, {
-        size = options.picker.size,
-        position = options.picker.position,
-        relative = options.picker.relative,
-        select = options.picker.select,
-      }, function(item)
-        if item then
-          local start_pos = #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
-          vim.api.nvim_buf_set_lines(input_box.bufnr, start_pos - 1, -1, false, { item })
-        end
-      end)
+  input_box:map(
+    options.picker.mapping.mode,
+    options.picker.mapping.keys,
+    function()
+      if options.picker.extern then
+        options.picker.extern(function(item)
+          if item then
+            local start_pos =
+              #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+            vim.api.nvim_buf_set_lines(
+              input_box.bufnr,
+              start_pos - 1,
+              -1,
+              false,
+              item
+            )
+          end
+          vim.api.nvim_set_current_win(input_box.winid)
+        end)
+      else
+        F.Picker(options.picker.cmd, {
+          size = options.picker.size,
+          position = options.picker.position,
+          relative = options.picker.relative,
+          select = options.picker.select,
+        }, function(item)
+          if item then
+            local start_pos =
+              #vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+            vim.api.nvim_buf_set_lines(
+              input_box.bufnr,
+              start_pos - 1,
+              -1,
+              false,
+              { item }
+            )
+          end
+        end)
+      end
     end
-  end)
+  )
 
   input_box:map("n", "<enter>", function()
     -- clear preview_box content [optional]
     vim.api.nvim_buf_set_lines(preview_box.bufnr, 0, -1, false, {})
 
-    local input_table = vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
+    local input_table =
+      vim.api.nvim_buf_get_lines(input_box.bufnr, 0, -1, true)
     local input = table.concat(input_table, "\n")
 
     -- clear input_box content
@@ -187,11 +213,19 @@ function M.handler(name, F, state, streaming, prompt, opts)
       options.format = get_images_format(input)
       if options.use_base64 then
         state.app.session[name] = {
-          { role = "user", content = prompt, images = F.base64_images_encode(input) },
+          {
+            role = "user",
+            content = prompt,
+            images = F.base64_images_encode(input),
+          },
         }
       else
         state.app.session[name] = {
-          { role = "user", content = prompt, images = vim.split(input, "\n") },
+          {
+            role = "user",
+            content = prompt,
+            images = vim.split(input, "\n"),
+          },
         }
       end
       state.popwin_list[preview_box.winid] = preview_box

@@ -45,9 +45,13 @@ function utils.add_language_comment()
   end
 
   -- escape % in comment string
-  local commentstring = vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
+  local commentstring =
+    vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
 
-  return string.format(commentstring, string.format("language: %s", vim.bo.ft))
+  return string.format(
+    commentstring,
+    string.format("language: %s", vim.bo.ft)
+  )
 end
 
 function utils.add_tab_comment()
@@ -58,13 +62,16 @@ function utils.add_tab_comment()
   local tab_comment
 
   if vim.bo.expandtab and vim.bo.softtabstop > 0 then
-    tab_comment = "indentation: use " .. vim.bo.softtabstop .. " spaces for a tab"
+    tab_comment = "indentation: use "
+      .. vim.bo.softtabstop
+      .. " spaces for a tab"
 
     if vim.bo.commentstring == nil or vim.bo.commentstring == "" then
       return "# " .. tab_comment
     end
 
-    local commentstring = vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
+    local commentstring =
+      vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
 
     return string.format(commentstring, tab_comment)
   end
@@ -75,7 +82,8 @@ function utils.add_tab_comment()
       return "# " .. tab_comment
     end
 
-    local commentstring = vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
+    local commentstring =
+      vim.bo.commentstring:gsub("^%% ", "%%%% "):gsub("%%$", "%%%%")
 
     return string.format(commentstring, tab_comment)
   end
@@ -107,15 +115,18 @@ function utils.make_cmp_context(blink_context)
   self.cursor.col = cursor[2] + 1
   self.cursor.line = self.cursor.row - 1
   -- self.cursor.character = require('cmp.utils.misc').to_utfindex(self.cursor_line, self.cursor.col)
-  self.cursor_before_line = string.sub(self.cursor_line, 1, self.cursor.col - 1)
+  self.cursor_before_line =
+    string.sub(self.cursor_line, 1, self.cursor.col - 1)
   self.cursor_after_line = string.sub(self.cursor_line, self.cursor.col)
   return self
 end
 
 function utils.get_context(cmp_context, opts)
   local cursor = cmp_context.cursor
-  local lines_before_list = vim.api.nvim_buf_get_lines(0, 0, cursor.line, false)
-  local lines_after_list = vim.api.nvim_buf_get_lines(0, cursor.line + 1, -1, false)
+  local lines_before_list =
+    vim.api.nvim_buf_get_lines(0, 0, cursor.line, false)
+  local lines_after_list =
+    vim.api.nvim_buf_get_lines(0, cursor.line + 1, -1, false)
 
   local lines_before = table.concat(lines_before_list, "\n")
   local lines_after = table.concat(lines_after_list, "\n")
@@ -131,17 +142,30 @@ function utils.get_context(cmp_context, opts)
     if n_chars_before < opts.context_window * opts.context_ratio then
       -- If the context length before cursor does not exceed the maximum
       -- size, we include the full content before the cursor.
-      lines_after = vim.fn.strcharpart(lines_after, 0, opts.context_window - n_chars_before)
+      lines_after = vim.fn.strcharpart(
+        lines_after,
+        0,
+        opts.context_window - n_chars_before
+      )
     elseif n_chars_after < opts.context_window * (1 - opts.context_ratio) then
       -- if the context length after cursor does not exceed the maximum
       -- size, we include the full content after the cursor.
-      lines_before = vim.fn.strcharpart(lines_before, n_chars_before + n_chars_after - opts.context_window)
+      lines_before = vim.fn.strcharpart(
+        lines_before,
+        n_chars_before + n_chars_after - opts.context_window
+      )
     else
       -- at the middle of the file, use the context_ratio to determine the allocation
-      lines_after = vim.fn.strcharpart(lines_after, 0, math.floor(opts.context_window * (1 - opts.context_ratio)))
+      lines_after = vim.fn.strcharpart(
+        lines_after,
+        0,
+        math.floor(opts.context_window * (1 - opts.context_ratio))
+      )
 
-      lines_before =
-        vim.fn.strcharpart(lines_before, n_chars_before - math.floor(opts.context_window * opts.context_ratio))
+      lines_before = vim.fn.strcharpart(
+        lines_before,
+        n_chars_before - math.floor(opts.context_window * opts.context_ratio)
+      )
     end
   end
   return {
@@ -179,7 +203,12 @@ function utils.prepend_to_complete_word(a, b)
 
   if last_word_b then
     if
-      first_word_a and not first_word_a:find(last_word_b, vim.fn.strdisplaywidth(last_word_b), true)
+      first_word_a
+        and not first_word_a:find(
+          last_word_b,
+          vim.fn.strdisplaywidth(last_word_b),
+          true
+        )
       or not first_word_a
     then
       a = last_word_b .. a

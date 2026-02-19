@@ -59,7 +59,8 @@ local function display_sub(s, i, j)
   while pos <= stop do
     local c = s:byte(pos)
     local char_len = utf8_char_length(c)
-    utf8_len = utf8_len + vim.api.nvim_strwidth(s:sub(pos, pos + char_len - 1))
+    utf8_len = utf8_len
+      + vim.api.nvim_strwidth(s:sub(pos, pos + char_len - 1))
     pos = pos + char_len
     if utf8_len >= j then
       stop = pos - 1
@@ -92,7 +93,8 @@ local function get_locations(bufnr, method, params, callback)
     if result then
       locations = vim.islist(result) and result or { result }
     end
-    local items = vim.lsp.util.locations_to_items(locations, client.offset_encoding)
+    local items =
+      vim.lsp.util.locations_to_items(locations, client.offset_encoding)
     vim.list_extend(all_items, items)
     remaining = remaining - 1
     if remaining == 0 then
@@ -130,7 +132,9 @@ local function find_definition_node(bufnr, row, col)
       return true
     end
     local t = n:type()
-    return t:match("declaration$") or t:match("definition$") or t:match("specifier$")
+    return t:match("declaration$")
+      or t:match("definition$")
+      or t:match("specifier$")
   end
 
   while node and not is_definition_node(node) do
@@ -198,7 +202,10 @@ function api.GetUserRequestArgs(args, env)
     if status then
       return result
     else
-      vim.notify("Custom args error: " .. tostring(result), vim.log.levels.ERROR)
+      vim.notify(
+        "Custom args error: " .. tostring(result),
+        vim.log.levels.ERROR
+      )
     end
   end
 end
@@ -210,7 +217,15 @@ end
 --- @param col_start integer
 --- @param row_end integer
 --- @param col_end integer
-function api.AddHighlight(namespace, bufnr, hl, row_start, col_start, row_end, col_end)
+function api.AddHighlight(
+  namespace,
+  bufnr,
+  hl,
+  row_start,
+  col_start,
+  row_end,
+  col_end
+)
   local ns = -1
 
   if type(namespace) == "string" then
@@ -220,9 +235,23 @@ function api.AddHighlight(namespace, bufnr, hl, row_start, col_start, row_end, c
   end
 
   if vim.version.lt(vim.version(), { 0, 11, 0 }) then
-    vim.api.nvim_buf_add_highlight(bufnr, ns, hl, row_start, col_start, col_end)
+    vim.api.nvim_buf_add_highlight(
+      bufnr,
+      ns,
+      hl,
+      row_start,
+      col_start,
+      col_end
+    )
   else
-    vim.hl.range(bufnr, ns, hl, { row_start, col_start }, { row_end, col_end }, {})
+    vim.hl.range(
+      bufnr,
+      ns,
+      hl,
+      { row_start, col_start },
+      { row_end, col_end },
+      {}
+    )
   end
 end
 
@@ -239,15 +268,34 @@ function api.AppendChunkToBuffer(bufnr, winid, chunk, detach)
     return
   end
   local line_count = vim.api.nvim_buf_line_count(bufnr)
-  local last_line = vim.api.nvim_buf_get_lines(bufnr, line_count - 1, line_count, false)[1]
+  local last_line =
+    vim.api.nvim_buf_get_lines(bufnr, line_count - 1, line_count, false)[1]
 
   state.cursor.pos = line_count
   local lines = vim.split(chunk, "\n")
   if #lines == 1 then
-    vim.api.nvim_buf_set_lines(bufnr, line_count - 1, line_count, false, { last_line .. lines[1] })
+    vim.api.nvim_buf_set_lines(
+      bufnr,
+      line_count - 1,
+      line_count,
+      false,
+      { last_line .. lines[1] }
+    )
   else
-    vim.api.nvim_buf_set_lines(bufnr, line_count - 1, line_count, false, { last_line .. lines[1] })
-    vim.api.nvim_buf_set_lines(bufnr, line_count, line_count, false, vim.list_slice(lines, 2))
+    vim.api.nvim_buf_set_lines(
+      bufnr,
+      line_count - 1,
+      line_count,
+      false,
+      { last_line .. lines[1] }
+    )
+    vim.api.nvim_buf_set_lines(
+      bufnr,
+      line_count,
+      line_count,
+      false,
+      vim.list_slice(lines, 2)
+    )
   end
   if vim.api.nvim_win_is_valid(winid) and not detach then
     api.UpdateCursorPosition(bufnr, winid)
@@ -327,12 +375,15 @@ function api.GetVisualSelectionRange(bufnr, call_mode, opts)
   local end_col = end_pos[3]
 
   -- normalize the range to start < end
-  if start_line > end_line or (start_line == end_line and start_col > end_col) then
+  if
+    start_line > end_line or (start_line == end_line and start_col > end_col)
+  then
     start_line, end_line = end_line, start_line
     start_col, end_col = end_col, start_col
   end
 
-  local lines = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+  local lines =
+    vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
 
   -- get whole buffer if there is no current/previous visual selection
   if start_line == 0 then
@@ -382,7 +433,8 @@ function api.MakeInlineContext(opts, bufnr, name)
 
   local mode = opts.mode or vim.fn.mode()
   if is_visual_mode(mode) or opts.enable_buffer_context then
-    lines, start_line, start_col, end_line, end_col = api.GetVisualSelectionRange(bufnr, mode, opts)
+    lines, start_line, start_col, end_line, end_col =
+      api.GetVisualSelectionRange(bufnr, mode, opts)
   else
     local pos = vim.fn.getpos(".")
     lines = {}
@@ -427,7 +479,8 @@ function api.GetAttach(opts)
   opts.diagnostic = opts.diagnostic or conf.configs.diagnostic
   opts.lsp = opts.lsp or conf.configs.lsp
 
-  local lines, start_line, end_line, start_col, end_col = api.MakeInlineContext(opts, bufnr, "attach_to_chat")
+  local lines, start_line, end_line, start_col, end_col =
+    api.MakeInlineContext(opts, bufnr, "attach_to_chat")
   if api.IsValid(opts.lsp) then
     opts.lsp.bufnr_info_list = {
       [bufnr] = {
@@ -455,7 +508,14 @@ function api.GetAttach(opts)
     state.input.attach_content = state.input.attach_content
       .. "\n"
       .. api.GetRangeDiagnostics(
-        { [bufnr] = { start_line = start_line, end_line = end_line, start_col = start_col, end_col = end_col } },
+        {
+          [bufnr] = {
+            start_line = start_line,
+            end_line = end_line,
+            start_col = start_col,
+            end_col = end_col,
+          },
+        },
         opts
       )
   end
@@ -476,13 +536,23 @@ function api.ClearAttach()
 end
 
 function api.UpdatePrompt(name)
-  if state.summarize_suggestions.prompt and not state.summarize_suggestions.status then
+  if
+    state.summarize_suggestions.prompt
+    and not state.summarize_suggestions.status
+  then
     if state.session[name][1].role == "system" then
-      state.session[name][1].content =
-        string.format("%s\n%s", state.session[name][1].content, state.summarize_suggestions.prompt)
+      state.session[name][1].content = string.format(
+        "%s\n%s",
+        state.session[name][1].content,
+        state.summarize_suggestions.prompt
+      )
       state.summarize_suggestions.status = true
     else
-      table.insert(state.session[name], 1, { role = "system", content = state.summarize_suggestions.prompt })
+      table.insert(
+        state.session[name],
+        1,
+        { role = "system", content = state.summarize_suggestions.prompt }
+      )
     end
   end
 end
@@ -522,22 +592,35 @@ function api.CancelLLM()
 end
 
 function api.SaveSession()
-  if conf.configs.save_session and state.session.filename and #state.session[state.session.filename] > 2 then
+  if
+    conf.configs.save_session
+    and state.session.filename
+    and #state.session[state.session.filename] > 2
+  then
     for _, changed_file in ipairs(state.session.changed) do
       local filename = nil
       if changed_file ~= "current" then
-        filename = string.format("%s/%s", conf.configs.history_path, changed_file)
+        filename =
+          string.format("%s/%s", conf.configs.history_path, changed_file)
       else
-        local _filename =
-          display_sub(state.session[changed_file][2].content, 1, conf.configs.max_history_name_length):gsub(".", {
-            ["["] = "\\[",
-            ["]"] = "\\]",
-            ["/"] = "%",
-            ["\n"] = " ",
-            ["\r"] = " ",
-          })
+        local _filename = display_sub(
+          state.session[changed_file][2].content,
+          1,
+          conf.configs.max_history_name_length
+        ):gsub(".", {
+          ["["] = "\\[",
+          ["]"] = "\\]",
+          ["/"] = "%",
+          ["\n"] = " ",
+          ["\r"] = " ",
+        })
 
-        filename = string.format("%s/%s-%s.json", conf.configs.history_path, _filename, os.date("%Y%m%d%H%M%S"))
+        filename = string.format(
+          "%s/%s-%s.json",
+          conf.configs.history_path,
+          _filename,
+          os.date("%Y%m%d%H%M%S")
+        )
       end
       local file = io.open(filename, "w")
       if file then
@@ -570,7 +653,13 @@ function api.CloseLLM()
   if state.layout.popup then
     state.layout.popup:unmount()
 
-    for _, comp in ipairs({ state.layout, state.input, state.llm, state.history, state.models }) do
+    for _, comp in ipairs({
+      state.layout,
+      state.input,
+      state.llm,
+      state.history,
+      state.models,
+    }) do
       comp.popup = nil
     end
     api.ClearAttach()
@@ -603,7 +692,8 @@ end
 
 function api.ResendLLM()
   table.insert(state.session.changed, state.session.filename)
-  state.session[state.session.filename][#state.session[state.session.filename]] = nil
+  state.session[state.session.filename][#state.session[state.session.filename]] =
+    nil
   api.OpenLLM()
 end
 
@@ -703,7 +793,10 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
         api.AppendChunkToBuffer(
           bufnr,
           winid,
-          require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n",
+          require("llm.tools.prompts").lsp
+            .. "\n"
+            .. symbols_location_info
+            .. "\n",
           detach
         )
       else
@@ -713,7 +806,12 @@ function api.RefreshLLMText(messages, bufnr, winid, detach)
     elseif api.IsValid(msg.content) then
       api.SetRole(bufnr, winid, msg.role, detach)
       if api.IsValid(msg._llm_reasoning_content) then
-        api.AppendChunkToBuffer(bufnr, winid, msg._llm_reasoning_content, detach)
+        api.AppendChunkToBuffer(
+          bufnr,
+          winid,
+          msg._llm_reasoning_content,
+          detach
+        )
       end
       api.AppendChunkToBuffer(bufnr, winid, msg.content, detach)
       api.NewLine(bufnr, winid, detach)
@@ -850,7 +948,9 @@ end
 function api.FormatHl(hl, win_name)
   local bg = vim.api.nvim_get_hl(0, { name = "CursorLine" }).bg
   local fg = vim.api.nvim_get_hl(0, { name = hl }).fg
-  state[win_name].hl = ("Llm%sSelected"):format(string.gsub(win_name, "^%a", string.upper))
+  state[win_name].hl = ("Llm%sSelected"):format(
+    string.gsub(win_name, "^%a", string.upper)
+  )
   vim.api.nvim_set_hl(0, state[win_name].hl, { fg = fg, bg = bg })
 end
 
@@ -867,9 +967,20 @@ function api.HistoryPreview()
     picker_cfg.select = opts.select
     picker_cfg.preview = opts.preview
   end
-  api.Picker("cd " .. conf.configs.history_path .. ";" .. opts.cmd, picker_cfg, function(item)
-    api.RefreshLLMText(state.session[item], state.llm.popup.bufnr, state.llm.popup.winid, false)
-  end, true, opts.enable_fzf_focus_print)
+  api.Picker(
+    "cd " .. conf.configs.history_path .. ";" .. opts.cmd,
+    picker_cfg,
+    function(item)
+      api.RefreshLLMText(
+        state.session[item],
+        state.llm.popup.bufnr,
+        state.llm.popup.winid,
+        false
+      )
+    end,
+    true,
+    opts.enable_fzf_focus_print
+  )
 end
 
 function api.ResetModel(opts, _table, idx)
@@ -1088,7 +1199,12 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
               fp:close()
             end
           end
-          api.RefreshLLMText(state.session[filename], preview_popup.bufnr, preview_popup.winid, true)
+          api.RefreshLLMText(
+            state.session[filename],
+            preview_popup.bufnr,
+            preview_popup.winid,
+            true
+          )
         end
       end
     end,
@@ -1116,7 +1232,9 @@ function api.Picker(cmd, ui, callback, force_preview, enable_fzf_focus_print)
       else
         if force_preview then
           -- Reset the current session name
-          state.session.filename = state.session[previous_session_name] and previous_session_name or nil
+          state.session.filename = state.session[previous_session_name]
+              and previous_session_name
+            or nil
         end
       end
       if force_preview and state.llm.popup then
@@ -1148,7 +1266,11 @@ function api.GetRangeDiagnostics(bufnr_info_list, opts)
         if level == "Error" then
           state.input.diagnostic_error = true
         end
-        local msg = string.format(tostring(i) .. ". %s: %s", level, diag.message:gsub("\n", "\n\t"))
+        local msg = string.format(
+          tostring(i) .. ". %s: %s",
+          level,
+          diag.message:gsub("\n", "\n\t")
+        )
         if diagnostics_tbl[diag.lnum] == nil then
           diagnostics_tbl[diag.lnum] = { msg }
         elseif not vim.tbl_contains(diagnostics_tbl[diag.lnum], msg) then
@@ -1164,9 +1286,13 @@ function api.GetRangeDiagnostics(bufnr_info_list, opts)
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
     for _, diags in pairs(diagnostics_tbl) do
-      diagnostics_content = diagnostics_content .. "\n" .. table.concat(diags, "\n")
+      diagnostics_content = diagnostics_content
+        .. "\n"
+        .. table.concat(diags, "\n")
     end
-    return diagnostics_prompt .. "\nThe code's diagnostics:" .. diagnostics_content
+    return diagnostics_prompt
+      .. "\nThe code's diagnostics:"
+      .. diagnostics_content
   end
   return diagnostics_prompt
 end
@@ -1177,7 +1303,10 @@ function api.lsp_wrap(opts)
   end
 
   opts.lsp.bufnr_info_list = vim.tbl_map(function(buf_info)
-    if api.IsValid(opts.lsp[buf_info.ft]) and api.IsValid(opts.lsp[buf_info.ft].methods) then
+    if
+      api.IsValid(opts.lsp[buf_info.ft])
+      and api.IsValid(opts.lsp[buf_info.ft].methods)
+    then
       return buf_info
     end
     return nil
@@ -1197,28 +1326,47 @@ function api.lsp_wrap(opts)
             }
 
             -- Deduplicate and take the union of the returned symbol definitions.
-            if not api.IsValid(state.input.lsp_ctx.symbols_location_list[symbol.fname]) then
-              state.input.lsp_ctx.symbols_location_list[symbol.fname] = { symbol_location }
+            if
+              not api.IsValid(
+                state.input.lsp_ctx.symbols_location_list[symbol.fname]
+              )
+            then
+              state.input.lsp_ctx.symbols_location_list[symbol.fname] =
+                { symbol_location }
             else
               local placed = false
 
-              for i, item in pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname]) do
-                if item.start_row > symbol_location.start_row and item.end_row < symbol_location.end_row then
-                  state.input.lsp_ctx.symbols_location_list[symbol.fname][i] = symbol_location
+              for i, item in
+                pairs(state.input.lsp_ctx.symbols_location_list[symbol.fname])
+              do
+                if
+                  item.start_row > symbol_location.start_row
+                  and item.end_row < symbol_location.end_row
+                then
+                  state.input.lsp_ctx.symbols_location_list[symbol.fname][i] =
+                    symbol_location
                   placed = true
                   break
-                elseif item.start_row <= symbol_location.start_row and item.end_row >= symbol_location.end_row then
+                elseif
+                  item.start_row <= symbol_location.start_row
+                  and item.end_row >= symbol_location.end_row
+                then
                   placed = true
                   break
                 end
               end
               if not placed then
-                table.insert(state.input.lsp_ctx.symbols_location_list[symbol.fname], symbol_location)
+                table.insert(
+                  state.input.lsp_ctx.symbols_location_list[symbol.fname],
+                  symbol_location
+                )
               end
             end
           end
           if symbol.done then
-            for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+            for fname, symbol_location in
+              pairs(state.input.lsp_ctx.symbols_location_list)
+            do
               if type(symbol_location) == "table" then
                 for _, sym in pairs(symbol_location) do
                   table.insert(
@@ -1228,7 +1376,10 @@ function api.lsp_wrap(opts)
                       sym.start_row,
                       sym.end_row,
                       sym.name,
-                      vim.api.nvim_get_option_value("filetype", { buf = sym.bufnr }),
+                      vim.api.nvim_get_option_value(
+                        "filetype",
+                        { buf = sym.bufnr }
+                      ),
                       table.concat(
                         vim.api.nvim_buf_get_text(
                           sym.bufnr,
@@ -1246,9 +1397,14 @@ function api.lsp_wrap(opts)
               end
             end
             if
-              not state.input.lsp_ctx.symbols_location_list.lsp_prompt and api.IsValid(state.input.lsp_ctx.content)
+              not state.input.lsp_ctx.symbols_location_list.lsp_prompt
+              and api.IsValid(state.input.lsp_ctx.content)
             then
-              table.insert(state.input.lsp_ctx.content, 1, require("llm.tools.prompts").lsp)
+              table.insert(
+                state.input.lsp_ctx.content,
+                1,
+                require("llm.tools.prompts").lsp
+              )
               state.input.lsp_ctx.symbols_location_list.lsp_prompt = true
             end
             llm_request()
@@ -1308,7 +1464,8 @@ function api.lsp_request(cfg, callback)
     if cfg.root_dir then
       state.input.lsp_ctx[bufnr].root_dir = vim.fs.root(bufnr, cfg.root_dir)
     end
-    state.input.lsp_ctx[bufnr].fname = vim.uri_to_fname(vim.uri_from_bufnr(bufnr))
+    state.input.lsp_ctx[bufnr].fname =
+      vim.uri_to_fname(vim.uri_from_bufnr(bufnr))
     local root = parser:parse()[1]:root()
     traverse(root, bufnr)
   end
@@ -1348,7 +1505,8 @@ function api.lsp_request(cfg, callback)
         end
       end
     end
-    query_symbols_method_cnt = query_symbols_method_cnt + #query_symbols * supported_method_cnt[bufnr]
+    query_symbols_method_cnt = query_symbols_method_cnt
+      + #query_symbols * supported_method_cnt[bufnr]
   end
 
   -- 3. 对每个符号异步调用 LSP
@@ -1362,73 +1520,88 @@ function api.lsp_request(cfg, callback)
       }
 
       for _, method in pairs(cfg[state.input.lsp_ctx[buf].ft].methods) do
-        get_locations(buf, "textDocument/" .. method, params, function(locations)
-          n_symbol = n_symbol + 1
+        get_locations(
+          buf,
+          "textDocument/" .. method,
+          params,
+          function(locations)
+            n_symbol = n_symbol + 1
 
-          for n_location, location in pairs(locations) do
-            local lsp_request_done = (n_symbol == query_symbols_method_cnt)
-            local uri = location.user_data.targetUri or location.user_data.uri
-            local range = location.user_data.targetRange or location.user_data.range
-            if not uri or not range then
-              LOG:DEBUG("symbol '" .. symbol.name .. "': Invalid LSP Location")
-              if lsp_request_done then
-                callback({ ["done"] = true })
+            for n_location, location in pairs(locations) do
+              local lsp_request_done = (n_symbol == query_symbols_method_cnt)
+              local uri = location.user_data.targetUri
+                or location.user_data.uri
+              local range = location.user_data.targetRange
+                or location.user_data.range
+              if not uri or not range then
+                LOG:DEBUG(
+                  "symbol '" .. symbol.name .. "': Invalid LSP Location"
+                )
+                if lsp_request_done then
+                  callback({ ["done"] = true })
+                end
+                return
               end
-              return
-            end
 
-            local fname = vim.uri_to_fname(uri)
-            -- 确保 buffer 已加载
+              local fname = vim.uri_to_fname(uri)
+              -- 确保 buffer 已加载
 
-            local bufnr = vim.fn.bufadd(fname)
-            safe_bufload(bufnr)
+              local bufnr = vim.fn.bufadd(fname)
+              safe_bufload(bufnr)
 
-            -- 取 LSP 返回的位置
-            row = range.start.line
-            col = range.start.character
+              -- 取 LSP 返回的位置
+              row = range.start.line
+              col = range.start.character
 
-            if
-              (
-                fname == state.input.lsp_ctx[buf].fname
-                and row >= state.input.lsp_ctx[buf].start_line
-                and row <= state.input.lsp_ctx[buf].end_line
-              )
-              or (
-                api.IsValid(state.input.lsp_ctx[buf].root_dir)
-                and string.match(fname, state.input.lsp_ctx[buf].root_dir) == nil
-              )
-            then
-              if lsp_request_done then
-                callback({ ["done"] = true })
+              if
+                (
+                  fname == state.input.lsp_ctx[buf].fname
+                  and row >= state.input.lsp_ctx[buf].start_line
+                  and row <= state.input.lsp_ctx[buf].end_line
+                )
+                or (
+                  api.IsValid(state.input.lsp_ctx[buf].root_dir)
+                  and string.match(fname, state.input.lsp_ctx[buf].root_dir)
+                    == nil
+                )
+              then
+                if lsp_request_done then
+                  callback({ ["done"] = true })
+                end
+                return
               end
-              return
-            end
-            local node = find_definition_node(bufnr, row, col)
+              local node = find_definition_node(bufnr, row, col)
 
-            if node then
-              local node_start_row, node_start_col, node_end_row, node_end_col = vim.treesitter.get_node_range(node)
-              local relative_fname = state.input.lsp_ctx[buf].root_dir ~= nil
-                  and vim.fs.relpath(state.input.lsp_ctx[buf].root_dir, fname)
-                or fname
-              callback({
-                ["name"] = symbol.name,
-                ["fname"] = relative_fname,
-                ["start_row"] = node_start_row + 1,
-                ["end_row"] = node_end_row + 1,
-                ["start_col"] = node_start_col + 1,
-                ["end_col"] = node_end_col + 1,
-                ["bufnr"] = bufnr,
-                ["done"] = lsp_request_done and (n_location == #locations),
-              }, true)
-            else
-              if lsp_request_done and (n_location == #locations) then
-                callback({ ["done"] = true })
+              if node then
+                local node_start_row, node_start_col, node_end_row, node_end_col =
+                  vim.treesitter.get_node_range(node)
+                local relative_fname = state.input.lsp_ctx[buf].root_dir
+                      ~= nil
+                    and vim.fs.relpath(
+                      state.input.lsp_ctx[buf].root_dir,
+                      fname
+                    )
+                  or fname
+                callback({
+                  ["name"] = symbol.name,
+                  ["fname"] = relative_fname,
+                  ["start_row"] = node_start_row + 1,
+                  ["end_row"] = node_end_row + 1,
+                  ["start_col"] = node_start_col + 1,
+                  ["end_col"] = node_end_col + 1,
+                  ["bufnr"] = bufnr,
+                  ["done"] = lsp_request_done and (n_location == #locations),
+                }, true)
               else
-                callback({ ["done"] = false })
+                if lsp_request_done and (n_location == #locations) then
+                  callback({ ["done"] = true })
+                else
+                  callback({ ["done"] = false })
+                end
               end
             end
           end
-        end)
+        )
       end
     end
   end
@@ -1438,7 +1611,9 @@ function api.AppendLspMsg(bufnr, winid)
   api.SetRole(bufnr, winid, "user")
 
   local symbols_location_info = ""
-  for fname, symbol_location in pairs(state.input.lsp_ctx.symbols_location_list) do
+  for fname, symbol_location in
+    pairs(state.input.lsp_ctx.symbols_location_list)
+  do
     if type(symbol_location) == "table" then
       for _, sym in pairs(symbol_location) do
         symbols_location_info = symbols_location_info
@@ -1453,7 +1628,11 @@ function api.AppendLspMsg(bufnr, winid)
       end
     end
   end
-  api.AppendChunkToBuffer(bufnr, winid, require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n")
+  api.AppendChunkToBuffer(
+    bufnr,
+    winid,
+    require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
+  )
   api.NewLine(bufnr, winid)
 end
 

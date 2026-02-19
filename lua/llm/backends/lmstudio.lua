@@ -47,12 +47,18 @@ function lmstudio.StreamingHandler(chunk, ctx)
       -- add reasoning_content
       if F.IsValid(data.choices[1].delta.reasoning_content) then
         backend_utils.mark_reason_begin(ctx, false)
-        ctx.reasoning_content = ctx.reasoning_content .. data.choices[1].delta.reasoning_content
+        ctx.reasoning_content = ctx.reasoning_content
+          .. data.choices[1].delta.reasoning_content
 
-        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.reasoning_content)
+        F.WriteContent(
+          ctx.bufnr,
+          ctx.winid,
+          data.choices[1].delta.reasoning_content
+        )
       elseif F.IsValid(data.choices[1].delta.content) then
         backend_utils.mark_reason_end(ctx, false)
-        ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
+        ctx.assistant_output = ctx.assistant_output
+          .. data.choices[1].delta.content
         F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
       end
 

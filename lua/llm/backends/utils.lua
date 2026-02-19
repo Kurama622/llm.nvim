@@ -67,7 +67,9 @@ local function serialization(val)
     right_space = right_space - 1
   end
 
-  return val:sub(1, left_space - 1) .. vim.json.encode(val:sub(left_space, right_space)) .. val:sub(right_space + 1)
+  return val:sub(1, left_space - 1)
+    .. vim.json.encode(val:sub(left_space, right_space))
+    .. val:sub(right_space + 1)
 end
 
 local function get_item_value(s)

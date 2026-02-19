@@ -15,9 +15,12 @@ function utils.parse_suggestion(suggestion, pattern)
     end
 
     table.insert(res, c)
-    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, pos, s - 1), "\n"))
+    linenr = linenr
+      + vim.tbl_count(vim.split(string.sub(suggestion, pos, s - 1), "\n"))
     local start_nr = linenr
-    linenr = linenr + vim.tbl_count(vim.split(string.sub(suggestion, s, e), "\n")) - 1
+    linenr = linenr
+      + vim.tbl_count(vim.split(string.sub(suggestion, s, e), "\n"))
+      - 1
     local end_nr = linenr
     table.insert(range_tbl, { start_nr, end_nr })
     pos = e + 2
@@ -26,7 +29,8 @@ function utils.parse_suggestion(suggestion, pattern)
 end
 
 function utils.get_hunk_idx(range_tbl, full_buffer_content)
-  local cursor_linenr = full_buffer_content and vim.api.nvim_win_get_cursor(0)[1]
+  local cursor_linenr = full_buffer_content
+      and vim.api.nvim_win_get_cursor(0)[1]
     or vim.api.nvim_win_get_cursor(0)[1] - state.llm.start_line + 1
   local idx = 0
   for n, range in ipairs(range_tbl) do
@@ -55,7 +59,12 @@ function utils.overwrite_selection(context, contents)
     context.start_col = context.start_col - 1
   end
 
-  local last_line_length = #vim.api.nvim_buf_get_lines(context.bufnr, context.end_line - 1, context.end_line, true)[1]
+  local last_line_length = #vim.api.nvim_buf_get_lines(
+    context.bufnr,
+    context.end_line - 1,
+    context.end_line,
+    true
+  )[1]
   if last_line_length ~= context.end_col then
     context.end_col = last_line_length
   end
@@ -68,14 +77,20 @@ function utils.overwrite_selection(context, contents)
     context.end_col,
     contents
   )
-  vim.api.nvim_win_set_cursor(context.winnr, { context.start_line, context.start_col })
+  vim.api.nvim_win_set_cursor(
+    context.winnr,
+    { context.start_line, context.start_col }
+  )
 end
 
 function utils.copy_suggestion_code(opts, suggestion, full_buffer_content)
-  local pattern = string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
+  local pattern =
+    string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
-    LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
+    LOG:WARN(
+      "The code block format is incorrect, please manually copy the generated code."
+    )
   else
     local idx = utils.get_hunk_idx(range_tbl, full_buffer_content)
     vim.fn.setreg("+", res[idx])
@@ -84,10 +99,13 @@ end
 
 function utils.new_diff(diff, opts, context, suggestion)
   opts = opts or { start_str = "```", end_str = "```" }
-  local pattern = string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
+  local pattern =
+    string.format("%s%%w*\n(.-)\n%%s*%s", opts.start_str, opts.end_str)
   local res, range_tbl = utils.parse_suggestion(suggestion, pattern)
   if vim.tbl_isempty(res) then
-    LOG:WARN("The code block format is incorrect, please manually copy the generated code.")
+    LOG:WARN(
+      "The code block format is incorrect, please manually copy the generated code."
+    )
     return false
   else
     local contents = vim.api.nvim_buf_get_lines(context.bufnr, 0, -1, true)
@@ -115,7 +133,14 @@ function utils.new_diff(diff, opts, context, suggestion)
   end
 end
 
-function utils.single_turn_dialogue(preview_box, streaming, options, context, diff, default_actions)
+function utils.single_turn_dialogue(
+  preview_box,
+  streaming,
+  options,
+  context,
+  diff,
+  default_actions
+)
   if preview_box then
     F.AppendChunkToBuffer(preview_box.bufnr, preview_box.winid, "-----\n")
   end
@@ -124,15 +149,24 @@ function utils.single_turn_dialogue(preview_box, streaming, options, context, di
   options.exit_handler = function(ostr)
     if utils.new_diff(diff, options, context, ostr) then
       for _, op in ipairs({ "accept", "reject", "close" }) do
-        utils.set_keymapping(options[op].mapping.mode, options[op].mapping.keys, function()
-          default_actions[op]()
-          if options[op].action ~= nil then
-            options[op]:action(options)
-          end
-          for _, reset_op in ipairs({ "accept", "reject", "close" }) do
-            utils.clear_keymapping(options[reset_op].mapping.mode, options[reset_op].mapping.keys, context.bufnr)
-          end
-        end, context.bufnr)
+        utils.set_keymapping(
+          options[op].mapping.mode,
+          options[op].mapping.keys,
+          function()
+            default_actions[op]()
+            if options[op].action ~= nil then
+              options[op]:action(options)
+            end
+            for _, reset_op in ipairs({ "accept", "reject", "close" }) do
+              utils.clear_keymapping(
+                options[reset_op].mapping.mode,
+                options[reset_op].mapping.keys,
+                context.bufnr
+              )
+            end
+          end,
+          context.bufnr
+        )
       end
     end
   end

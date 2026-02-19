@@ -71,7 +71,8 @@ function M.GetStreamingOutput(opts)
 
     opts.api_type = required_params.api_type
     if required_params.api_type == "workers-ai" then
-      required_params.url = string.format(required_params.url, ACCOUNT, required_params.model)
+      required_params.url =
+        string.format(required_params.url, ACCOUNT, required_params.model)
     elseif required_params.api_type == "ollama" then
       body.options = {}
     elseif required_params.api_type == "openai" then
@@ -83,7 +84,10 @@ function M.GetStreamingOutput(opts)
             local format = opts.format[i] or "jpeg"
             table.insert(msg.content, {
               ["type"] = "image_url",
-              image_url = { url = "data:image/" .. format .. ";base64," .. image, detail = opts.detail },
+              image_url = {
+                url = "data:image/" .. format .. ";base64," .. image,
+                detail = opts.detail,
+              },
             })
           end
           msg.images = nil
@@ -91,7 +95,8 @@ function M.GetStreamingOutput(opts)
         end
       end
     elseif required_params.api_type == "copilot" then
-      LLM_KEY = require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
+      LLM_KEY =
+        require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
       if LLM_KEY == nil then
         LLM_KEY = coroutine.yield()
       end
@@ -113,7 +118,12 @@ function M.GetStreamingOutput(opts)
     }
 
     for param_name, param_value in pairs(params) do
-      io_utils.add_request_body_params(body, param_name, param_value, required_params.api_type)
+      io_utils.add_request_body_params(
+        body,
+        param_name,
+        param_value,
+        required_params.api_type
+      )
     end
 
     if required_params.api_type == "ollama" then
@@ -132,8 +142,12 @@ function M.GetStreamingOutput(opts)
       functions_tbl = required_params.functions_tbl,
       stream = true,
     }
-    local stream_output =
-      backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
+    local stream_output = backends.get_streaming_handler(
+      required_params.streaming_handler,
+      required_params.api_type,
+      conf.configs,
+      ctx
+    )
 
     local _args = nil
     if required_params.url ~= nil then
@@ -164,7 +178,11 @@ function M.GetStreamingOutput(opts)
           table.insert(_args, "-H")
           table.insert(
             _args,
-            ("Editor-Version: Neovim/%d.%d.%d"):format(nvim_version.major, nvim_version.minor, nvim_version.patch)
+            ("Editor-Version: Neovim/%d.%d.%d"):format(
+              nvim_version.major,
+              nvim_version.minor,
+              nvim_version.patch
+            )
           )
         end
 
@@ -214,8 +232,13 @@ function M.GetStreamingOutput(opts)
                 json_str = ctx.line:sub(7, end_idx + 3)
               end
               local data = json.decode(json_str)
-              ctx.assistant_output = ctx.assistant_output .. data.choices[1].delta.content
-              F.WriteContent(opts.bufnr, opts.winid, data.choices[1].delta.content)
+              ctx.assistant_output = ctx.assistant_output
+                .. data.choices[1].delta.content
+              F.WriteContent(
+                opts.bufnr,
+                opts.winid,
+                data.choices[1].delta.content
+              )
 
               if end_idx + 4 > #ctx.line then
                 ctx.line = ""
@@ -256,12 +279,24 @@ function M.GetStreamingOutput(opts)
       end),
       on_exit = schedule_wrap(function(request_job)
         if ctx.body.tools ~= nil then
-          backends.get_tools_respond(required_params.api_type, conf.configs, ctx)(request_job:result())
+          backends.get_tools_respond(
+            required_params.api_type,
+            conf.configs,
+            ctx
+          )(request_job:result())
           ctx.callback = function()
             exit_callback(opts, ctx)
           end
-          backends.get_function_calling(required_params.api_type, conf.configs, ctx)(
-            backends.gen_msg_with_tool_calls(required_params.api_type, conf.configs, ctx)
+          backends.get_function_calling(
+            required_params.api_type,
+            conf.configs,
+            ctx
+          )(
+            backends.gen_msg_with_tool_calls(
+              required_params.api_type,
+              conf.configs,
+              ctx
+            )
           )
         else
           exit_callback(opts, ctx)
@@ -271,14 +306,16 @@ function M.GetStreamingOutput(opts)
 
     ui.display_spinner_extmark(opts)
     if F.IsValid(state.quote_buffers[1]) then
-      state.input.attach_content = state.input.attach_content .. "This is the content of the buffer involved:"
+      state.input.attach_content = state.input.attach_content
+        .. "This is the content of the buffer involved:"
       for idx, buffer in ipairs(state.quote_buffers) do
         opts.enable_buffer_idx = idx
         buffer:callback(opts, co)
       end
     end
     if F.IsValid(state.quote_files[1]) then
-      state.input.attach_content = state.input.attach_content .. "This is the content of the file involved:"
+      state.input.attach_content = state.input.attach_content
+        .. "This is the content of the file involved:"
       for idx, file in ipairs(state.quote_files) do
         opts.enable_file_idx = idx
         file:callback(opts, co)

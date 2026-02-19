@@ -12,7 +12,11 @@ function utils.get_params_value(key, opts)
       val = conf.configs[key]
     end
 
-    if conf.configs.url == nil and val == nil and F.IsValid(conf.configs.models) then
+    if
+      conf.configs.url == nil
+      and val == nil
+      and F.IsValid(conf.configs.models)
+    then
       val = conf.configs.models[1][key]
     end
   end

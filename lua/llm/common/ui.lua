@@ -10,7 +10,12 @@ local llm_spinner_ns = vim.api.nvim_create_namespace("llm_spinner_extmark")
 -- Author: @SmiteshP
 -- Updated by @Kurama622
 function ui.seamless(style, section)
-  if style ~= "single" and style ~= "rounded" and style ~= "double" and style ~= "solid" then
+  if
+    style ~= "single"
+    and style ~= "rounded"
+    and style ~= "double"
+    and style ~= "solid"
+  then
     return style
   end
 
@@ -181,7 +186,11 @@ function ui.FlexibleWindow(str, enter_flexible_win, user_opts)
   local win_height = math.min(height, max_win_height)
   if win_width < 1 or win_height < 1 then
     LOG:ERROR(
-      string.format("Unable to create a window with width %s and height %s.", tostring(win_width), tostring(win_height))
+      string.format(
+        "Unable to create a window with width %s and height %s.",
+        tostring(win_width),
+        tostring(win_height)
+      )
     )
     return nil
   end
@@ -266,7 +275,13 @@ function ui.show_spinner(waiting_state)
         return
       end
 
-      vim.api.nvim_buf_set_lines(waiting_state.bufnr, 0, -1, false, { spinner_frames[frame] })
+      vim.api.nvim_buf_set_lines(
+        waiting_state.bufnr,
+        0,
+        -1,
+        false,
+        { spinner_frames[frame] }
+      )
       F.AddHighlight("spinner", waiting_state.bufnr, spinner_hl, 0, 0, 0, -1)
 
       frame = frame % #spinner_frames + 1
@@ -287,17 +302,28 @@ function ui.display_spinner_extmark(opts)
     vim.schedule_wrap(function()
       if vim.api.nvim_win_is_valid(opts.winid) then
         if opts.spinner_id ~= nil then
-          vim.api.nvim_buf_del_extmark(opts.bufnr, llm_spinner_ns, opts.spinner_id)
+          vim.api.nvim_buf_del_extmark(
+            opts.bufnr,
+            llm_spinner_ns,
+            opts.spinner_id
+          )
         end
         if opts.spinner_status then
-          opts.spinner_id =
-            vim.api.nvim_buf_set_extmark(opts.bufnr, llm_spinner_ns, vim.api.nvim_buf_line_count(opts.bufnr) - 1, 0, {
+          opts.spinner_id = vim.api.nvim_buf_set_extmark(
+            opts.bufnr,
+            llm_spinner_ns,
+            vim.api.nvim_buf_line_count(opts.bufnr) - 1,
+            0,
+            {
               virt_text = { { spinner_frames[frame], spinner_hl } },
               virt_text_pos = "eol",
-            })
+            }
+          )
         end
       end
-      if not opts.spinner_status or not vim.api.nvim_win_is_valid(opts.winid) then
+      if
+        not opts.spinner_status or not vim.api.nvim_win_is_valid(opts.winid)
+      then
         timer:close()
         return
       end
@@ -311,7 +337,11 @@ function ui.clear_spinner_extmark(opts)
   if opts.spinner_status then
     opts.spinner_status = false
     if opts.spinner_id ~= nil and vim.api.nvim_win_is_valid(opts.winid) then
-      vim.api.nvim_buf_del_extmark(opts.bufnr, llm_spinner_ns, opts.spinner_id)
+      vim.api.nvim_buf_del_extmark(
+        opts.bufnr,
+        llm_spinner_ns,
+        opts.spinner_id
+      )
     end
   end
 end

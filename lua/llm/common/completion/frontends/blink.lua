@@ -125,7 +125,8 @@ function blink:execute(ctx, item, callback, default_implementation)
 end
 
 function blink:get_completions(ctx, callback)
-  local trigger_char = ctx.trigger.character or ctx.line:sub(ctx.bounds.start_col - 1, ctx.bounds.start_col - 1)
+  local trigger_char = ctx.trigger.character
+    or ctx.line:sub(ctx.bounds.start_col - 1, ctx.bounds.start_col - 1)
 
   if vim.bo.ft == "llm" then
     if trigger_char == "@" then
@@ -194,7 +195,8 @@ function blink:get_completions(ctx, callback)
   end
 
   local function _complete()
-    local cond = self.opts.filetypes[vim.bo.ft] == nil and self.opts.default_filetype_enabled
+    local cond = self.opts.filetypes[vim.bo.ft] == nil
+        and self.opts.default_filetype_enabled
       or self.opts.filetypes[vim.bo.ft]
     if not cond then
       return

@@ -304,7 +304,14 @@ M.configs = {
   display = {
     diff = {
       layout = "vertical", -- vertical|horizontal split for default provider
-      opts = { "internal", "filler", "closeoff", "algorithm:patience", "followwrap", "linematch:120" },
+      opts = {
+        "internal",
+        "filler",
+        "closeoff",
+        "algorithm:patience",
+        "followwrap",
+        "linematch:120",
+      },
       provider = "default", -- default|mini_diff
       disable_diagnostic = false,
     },
@@ -353,7 +360,10 @@ M.session = {
 
 function M.setup(opts)
   M.configs = vim.tbl_deep_extend("force", M.configs, opts or {})
-  table.insert(M.session.messages, { role = "system", content = M.configs.prompt })
+  table.insert(
+    M.session.messages,
+    { role = "system", content = M.configs.prompt }
+  )
 
   require("llm.common.log"):setup(M.configs.enable_trace, M.configs.log_level)
 
@@ -368,8 +378,10 @@ function M.setup(opts)
 
   M._.chat_ui_opts = M.configs.chat_ui_opts
 
-  M.configs.popwin_opts.border.text.top_user = M.configs.popwin_opts.border.text.top
-  M.configs.popwin_opts.border.text.top_builtin = " [<d>: display diff, <y>: copy code] "
+  M.configs.popwin_opts.border.text.top_user =
+    M.configs.popwin_opts.border.text.top
+  M.configs.popwin_opts.border.text.top_builtin =
+    " [<d>: display diff, <y>: copy code] "
   M.prefix.user = M.configs.prefix.user
   M.prefix.assistant = M.configs.prefix.assistant
 end

@@ -1,6 +1,10 @@
-vim.notify('"llm.common.tools" is deprecated, please use require("llm.tools") instead!', vim.log.levels.WARN, {
-  title = "llm.nvim",
-})
+vim.notify(
+  '"llm.common.tools" is deprecated, please use require("llm.tools") instead!',
+  vim.log.levels.WARN,
+  {
+    title = "llm.nvim",
+  }
+)
 return {
   action_handler = require("llm.tools.action").handler,
   completion_handler = require("llm.tools.completion").handler,
