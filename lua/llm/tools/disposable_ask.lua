@@ -1,13 +1,11 @@
 local LOG = require("llm.common.log")
-local Popup = require("nui.popup")
-local sess = require("llm.session")
-local diff = require("llm.common.diff_style")
-local utils = require("llm.tools.utils")
 local state = require("llm.state")
 local F = require("llm.common.api")
 local M = {}
 
 function M.handler(_, _, _, _, prompt, opts)
+  local utils = require("llm.tools.utils")
+  local diff = require("llm.common.diff_style")
   local default_actions = {
     display = function()
       if diff.style == nil then
@@ -127,7 +125,7 @@ function M.handler(_, _, _, _, prompt, opts)
 
   options = vim.tbl_deep_extend("force", options, opts or {})
 
-  local input_box = Popup(options)
+  local input_box = require("nui.popup")(options)
   local mode = options.mode or vim.fn.mode()
 
   input_box:mount()
@@ -147,7 +145,7 @@ function M.handler(_, _, _, _, prompt, opts)
       _ = options,
       mode = mode,
     }
-    sess.LLMSelectedTextHandler(description, true, builtin_opts)
+    require("llm.session").LLMSelectedTextHandler(description, true, builtin_opts)
   end)
 
   for _, f in pairs(options.hook) do

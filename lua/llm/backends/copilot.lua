@@ -1,7 +1,5 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
-local curl = require("plenary.curl")
-local job = require("plenary.job")
 local backend_utils = require("llm.backends.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 local copilot = { token = "", expires_time = -1 }
@@ -10,7 +8,7 @@ function copilot:get_authorization_token(LLM_KEY, co)
   if self.token and self.expires_time >= os.time() then
     return self.token
   end
-  curl.get("https://api.github.com/copilot_internal/v2/token", {
+  require("plenary.curl").get("https://api.github.com/copilot_internal/v2/token", {
     headers = {
       Authorization = "Bearer " .. LLM_KEY,
       ["Accept"] = "application/json",
@@ -151,7 +149,8 @@ function copilot.FunctionCalling(ctx, t)
   table.insert(ctx.args, "X-Initiator: agent")
   -- update curl request body file
   require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
-  job
+
+  require("plenary.job")
     :new({
       command = "curl",
       args = ctx.args,

@@ -5,7 +5,7 @@ function M.setup(opts)
     opts = { keys = {} }
   end
   require("llm.config").setup(opts)
-  vim.api.nvim_exec_autocmds("User", { pattern = "AutoTrigger" })
+  require("llm.app").auto_trigger()
 end
 
 return M

@@ -1,7 +1,4 @@
-local state = require("llm.state")
 local conf = require("llm.config")
-local app = require("llm.app")
-local F = require("llm.common.api")
 
 local highlight = {
   LlmBlueNormal = { fg = "#65bcff", bg = "NONE", default = true },
@@ -21,23 +18,8 @@ local highlight = {
   LlmBuffers = { fg = "#2aa198", bg = "NONE", default = true, reverse = true },
 }
 
-local llm_augroup = vim.api.nvim_create_augroup("llm_augroup", { clear = true })
-
 for k, v in pairs(highlight) do
   vim.api.nvim_set_hl(0, k, v)
-end
-
-local function OpenLLM()
-  local streaming = require("llm.common.io.streaming")
-  F.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, "assistant")
-  streaming.GetStreamingOutput({
-    bufnr = state.llm.popup.bufnr,
-    winid = state.llm.popup.winid,
-    messages = state.session[state.session.filename],
-    fetch_key = conf.configs.fetch_key,
-    args = conf.configs.args,
-    streaming_handler = conf.configs.streaming_handler,
-  })
 end
 
 vim.api.nvim_create_user_command("LLMSessionToggle", function()
@@ -54,7 +36,8 @@ vim.api.nvim_create_user_command("LLMAppHandler", function(args)
   if args.count ~= -1 then
     arg_opts.mode = "v"
   end
-  app.LLMAppHandler(args.fargs[1], arg_opts)
+
+  require("llm.app").LLMAppHandler(args.fargs[1], arg_opts)
 end, {
   nargs = 1,
   range = true,
@@ -65,22 +48,12 @@ end, {
   end,
 })
 
-vim.api.nvim_create_autocmd("User", {
-  pattern = "AutoTrigger",
-  group = llm_augroup,
-  callback = app.auto_trigger,
-})
-
-vim.api.nvim_create_autocmd("User", {
-  pattern = "OpenLLM",
-  group = llm_augroup,
-  callback = OpenLLM,
-})
-
 vim.api.nvim_create_autocmd("VimLeave", {
   group = vim.api.nvim_create_augroup("llm_exit", { clear = true }),
   callback = function()
+    local state = require("llm.state")
     if state.layout.popup ~= nil or state.llm.popup ~= nil then
+      local F = require("llm.common.api")
       F.SaveSession()
     end
   end,
@@ -89,6 +62,7 @@ vim.api.nvim_create_autocmd("VimLeave", {
 vim.api.nvim_create_autocmd("VimResized", {
   group = vim.api.nvim_create_augroup("llm_refresh_layout", { clear = true }),
   callback = function()
+    local state = require("llm.state")
     if state.layout.popup ~= nil then
       state.layout.popup:update({
         relative = conf.configs.chat_ui_opts.relative,

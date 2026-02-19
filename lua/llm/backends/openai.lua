@@ -1,6 +1,5 @@
 local LOG = require("llm.common.log")
 local F = require("llm.common.api")
-local job = require("plenary.job")
 local backend_utils = require("llm.backends.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 local openai = {}
@@ -130,7 +129,7 @@ function openai.FunctionCalling(ctx, t)
   -- update curl request body file
   require("llm.common.file_io").SaveFile(ctx.request_body_file, json.encode(ctx.body))
 
-  job
+  require("plenary.job")
     :new({
       command = "curl",
       args = ctx.args,

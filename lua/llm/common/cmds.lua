@@ -4,7 +4,6 @@ local LOG = require("llm.common.log")
 local F = require("llm.common.api")
 local conf = require("llm.config")
 local backends = require("llm.backends")
-local ui = require("llm.common.ui")
 
 local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg, co)
   return job:new({
@@ -22,7 +21,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
       vim.json.encode(body),
     },
     on_stdout = vim.schedule_wrap(function(_, data)
-      ui.clear_spinner_extmark(opts)
+      require("llm.common.ui").clear_spinner_extmark(opts)
     end),
     on_stderr = vim.schedule_wrap(function(_, err)
       if err ~= nil then
@@ -42,7 +41,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
         F.WriteContent(opts.bufnr, opts.winid, "> - [" .. item.title .. "](" .. item.url .. ")\n")
       end
       F.WriteContent(opts.bufnr, opts.winid, "\n")
-      if search_response.answer then
+      if F.IsValid(search_response.answer) then
         msg[#msg].content = body.query
           .. "\nPlease answer the question based on the provided web search results.\n\n---\nSearch results:\n"
           .. search_response.answer
@@ -58,6 +57,7 @@ local function setup_web_search_job(web_search_conf, fetch_key, opts, body, msg,
       require("llm.common.file_io").SaveFile(opts.request_body_file, vim.json.encode(opts.body))
       LOG:INFO("Finish search!")
 
+      require("llm.common.ui").display_spinner_extmark(opts)
       state.llm.worker.jobs.web_search = nil
       table.remove(state.enabled_cmds, opts.enabled_cmds_idx)
       coroutine.resume(co)

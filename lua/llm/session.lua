@@ -2,7 +2,6 @@ local M = {}
 
 local conf = require("llm.config")
 local state = require("llm.state")
-local Popup = require("nui.popup")
 local F = require("llm.common.api")
 local LOG = require("llm.common.log")
 
@@ -87,7 +86,7 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     conf.configs.popwin_opts.border.text.top = conf.configs.popwin_opts.border.text.top_user
   end
 
-  local popwin = Popup(conf.configs.popwin_opts)
+  local popwin = require("nui.popup")(conf.configs.popwin_opts)
   popwin:mount()
 
   state.popwin_list[popwin.winid] = popwin
@@ -343,10 +342,10 @@ function M.NewSession()
                     })
                     F.AppendLspMsg(bufnr, winid)
                   end
-                  vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                  F.OpenLLM()
                 end)
               else
-                vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                F.OpenLLM()
               end
             end
           end, { noremap = true })
@@ -397,9 +396,8 @@ function M.NewSession()
       -----------------------------------------------------
       ---                 SPLIT STYLE
       -----------------------------------------------------
-      local Split = require("nui.split")
       if filename ~= "" or vim.bo.modifiable == false then
-        state.llm.popup = Split({
+        state.llm.popup = require("nui.split")({
           relative = "editor",
           position = conf.configs.style,
           size = conf.configs.chat_ui_opts.output.split.size,
@@ -436,7 +434,7 @@ function M.NewSession()
                 vim.api.nvim_feedkeys("A", "n", false)
               end
             else
-              state.input.popup = Popup({
+              state.input.popup = require("nui.popup")({
                 relative = conf.configs.chat_ui_opts.input.split.relative or conf.configs.chat_ui_opts.relative,
                 position = conf.configs.chat_ui_opts.input.split.position,
                 enter = conf.configs.chat_ui_opts.input.split.enter,
@@ -480,10 +478,10 @@ function M.NewSession()
                             })
                             F.AppendLspMsg(bufnr, winid)
                           end
-                          vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                          F.OpenLLM()
                         end)
                       else
-                        vim.api.nvim_exec_autocmds("User", { pattern = "OpenLLM" })
+                        F.OpenLLM()
                       end
                     end
                     vim.api.nvim_set_current_win(state.llm.popup.winid)

@@ -1,10 +1,10 @@
 local M = {}
-local Layout = require("nui.layout")
 local conf = require("llm.config")
-local Popup = require("nui.popup")
 local LOG = require("llm.common.log")
 
 function M.handler(name, F, state, streaming, prompt, opts)
+  local Layout = require("nui.layout")
+  local Popup = require("nui.popup")
   local ft = vim.bo.filetype
   if prompt == nil then
     prompt = require("llm.tools.prompts").side_by_side

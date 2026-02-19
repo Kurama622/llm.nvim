@@ -1,8 +1,5 @@
 local LOG = require("llm.common.log")
-local Popup = require("nui.popup")
-local ui = require("llm.common.ui")
 local conf = require("llm.config")
-local Layout = require("nui.layout")
 local M = {}
 
 local function get_images_format(paths)
@@ -16,6 +13,9 @@ local function get_images_format(paths)
 end
 
 function M.handler(name, F, state, streaming, prompt, opts)
+  local Popup = require("nui.popup")
+  local ui = require("llm.common.ui")
+  local Layout = require("nui.layout")
   if prompt == nil then
     prompt = require("llm.tools.prompts").images
   elseif type(prompt) == "function" then

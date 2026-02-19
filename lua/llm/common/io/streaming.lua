@@ -3,13 +3,11 @@ local M = {
 }
 
 local conf = require("llm.config")
-local job = require("plenary.job")
 local F = require("llm.common.api")
 local backends = require("llm.backends")
 local state = require("llm.state")
 local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
-local fio = require("llm.common.file_io")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local function exit_callback(opts, ctx)
@@ -36,6 +34,7 @@ local function exit_callback(opts, ctx)
 end
 
 function M.GetStreamingOutput(opts)
+  state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
   return coroutine.wrap(function()
     local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
@@ -92,8 +91,10 @@ function M.GetStreamingOutput(opts)
         end
       end
     elseif required_params.api_type == "copilot" then
-      require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
-      LLM_KEY = coroutine.yield()
+      LLM_KEY = require("llm.backends.copilot"):get_authorization_token(LLM_KEY, co)
+      if LLM_KEY == nil then
+        LLM_KEY = coroutine.yield()
+      end
     end
 
     local authorization = "Authorization: Bearer " .. LLM_KEY
@@ -134,14 +135,14 @@ function M.GetStreamingOutput(opts)
     local stream_output =
       backends.get_streaming_handler(required_params.streaming_handler, required_params.api_type, conf.configs, ctx)
 
-    state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
     local _args = nil
     if required_params.url ~= nil then
       body.model = required_params.model
 
       local data_file = conf.configs.curl_data_cache_path .. "/streaming-data"
       ctx.request_body_file = data_file
-      fio.SaveFile(data_file, json.encode(body))
+      require("llm.common.file_io").SaveFile(data_file, json.encode(body))
+
       if opts.args == nil then
         _args = { "-s", "-m", required_params.timeout }
 
@@ -234,7 +235,8 @@ function M.GetStreamingOutput(opts)
     opts.body = body
     opts.args = _args
     opts.request_body_file = ctx.request_body_file
-    local request_job = job:new({
+
+    local request_job = require("plenary.job"):new({
       command = "curl",
       args = _args,
       on_stdout = schedule_wrap(function(_, chunk)

@@ -1,13 +1,9 @@
-local Popup = require("nui.popup")
 local conf = require("llm.config")
-local api = require("llm.common.api")
 local backends = require("llm.backends")
-local job = require("plenary.job")
 local LOG = require("llm.common.log")
 local state = require("llm.state")
 local io_utils = require("llm.common.io.utils")
 local F = require("llm.common.api")
-local fio = require("llm.common.file_io")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local io_parse = {
@@ -49,7 +45,7 @@ function io_parse.GetOutput(opts)
     local co = assert(coroutine.running())
     local ui = require("llm.common.ui")
     local wait_box_opts = ui.wait_ui_opts()
-    local wait_box = Popup(wait_box_opts)
+    local wait_box = require("nui.popup")(wait_box_opts)
 
     local waiting_state = {
       box = wait_box,
@@ -130,7 +126,7 @@ function io_parse.GetOutput(opts)
       body.model = required_params.model
       local data_file = conf.configs.curl_data_cache_path .. "/non-streaming-data"
       ctx.request_body_file = data_file
-      fio.SaveFile(data_file, json.encode(body))
+      require("llm.common.file_io").SaveFile(data_file, json.encode(body))
 
       if opts.args == nil then
         _args = { "-s", "-m", required_params.timeout }
@@ -180,7 +176,7 @@ function io_parse.GetOutput(opts)
         }
 
         setmetatable(env, { __index = _G })
-        _args = api.GetUserRequestArgs(opts.args, env)
+        _args = F.GetUserRequestArgs(opts.args, env)
       end
 
       if parse == nil then
@@ -193,11 +189,11 @@ function io_parse.GetOutput(opts)
     end
     ctx.args = _args
 
-    local request_job = job:new({
+    local request_job = require("plenary.job"):new({
       command = "curl",
       args = _args,
       on_stdout = schedule_wrap(function(_, data)
-        ctx.line = ctx.line .. api.TrimLeadingWhitespace(data)
+        ctx.line = ctx.line .. F.TrimLeadingWhitespace(data)
       end),
       on_stderr = schedule_wrap(function(_, err)
         if err ~= nil then

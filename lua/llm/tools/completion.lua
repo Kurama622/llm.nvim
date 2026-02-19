@@ -1,4 +1,3 @@
-local completion = require("llm.common.completion")
 local M = {}
 function M.handler(name, F, state, _, prompt, opts)
   local options = {
@@ -55,6 +54,7 @@ function M.handler(name, F, state, _, prompt, opts)
   end
 
   options.timeout = tostring(options.timeout)
-  completion:init(options)
+
+  require("llm.common.completion"):init(options)
 end
 return M
