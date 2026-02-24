@@ -23,6 +23,7 @@ local function new_session()
     '[Unrecommended Behavior] Last time, the window was closed without using the "Session:Close" shortcut key.'
   )
   conf.session.status = -1
+  M.NewSession()
 end
 
 local function show_session()
