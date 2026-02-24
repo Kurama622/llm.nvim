@@ -55,7 +55,10 @@ end
 
 local function ToggleLLM()
   if conf.session.status == 1 then
-    if vim.api.nvim_win_is_valid(state.llm.popup.winid) then
+    if
+      state.llm.popup.winid
+      and vim.api.nvim_win_is_valid(state.llm.popup.winid)
+    then
       hide_session()
     else
       new_session()
@@ -115,17 +118,14 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
   if F.IsValid(opts.diagnostic) then
     state.input.attach_content = state.input.attach_content
       .. "\n"
-      .. F.GetRangeDiagnostics(
-        {
-          [bufnr] = {
-            start_line = start_line,
-            end_line = end_line,
-            start_col = start_col,
-            end_col = end_col,
-          },
+      .. F.GetRangeDiagnostics({
+        [bufnr] = {
+          start_line = start_line,
+          end_line = end_line,
+          start_col = start_col,
+          end_col = end_col,
         },
-        opts
-      )
+      }, opts)
   end
 
   state.input.request_with_lsp = F.lsp_wrap(opts)
@@ -140,13 +140,10 @@ function M.LLMSelectedTextHandler(description, builtin_called, opts)
     else
       state.session[popwin.winid] = {}
     end
-    table.insert(
-      state.session[popwin.winid],
-      {
-        role = "user",
-        content = description .. "\n" .. state.input.attach_content .. "\n",
-      }
-    )
+    table.insert(state.session[popwin.winid], {
+      role = "user",
+      content = description .. "\n" .. state.input.attach_content .. "\n",
+    })
 
     F.UpdatePrompt(popwin.winid)
 
@@ -290,9 +287,9 @@ function M.NewSession()
       bufnr = state.llm.popup.bufnr
       winid = state.llm.popup.winid
 
-      -------------------------------------------------------------------------
+      -----------------------------------------------------
       --- init current session
-      -------------------------------------------------------------------------
+      -----------------------------------------------------
       state.session.filename = "current"
       if not state.session[state.session.filename] then
         state.session[state.session.filename] =
@@ -705,7 +702,7 @@ function M.NewSession()
     end
 
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = bufnr })
-    vim.api.nvim_buf_set_name(bufnr, "[llm-session]")
+    pcall(vim.api.nvim_buf_set_name, bufnr, "[llm-session]")
   else
     ToggleLLM()
   end
