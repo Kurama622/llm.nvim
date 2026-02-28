@@ -1737,6 +1737,11 @@ function api.HelpForFloatOutputWin()
   help(
     keymap_desc_tbl,
     gen_keymap_desc_tbl(keymap_desc_tbl, {
+      ["Session:Toggle"] = "Toggle Chat UI",
+      ["Session:Open"] = "Open Chat UI",
+      ["Session:Close"] = "Close Chat UI",
+      ["Session:Hide"] = "Hide Chat UI",
+      ["Session:New"] = "Create a New Session",
       ["Focus:Input"] = "Focus the Input Window",
     })
   )
