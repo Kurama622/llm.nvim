@@ -1706,6 +1706,7 @@ function api.HelpForSplitOutputWin()
       ["Output:Cancel"] = "Cancel the Request",
       ["Output:Resend"] = "Resend the Request",
       ["Session:Toggle"] = "Toggle Chat UI",
+      ["Session:Open"] = "Open Chat UI",
       ["Session:Close"] = "Close Chat UI",
       ["Session:Hide"] = "Hide Chat UI",
       ["Session:History"] = "Preview History",
