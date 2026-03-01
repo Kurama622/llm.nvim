@@ -65,8 +65,8 @@ Based on this format, generate appropriate commit messages. Respond with message
         end
         f:close()
 
-        local cmd = "git commit -F " .. vim.fn.shellescape(tmpname)
-        vim.api.nvim_command("!" .. cmd)
+        local cmd = "!git commit -F " .. vim.fn.shellescape(tmpname)
+        vim.api.nvim_command(cmd)
 
         os.remove(tmpname)
         -- just for lazygit
