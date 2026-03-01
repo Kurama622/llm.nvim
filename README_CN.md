@@ -68,6 +68,8 @@
 
 [模型配置](./examples/chat/) | [界面配置](./examples/ui/)
 
+**按`?`显示快捷键帮助窗口**
+
 - 浮动风格
 <p align= "center">
   <img src="https://github.com/user-attachments/assets/f488f87a-fc65-49ea-9574-29721b224adb" alt="llm-float-ui" width="800">

@@ -57,13 +57,18 @@ Based on this format, generate appropriate commit messages. Respond with message
       action = function()
         local contents = vim.api.nvim_buf_get_lines(0, 0, -1, true)
 
-        local cmd = string.format('!git commit -m "%s"', table.concat(contents, '" -m "'))
-        cmd = (cmd:gsub(".", {
-          ["#"] = "\\#",
-          ["%"] = "\\%",
-        }))
+        local tmpname = os.tmpname()
+        local f = io.open(tmpname, "w")
+        assert(f, "Failed to open tmpfile!")
+        for _, line in ipairs(contents) do
+          f:write(line, "\n")
+        end
+        f:close()
 
+        local cmd = "!git commit -F " .. vim.fn.shellescape(tmpname)
         vim.api.nvim_command(cmd)
+
+        os.remove(tmpname)
         -- just for lazygit
         vim.schedule(function()
           vim.api.nvim_command("LazyGit")

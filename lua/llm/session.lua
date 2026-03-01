@@ -302,9 +302,13 @@ function M.NewSession()
       -- set keymaps
       for k, v in pairs(conf.configs.keys) do
         if k == "Session:Close" then
-          F.SetFloatKeyMapping(state.llm.popup, v.mode, v.key, function()
-            F.CloseLLM()
-          end, { noremap = true })
+          F.SetFloatKeyMapping(
+            state.llm.popup,
+            v.mode,
+            v.key,
+            F.CloseLLM,
+            { noremap = true }
+          )
         elseif k == "Session:Hide" then
           F.SetFloatKeyMapping(
             state.llm.popup,
@@ -364,6 +368,14 @@ function M.NewSession()
           F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
             F.ScrollWindow(state.llm.popup.winid, "bottom")
           end, { noremap = true })
+        elseif k == "Help" then
+          F.SetFloatKeyMapping(
+            state.llm.popup,
+            v.mode,
+            v.key,
+            F.HelpForFloatOutputWin,
+            { noremap = true }
+          )
         end
       end
 
@@ -438,9 +450,13 @@ function M.NewSession()
             { noremap = true, silent = true }
           )
         elseif k == "Session:Close" then
-          F.SetFloatKeyMapping(state.input.popup, v.mode, v.key, function()
-            F.CloseLLM()
-          end, { noremap = true })
+          F.SetFloatKeyMapping(
+            state.input.popup,
+            v.mode,
+            v.key,
+            F.CloseLLM,
+            { noremap = true }
+          )
         elseif k == "Session:Toggle" or k == "Session:Open" then
           F.SetFloatKeyMapping(
             state.input.popup,
@@ -491,6 +507,14 @@ function M.NewSession()
             vim.api.nvim_set_current_win(state.llm.popup.winid)
             vim.api.nvim_command("stopinsert")
           end, { noremap = true })
+        elseif k == "Help" then
+          F.SetFloatKeyMapping(
+            state.input.popup,
+            v.mode,
+            v.key,
+            F.HelpForFloatInputWin,
+            { noremap = true }
+          )
         end
       end
       conf.session.status = 1
@@ -632,17 +656,23 @@ function M.NewSession()
                     state.input.popup,
                     d.mode,
                     d.key,
-                    function()
-                      F.CloseLLM()
-                    end,
+                    F.CloseLLM,
                     { noremap = true }
                   )
-                elseif name == "Session:Toggle" or k == "Session:Open" then
+                elseif name == "Session:Toggle" or name == "Session:Open" then
                   F.SetFloatKeyMapping(
                     state.input.popup,
                     d.mode,
                     d.key,
                     ToggleLLM,
+                    { noremap = true }
+                  )
+                elseif name == "Help" then
+                  F.SetFloatKeyMapping(
+                    state.input.popup,
+                    d.mode,
+                    d.key,
+                    F.HelpForSplitInputWin,
                     { noremap = true }
                   )
                 end
@@ -657,9 +687,12 @@ function M.NewSession()
             { buffer = bufnr, noremap = true, silent = true }
           )
         elseif k == "Session:Close" then
-          F.SetSplitKeyMapping(v.mode, v.key, function()
-            F.CloseLLM()
-          end, { buffer = bufnr, noremap = true, silent = true })
+          F.SetSplitKeyMapping(
+            v.mode,
+            v.key,
+            F.CloseLLM,
+            { buffer = bufnr, noremap = true, silent = true }
+          )
         elseif k == "Session:Hide" then
           F.SetSplitKeyMapping(
             v.mode,
@@ -694,6 +727,13 @@ function M.NewSession()
             v.mode,
             v.key,
             F.ResendLLM,
+            { buffer = bufnr, noremap = true, silent = true }
+          )
+        elseif k == "Help" then
+          F.SetSplitKeyMapping(
+            v.mode,
+            v.key,
+            F.HelpForSplitOutputWin,
             { buffer = bufnr, noremap = true, silent = true }
           )
         end

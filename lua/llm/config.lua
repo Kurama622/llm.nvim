@@ -349,7 +349,9 @@ M.configs = {
     ["HalfPageUp"]        = { mode = {"i","n"}, key = "<C-u>" },
     ["HalfPageDown"]      = { mode = {"i","n"}, key = "<C-d>" },
     ["JumpToTop"]         = { mode = "n", key = "gg" },
-    ["JumpToBottom"]      = { mode = "n", key = "G" }
+    ["JumpToBottom"]      = { mode = "n", key = "G" },
+    -- help
+    ["Help"]      = { mode = "n", key = "?" }
   },
 }
 

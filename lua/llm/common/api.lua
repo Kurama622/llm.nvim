@@ -70,6 +70,65 @@ local function display_sub(s, i, j)
   return s:sub(start, stop)
 end
 
+---@param keymap_desc_tbl table
+---@param desc_tbl table
+---@return integer max_width Window max width
+local function gen_keymap_desc_tbl(keymap_desc_tbl, desc_tbl)
+  local max_width = 0
+  for name, value in pairs(conf.configs.keys) do
+    if vim.tbl_contains(vim.tbl_keys(desc_tbl), name) then
+      table.insert(
+        keymap_desc_tbl,
+        (" %-7s%-25s%s "):format(
+          (
+            type(value.mode) == "table" and table.concat(value.mode, "|")
+            or value.mode
+          ),
+          (
+            type(value.key) == "table" and table.concat(value.key, "|")
+            or value.key
+          ),
+          desc_tbl[name]
+        )
+      )
+    end
+  end
+  for _, cfg in pairs(keymap_desc_tbl) do
+    max_width = math.max(max_width, #cfg)
+  end
+  return max_width
+end
+
+---@param keymap_desc_tbl table
+---@param max_width integer
+local function help(keymap_desc_tbl, max_width)
+  local help_buf = vim.api.nvim_create_buf(false, true)
+  local help_win_height = #keymap_desc_tbl
+  local help_win_row, help_win_col =
+    math.floor((vim.o.lines - help_win_height) / 2),
+    math.floor((vim.o.columns - max_width) / 2)
+  vim.api.nvim_buf_set_lines(help_buf, 0, -1, false, keymap_desc_tbl)
+  local help_win = vim.api.nvim_open_win(help_buf, true, {
+    relative = "editor",
+    style = "minimal",
+    border = conf.configs.popwin_opts.border.style,
+    width = max_width,
+    height = help_win_height,
+    row = help_win_row,
+    col = help_win_col,
+  })
+
+  local ns_id = vim.api.nvim_create_namespace("llm_help")
+  vim.api.nvim_buf_set_extmark(help_buf, ns_id, 0, 0, {
+    end_col = 39, -- length: (" %-7s%-25s%s "):format("Modes", "Keys", "Action")
+    hl_group = "Title",
+  })
+  local keymap = conf.configs.keys["Session:Close"]
+  api.SetSplitKeyMapping(keymap.mode, keymap.key, function()
+    vim.api.nvim_win_close(help_win, true)
+  end, { buffer = help_buf, noremap = true, silent = true })
+end
+
 ---@param bufnr integer Buffer number.
 ---@param method string
 ---@param params? table LSP request params.
@@ -507,17 +566,14 @@ function api.GetAttach(opts)
   if api.IsValid(opts.diagnostic) then
     state.input.attach_content = state.input.attach_content
       .. "\n"
-      .. api.GetRangeDiagnostics(
-        {
-          [bufnr] = {
-            start_line = start_line,
-            end_line = end_line,
-            start_col = start_col,
-            end_col = end_col,
-          },
+      .. api.GetRangeDiagnostics({
+        [bufnr] = {
+          start_line = start_line,
+          end_line = end_line,
+          start_col = start_col,
+          end_col = end_col,
         },
-        opts
-      )
+      }, opts)
   end
   state.input.request_with_lsp = api.lsp_wrap(opts)
   return bufnr
@@ -1636,4 +1692,94 @@ function api.AppendLspMsg(bufnr, winid)
   api.NewLine(bufnr, winid)
 end
 
+function api.HelpForSplitOutputWin()
+  local keymap_desc_tbl = {
+    (" %-7s%-25s%s "):format("Modes", "Keys", "Action"),
+    (" %-7s%-25s%s "):format("n", "d", "Show Diff (Current Code Block)"),
+    (" %-7s%-25s%s "):format("n", "y|Y", "Copy Current Code Block"),
+  }
+
+  help(
+    keymap_desc_tbl,
+    gen_keymap_desc_tbl(keymap_desc_tbl, {
+      ["Output:Ask"] = "Ask",
+      ["Output:Cancel"] = "Cancel the Request",
+      ["Output:Resend"] = "Resend the Request",
+      ["Session:Toggle"] = "Toggle Chat UI",
+      ["Session:Open"] = "Open Chat UI",
+      ["Session:Close"] = "Close Chat UI",
+      ["Session:Hide"] = "Hide Chat UI",
+      ["Session:History"] = "Preview History",
+      ["Session:New"] = "Create a New Session",
+      ["Session:Models"] = "Switch Model",
+    })
+  )
+end
+
+function api.HelpForSplitInputWin()
+  local keymap_desc_tbl = {
+    (" %-7s%-25s%s "):format("Modes", "Keys", "Action"),
+    (" %-7s%-25s%s "):format("n", "<cr>", "Submit"),
+    (" %-7s%-25s%s "):format("i", "@", "Web Search"),
+    (" %-7s%-25s%s "):format("i", "/", "Add Files or Buffers"),
+    (" %-7s%-25s%s "):format("n", "d", "Show Diff (Last Code Block)"),
+    (" %-7s%-25s%s "):format("n", "y|Y", "Copy the Last Code Block"),
+  }
+  help(keymap_desc_tbl, gen_keymap_desc_tbl(keymap_desc_tbl, {}))
+end
+
+function api.HelpForFloatOutputWin()
+  local keymap_desc_tbl = {
+    (" %-7s%-25s%s "):format("Modes", "Keys", "Action"),
+    (" %-7s%-25s%s "):format("n", "d", "Show Diff (Current Code Block)"),
+    (" %-7s%-25s%s "):format("n", "y|Y", "Copy Current Code Block"),
+  }
+
+  help(
+    keymap_desc_tbl,
+    gen_keymap_desc_tbl(keymap_desc_tbl, {
+      ["Session:Toggle"] = "Toggle Chat UI",
+      ["Session:Open"] = "Open Chat UI",
+      ["Session:Close"] = "Close Chat UI",
+      ["Session:Hide"] = "Hide Chat UI",
+      ["Session:New"] = "Create a New Session",
+      ["Focus:Input"] = "Focus the Input Window",
+    })
+  )
+end
+
+function api.HelpForFloatInputWin()
+  local keymap_desc_tbl = {
+    (" %-7s%-25s%s "):format("Modes", "Keys", "Action"),
+    (" %-7s%-25s%s "):format("i", "@", "Web Search"),
+    (" %-7s%-25s%s "):format("i", "/", "Add Files or Buffers"),
+    (" %-7s%-25s%s "):format("n", "d", "Show Diff (Last Code Block)"),
+    (" %-7s%-25s%s "):format("n", "y|Y", "Copy the Last Code Block"),
+  }
+
+  help(
+    keymap_desc_tbl,
+    gen_keymap_desc_tbl(keymap_desc_tbl, {
+      ["Input:Submit"] = "Submit",
+      ["Input:Cancel"] = "Cancel the Request",
+      ["Input:Resend"] = "Resend the Request",
+      ["Input:HistoryNext"] = "Preview Next History",
+      ["Input:HistoryPrev"] = "Preview Previous History",
+      ["Input:ModelsNext"] = "Switch Next Model",
+      ["Input:ModelsPrev"] = "Switch Previous Model",
+      ["Session:Toggle"] = "Toggle Chat UI",
+      ["Session:Open"] = "Open Chat UI",
+      ["Session:Close"] = "Close Chat UI",
+      ["Session:Hide"] = "Hide Chat UI",
+      ["Session:New"] = "Create a New Session",
+      ["Focus:Output"] = "Focus the Output Window",
+      ["PageUp"] = "Output Page Up",
+      ["PageDown"] = "Output Page Down",
+      ["HalfPageUp"] = "Output Page Up (half)",
+      ["HalfPageDown"] = "Output Page Down (half)",
+      ["JumpToTop"] = "Jump to the Top of the Output",
+      ["JumpToBottom"] = "Jump to the Bottom of the Output",
+    })
+  )
+end
 return api
