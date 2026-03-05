@@ -1,5 +1,11 @@
 local M = {}
 
+M.time = {
+  ns_id = vim.api.nvim_create_namespace("llm_response_time"),
+  ["start"] = 0,
+  ["end"] = 0,
+}
+
 M.cursor = {
   role = nil,
   has_prefix = true,

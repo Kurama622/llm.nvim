@@ -12,10 +12,6 @@ local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local function exit_callback(opts, ctx)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
-  local newline_func = schedule_wrap(function()
-    F.NewLine(opts.bufnr, opts.winid)
-  end)
-  newline_func()
   local name = opts._name or "chat"
   state.llm.worker.jobs[name] = nil
   if opts.exit_handler ~= nil then
@@ -27,6 +23,30 @@ local function exit_callback(opts, ctx)
   if state.summarize_suggestions.ctx then
     setmetatable(state.summarize_suggestions, { __index = ctx })
   end
+
+  state.time["end"] = vim.uv.hrtime()
+  vim.api.nvim_buf_set_extmark(
+    opts.bufnr,
+    state.time.ns_id,
+    vim.api.nvim_buf_line_count(opts.bufnr),
+    -1,
+    {
+      virt_text = {
+        {
+          ("%.2f s"):format((state.time["end"] - state.time["start"]) / 1e9),
+          "LlmGrayNormal",
+        },
+      },
+      virt_text_pos = "eol_right_align",
+      invalidate = true,
+      right_gravity = false,
+    }
+  )
+
+  local newline_func = schedule_wrap(function()
+    F.NewLine(opts.bufnr, opts.winid)
+  end)
+  newline_func()
 
   io_utils.reset_io_status(opts)
   -- reset tool_calls content
