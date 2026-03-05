@@ -1,7 +1,7 @@
 local M = {}
 
-M.time = {
-  ns_id = vim.api.nvim_create_namespace("llm_response_time"),
+M.response_info = {
+  ns_id = vim.api.nvim_create_namespace("llm_response_info"),
   ["start"] = 0,
   ["end"] = 0,
 }

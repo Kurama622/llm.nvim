@@ -66,6 +66,7 @@ function copilot.StreamingHandler(chunk, ctx)
         break
       end
 
+      ctx.finish_reason = data.choices[1].finish_reason
       -- add reasoning_content
       if F.IsValid(data.choices[1].delta.reasoning_content) then
         backend_utils.mark_reason_begin(ctx, false)

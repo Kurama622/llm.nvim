@@ -19,6 +19,7 @@ function ollama.StreamingHandler(chunk, ctx)
       return ctx.assistant_output
     end
 
+    ctx.finish_reason = data.done_reason
     -- add reasoning_content
     if F.IsValid(data.message.thinking) then
       backend_utils.mark_reason_begin(ctx, true)

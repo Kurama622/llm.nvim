@@ -24,25 +24,44 @@ local function exit_callback(opts, ctx)
     setmetatable(state.summarize_suggestions, { __index = ctx })
   end
 
-  state.time["end"] = vim.uv.hrtime()
+  state.response_info["end"] = vim.uv.hrtime()
+  local virt_lines = ("duration: %.2fs"):format(
+    (state.response_info["end"] - state.response_info["start"]) / 1e9
+  )
+  local virt_lines_hl = "DiagnosticInfo"
+  if ctx.code == 0 then
+    if ctx.finish_reason == "length" then
+      virt_lines = virt_lines .. " (stop by length)"
+      virt_lines_hl = "DiagnosticWarn"
+    end
+  else
+    virt_lines_hl = "DiagnosticError"
+    if ctx.code then
+      virt_lines = ("%s (curl exited abnormally with code %s)"):format(
+        virt_lines,
+        ctx.code
+      )
+    end
+  end
+
   vim.api.nvim_buf_set_extmark(
     opts.bufnr,
-    state.time.ns_id,
+    state.response_info.ns_id,
     vim.api.nvim_buf_line_count(opts.bufnr),
-    -1,
+    0,
     {
-      virt_text = {
+      virt_lines = {
         {
-          ("%.2f s"):format((state.time["end"] - state.time["start"]) / 1e9),
-          "LlmGrayNormal",
+          {
+            virt_lines,
+            virt_lines_hl,
+          },
         },
       },
-      virt_text_pos = "eol_right_align",
-      invalidate = true,
+      virt_lines_above = false,
       right_gravity = false,
     }
   )
-
   local newline_func = schedule_wrap(function()
     F.NewLine(opts.bufnr, opts.winid)
   end)
@@ -54,6 +73,7 @@ local function exit_callback(opts, ctx)
 end
 
 function M.GetStreamingOutput(opts)
+  state.response_info["start"] = vim.uv.hrtime()
   state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
   return coroutine.wrap(function()
     local co = assert(coroutine.running())
@@ -297,7 +317,8 @@ function M.GetStreamingOutput(opts)
         end
         -- TODO: Add error handling
       end),
-      on_exit = schedule_wrap(function(request_job)
+      on_exit = schedule_wrap(function(request_job, code)
+        ctx.code = code
         if ctx.body.tools ~= nil then
           backends.get_tools_respond(
             required_params.api_type,

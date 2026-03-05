@@ -20,6 +20,11 @@ function workers_ai.StreamingHandler(chunk, ctx)
       return ctx.assistant_output
     end
 
+    -- case: { response = "", usage = { completion_tokens = 10, prompt_tokens = 11,
+    --         prompt_tokens_details = { cached_tokens = 0 },
+    --         total_tokens = 21 } }
+    ctx.finish_reason = nil -- There is no field related to finish_reason.
+
     ctx.assistant_output = ctx.assistant_output .. data.response
     F.WriteContent(ctx.bufnr, ctx.winid, data.response)
     ctx.line = ""

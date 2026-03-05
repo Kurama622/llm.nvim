@@ -690,7 +690,6 @@ function api.SaveSession()
 end
 
 function api.OpenLLM()
-  state.time["start"] = vim.uv.hrtime()
   local streaming = require("llm.common.io.streaming")
   api.SetRole(state.llm.popup.bufnr, state.llm.popup.winid, "assistant")
   streaming.GetStreamingOutput({
