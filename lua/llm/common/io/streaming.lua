@@ -66,6 +66,7 @@ local function exit_callback(opts, ctx)
         },
       },
       virt_lines_above = false,
+      invalidate = true,
       right_gravity = false,
     }
   )
