@@ -30,8 +30,15 @@ local function exit_callback(opts, ctx)
   )
   local virt_lines_hl = "DiagnosticInfo"
   if ctx.code == 0 then
-    if ctx.finish_reason == "length" then
-      virt_lines = virt_lines .. " (stop by length)"
+    if ctx.finish_reason ~= "stop" then
+      if
+        type(ctx.finish_reason) == "string" and ctx.finish_reason ~= "stop"
+      then
+        virt_lines = ("%s (stop by '%s')"):format(
+          virt_lines,
+          ctx.finish_reason
+        )
+      end
       virt_lines_hl = "DiagnosticWarn"
     end
   else

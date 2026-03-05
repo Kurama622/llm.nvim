@@ -34,8 +34,12 @@ function deepseek.StreamingHandler(chunk, ctx)
         break
       end
 
-      if not status or not data.choices[1].delta.content then
+      if not status then
         LOG:TRACE("json decode error:", json_str)
+        break
+      end
+      if not data.choices[1].delta.content then
+        ctx.finish_reason = data.choices[1].finish_reason
         break
       end
 
