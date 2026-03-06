@@ -16,6 +16,19 @@ local highlight = {
   LlmWhiteNormal = { fg = "#c8d3f5", bg = "NONE", default = true },
   LlmCmds = { fg = "#2aa198", bg = "NONE", default = true },
   LlmBuffers = { fg = "#2aa198", bg = "NONE", default = true, reverse = true },
+  LlmDiagnosticError = {
+    fg = "#d75f5f",
+    bg = "NONE",
+    bold = true,
+    default = true,
+  },
+  LlmDiagnosticWarn = {
+    fg = "#e0af68",
+    bg = "NONE",
+    bold = true,
+    default = true,
+  },
+  LlmDiagnosticInfo = { fg = "#6e7171", bg = "NONE", default = true },
 }
 
 for k, v in pairs(highlight) do

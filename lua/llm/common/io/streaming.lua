@@ -10,12 +10,57 @@ local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
+local function set_response_info_extmark(opts, ctx)
+  local virt_lines = ("Finished, duration: %.2fs"):format(
+    (state.response_info["end"] - state.response_info["start"]) / 1e9
+  )
+  local virt_lines_hl = "LlmDiagnosticInfo"
+  if ctx.code == 0 then
+    if ctx.finish_reason ~= "stop" then
+      if
+        type(ctx.finish_reason) == "string" and ctx.finish_reason ~= "stop"
+      then
+        virt_lines = ("%s (Finish reason: %s)"):format(
+          virt_lines,
+          ctx.finish_reason
+        )
+      end
+      virt_lines_hl = "LlmDiagnosticWarn"
+    end
+  elseif type(ctx.code) == "number" then
+    virt_lines_hl = "LlmDiagnosticError"
+    virt_lines = ("%s (Curl exited abnormally with code %s)"):format(
+      virt_lines,
+      ctx.code
+    )
+  elseif ctx.code == nil then
+    virt_lines_hl = "LlmDiagnosticError"
+    virt_lines = virt_lines .. " (Interrupt)"
+  end
+
+  vim.api.nvim_buf_set_extmark(
+    opts.bufnr,
+    state.response_info.ns_id,
+    vim.api.nvim_buf_line_count(opts.bufnr),
+    0,
+    {
+      virt_lines = {
+        {
+          {
+            virt_lines,
+            virt_lines_hl,
+          },
+        },
+      },
+      virt_lines_above = false,
+      invalidate = true,
+      right_gravity = false,
+    }
+  )
+end
+
 local function exit_callback(opts, ctx)
   table.insert(opts.messages, io_utils.gen_messages(ctx))
-  local newline_func = schedule_wrap(function()
-    F.NewLine(opts.bufnr, opts.winid)
-  end)
-  newline_func()
   local name = opts._name or "chat"
   state.llm.worker.jobs[name] = nil
   if opts.exit_handler ~= nil then
@@ -28,12 +73,20 @@ local function exit_callback(opts, ctx)
     setmetatable(state.summarize_suggestions, { __index = ctx })
   end
 
+  state.response_info["end"] = vim.uv.hrtime()
+  set_response_info_extmark(opts, ctx)
+  local newline_func = schedule_wrap(function()
+    F.NewLine(opts.bufnr, opts.winid)
+  end)
+  newline_func()
+
   io_utils.reset_io_status(opts)
   -- reset tool_calls content
   backends.msg_tool_calls_content = {}
 end
 
 function M.GetStreamingOutput(opts)
+  state.response_info["start"] = vim.uv.hrtime()
   state.llm.start_line = vim.api.nvim_buf_line_count(opts.bufnr)
   return coroutine.wrap(function()
     local co = assert(coroutine.running())
@@ -277,7 +330,8 @@ function M.GetStreamingOutput(opts)
         end
         -- TODO: Add error handling
       end),
-      on_exit = schedule_wrap(function(request_job)
+      on_exit = schedule_wrap(function(request_job, code)
+        ctx.code = code
         if ctx.body.tools ~= nil then
           backends.get_tools_respond(
             required_params.api_type,

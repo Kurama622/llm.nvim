@@ -39,11 +39,17 @@ function openai.StreamingHandler(chunk, ctx)
         break
       end
 
-      if not status or not data.choices[1].delta.content then
+      if not status then
         LOG:TRACE("json decode error:", json_str)
         break
       end
 
+      if not data.choices[1].delta.content then
+        ctx.finish_reason = data.choices[1].finish_reason
+        break
+      end
+
+      ctx.finish_reason = data.choices[1].finish_reason
       -- add reasoning_content
       if F.IsValid(data.choices[1].delta.reasoning_content) then
         backend_utils.mark_reason_begin(ctx, false)

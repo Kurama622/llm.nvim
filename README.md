@@ -65,7 +65,7 @@
 
 [models](./examples/chat/) | [UI](./examples/ui/)
 
-**Press `?` Can display the shortcut key help window**
+**Press `?` can display the shortcut key help window**
 
 - Float-UI
 <p align= "center">

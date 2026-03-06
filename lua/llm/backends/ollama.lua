@@ -14,11 +14,17 @@ function ollama.StreamingHandler(chunk, ctx)
   else
     ctx.line = ctx.line .. chunk
     local status, data = pcall(json.decode, ctx.line)
-    if not status or not data.message.content then
+    if not status then
       LOG:TRACE("json decode error:", data)
       return ctx.assistant_output
     end
 
+    if not data.message.content then
+      ctx.finish_reason = data.done_reason
+      return ctx.assistant_output
+    end
+
+    ctx.finish_reason = data.done_reason
     -- add reasoning_content
     if F.IsValid(data.message.thinking) then
       backend_utils.mark_reason_begin(ctx, true)
