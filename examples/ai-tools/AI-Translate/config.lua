@@ -21,12 +21,15 @@ Translate = {
     },
 
     -- Customize the behavior of accept (default keymap: y/Y),
-    -- with the default action being entering visual-line mode to copy.
-    -- This sample code is for entering the visual mode to copy.
+    -- the default action of copying text will include a newline character at the end.
+    -- This sample code copies text without the trailing newline character.
     accept = {
       action = function(self, opts)
-        vim.api.nvim_set_current_win(opts.winid)
-        vim.api.nvim_command("normal! gg^vGkk$hy")
+        local res = vim.tbl_filter(function(item)
+          return item ~= ""
+        end, vim.api.nvim_buf_get_lines(opts.bufnr, 0, -1, true))
+
+        vim.fn.setreg("+", table.concat(res, "\n"))
       end,
     },
   },

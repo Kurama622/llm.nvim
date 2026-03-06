@@ -156,8 +156,8 @@ function M.handler(name, F, state, streaming, prompt, opts)
 
   local default_actions = {
     accept = function()
-      vim.api.nvim_set_current_win(preview_box.winid)
-      vim.api.nvim_command("normal! ggVGkky")
+      local res = vim.api.nvim_buf_get_lines(preview_box.bufnr, 0, -1, true)
+      vim.fn.setreg("+", table.concat(res, "\n"))
     end,
     reject = function() end,
     close = function() end,

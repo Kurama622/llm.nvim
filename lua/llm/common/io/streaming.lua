@@ -25,8 +25,8 @@ local function set_response_info_extmark(opts, ctx)
       )
       virt_lines_hl = "LlmDiagnosticWarn"
     elseif ctx.finish_reason == nil then
-      virt_lines_hl = "LlmDiagnosticError"
       virt_lines = virt_lines .. " (Interrupt)"
+      virt_lines_hl = "LlmDiagnosticWarn"
     end
   elseif type(ctx.code) == "number" then
     virt_lines_hl = "LlmDiagnosticError"
@@ -36,7 +36,7 @@ local function set_response_info_extmark(opts, ctx)
     )
   elseif ctx.code == nil then
     virt_lines_hl = "LlmDiagnosticError"
-    virt_lines = virt_lines .. " (Interrupt)"
+    virt_lines = virt_lines .. " (Terminate)"
   end
 
   vim.api.nvim_buf_set_extmark(
