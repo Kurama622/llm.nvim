@@ -10,45 +10,32 @@ local LOG = require("llm.common.log")
 local io_utils = require("llm.common.io.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
-local function exit_callback(opts, ctx)
-  table.insert(opts.messages, io_utils.gen_messages(ctx))
-  local name = opts._name or "chat"
-  state.llm.worker.jobs[name] = nil
-  if opts.exit_handler ~= nil then
-    local callback_func = schedule_wrap(function()
-      opts.exit_handler(ctx.assistant_output)
-    end)
-    callback_func()
-  end
-  if state.summarize_suggestions.ctx then
-    setmetatable(state.summarize_suggestions, { __index = ctx })
-  end
-
-  state.response_info["end"] = vim.uv.hrtime()
+local function set_response_info_extmark(opts, ctx)
   local virt_lines = ("duration: %.2fs"):format(
     (state.response_info["end"] - state.response_info["start"]) / 1e9
   )
-  local virt_lines_hl = "DiagnosticInfo"
+  local virt_lines_hl = "LlmDiagnosticInfo"
   if ctx.code == 0 then
     if ctx.finish_reason ~= "stop" then
       if
         type(ctx.finish_reason) == "string" and ctx.finish_reason ~= "stop"
       then
-        virt_lines = ("%s (stop by '%s')"):format(
+        virt_lines = ("%s (Finish reason: %s)"):format(
           virt_lines,
           ctx.finish_reason
         )
       end
-      virt_lines_hl = "DiagnosticWarn"
+      virt_lines_hl = "LlmDiagnosticWarn"
     end
-  else
-    virt_lines_hl = "DiagnosticError"
-    if ctx.code then
-      virt_lines = ("%s (curl exited abnormally with code %s)"):format(
-        virt_lines,
-        ctx.code
-      )
-    end
+  elseif type(ctx.code) == "number" then
+    virt_lines_hl = "LlmDiagnosticError"
+    virt_lines = ("%s (Curl exited abnormally with code %s)"):format(
+      virt_lines,
+      ctx.code
+    )
+  elseif ctx.code == nil then
+    virt_lines_hl = "LlmDiagnosticError"
+    virt_lines = virt_lines .. " (Interrupt)"
   end
 
   vim.api.nvim_buf_set_extmark(
@@ -70,6 +57,24 @@ local function exit_callback(opts, ctx)
       right_gravity = false,
     }
   )
+end
+
+local function exit_callback(opts, ctx)
+  table.insert(opts.messages, io_utils.gen_messages(ctx))
+  local name = opts._name or "chat"
+  state.llm.worker.jobs[name] = nil
+  if opts.exit_handler ~= nil then
+    local callback_func = schedule_wrap(function()
+      opts.exit_handler(ctx.assistant_output)
+    end)
+    callback_func()
+  end
+  if state.summarize_suggestions.ctx then
+    setmetatable(state.summarize_suggestions, { __index = ctx })
+  end
+
+  state.response_info["end"] = vim.uv.hrtime()
+  set_response_info_extmark(opts, ctx)
   local newline_func = schedule_wrap(function()
     F.NewLine(opts.bufnr, opts.winid)
   end)

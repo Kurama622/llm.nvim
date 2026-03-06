@@ -383,7 +383,7 @@ function api.SetRole(bufnr, winid, role, detach)
 end
 
 function api.NewLine(bufnr, winid, detach)
-  api.AppendChunkToBuffer(bufnr, winid, "\n\n", detach)
+  api.AppendChunkToBuffer(bufnr, winid, "\n", detach)
   state.cursor.has_prefix = true
 end
 
