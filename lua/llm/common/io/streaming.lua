@@ -16,16 +16,17 @@ local function set_response_info_extmark(opts, ctx)
   )
   local virt_lines_hl = "LlmDiagnosticInfo"
   if ctx.code == 0 then
-    if ctx.finish_reason ~= "stop" then
-      if
-        type(ctx.finish_reason) == "string" and ctx.finish_reason ~= "stop"
-      then
-        virt_lines = ("%s (Finish reason: %s)"):format(
-          virt_lines,
-          ctx.finish_reason
-        )
-      end
+    if
+      type(ctx.finish_reason) == "string" and ctx.finish_reason ~= "stop"
+    then
+      virt_lines = ("%s (%s)"):format(
+        virt_lines,
+        ctx.finish_reason:sub(1, 1):upper() .. ctx.finish_reason:sub(2)
+      )
       virt_lines_hl = "LlmDiagnosticWarn"
+    elseif ctx.finish_reason == nil then
+      virt_lines_hl = "LlmDiagnosticError"
+      virt_lines = virt_lines .. " (Interrupt)"
     end
   elseif type(ctx.code) == "number" then
     virt_lines_hl = "LlmDiagnosticError"
