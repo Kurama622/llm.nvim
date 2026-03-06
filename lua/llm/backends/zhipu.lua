@@ -44,7 +44,7 @@ function glm.StreamingHandler(chunk, ctx)
         ctx.finish_reason = data.choices[1].finish_reason
         -- add reasoning_content
         if F.IsValid(data.choices[1].delta.reasoning_content) then
-          backend_utils.mark_reason_begin(ctx, true)
+          backend_utils.mark_reason_begin(ctx, false)
           ctx.reasoning_content = ctx.reasoning_content
             .. data.choices[1].delta.reasoning_content
 
