@@ -11,7 +11,7 @@ local io_utils = require("llm.common.io.utils")
 local schedule_wrap, json = vim.schedule_wrap, vim.json
 
 local function set_response_info_extmark(opts, ctx)
-  local virt_lines = ("duration: %.2fs"):format(
+  local virt_lines = ("Finished, duration: %.2fs"):format(
     (state.response_info["end"] - state.response_info["start"]) / 1e9
   )
   local virt_lines_hl = "LlmDiagnosticInfo"
