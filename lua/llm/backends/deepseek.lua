@@ -162,32 +162,32 @@ function deepseek.FunctionCalling(ctx, t)
     :start()
 end
 
-function deepseek.AppendToolsRespond(results, msg)
+function deepseek.AppendToolsResponse(results, msg)
   local fc_type = "function"
-  for _, fc_respond_str in pairs(results) do
-    local start_idx = fc_respond_str:find("data: ") or 1
-    local status, fc_respond =
-      pcall(vim.json.decode, fc_respond_str:sub(start_idx + 6))
+  for _, fc_response_str in pairs(results) do
+    local start_idx = fc_response_str:find("data: ") or 1
+    local status, fc_response =
+      pcall(vim.json.decode, fc_response_str:sub(start_idx + 6))
     if status then
       if
-        F.IsValid(fc_respond.choices)
-        and F.IsValid(fc_respond.choices[1].delta)
-        and F.IsValid(fc_respond.choices[1].delta.tool_calls)
+        F.IsValid(fc_response.choices)
+        and F.IsValid(fc_response.choices[1].delta)
+        and F.IsValid(fc_response.choices[1].delta.tool_calls)
       then
-        -- LOG:INFO(fc_respond.choices[1].delta.tool_calls[1])
-        if F.IsValid(fc_respond.choices[1].delta.tool_calls[1].id) then
-          table.insert(msg, fc_respond.choices[1].delta.tool_calls[1])
-          fc_type = fc_respond.choices[1].delta.tool_calls[1].type
+        -- LOG:INFO(fc_response.choices[1].delta.tool_calls[1])
+        if F.IsValid(fc_response.choices[1].delta.tool_calls[1].id) then
+          table.insert(msg, fc_response.choices[1].delta.tool_calls[1])
+          fc_type = fc_response.choices[1].delta.tool_calls[1].type
         else
           msg[#msg][fc_type].arguments = msg[#msg][fc_type].arguments
-            .. fc_respond.choices[1].delta.tool_calls[1][fc_type].arguments
+            .. fc_response.choices[1].delta.tool_calls[1][fc_type].arguments
         end
       end
     end
   end
 end
 
-function deepseek.GetToolsRespond(chunk, msg)
+function deepseek.GetToolsResponse(chunk, msg)
   if F.IsValid(chunk) then
     local tool_calls = vim.json.decode(chunk).choices[1].message.tool_calls
     if F.IsValid(tool_calls) then

@@ -229,7 +229,7 @@ function backends.get_function_calling(api_type, configs, ctx)
   return handle_api_type(api_type) or handle_api_type(configs.api_type)
 end
 
-function backends.get_tools_respond(api_type, configs, ctx)
+function backends.get_tools_response(api_type, configs, ctx)
   local function handle_api_type(type)
     local api_handlers = {
       ["workers-ai"] = function(chunk)
@@ -239,45 +239,47 @@ function backends.get_tools_respond(api_type, configs, ctx)
         LOG:ERROR("GLM do not support function-calling.")
       end,
       ["openai"] = ctx.stream and function(chunk)
-        return require("llm.backends.openai").AppendToolsRespond(
+        return require("llm.backends.openai").AppendToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )
       end or function(chunk)
-        return require("llm.backends.openai").GetToolsRespond(
+        return require("llm.backends.openai").GetToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )
       end,
       ["copilot"] = ctx.stream and function(chunk)
-        return require("llm.backends.copilot").AppendToolsRespond(
+        return require("llm.backends.copilot").AppendToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )
       end or function(chunk)
-        return require("llm.backends.copilot").GetToolsRespond(
+        return require("llm.backends.copilot").GetToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )
       end,
-      ["deepseek"] = ctx.stream and function(chunk)
-        return require("llm.backends.deepseek").AppendToolsRespond(
-          chunk,
-          backends.msg_tool_calls_content
-        )
-      end or function(chunk)
-        return require("llm.backends.deepseek").GetToolsRespond(
-          chunk,
-          backends.msg_tool_calls_content
-        )
-      end,
+      ["deepseek"] = ctx.stream
+          and function(chunk)
+            return require("llm.backends.deepseek").AppendToolsResponse(
+              chunk,
+              backends.msg_tool_calls_content
+            )
+          end
+        or function(chunk)
+          return require("llm.backends.deepseek").GetToolsResponse(
+            chunk,
+            backends.msg_tool_calls_content
+          )
+        end,
       ["ollama"] = ctx.stream and function(chunk)
-        return require("llm.backends.ollama").AppendToolsRespond(
+        return require("llm.backends.ollama").AppendToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )
       end or function(chunk)
-        return require("llm.backends.ollama").GetToolsRespond(
+        return require("llm.backends.ollama").GetToolsResponse(
           chunk,
           backends.msg_tool_calls_content
         )

@@ -14,6 +14,32 @@ function openai.StreamingHandler(chunk, ctx)
     return ctx.assistant_output
   end
 
+  local function get_response(data)
+    if not data.choices[1].delta.content then
+      ctx.finish_reason = data.choices[1].finish_reason
+      return
+    end
+
+    ctx.finish_reason = data.choices[1].finish_reason
+    -- add reasoning_content
+    if F.IsValid(data.choices[1].delta.reasoning_content) then
+      backend_utils.mark_reason_begin(ctx, false)
+      ctx.reasoning_content = ctx.reasoning_content
+        .. data.choices[1].delta.reasoning_content
+
+      F.WriteContent(
+        ctx.bufnr,
+        ctx.winid,
+        data.choices[1].delta.reasoning_content
+      )
+    elseif F.IsValid(data.choices[1].delta.content) then
+      backend_utils.mark_reason_end(ctx, false)
+      ctx.assistant_output = ctx.assistant_output
+        .. data.choices[1].delta.content
+      F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
+    end
+  end
+
   local tail = chunk:sub(-1, -1)
   if tail:sub(1, 1) ~= "}" then
     ctx.line = ctx.line .. chunk
@@ -24,63 +50,53 @@ function openai.StreamingHandler(chunk, ctx)
     local lend = ctx.line:find("}$")
     local json_str = nil
     if lstart == nil or lend == nil then
-      LOG:ERROR(ctx.line)
-    end
-
-    while lstart ~= nil and lend ~= nil do
-      if lstart < lend then
-        json_str = ctx.line:sub(rstart + 1, lend)
-      end
+      -- For openrouter: ": OPENROUTER PROCESSING"
+      local find_json_start = string.find(ctx.line, "{") or 1
+      json_str = string.sub(ctx.line, find_json_start)
 
       local status, data = pcall(json.decode, json_str)
-
-      if data.choices == nil or data.choices[1] == nil then
-        ctx.line = ""
-        break
+      if not status or data.choices == nil then
+        LOG:ERROR(json_str)
+        return
       end
+      get_response(data)
 
-      if not status then
-        LOG:TRACE("json decode error:", json_str)
-        break
-      end
+      ctx.line = ""
+    else
+      while lstart ~= nil and lend ~= nil do
+        if lstart < lend then
+          json_str = ctx.line:sub(rstart + 1, lend)
+        end
 
-      if not data.choices[1].delta.content then
-        ctx.finish_reason = data.choices[1].finish_reason
-        break
-      end
+        local status, data = pcall(json.decode, json_str)
 
-      ctx.finish_reason = data.choices[1].finish_reason
-      -- add reasoning_content
-      if F.IsValid(data.choices[1].delta.reasoning_content) then
-        backend_utils.mark_reason_begin(ctx, false)
-        ctx.reasoning_content = ctx.reasoning_content
-          .. data.choices[1].delta.reasoning_content
+        if data.choices == nil or data.choices[1] == nil then
+          ctx.line = ""
+          break
+        end
 
-        F.WriteContent(
-          ctx.bufnr,
-          ctx.winid,
-          data.choices[1].delta.reasoning_content
-        )
-      elseif F.IsValid(data.choices[1].delta.content) then
-        backend_utils.mark_reason_end(ctx, false)
-        ctx.assistant_output = ctx.assistant_output
-          .. data.choices[1].delta.content
-        F.WriteContent(ctx.bufnr, ctx.winid, data.choices[1].delta.content)
-      end
+        if not status then
+          LOG:TRACE("json decode error:", json_str)
+          break
+        end
 
-      if lend + 1 > #ctx.line then
-        ctx.line = ""
-        break
-      else
-        ctx.line = ctx.line:sub(lend + 1)
-      end
-      lstart = ctx.line:find("^data:%s*")
-      lend = ctx.line:find("}$")
-      if lstart == nil or lend == nil then
-        ctx.line = ""
+        get_response(data)
+
+        if lend + 1 > #ctx.line then
+          ctx.line = ""
+          break
+        else
+          ctx.line = ctx.line:sub(lend + 1)
+        end
+        lstart = ctx.line:find("^data:%s*")
+        lend = ctx.line:find("}$")
+        if lstart == nil or lend == nil then
+          ctx.line = ""
+        end
       end
     end
   end
+
   return ctx.assistant_output
 end
 
@@ -168,36 +184,38 @@ function openai.FunctionCalling(ctx, t)
     :start()
 end
 
-function openai.AppendToolsRespond(results, msg)
+function openai.AppendToolsResponse(results, msg)
   local fc_type = "function"
-  for _, fc_respond_str in pairs(results) do
-    local lstart, rstart = fc_respond_str:find("^data:%s*")
+  for _, fc_response_str in pairs(results) do
+    local lstart, rstart = fc_response_str:find("^data:%s*")
     if lstart == nil then
-      rstart = 6
+      local find_json_start = string.find(fc_response_str, "{") or 1
+      fc_response_str = string.sub(fc_response_str, find_json_start)
+      rstart = 0
     end
 
-    local status, fc_respond =
-      pcall(vim.json.decode, fc_respond_str:sub(rstart + 1))
+    local status, fc_response =
+      pcall(vim.json.decode, fc_response_str:sub(rstart + 1))
     if status then
       if
-        F.IsValid(fc_respond.choices)
-        and F.IsValid(fc_respond.choices[1].delta)
-        and F.IsValid(fc_respond.choices[1].delta.tool_calls)
+        F.IsValid(fc_response.choices)
+        and F.IsValid(fc_response.choices[1].delta)
+        and F.IsValid(fc_response.choices[1].delta.tool_calls)
       then
-        -- LOG:INFO(fc_respond.choices[1].delta.tool_calls[1])
-        if F.IsValid(fc_respond.choices[1].delta.tool_calls[1].id) then
-          table.insert(msg, fc_respond.choices[1].delta.tool_calls[1])
-          fc_type = fc_respond.choices[1].delta.tool_calls[1].type
+        -- LOG:INFO(fc_response.choices[1].delta.tool_calls[1])
+        if F.IsValid(fc_response.choices[1].delta.tool_calls[1].id) then
+          table.insert(msg, fc_response.choices[1].delta.tool_calls[1])
+          fc_type = fc_response.choices[1].delta.tool_calls[1].type
         else
           msg[#msg][fc_type].arguments = msg[#msg][fc_type].arguments
-            .. fc_respond.choices[1].delta.tool_calls[1][fc_type].arguments
+            .. fc_response.choices[1].delta.tool_calls[1][fc_type].arguments
         end
       end
     end
   end
 end
 
-function openai.GetToolsRespond(chunk, msg)
+function openai.GetToolsResponse(chunk, msg)
   if F.IsValid(chunk) then
     local tool_calls = vim.json.decode(chunk).choices[1].message.tool_calls
     if F.IsValid(tool_calls) then
@@ -220,6 +238,12 @@ function openai.StreamingTblHandler(results)
       return assistant_output
     end
 
+    local function get_response(data)
+      if F.IsValid(data.choices[1].delta.content) then
+        assistant_output = assistant_output .. data.choices[1].delta.content
+      end
+    end
+
     local tail = chunk:sub(-1, -1)
     if tail:sub(1, 1) ~= "}" then
       line = line .. chunk
@@ -230,39 +254,47 @@ function openai.StreamingTblHandler(results)
       local lend = line:find("}$")
       local json_str = nil
       if lstart == nil or lend == nil then
-        LOG:ERROR(line)
-      end
-
-      while lstart ~= nil and lend ~= nil do
-        if lstart < lend then
-          json_str = line:sub(rstart + 1, lend)
-        end
+        local find_json_start = string.find(line, "{") or 1
+        json_str = string.sub(line, find_json_start)
 
         local status, data = pcall(json.decode, json_str)
+        if not status or data.choices == nil then
+          LOG:ERROR(json_str)
+          return
+        end
+        get_response(data)
 
-        if data.choices == nil or data.choices[1] == nil then
-          line = ""
-          break
-        end
+        line = ""
+      else
+        while lstart ~= nil and lend ~= nil do
+          if lstart < lend then
+            json_str = line:sub(rstart + 1, lend)
+          end
 
-        if not status or not data.choices[1].delta.content then
-          LOG:TRACE("json decode error:", json_str)
-          break
-        end
-        if F.IsValid(data.choices[1].delta.content) then
-          assistant_output = assistant_output .. data.choices[1].delta.content
-        end
+          local status, data = pcall(json.decode, json_str)
 
-        if lend + 1 > #line then
-          line = ""
-          break
-        else
-          line = line:sub(lend + 1)
-        end
-        lstart = line:find("^data:%s*")
-        lend = line:find("}$")
-        if lstart == nil or lend == nil then
-          line = ""
+          if data.choices == nil or data.choices[1] == nil then
+            line = ""
+            break
+          end
+
+          if not status or not data.choices[1].delta.content then
+            LOG:TRACE("json decode error:", json_str)
+            break
+          end
+          get_response(data)
+
+          if lend + 1 > #line then
+            line = ""
+            break
+          else
+            line = line:sub(lend + 1)
+          end
+          lstart = line:find("^data:%s*")
+          lend = line:find("}$")
+          if lstart == nil or lend == nil then
+            line = ""
+          end
         end
       end
     end
