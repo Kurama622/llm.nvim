@@ -50,6 +50,7 @@ function openai.StreamingHandler(chunk, ctx)
     local lend = ctx.line:find("}$")
     local json_str = nil
     if lstart == nil or lend == nil then
+      -- For openrouter: ": OPENROUTER PROCESSING"
       local find_json_start = string.find(ctx.line, "{") or 1
       json_str = string.sub(ctx.line, find_json_start)
 
@@ -237,6 +238,12 @@ function openai.StreamingTblHandler(results)
       return assistant_output
     end
 
+    local function get_response(data)
+      if F.IsValid(data.choices[1].delta.content) then
+        assistant_output = assistant_output .. data.choices[1].delta.content
+      end
+    end
+
     local tail = chunk:sub(-1, -1)
     if tail:sub(1, 1) ~= "}" then
       line = line .. chunk
@@ -247,39 +254,47 @@ function openai.StreamingTblHandler(results)
       local lend = line:find("}$")
       local json_str = nil
       if lstart == nil or lend == nil then
-        LOG:ERROR(line)
-      end
-
-      while lstart ~= nil and lend ~= nil do
-        if lstart < lend then
-          json_str = line:sub(rstart + 1, lend)
-        end
+        local find_json_start = string.find(line, "{") or 1
+        json_str = string.sub(line, find_json_start)
 
         local status, data = pcall(json.decode, json_str)
+        if not status or data.choices == nil then
+          LOG:ERROR(json_str)
+          return
+        end
+        get_response(data)
 
-        if data.choices == nil or data.choices[1] == nil then
-          line = ""
-          break
-        end
+        line = ""
+      else
+        while lstart ~= nil and lend ~= nil do
+          if lstart < lend then
+            json_str = line:sub(rstart + 1, lend)
+          end
 
-        if not status or not data.choices[1].delta.content then
-          LOG:TRACE("json decode error:", json_str)
-          break
-        end
-        if F.IsValid(data.choices[1].delta.content) then
-          assistant_output = assistant_output .. data.choices[1].delta.content
-        end
+          local status, data = pcall(json.decode, json_str)
 
-        if lend + 1 > #line then
-          line = ""
-          break
-        else
-          line = line:sub(lend + 1)
-        end
-        lstart = line:find("^data:%s*")
-        lend = line:find("}$")
-        if lstart == nil or lend == nil then
-          line = ""
+          if data.choices == nil or data.choices[1] == nil then
+            line = ""
+            break
+          end
+
+          if not status or not data.choices[1].delta.content then
+            LOG:TRACE("json decode error:", json_str)
+            break
+          end
+          get_response(data)
+
+          if lend + 1 > #line then
+            line = ""
+            break
+          else
+            line = line:sub(lend + 1)
+          end
+          lstart = line:find("^data:%s*")
+          lend = line:find("}$")
+          if lstart == nil or lend == nil then
+            line = ""
+          end
         end
       end
     end
