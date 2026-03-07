@@ -122,13 +122,13 @@ function ollama.FunctionCalling(ctx, t)
     :start()
 end
 
-function ollama.AppendToolsRespond(chunk, msg)
+function ollama.AppendToolsResponse(chunk, msg)
   if F.IsValid(chunk) then
-    for _, fc_respond_str in pairs(chunk) do
-      local status, fc_respond = pcall(vim.json.decode, fc_respond_str)
+    for _, fc_response_str in pairs(chunk) do
+      local status, fc_response = pcall(vim.json.decode, fc_response_str)
 
       if status then
-        local tool_calls = fc_respond.message.tool_calls
+        local tool_calls = fc_response.message.tool_calls
         if F.IsValid(tool_calls) then
           if F.IsValid(tool_calls[1]["function"].name) then
             table.insert(msg, {
@@ -144,7 +144,7 @@ function ollama.AppendToolsRespond(chunk, msg)
   end
 end
 
-function ollama.GetToolsRespond(chunk, msg)
+function ollama.GetToolsResponse(chunk, msg)
   if F.IsValid(chunk) then
     local tool_calls = json.decode(chunk).message.tool_calls
     if F.IsValid(tool_calls) then

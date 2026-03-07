@@ -334,7 +334,7 @@ function M.GetStreamingOutput(opts)
       on_exit = schedule_wrap(function(request_job, code)
         ctx.code = code
         if ctx.body.tools ~= nil then
-          backends.get_tools_respond(
+          backends.get_tools_response(
             required_params.api_type,
             conf.configs,
             ctx

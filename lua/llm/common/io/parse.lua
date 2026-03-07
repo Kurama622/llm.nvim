@@ -231,7 +231,7 @@ function io_parse.GetOutput(opts)
           LOG:ERROR("Error occurred:", result)
         end
         if ctx.body.tools ~= nil then
-          backends.get_tools_respond(
+          backends.get_tools_response(
             required_params.api_type,
             conf.configs,
             ctx
