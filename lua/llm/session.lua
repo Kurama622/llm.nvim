@@ -403,7 +403,7 @@ function M.NewSession()
               {}
             )
             F.UpdatePrompt(state.session.filename)
-            if input ~= "" then
+            if input ~= "\n" then
               table.insert(state.session.changed, state.session.filename)
               table.insert(
                 state.session[state.session.filename],
@@ -601,7 +601,7 @@ function M.NewSession()
                       state.input.popup:unmount()
                       state.input.popup = nil
                       F.UpdatePrompt(state.session.filename)
-                      if input ~= "" then
+                      if input ~= "\n" then
                         table.insert(
                           state.session.changed,
                           state.session.filename
