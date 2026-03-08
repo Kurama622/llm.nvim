@@ -39,6 +39,11 @@ local function setup_web_search_job(
     on_exit = vim.schedule_wrap(function(j)
       local status, search_response = pcall(vim.json.decode, j:result()[1])
       if not status or not search_response.results then
+        LOG:ERROR("web search failed!")
+        require("llm.common.ui").display_spinner_extmark(opts)
+        state.llm.worker.jobs.web_search = nil
+        table.remove(state.enabled_cmds, opts.enabled_cmds_idx)
+        coroutine.resume(co)
         return
       end
       local reference = search_response.results
