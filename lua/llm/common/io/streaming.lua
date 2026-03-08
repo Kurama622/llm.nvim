@@ -95,6 +95,7 @@ function M.GetStreamingOutput(opts)
     local ACCOUNT = os.getenv("ACCOUNT")
     local LLM_KEY = os.getenv("LLM_KEY")
 
+    ui.display_spinner_extmark(opts)
     state.args_template = opts.args
     local required_params = M.required_params
 
@@ -359,7 +360,6 @@ function M.GetStreamingOutput(opts)
       end),
     })
 
-    ui.display_spinner_extmark(opts)
     if F.IsValid(state.quote_buffers[1]) then
       state.input.attach_content = state.input.attach_content
         .. "This is the content of the buffer involved:"
