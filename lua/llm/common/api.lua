@@ -721,6 +721,8 @@ function api.CloseLLM()
     api.ClearAttach()
     api.ClearSummarizeSuggestions()
     conf.session.status = -1
+    state.history.index = 1
+    state.models.Chat.selected = nil
     vim.api.nvim_command("doautocmd BufEnter")
   else
     if state.input.popup then
@@ -739,7 +741,6 @@ function api.CloseLLM()
       end
       api.ClearAttach()
       api.ClearSummarizeSuggestions()
-      state.history.index = nil
       conf.session.status = -1
     end
   end
@@ -800,14 +801,13 @@ function api.RepositionPopupCursor(popup, pos)
 end
 
 function api.MoveHistoryCursor(offset)
-  local pos = vim.api.nvim_win_get_cursor(state.history.popup.winid)
-  local new_pos = pos[1] + offset
-  if new_pos > #state.history.list then
-    new_pos = 1
-  elseif new_pos < 1 then
-    new_pos = #state.history.list
+  state.history.index = state.history.index + offset
+  if state.history.index > #state.history.list then
+    state.history.index = 1
+  elseif state.history.index < 1 then
+    state.history.index = #state.history.list
   end
-  api.RepositionPopupCursor(state.history.popup, new_pos)
+  api.RepositionPopupCursor(state.history.popup, state.history.index)
 end
 
 function api.MoveModelsCursor(offset)
