@@ -39,6 +39,10 @@ local function set_response_info_extmark(opts, ctx)
     virt_lines = virt_lines .. " (Terminate)"
   end
 
+  if not vim.api.nvim_buf_is_valid(opts.bufnr) then
+    return
+  end
+
   vim.api.nvim_buf_set_extmark(
     opts.bufnr,
     state.response_info.ns_id,

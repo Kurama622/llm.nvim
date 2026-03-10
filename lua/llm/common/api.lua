@@ -383,7 +383,7 @@ function api.SetRole(bufnr, winid, role, detach)
 end
 
 function api.NewLine(bufnr, winid, detach)
-  api.AppendChunkToBuffer(bufnr, winid, "\n", detach)
+  api.AppendChunkToBuffer(bufnr, winid, "\n\n", detach)
   state.cursor.has_prefix = true
 end
 
@@ -721,6 +721,8 @@ function api.CloseLLM()
     api.ClearAttach()
     api.ClearSummarizeSuggestions()
     conf.session.status = -1
+    state.history.index = 1
+    state.models.Chat.selected = nil
     vim.api.nvim_command("doautocmd BufEnter")
   else
     if state.input.popup then
@@ -739,7 +741,6 @@ function api.CloseLLM()
       end
       api.ClearAttach()
       api.ClearSummarizeSuggestions()
-      state.history.index = nil
       conf.session.status = -1
     end
   end
@@ -800,14 +801,13 @@ function api.RepositionPopupCursor(popup, pos)
 end
 
 function api.MoveHistoryCursor(offset)
-  local pos = vim.api.nvim_win_get_cursor(state.history.popup.winid)
-  local new_pos = pos[1] + offset
-  if new_pos > #state.history.list then
-    new_pos = 1
-  elseif new_pos < 1 then
-    new_pos = #state.history.list
+  state.history.index = state.history.index + offset
+  if state.history.index > #state.history.list then
+    state.history.index = 1
+  elseif state.history.index < 1 then
+    state.history.index = #state.history.list
   end
-  api.RepositionPopupCursor(state.history.popup, new_pos)
+  api.RepositionPopupCursor(state.history.popup, state.history.index)
 end
 
 function api.MoveModelsCursor(offset)
@@ -1337,7 +1337,7 @@ function api.GetRangeDiagnostics(bufnr_info_list, opts)
   end
 
   local diagnostics_prompt = state.input.diagnostic_error and ""
-    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
+    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues."
 
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
@@ -1687,7 +1687,7 @@ function api.AppendLspMsg(bufnr, winid)
   api.AppendChunkToBuffer(
     bufnr,
     winid,
-    require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
+    require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info
   )
   api.NewLine(bufnr, winid)
 end

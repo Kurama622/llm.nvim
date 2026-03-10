@@ -29,7 +29,7 @@ M.input = {
 
 M.history = {
   popup = nil,
-  index = nil,
+  index = 1,
   list = nil,
   foucs_item = nil,
 }

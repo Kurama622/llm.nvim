@@ -121,9 +121,12 @@ function _layout.chat_ui(
             nui_utils.defaults(state.history.list, {})
           )
           state.history.popup.tree:render()
-          vim.api.nvim_win_set_cursor(state.history.popup.winid, { 1, 0 })
+          vim.api.nvim_win_set_cursor(
+            state.history.popup.winid,
+            { state.history.index, 0 }
+          )
           state.history.popup._.on_change(
-            state.history.popup.tree:get_node(1)
+            state.history.popup.tree:get_node(state.history.index)
           )
         end,
         on_change = function(item)
@@ -197,9 +200,15 @@ function _layout.chat_ui(
               nui_utils.defaults(state.models.list, {})
             )
             state.models.popup.tree:render()
-            vim.api.nvim_win_set_cursor(state.models.popup.winid, { 1, 0 })
+            local index = state.models.Chat.selected
+                and state.models.Chat.selected._model_idx
+              or 1
+            vim.api.nvim_win_set_cursor(
+              state.models.popup.winid,
+              { index, 0 }
+            )
             state.models.popup._.on_change(
-              state.models.popup.tree:get_node(1)
+              state.models.popup.tree:get_node(index)
             )
           end,
           on_change = function(item)
