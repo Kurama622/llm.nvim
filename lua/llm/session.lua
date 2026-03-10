@@ -385,8 +385,10 @@ function M.NewSession()
             local input_table =
               vim.api.nvim_buf_get_lines(state.input.popup.bufnr, 0, -1, true)
             local input = table.concat(input_table, "\n")
-              .. "\n"
-              .. state.input.attach_content
+
+            if F.IsValid(state.input.attach_content) then
+              input = input .. "\n" .. state.input.attach_content
+            end
 
             if not conf.configs.save_session then
               state.session.filename = "current"
@@ -403,7 +405,7 @@ function M.NewSession()
               {}
             )
             F.UpdatePrompt(state.session.filename)
-            if input ~= "\n" then
+            if input ~= "" then
               table.insert(state.session.changed, state.session.filename)
               table.insert(
                 state.session[state.session.filename],
@@ -590,8 +592,9 @@ function M.NewSession()
                         true
                       )
                       local input = table.concat(input_table, "\n")
-                        .. "\n"
-                        .. state.input.attach_content
+                      if F.IsValid(state.input.attach_content) then
+                        input = input .. "\n" .. state.input.attach_content
+                      end
                       state.session.filename = state.session.filename
                         or "current"
                       if not state.session[state.session.filename] then
@@ -601,7 +604,7 @@ function M.NewSession()
                       state.input.popup:unmount()
                       state.input.popup = nil
                       F.UpdatePrompt(state.session.filename)
-                      if input ~= "\n" then
+                      if input ~= "" then
                         table.insert(
                           state.session.changed,
                           state.session.filename

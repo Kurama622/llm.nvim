@@ -383,7 +383,7 @@ function api.SetRole(bufnr, winid, role, detach)
 end
 
 function api.NewLine(bufnr, winid, detach)
-  api.AppendChunkToBuffer(bufnr, winid, "\n", detach)
+  api.AppendChunkToBuffer(bufnr, winid, "\n\n", detach)
   state.cursor.has_prefix = true
 end
 
@@ -1337,7 +1337,7 @@ function api.GetRangeDiagnostics(bufnr_info_list, opts)
   end
 
   local diagnostics_prompt = state.input.diagnostic_error and ""
-    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues.\n"
+    or "\nAll dependency libraries, packages, or header files involved in the code have been correctly imported, so there is no need to pay attention to such dependency issues."
 
   if api.IsValid(diagnostics_tbl) then
     local diagnostics_content = ""
@@ -1687,7 +1687,7 @@ function api.AppendLspMsg(bufnr, winid)
   api.AppendChunkToBuffer(
     bufnr,
     winid,
-    require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info .. "\n"
+    require("llm.tools.prompts").lsp .. "\n" .. symbols_location_info
   )
   api.NewLine(bufnr, winid)
 end
