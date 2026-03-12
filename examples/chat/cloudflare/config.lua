@@ -6,6 +6,7 @@ return {
     config = function()
       require("llm").setup({
         -- [[ cloudflare ]]     params: api_type =  "workers-ai" | "openai" | "zhipu" | "ollama"
+        url = "https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s",
         model = "@cf/google/gemma-7b-it-lora",
         api_type = "workers-ai",
 
@@ -53,8 +54,16 @@ return {
     end,
     keys = {
       { "<leader>ac", mode = "n", "<cmd>LLMSessionToggle<cr>" },
-      { "<leader>ae", mode = "v", "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>" },
-      { "<leader>ts", mode = "x", "<cmd>LLMSelectedTextHandler 英译汉<cr>" },
+      {
+        "<leader>ae",
+        mode = "v",
+        "<cmd>LLMSelectedTextHandler 请解释下面这段代码<cr>",
+      },
+      {
+        "<leader>ts",
+        mode = "x",
+        "<cmd>LLMSelectedTextHandler 英译汉<cr>",
+      },
     },
   },
 }
