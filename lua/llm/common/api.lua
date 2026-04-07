@@ -1553,7 +1553,7 @@ function api.lsp_request(cfg, callback)
         return
       end
       for i = 1, #clients do
-        if clients[i].supports_method("textDocument/" .. method, bufnr) then
+        if clients[i]:supports_method("textDocument/" .. method, bufnr) then
           supported_method_cnt[bufnr] = supported_method_cnt[bufnr] + 1
         else
           cfg[state.input.lsp_ctx[bufnr].ft].methods[n_method] = nil
