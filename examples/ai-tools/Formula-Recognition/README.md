@@ -73,7 +73,7 @@ FormulaRecognition = {
           },
           actions = {
             close = function()
-              vim.api.startinsert()
+              vim.cmd.startinsert()
             end,
             confirm = function(picker, selected)
               picker:close()
