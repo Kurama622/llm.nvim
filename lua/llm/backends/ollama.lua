@@ -20,8 +20,8 @@ function ollama.StreamingHandler(chunk, ctx)
     end
 
     if data.error then
-       F.WriteContent(ctx.bufnr, ctx.winid, "Error: " .. data.error)
-       return ctx.assistant_output
+      LOG:ERROR(data.error)
+      return ctx.assistant_output
     end
 
     if not data.message.content then
